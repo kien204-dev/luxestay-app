@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { APP_NAME } from "../config/brand";
+import { useProperty } from "../context/PropertyContext";
 import {
   changeCurrentUserPassword,
   getCurrentUser,
@@ -28,6 +28,7 @@ const initialPassword = {
 function Settings() {
   const menu = ["Profile", "Security", "Notifications", "System"];
   const { updateCurrentUser } = useAuth();
+  const { name: APP_NAME } = useProperty();
   const [profile, setProfile] = useState(initialProfile);
   const [savedProfile, setSavedProfile] = useState(initialProfile);
   const [passwordForm, setPasswordForm] = useState(initialPassword);

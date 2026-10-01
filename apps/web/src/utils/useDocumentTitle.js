@@ -1,9 +1,11 @@
 import { useEffect } from "react";
-import { APP_NAME } from "../config/brand";
+import { useProperty } from "../context/PropertyContext";
 
 // "<page> · <brand>" in the browser tab; just the brand when no page title.
 export function useDocumentTitle(title) {
+  const { name } = useProperty();
+
   useEffect(() => {
-    document.title = title ? `${title} · ${APP_NAME}` : APP_NAME;
-  }, [title]);
+    document.title = title ? `${title} · ${name}` : name;
+  }, [title, name]);
 }

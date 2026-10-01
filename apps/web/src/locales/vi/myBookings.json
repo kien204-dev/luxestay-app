@@ -45,7 +45,9 @@
     "cancelling": "Đang hủy...",
     "cancelBooking": "Hủy đặt phòng",
     "reviewed": "Đã đánh giá",
-    "reviewThisRoom": "Đánh giá phòng này"
+    "reviewThisRoom": "Đánh giá phòng này",
+    "downloadReceipt": "Tải phiếu PDF",
+    "downloadFailed": "Không tải được phiếu xác nhận"
   },
   "pagination": {
     "prev": "← Trước",

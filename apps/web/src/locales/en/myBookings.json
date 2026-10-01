@@ -45,7 +45,9 @@
     "cancelling": "Cancelling...",
     "cancelBooking": "Cancel booking",
     "reviewed": "Reviewed",
-    "reviewThisRoom": "Review this room"
+    "reviewThisRoom": "Review this room",
+    "downloadReceipt": "Download PDF",
+    "downloadFailed": "Could not download the confirmation"
   },
   "pagination": {
     "prev": "← Prev",

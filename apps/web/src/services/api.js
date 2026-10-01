@@ -1,4 +1,5 @@
 import axios from "axios";
+import i18n from "../i18n";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
@@ -18,6 +19,13 @@ const PUBLIC_AUTH_PATHS = new Set([
 ]);
 
 export const SESSION_EXPIRED_EVENT = "auth:session-expired";
+
+// Emails and documents about a booking are written in the language the
+// guest was using when they made it.
+api.interceptors.request.use((config) => {
+  config.headers["Accept-Language"] = i18n.resolvedLanguage || i18n.language || "vi";
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,

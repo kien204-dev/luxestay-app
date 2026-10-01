@@ -27,11 +27,11 @@ export const BRAND_INITIAL = (Array.from(APP_NAME)[0] || "L").toUpperCase();
 
 // A favicon drawn from the brand itself (monogram on the brand colour), so
 // rebranding does not leave another product's icon in the browser tab.
-export function brandFaviconDataUri() {
+export function brandFaviconDataUri(initial = BRAND_INITIAL) {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
     `<rect width="64" height="64" rx="14" fill="${BRAND_COLORS.navy}"/>` +
     `<text x="32" y="44" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" ` +
-    `font-size="38" font-weight="700" fill="${BRAND_COLORS.gold}">${BRAND_INITIAL}</text></svg>`;
+    `font-size="38" font-weight="700" fill="${BRAND_COLORS.gold}">${initial}</text></svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

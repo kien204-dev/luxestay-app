@@ -8,6 +8,7 @@ import { useBookingPolicy } from "../../utils/useBookingPolicy";
 import { useDocumentTitle } from "../../utils/useDocumentTitle";
 import { formatMoney } from "../../utils/format";
 import { searchToQuery } from "../../utils/stayQuery";
+import { useProperty } from "../../context/PropertyContext";
 
 const FEATURED_COUNT = 6;
 const DESTINATION_COUNT = 8;
@@ -139,6 +140,7 @@ function WhyBookDirect() {
 export default function Home() {
   const { t } = useTranslation("site");
   const navigate = useNavigate();
+  const property = useProperty();
   useDocumentTitle(t("home.documentTitle"));
 
   return (
@@ -146,7 +148,7 @@ export default function Home() {
       <section className="guest-hero">
         <div className="guest-container">
           <h1>{t("home.heroTitle")}</h1>
-          <p>{t("home.heroSubtitle")}</p>
+          <p>{t("home.heroSubtitle", { brand: property.name })}</p>
           <SearchBar onSearch={(search) => navigate(`/rooms${searchToQuery(search)}`)} />
         </div>
       </section>

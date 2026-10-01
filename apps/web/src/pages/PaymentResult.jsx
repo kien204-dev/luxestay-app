@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getPaymentByTransactionRef } from "../services/paymentService";
-import { APP_NAME } from "../config/brand";
+import { useProperty } from "../context/PropertyContext";
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLLS = 15;
@@ -13,6 +13,7 @@ function extractTransactionRef(searchParams) {
 
 export default function PaymentResult() {
   const navigate = useNavigate();
+  const { name: APP_NAME } = useProperty();
   const [searchParams] = useSearchParams();
   const transactionRef = extractTransactionRef(searchParams);
 

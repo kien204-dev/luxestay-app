@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
-import { APP_NAME, BRAND_INITIAL, CONTACT, SUPPORTED_LANGUAGES } from "../config/brand";
+import { SUPPORTED_LANGUAGES } from "../config/brand";
+import { useProperty } from "../context/PropertyContext";
 import { ADMIN_HOME, loginPathFor } from "../utils/authRedirect";
 import "../styles/guest.css";
 
@@ -29,6 +30,7 @@ function LanguageSwitch() {
 function Header() {
   const { t } = useTranslation("site");
   const { user, logout } = useAuth();
+  const property = useProperty();
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,8 +48,12 @@ function Header() {
     <header className="guest-header">
       <div className="guest-container guest-header-inner">
         <Link to="/" className="guest-brand" onClick={closeMenu}>
-          <span className="guest-brand-mark" aria-hidden="true">{BRAND_INITIAL}</span>
-          {APP_NAME}
+          {property.logoUrl ? (
+            <img className="guest-brand-logo" src={property.logoUrl} alt="" />
+          ) : (
+            <span className="guest-brand-mark" aria-hidden="true">{property.initial}</span>
+          )}
+          {property.name}
         </Link>
 
         <button
@@ -101,10 +107,11 @@ function Header() {
 
 function Footer() {
   const { t } = useTranslation("site");
+  const property = useProperty();
   const contactLines = [
-    CONTACT.address,
-    CONTACT.phone && `${t("footer.phone")}: ${CONTACT.phone}`,
-    CONTACT.email && `${t("footer.email")}: ${CONTACT.email}`,
+    property.address,
+    property.phone && `${t("footer.phone")}: ${property.phone}`,
+    property.email && `${t("footer.email")}: ${property.email}`,
   ].filter(Boolean);
 
   return (
@@ -112,7 +119,7 @@ function Footer() {
       <div className="guest-container">
         <div className="guest-footer-grid">
           <div>
-            <h4>{APP_NAME}</h4>
+            <h4>{property.name}</h4>
             <p style={{ margin: 0, lineHeight: 1.6 }}>{t("footer.tagline")}</p>
           </div>
 
@@ -137,20 +144,21 @@ function Footer() {
         </div>
 
         <div className="guest-footer-bottom">
-          © {new Date().getFullYear()} {APP_NAME}
+          © {new Date().getFullYear()} {property.name}
         </div>
       </div>
     </footer>
   );
 }
 
-// Shell of the public site: header, the current page, footer.
-export default function GuestLayout() {
+// Shell of the public site: header, the current page, footer. Used as a
+// layout route (renders the matched child route) or around explicit children.
+export default function GuestLayout({ children }) {
   return (
     <div className="guest">
       <Header />
       <main className="guest-main">
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
       <Footer />
     </div>

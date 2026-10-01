@@ -135,6 +135,12 @@ export default function RoomDetail() {
               <span className="detail-fact">
                 {t("room.maxGuests", { count: Number(current.capacity) || 1 })}
               </span>
+              {policy?.checkInTime && (
+                <span className="detail-fact">{t("detail.checkInFrom", { time: policy.checkInTime })}</span>
+              )}
+              {policy?.checkOutTime && (
+                <span className="detail-fact">{t("detail.checkOutBefore", { time: policy.checkOutTime })}</span>
+              )}
             </div>
           </section>
 

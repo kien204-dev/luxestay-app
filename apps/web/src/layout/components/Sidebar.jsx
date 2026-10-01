@@ -1,13 +1,14 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import Icon from "../../utils/icon";
 import { useAuth } from "../../context/AuthContext";
-import { APP_NAME } from "../../config/brand";
+import { useProperty } from "../../context/PropertyContext";
 import { useBookingNotifications } from "../../context/BookingNotificationsContext";
 
 export default function Sidebar({ compact = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
+  const property = useProperty();
   const { newBookingCount } = useBookingNotifications();
 
   const navItems = [
@@ -18,6 +19,7 @@ export default function Sidebar({ compact = false }) {
     { path: "/admin/orders", label: "Orders", icon: "Orders", adminOnly: true },
     { path: "/admin/calendar", label: "Calendar", icon: "Calendar", adminOnly: true },
     { path: "/admin/coupons", label: "Coupons", icon: "Tag", adminOnly: true },
+    { path: "/admin/property", label: "Property", icon: "Hotel", adminOnly: true },
     { path: "/settings", label: "Settings", icon: "Settings" },
   ].filter((item) => !item.adminOnly || user?.role === "admin");
 
@@ -64,7 +66,7 @@ export default function Sidebar({ compact = false }) {
             color: "var(--color-gold-400)",
           }}
         >
-          {APP_NAME}
+          {property.name}
         </span>
       </div>
 

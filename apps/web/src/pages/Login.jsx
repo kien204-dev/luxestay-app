@@ -12,7 +12,7 @@ import {
   logGoogleAuthError,
 } from "../utils/googleAuthError";
 import { useToast } from "../context/ToastContext";
-import { APP_NAME } from "../config/brand";
+import { useProperty } from "../context/PropertyContext";
 import { postLoginPath } from "../utils/authRedirect";
 
 function Login() {
@@ -27,6 +27,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
+  const { name: APP_NAME } = useProperty();
   const navigate = useNavigate();
   const toast = useToast();
   const { t } = useTranslation("auth");

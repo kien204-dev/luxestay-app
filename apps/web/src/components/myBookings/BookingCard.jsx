@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useToast } from "../../context/ToastContext";
+import { downloadBookingReceipt } from "../../services/bookingService";
 import { normalizeImageUrl, useFallbackImage } from "../../utils/imageUrl";
 import StarRating from "../StarRating";
 import { STATUS_STYLE, PAYMENT_STATUS_STYLE, getStatusLabel, getPaymentStatusLabel, formatMoney, formatDate } from "./helpers";
@@ -10,6 +13,19 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
   const lang = i18n.language;
   const statusLabel = getStatusLabel(t);
   const paymentStatusLabel = getPaymentStatusLabel(t);
+  const toast = useToast();
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      await downloadBookingReceipt(b.id, lang);
+    } catch (err) {
+      toast.error(err.response?.data?.message || t("myBookings:card.downloadFailed"));
+    } finally {
+      setDownloading(false);
+    }
+  };
     const style = STATUS_STYLE[b.status] || STATUS_STYLE.pending;
     const pmtStyle = PAYMENT_STATUS_STYLE[b.payment_status] || PAYMENT_STATUS_STYLE.unpaid;
     const canCancel = ["pending", "confirmed"].includes(b.status);
@@ -135,6 +151,23 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
           }}
         >
           {t("myBookings:card.details")}
+        </button>
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          data-testid="download-receipt"
+          style={{
+            padding: "8px 14px",
+            background: "transparent",
+            color: "#002366",
+            border: "1px solid #002366",
+            borderRadius: 6,
+            cursor: downloading ? "not-allowed" : "pointer",
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          {downloading ? "…" : t("myBookings:card.downloadReceipt")}
         </button>
         {["pending", "confirmed"].includes(b.status) && ["unpaid", "failed", undefined].includes(b.payment_status) && (
           <button

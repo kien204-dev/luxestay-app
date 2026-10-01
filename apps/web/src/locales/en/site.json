@@ -90,10 +90,20 @@
     "about": "About this room",
     "noDescription": "This room has no description yet.",
     "availability": "Availability",
-    "reviews": "Guest reviews"
+    "reviews": "Guest reviews",
+    "checkInFrom": "Check-in from {{time}}",
+    "checkOutBefore": "Check-out before {{time}}"
   },
   "calendar": {
-    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "weekdays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
     "previous": "Previous month",
     "next": "Next month",
     "free": "Available",
