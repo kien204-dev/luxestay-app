@@ -3,6 +3,7 @@ const pool = require("../db/db.js");
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 const { getPropertySettings } = require("../services/propertySettings");
+const { todayInAppTimezone } = require("../utils/time");
 
 // pdfkit's built-in standard fonts (Helvetica etc.) have no Vietnamese
 // glyph coverage, so PDF text needs an embedded Unicode font — Noto Sans
@@ -108,6 +109,43 @@ function getRangeWindow(range) {
   };
 }
 
+// How many rooms have a guest tonight. Counted from confirmed bookings that
+// cover today, not from rooms.status: that flag means "has some booking in
+// the future" and would call a room occupied weeks before anyone arrives.
+async function computeRoomOccupancy() {
+  const result = await pool.query(
+    `
+    SELECT
+      COUNT(*)::int AS "totalRooms",
+      COUNT(*) FILTER (WHERE status = 'maintenance')::int AS "maintenanceRooms",
+      COUNT(*) FILTER (
+        WHERE status != 'maintenance' AND EXISTS (
+          SELECT 1 FROM bookings b
+          WHERE b.room_id = rooms.id
+            AND b.status = 'confirmed'
+            AND b.check_in <= $1::date
+            AND b.check_out > $1::date
+        )
+      )::int AS "occupiedRooms"
+    FROM rooms
+    `,
+    [todayInAppTimezone()]
+  );
+
+  const row = result.rows[0] || {};
+  const totalRooms = Number(row.totalRooms) || 0;
+  const maintenanceRooms = Number(row.maintenanceRooms) || 0;
+  const bookedRooms = Number(row.occupiedRooms) || 0;
+
+  return {
+    totalRooms,
+    maintenanceRooms,
+    // Kept under their existing names for the dashboard cards and export.
+    bookedRooms,
+    availableRooms: Math.max(totalRooms - maintenanceRooms - bookedRooms, 0),
+  };
+}
+
 // Shared by the /stats route and the export endpoint, so the export never
 // runs a second, parallel version of this aggregation.
 async function computeDashboardStats(rangeInput) {
@@ -117,17 +155,20 @@ async function computeDashboardStats(rangeInput) {
   const bookingWhere = window
     ? "WHERE COALESCE(created_at, check_in::timestamp) >= $1 AND COALESCE(created_at, check_in::timestamp) < $2"
     : "";
+  // Revenue is money actually received. A confirmed booking nobody has paid
+  // for yet is reported separately as outstanding.
   const revenueWhere = window
-    ? `${bookingWhere} AND status IN ('confirmed', 'completed')`
-    : "WHERE status IN ('confirmed', 'completed')";
+    ? `${bookingWhere} AND payment_status = 'paid'`
+    : "WHERE payment_status = 'paid'";
+  const outstandingWhere = `${window ? `${bookingWhere} AND` : "WHERE"} status IN ('confirmed', 'completed') AND payment_status IN ('unpaid', 'pending', 'failed')`;
   const params = window ? [window.start, window.end] : [];
+
+  const occupancy = await computeRoomOccupancy();
 
   const result = await pool.query(
     `
     SELECT
       (SELECT COUNT(*) FROM rooms)::int AS "totalRooms",
-      (SELECT COUNT(*) FROM rooms WHERE status = 'available')::int AS "availableRooms",
-      (SELECT COUNT(*) FROM rooms WHERE status = 'booked')::int AS "bookedRooms",
       (SELECT COUNT(*) FROM users WHERE deleted_at IS NULL)::int AS "totalUsers",
       (SELECT COUNT(*) FROM bookings ${bookingWhere})::int AS "totalBookings",
       COALESCE((
@@ -139,7 +180,12 @@ async function computeDashboardStats(rangeInput) {
         SELECT SUM(discount_amount)
         FROM bookings
         ${revenueWhere}
-      ), 0)::numeric AS "totalDiscount"
+      ), 0)::numeric AS "totalDiscount",
+      COALESCE((
+        SELECT SUM(total_price)
+        FROM bookings
+        ${outstandingWhere}
+      ), 0)::numeric AS "outstanding"
     `,
     params
   );
@@ -150,15 +196,16 @@ async function computeDashboardStats(rangeInput) {
 
   return {
     range,
-    totalRooms: Number(stats.totalRooms) || 0,
-    availableRooms: Number(stats.availableRooms) || 0,
-    bookedRooms: Number(stats.bookedRooms) || 0,
+    totalRooms: occupancy.totalRooms,
+    availableRooms: occupancy.availableRooms,
+    bookedRooms: occupancy.bookedRooms,
+    maintenanceRooms: occupancy.maintenanceRooms,
     totalUsers: Number(stats.totalUsers) || 0,
     totalBookings: Number(stats.totalBookings) || 0,
-    // "revenue" stays the pre-existing field name/meaning (net, after any
-    // coupon discount) so the existing Dashboard stat card keeps working
-    // unchanged; grossRevenue/totalDiscount are additive.
+    // revenue: paid bookings, net of coupon discounts. outstanding: confirmed
+    // or completed stays that have not been paid for yet.
     revenue,
+    outstanding: Number(stats.outstanding) || 0,
     grossRevenue: revenue + totalDiscount,
     totalDiscount,
   };
@@ -190,7 +237,7 @@ async function computeDashboardAnalytics(rangeInput) {
   ] = await Promise.all([
     pool.query(
       `
-      SELECT COALESCE(created_at, check_in::timestamp) AS ts, total_price, status
+      SELECT COALESCE(created_at, check_in::timestamp) AS ts, total_price, status, payment_status
       FROM bookings
       WHERE COALESCE(created_at, check_in::timestamp) >= $1
         AND COALESCE(created_at, check_in::timestamp) < $2
@@ -215,7 +262,7 @@ async function computeDashboardAnalytics(rangeInput) {
         r.room_name,
         r.room_type,
         COUNT(b.id)::int AS booking_count,
-        COALESCE(SUM(b.total_price) FILTER (WHERE b.status IN ('confirmed', 'completed')), 0)::numeric AS revenue
+        COALESCE(SUM(b.total_price) FILTER (WHERE b.payment_status = 'paid'), 0)::numeric AS revenue
       FROM rooms r
       JOIN bookings b ON b.room_id = r.id
         AND COALESCE(b.created_at, b.check_in::timestamp) >= $1
@@ -226,14 +273,7 @@ async function computeDashboardAnalytics(rangeInput) {
       `,
       [start, end]
     ),
-    pool.query(`
-      SELECT
-        COUNT(*)::int AS "totalRooms",
-        COUNT(*) FILTER (WHERE status = 'booked')::int AS "bookedRooms",
-        COUNT(*) FILTER (WHERE status = 'available')::int AS "availableRooms",
-        COUNT(*) FILTER (WHERE status = 'maintenance')::int AS "maintenanceRooms"
-      FROM rooms
-    `),
+    computeRoomOccupancy().then((occupancy) => ({ rows: [occupancy] })),
     pool.query(`
       SELECT
         b.id,
@@ -260,7 +300,7 @@ async function computeDashboardAnalytics(rangeInput) {
     if (idx < 0 || idx >= buckets.length) return;
 
     bookingsByMonth[idx].bookings += 1;
-    if (["confirmed", "completed"].includes(row.status)) {
+    if (row.payment_status === "paid") {
       revenueByMonth[idx].revenue += Number(row.total_price) || 0;
     }
   });

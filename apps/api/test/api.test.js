@@ -702,9 +702,14 @@ function makeFakePool(state) {
         return ts >= start && ts < end;
       };
       const bookingsInRange = state.bookings.filter(inRange);
-      const revenueEligible = bookingsInRange.filter((item) =>
-        ["confirmed", "completed"].includes(item.status)
-      );
+      const revenueEligible = bookingsInRange.filter((item) => item.payment_status === "paid");
+      const outstanding = bookingsInRange
+        .filter(
+          (item) =>
+            ["confirmed", "completed"].includes(item.status) &&
+            ["unpaid", "pending", "failed"].includes(item.payment_status || "unpaid")
+        )
+        .reduce((sum, item) => sum + Number(item.total_price), 0);
       const revenue = revenueEligible.reduce((sum, item) => sum + Number(item.total_price), 0);
       const totalDiscount = revenueEligible.reduce(
         (sum, item) => sum + Number(item.discount_amount || 0),
@@ -714,12 +719,11 @@ function makeFakePool(state) {
         rows: [
           {
             totalRooms: state.rooms.length,
-            availableRooms: state.rooms.filter((item) => item.status === "available").length,
-            bookedRooms: state.rooms.filter((item) => item.status === "booked").length,
             totalUsers: state.users.length,
             totalBookings: bookingsInRange.length,
             revenue,
             totalDiscount,
+            outstanding,
           },
         ],
       };
@@ -740,6 +744,7 @@ function makeFakePool(state) {
           ts: b.created_at || b.check_in,
           total_price: b.total_price,
           status: b.status,
+          payment_status: b.payment_status,
         }));
       return { rows };
     }
@@ -776,7 +781,7 @@ function makeFakePool(state) {
             return ts >= start && ts < end;
           });
           const revenue = bookings
-            .filter((booking) => ["confirmed", "completed"].includes(booking.status))
+            .filter((booking) => booking.payment_status === "paid")
             .reduce((sum, booking) => sum + Number(booking.total_price), 0);
 
           return {
@@ -794,14 +799,23 @@ function makeFakePool(state) {
       return { rows };
     }
 
-    if (text.includes("from rooms") && text.includes("filter (where status = 'booked')")) {
+    if (text.includes("from rooms") && text.includes('as "occupiedrooms"')) {
+      const today = params[0];
+      const usable = state.rooms.filter((item) => item.status !== "maintenance");
       return {
         rows: [
           {
             totalRooms: state.rooms.length,
-            bookedRooms: state.rooms.filter((item) => item.status === "booked").length,
-            availableRooms: state.rooms.filter((item) => item.status === "available").length,
-            maintenanceRooms: state.rooms.filter((item) => item.status === "maintenance").length,
+            maintenanceRooms: state.rooms.length - usable.length,
+            occupiedRooms: usable.filter((room) =>
+              state.bookings.some(
+                (booking) =>
+                  booking.room_id === room.id &&
+                  booking.status === "confirmed" &&
+                  booking.check_in <= today &&
+                  booking.check_out > today
+              )
+            ).length,
           },
         ],
       };
@@ -2513,6 +2527,48 @@ describe("hotel booking API", () => {
     );
     assert.equal(invalidRange.response.status, 200);
     assert.equal(invalidRange.body.range, "year");
+  });
+
+  it("counts revenue from paid bookings only and occupancy from tonight's guests", async () => {
+    // The property's own "today", as the dashboard uses it.
+    const today = require("../src/utils/time").todayInAppTimezone();
+    const tomorrow = new Date(Date.parse(today + "T00:00:00Z") + 86400000).toISOString().slice(0, 10);
+    const before = (await request(baseUrl, "/api/dashboard/stats", { headers: authHeader(adminToken) })).body;
+
+    // Confirmed but not paid: a room is occupied tonight, no money yet.
+    const staying = pushPendingBooking(1980, {
+      room_id: 2,
+      status: "confirmed",
+      payment_status: "unpaid",
+      total_price: 700,
+      check_in: today,
+      check_out: tomorrow,
+    });
+    // Paid for a stay far in the future: money in, nobody in the room.
+    pushPendingBooking(1981, {
+      room_id: 2,
+      status: "confirmed",
+      payment_status: "paid",
+      total_price: 900,
+      check_in: "2095-01-01",
+      check_out: "2095-01-02",
+    });
+
+    const after = (await request(baseUrl, "/api/dashboard/stats", { headers: authHeader(adminToken) })).body;
+
+    assert.equal(after.revenue, before.revenue + 900);
+    assert.equal(after.outstanding, before.outstanding + 700);
+    assert.equal(after.bookedRooms, before.bookedRooms + 1);
+    assert.equal(after.availableRooms, before.availableRooms - 1);
+    assert.equal(after.totalRooms, after.availableRooms + after.bookedRooms + after.maintenanceRooms);
+
+    staying.status = "cancelled";
+    const later = (await request(baseUrl, "/api/dashboard/stats", { headers: authHeader(adminToken) })).body;
+    assert.equal(later.bookedRooms, before.bookedRooms);
+    assert.equal(later.outstanding, before.outstanding);
+
+    // Leave the shared state as the following tests expect it.
+    state.bookings = state.bookings.filter((booking) => ![1980, 1981].includes(booking.id));
   });
 
   it("scopes dashboard stats totals to the requested range", async () => {
