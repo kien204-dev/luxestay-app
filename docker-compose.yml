@@ -63,6 +63,18 @@ services:
       - uploads:/app/apps/api/uploads
       - api-data:/data
 
+  # Optional test inbox: catches every email the app sends and shows it at
+  # http://localhost:8025 instead of delivering it. Start it with
+  #   docker compose --profile mail up
+  # and point the API at it in .env: SMTP_HOST=mailpit, SMTP_PORT=1025,
+  # SMTP_FROM="Your Property <no-reply@example.com>" (no user/password).
+  mailpit:
+    image: axllent/mailpit:v1.27
+    profiles: ["mail"]
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+
   web:
     build:
       context: .

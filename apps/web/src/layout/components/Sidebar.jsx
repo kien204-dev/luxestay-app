@@ -80,7 +80,8 @@ export default function Sidebar({ compact = false }) {
       >
         {navItems.map(({ path, label, icon }) => {
           const IconComp = Icon[icon];
-          const active = location.pathname.startsWith(path);
+          const exactOnly = path === "/" || path === "/admin";
+          const active = exactOnly ? location.pathname === path : location.pathname.startsWith(path);
 
           return (
             <button

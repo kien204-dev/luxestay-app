@@ -229,7 +229,11 @@ async function sendBookingEmail(kind, bookingId) {
   if (!to) return;
 
   const property = await getPropertySettings();
-  await emailService.sendEmail({ to, ...buildBookingEmail(kind, booking, property) });
+  await emailService.sendEmail({
+    to,
+    fromName: property.name,
+    ...buildBookingEmail(kind, booking, property),
+  });
 }
 
 // Fire and forget: call after COMMIT, do not await.

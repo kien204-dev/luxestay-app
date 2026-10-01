@@ -99,12 +99,21 @@ async function sendPasswordResetEmail({ to, name, resetUrl }) {
   });
 }
 
-// Any message to a guest. html is optional.
-async function sendEmail({ to, subject, text, html }) {
+// "Some Name <a@b.c>" or "a@b.c" -> "a@b.c"
+function addressOf(from) {
+  const match = String(from).match(/<([^>]+)>/);
+  return (match ? match[1] : String(from)).trim();
+}
+
+// Any message to a guest. html is optional. fromName replaces the display
+// name of SMTP_FROM (the address itself stays as configured), so mail shows
+// the property's current name even after an admin renames it.
+async function sendEmail({ to, subject, text, html, fromName }) {
   const config = assertEmailConfigured();
   const transporter = await createTransporter(config);
+  const from = fromName ? { name: fromName, address: addressOf(config.from) } : config.from;
 
-  await transporter.sendMail({ from: config.from, to, subject, text, ...(html ? { html } : {}) });
+  await transporter.sendMail({ from, to, subject, text, ...(html ? { html } : {}) });
 }
 
 // Plain-text operational notice to the property's admins.

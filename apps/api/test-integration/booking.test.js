@@ -563,6 +563,91 @@ describe("booking and payment rules on real PostgreSQL", () => {
     assert.ok(destinations.body.every((item) => item.name && item.room_count >= 1));
   });
 
+  it("stores property settings and applies them to the booking rules", async () => {
+    const before = await api("/api/settings/public");
+    assert.equal(before.status, 200);
+    assert.equal(before.body.freeCancellationDays, 3);
+
+    const forbidden = await api("/api/settings", { method: "PUT", cookie: guestCookie, body: { name: "x" } });
+    assert.equal(forbidden.status, 403);
+
+    const saved = await api("/api/settings", {
+      method: "PUT",
+      cookie: adminCookie,
+      body: { name: "Nhà Nghỉ Hoa Sữa", checkInTime: "15:00", checkOutTime: "11:30", freeCancellationDays: 1 },
+    });
+    assert.equal(saved.status, 200, JSON.stringify(saved.body));
+
+    try {
+      const after = await api("/api/settings/public");
+      assert.equal(after.body.name, "Nhà Nghỉ Hoa Sữa");
+      assert.equal(after.body.checkInTime, "15:00");
+
+      // The database refuses values the API would never send.
+      await assert.rejects(pool.query("UPDATE property_settings SET check_in_time = '25:99' WHERE id = 1"));
+      await assert.rejects(pool.query("INSERT INTO property_settings (id, name) VALUES (2, 'second row')"));
+
+      // With a 1-day window, a paid booking 2 days ahead can be cancelled by the guest.
+      const booking = (await book(await freshRoomId(), dayFromToday(2), dayFromToday(3))).body.booking;
+      await api(`/api/bookings/${booking.id}/mark-paid`, { method: "PATCH", cookie: adminCookie });
+      const cancelled = await api(`/api/bookings/${booking.id}/cancel`, { method: "PATCH", cookie: guestCookie });
+      assert.equal(cancelled.status, 200, JSON.stringify(cancelled.body));
+      assert.equal(cancelled.body.booking.payment_status, "refund_pending");
+    } finally {
+      // Back to "nothing stored" so the other tests see the environment's 3 days.
+      await pool.query("DELETE FROM property_settings");
+    }
+    assert.equal((await api("/api/settings/public")).body.freeCancellationDays, 3);
+  });
+
+  it("books for a walk-in guest, lists it with totals, and produces a PDF", async () => {
+    const roomId = await freshRoomId();
+    const created = await api("/api/bookings", {
+      method: "POST",
+      cookie: adminCookie,
+      body: {
+        room_id: roomId,
+        check_in: dayFromToday(140),
+        check_out: dayFromToday(142),
+        guests: 1,
+        guest_name: "Trần Thị Bình",
+        guest_phone: "0912 345 678",
+        paid: true,
+      },
+    });
+    assert.equal(created.status, 201, JSON.stringify(created.body));
+    assert.equal(created.body.booking.status, "confirmed");
+    assert.equal(created.body.booking.payment_status, "paid");
+    assert.equal(created.body.booking.expires_at, null);
+
+    const row = await bookingRow(created.body.booking.id);
+    assert.equal(row.guest_name, "Trần Thị Bình");
+    assert.equal(row.language, "vi");
+
+    const summary = await api("/api/bookings/summary", { cookie: adminCookie });
+    const counted = await pool.query(
+      "SELECT COUNT(*)::int AS total, COALESCE(SUM(total_price) FILTER (WHERE payment_status = 'paid'), 0) AS revenue FROM bookings"
+    );
+    assert.equal(summary.body.total, counted.rows[0].total);
+    assert.equal(summary.body.revenue, Number(counted.rows[0].revenue));
+
+    const page = await api("/api/bookings?page=1&limit=3", { cookie: adminCookie });
+    assert.equal(page.body.data.length, 3);
+    assert.equal(page.body.data[0].guest_name, "Trần Thị Bình");
+
+    const pdf = await fetch(`${baseUrl}/api/bookings/${created.body.booking.id}/receipt`, {
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(pdf.status, 200);
+    assert.equal(Buffer.from(await pdf.arrayBuffer()).subarray(0, 5).toString(), "%PDF-");
+
+    const stats = await api("/api/dashboard/stats", { cookie: adminCookie });
+    assert.equal(stats.status, 200, JSON.stringify(stats.body));
+    assert.equal(stats.body.totalRooms, stats.body.availableRooms + stats.body.bookedRooms + stats.body.maintenanceRooms);
+    const analytics = await api("/api/dashboard/analytics?range=month", { cookie: adminCookie });
+    assert.equal(analytics.status, 200, JSON.stringify(analytics.body));
+  });
+
   it("keeps maintenance set by the admin and derives available/booked from bookings", async () => {
     const roomId = await freshRoomId();
     const room = (await api(`/api/rooms/${roomId}`)).body;
