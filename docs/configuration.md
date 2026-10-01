@@ -26,7 +26,7 @@ Khối `environment:` trong `docker-compose.yml` **thắng** `.env`. Vì vậy:
 | `DB_PASSWORD`, `JWT_SECRET`, `TRUST_PROXY_HOPS`, `AUTH_COOKIE_SECURE`, `AUTH_COOKIE_SAME_SITE`, `SEED_ON_START`, `APP_NAME` | Có mặc định trong compose, đổi được trong `.env` |
 | Mọi biến khác (`VNPAY_*`, `SMTP_*`, `MOMO_*`, `ALLOWED_ORIGINS`, `APP_TIMEZONE`…) | Đi thẳng từ `.env` vào API |
 
-Web (Vite) nhận cấu hình **lúc build image**, không phải lúc chạy: `VITE_API_URL` (cố định `/api`), `VITE_APP_NAME` (từ `APP_NAME`) và sáu biến `VITE_FIREBASE_*`. Đổi một trong các biến này phải build lại (`--build`).
+Web (Vite) nhận cấu hình **lúc build image**, không phải lúc chạy: `VITE_API_URL` (cố định `/api`), `VITE_APP_NAME` (từ `APP_NAME`), `VITE_DEFAULT_LANGUAGE`, ba biến `VITE_CONTACT_*` và sáu biến `VITE_FIREBASE_*`. Đổi một trong các biến này phải build lại (`--build`).
 
 ## Chạy thủ công: biến đi đường nào
 
@@ -79,7 +79,9 @@ Tuỳ chọn:
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:3001/api` (Docker: `/api`) | Địa chỉ API |
-| `VITE_APP_NAME` | `LuxeStay` | Tên hiển thị (Docker: lấy từ `APP_NAME`) |
+| `VITE_APP_NAME` | `LuxeStay` | Tên hiển thị, tiêu đề tab và chữ cái trên favicon (Docker: lấy từ `APP_NAME`) |
+| `VITE_DEFAULT_LANGUAGE` | `vi` | Ngôn ngữ khách thấy ở lần đầu (`vi` hoặc `en`); cũng là `lang` của trang |
+| `VITE_CONTACT_PHONE`, `VITE_CONTACT_EMAIL`, `VITE_CONTACT_ADDRESS` | trống | Thông tin liên hệ ở chân trang; để trống thì không hiện |
 | `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` | trống | Đăng nhập Google. Thiếu thì nút bị tắt |
 
 ## Địa chỉ web, origin và cookie

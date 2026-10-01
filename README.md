@@ -27,6 +27,18 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 
 > Trước khi đưa lên mạng thật: đổi mật khẩu tài khoản khách mẫu (hoặc khoá tài khoản đó trong trang Users), đặt `SEED_ON_START=false`, và đọc [DEPLOY.md](DEPLOY.md).
 
+## Các trang
+
+| Địa chỉ | Nội dung | Ai xem được |
+|---|---|---|
+| `/` | Trang chủ: tìm phòng theo ngày, điểm đến, phòng nổi bật | Mọi người |
+| `/rooms` | Danh sách phòng, lọc theo địa điểm, ngày, số khách; phân trang | Mọi người |
+| `/rooms/:id` | Chi tiết phòng, lịch phòng trống, đặt phòng và thanh toán | Mọi người (đặt phòng cần đăng nhập) |
+| `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá | Đã đăng nhập |
+| `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị | Quản trị |
+
+Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
+
 ## Chạy thủ công để phát triển
 
 Cần Node.js 22 trở lên và PostgreSQL 14 trở lên.
@@ -103,7 +115,7 @@ Các tính năng dưới đây tắt cho tới khi bạn cấu hình; phần cò
 
 ### Đổi tên thương hiệu
 
-Đặt `APP_NAME` (Docker), hoặc `APP_NAME` trong `apps/api/.env` và `VITE_APP_NAME` trong `apps/web/.env`. Tên này được dùng ở giao diện, email, mô tả thanh toán và báo cáo xuất ra.
+Đặt `APP_NAME` (Docker), hoặc `APP_NAME` trong `apps/api/.env` và `VITE_APP_NAME` trong `apps/web/.env`. Tên này được dùng ở giao diện, tiêu đề tab, favicon (chữ cái đầu), email và báo cáo xuất ra. Ngôn ngữ mặc định và thông tin liên hệ ở chân trang: `VITE_DEFAULT_LANGUAGE`, `VITE_CONTACT_*`. Màu của trang khách nằm ở đầu file `apps/web/src/styles/guest.css`.
 
 ### Ảnh phòng mẫu
 
@@ -126,8 +138,10 @@ apps/
     test/
   web/
     src/
-      pages/         mỗi trang một file
-      components/    thành phần dùng chung
+      pages/         mỗi trang một file (pages/guest: trang khách)
+      components/    thành phần dùng chung (guest/, myBookings/)
+      layout/        khung trang khách và khung quản trị
+      styles/        CSS của trang khách (đổi màu thương hiệu ở guest.css)
       context/       đăng nhập, thông báo
       services/      gọi API
       locales/       bản dịch vi/en
@@ -144,7 +158,7 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Tài khoản | `POST /login`, `/register`, `/logout`, `/forgot-password`, `/reset-password`, `/google-login` | Công khai |
 | Hồ sơ | `GET/PUT /users/me`, `PUT /users/me/password`, `POST /users/me/avatar` | Đã đăng nhập |
 | Người dùng | `GET/POST /users`, `GET/PUT/DELETE /users/:id`, `PATCH /users/:id/lock` | Quản trị |
-| Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/:id`, `/rooms/:id/reviews` | Công khai |
+| Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/destinations`, `/rooms/:id`, `/rooms/:id/availability`, `/rooms/:id/reviews` | Công khai |
 | Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, ảnh phòng | Quản trị |
 | Đặt phòng | `GET/POST /bookings`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel` | Chủ booking hoặc quản trị |
 | Đặt phòng | `GET /bookings/policy` | Công khai |

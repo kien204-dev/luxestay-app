@@ -539,6 +539,30 @@ describe("booking and payment rules on real PostgreSQL", () => {
     assert.equal(policy.body.freeCancellationDays, 3);
   });
 
+  it("publishes a room's taken nights without anything about the bookings behind them", async () => {
+    const roomId = await freshRoomId();
+    await book(roomId, dayFromToday(130), dayFromToday(132));
+    const cancelled = (await book(roomId, dayFromToday(133), dayFromToday(134))).body.booking;
+    await api(`/api/bookings/${cancelled.id}/cancel`, { method: "PATCH", cookie: guestCookie });
+
+    // No cookie: this is what an anonymous visitor's calendar asks for.
+    const result = await api(
+      `/api/rooms/${roomId}/availability?from=${dayFromToday(128)}&to=${dayFromToday(136)}`
+    );
+
+    assert.equal(result.status, 200);
+    assert.deepEqual(Object.keys(result.body).sort(), ["bookable", "from", "room_id", "to", "today", "unavailable"]);
+    // The two booked nights; checkout day is free again, the cancelled stay does not count.
+    assert.deepEqual(result.body.unavailable, [dayFromToday(130), dayFromToday(131)]);
+    assert.equal(result.body.bookable, true);
+    assert.doesNotMatch(JSON.stringify(result.body), /user|email|guest|price|status/i);
+
+    const destinations = await api("/api/rooms/destinations");
+    assert.equal(destinations.status, 200);
+    assert.ok(destinations.body.length > 0);
+    assert.ok(destinations.body.every((item) => item.name && item.room_count >= 1));
+  });
+
   it("keeps maintenance set by the admin and derives available/booked from bookings", async () => {
     const roomId = await freshRoomId();
     const room = (await api(`/api/rooms/${roomId}`)).body;
