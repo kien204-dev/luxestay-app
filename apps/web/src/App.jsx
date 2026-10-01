@@ -57,6 +57,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/rooms" element={<RoomList />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
+          <Route path="/my-bookings" element={signedIn(<MyBookings />)} />
         </Route>
         <Route path="/booking" element={<Navigate to="/rooms" replace />} />
 
@@ -67,7 +68,6 @@ function App() {
         <Route path="/reset-password" element={guestOnly(<ResetPassword />)} />
 
         {/* Signed-in guests and admins */}
-        <Route path="/my-bookings" element={signedIn(<MyBookings />)} />
         <Route path="/payment/result" element={signedIn(<PaymentResult />)} />
         <Route path="/settings" element={signedIn(<MainLayout><Settings /></MainLayout>)} />
         <Route path="/profile" element={signedIn(<MainLayout><Settings /></MainLayout>)} />
