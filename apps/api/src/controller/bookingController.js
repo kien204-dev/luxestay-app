@@ -4,6 +4,7 @@ const { emitBookingCreated } = require("../services/socket.js");
 const { notifyRefundPending } = require("../services/adminAlerts.js");
 const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
 const { getPropertySettings } = require("../services/propertySettings.js");
+const { notifyBooking, SUPPORTED_LANGUAGES } = require("../services/bookingEmails.js");
 
 const ACTIVE_STATUSES = ["pending", "confirmed"];
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -98,6 +99,37 @@ exports.syncRoomStatus = syncRoomStatus;
 exports.hasDateOverlap = hasDateOverlap;
 exports.REFUND_REASONS = REFUND_REASONS;
 exports.EXCLUSION_VIOLATION = EXCLUSION_VIOLATION;
+
+// The language the guest's browser is showing the site in (the web app
+// sends it as Accept-Language); remembered on the booking for later emails.
+function requestLanguage(req) {
+  const preferred = String(req.headers["accept-language"] || "").trim().slice(0, 2).toLowerCase();
+  if (SUPPORTED_LANGUAGES.includes(preferred)) return preferred;
+  return SUPPORTED_LANGUAGES.includes(process.env.DEFAULT_LANGUAGE) ? process.env.DEFAULT_LANGUAGE : "vi";
+}
+
+const GUEST_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GUEST_PHONE_PATTERN = /^[0-9+\-\s().]{6,30}$/;
+
+// An admin entering a booking for someone at the desk or on the phone.
+// Returns null for an ordinary booking, { error } or { guest } otherwise.
+function parseWalkInGuest(req) {
+  if (req.user.role !== "admin" || req.body.guest_name === undefined) return null;
+
+  const text = (value) => (typeof value === "string" ? value.trim() : "");
+  const name = text(req.body.guest_name);
+  const phone = text(req.body.guest_phone);
+  const email = text(req.body.guest_email).toLowerCase();
+
+  if (!name) return { error: "Vui lòng nhập tên khách" };
+  if (name.length > 100) return { error: "Tên khách không được dài quá 100 ký tự" };
+  if (phone && !GUEST_PHONE_PATTERN.test(phone)) return { error: "Số điện thoại khách không hợp lệ" };
+  if (email && (email.length > 255 || !GUEST_EMAIL_PATTERN.test(email))) {
+    return { error: "Email khách không hợp lệ" };
+  }
+
+  return { guest: { name, phone: phone || null, email: email || null, paid: req.body.paid === true } };
+}
 
 function parseId(value) {
   const id = Number(value);
@@ -221,6 +253,10 @@ const BOOKING_SELECT = `
     b.refunded_at,
     b.coupon_id,
     b.discount_amount,
+    b.language,
+    b.guest_name,
+    b.guest_phone,
+    b.guest_email,
     u.name AS user_name,
     u.email AS user_email,
     r.room_name,
@@ -386,6 +422,12 @@ exports.createBooking = async (req, res) => {
     });
   }
 
+  const walkIn = parseWalkInGuest(req);
+  if (walkIn?.error) {
+    return res.status(400).json({ message: walkIn.error });
+  }
+  const guest = walkIn?.guest || null;
+
   if (!parseDateOnly(check_in) || !parseDateOnly(check_out)) {
     return res.status(400).json({ message: "Ngày check-in/check-out không hợp lệ" });
   }
@@ -487,19 +529,26 @@ exports.createBooking = async (req, res) => {
     // for, so the booking is confirmed straight away instead of sitting in
     // "pending" until it expires.
     const isFree = total_price <= 0;
-    const status = isFree ? "confirmed" : "pending";
-    const paymentStatus = isFree ? "paid" : "unpaid";
-    const expiresAt = isFree
+    // A booking entered by an admin for a guest in front of them is confirmed
+    // on the spot (no payment countdown); the admin says whether it was paid.
+    const confirmedNow = isFree || Boolean(guest);
+    const status = confirmedNow ? "confirmed" : "pending";
+    const paymentStatus = isFree || guest?.paid ? "paid" : "unpaid";
+    const expiresAt = confirmedNow
       ? null
       : new Date(Date.now() + getPendingBookingTtlMinutes() * 60 * 1000);
 
     const result = await client.query(
       `
-      INSERT INTO bookings (user_id, room_id, check_in, check_out, total_price, guests, status, expires_at, coupon_id, discount_amount, payment_status)
-      VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO bookings (user_id, room_id, check_in, check_out, total_price, guests, status, expires_at, coupon_id, discount_amount, payment_status, language, guest_name, guest_phone, guest_email)
+      VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *
       `,
-      [user_id, roomId, check_in, check_out, total_price, guestCount, status, expiresAt, couponId, discountAmount, paymentStatus]
+      [
+        user_id, roomId, check_in, check_out, total_price, guestCount, status, expiresAt,
+        couponId, discountAmount, paymentStatus, requestLanguage(req),
+        guest?.name ?? null, guest?.phone ?? null, guest?.email ?? null,
+      ]
     );
 
     await syncRoomStatus(client, roomId);
@@ -518,6 +567,7 @@ exports.createBooking = async (req, res) => {
       status: result.rows[0].status,
       created_at: result.rows[0].created_at,
     });
+    notifyBooking(status === "confirmed" ? "confirmed" : "received", result.rows[0].id);
 
     res.status(201).json({
       message: "Đặt phòng thành công",
@@ -607,6 +657,9 @@ exports.updateBookingStatus = async (req, res) => {
     await client.query("COMMIT");
 
     if (owesRefund) notifyRefundPending(booking);
+    if (status !== currentStatus && (status === "confirmed" || status === "cancelled")) {
+      notifyBooking(status, booking.id);
+    }
 
     res.json({
       message: "Cập nhật trạng thái thành công",
@@ -681,6 +734,7 @@ exports.cancelBooking = async (req, res) => {
     await client.query("COMMIT");
 
     if (cancelled.owesRefund) notifyRefundPending(cancelled.booking);
+    notifyBooking("cancelled", cancelled.booking.id);
 
     res.json({
       message: cancelled.owesRefund
@@ -753,6 +807,8 @@ exports.markBookingPaid = async (req, res) => {
 
     await syncRoomStatus(client, booking.room_id);
     await client.query("COMMIT");
+
+    notifyBooking("confirmed", id);
 
     res.json({ message: "Đã ghi nhận thanh toán", booking: result.rows[0] });
   } catch (err) {

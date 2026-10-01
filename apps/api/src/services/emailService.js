@@ -21,8 +21,12 @@ function assertEmailConfigured() {
 
   if (!config.host) missing.push("SMTP_HOST");
   if (!process.env.SMTP_PORT) missing.push("SMTP_PORT");
-  if (!config.user) missing.push("SMTP_USER");
-  if (!config.pass) missing.push("SMTP_PASS (or SMTP_PASSWORD)");
+  // SMTP_USER/SMTP_PASS are optional: a relay on a private network (or a
+  // test inbox such as Mailpit) takes mail without signing in. Giving only
+  // one of the two is a mistake, though.
+  if (Boolean(config.user) !== Boolean(config.pass)) {
+    missing.push(config.user ? "SMTP_PASS (or SMTP_PASSWORD)" : "SMTP_USER");
+  }
   if (!config.from) missing.push("SMTP_FROM");
 
   if (missing.length > 0) {
@@ -65,10 +69,7 @@ async function createTransporter(config) {
       // TLS certificate verification must still use the original SMTP hostname.
       servername: config.host,
     },
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
+    ...(config.user ? { auth: { user: config.user, pass: config.pass } } : {}),
   });
 }
 
@@ -98,6 +99,14 @@ async function sendPasswordResetEmail({ to, name, resetUrl }) {
   });
 }
 
+// Any message to a guest. html is optional.
+async function sendEmail({ to, subject, text, html }) {
+  const config = assertEmailConfigured();
+  const transporter = await createTransporter(config);
+
+  await transporter.sendMail({ from: config.from, to, subject, text, ...(html ? { html } : {}) });
+}
+
 // Plain-text operational notice to the property's admins.
 async function sendAdminEmail({ to, subject, text }) {
   const config = assertEmailConfigured();
@@ -110,6 +119,7 @@ module.exports = {
   assertEmailConfigured,
   isEmailConfigured,
   sendAdminEmail,
+  sendEmail,
   resolveSmtpIpv4,
   sendPasswordResetEmail,
 };

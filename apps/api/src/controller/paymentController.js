@@ -10,6 +10,7 @@ const { reclaimCoupon } = require("./couponController.js");
 const vnpayService = require("../services/vnpayService.js");
 const momoService = require("../services/momoService.js");
 const { notifyRefundPending, notifyDuplicatePayment } = require("../services/adminAlerts.js");
+const { notifyBooking } = require("../services/bookingEmails.js");
 const { todayInAppTimezone } = require("../utils/time.js");
 
 // Read per request, not at load time, so the list follows the environment.
@@ -413,6 +414,8 @@ async function settlePayment({ transactionRef, receivedAmount, isSuccess, provid
       const applied = await applySuccessfulPayment(client, booking);
       if (applied.outcome === "refund_pending") {
         afterCommit = () => notifyRefundPending(applied.booking);
+      } else {
+        afterCommit = () => notifyBooking("confirmed", booking.id);
       }
     }
 

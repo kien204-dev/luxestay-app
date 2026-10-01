@@ -139,6 +139,45 @@ test("the startup summary shows what is configured without printing any secret",
   }
 });
 
+test("booking emails escape what guests and admins typed", () => {
+  const { buildBookingEmail } = require("../src/services/bookingEmails");
+  const email = buildBookingEmail(
+    "confirmed",
+    {
+      id: 7,
+      language: "vi",
+      user_name: '<script>alert("x")</script>',
+      room_name: "Phòng <b>VIP</b>",
+      room_location: "Hà Nội",
+      check_in: "2031-03-11",
+      check_out: "2031-03-13",
+      guests: 2,
+      total_price: 1500000,
+      discount_amount: 0,
+      payment_status: "paid",
+    },
+    {
+      name: "Nhà nghỉ <Hoa & Sữa>",
+      phone: "0901",
+      email: "",
+      address: "",
+      checkInTime: "14:00",
+      checkOutTime: "12:00",
+      freeCancellationDays: 3,
+    }
+  );
+
+  assert.equal(email.subject, "Xác nhận đặt phòng #BK-0007");
+  assert.doesNotMatch(email.html, /<script>|<b>VIP<\/b>|<Hoa/);
+  assert.match(email.html, /&lt;script&gt;/);
+  assert.match(email.html, /Nhà nghỉ &lt;Hoa &amp; Sữa&gt;/);
+  // The plain-text part keeps the original characters.
+  assert.ok(email.text.includes("Nhà nghỉ <Hoa & Sữa>"));
+  assert.ok(email.text.includes("1.500.000 đ"));
+  assert.ok(email.text.includes("từ 14:00"));
+  assert.ok(email.text.includes("trước 12:00"));
+});
+
 test("password rule needs 8+ characters with letters and numbers", () => {
   assert.equal(isStrongPassword("abc12345"), true);
   assert.equal(isStrongPassword("abc1234"), false);
