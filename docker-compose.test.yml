@@ -16,3 +16,10 @@ services:
       interval: 2s
       timeout: 3s
       retries: 30
+
+  # A stand-in S3 server for the storage driver tests: in-memory, accepts any
+  # credentials, bound to this machine only.
+  s3-test:
+    image: adobe/s3mock:latest
+    ports:
+      - "127.0.0.1:${TEST_S3_PORT:-54331}:9090"

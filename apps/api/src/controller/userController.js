@@ -1,8 +1,7 @@
 const pool = require("../db/db.js");
 const bcrypt = require("bcryptjs");
 const { setAuthCookie } = require("../services/authSession");
-const { deleteLocalUploadFile } = require("../utils/localUploads.js");
-const { AVATAR_UPLOAD_DIR } = require("../middleware/avatarUpload.js");
+const { removeUpload } = require("../services/storage.js");
 const { isStrongPassword, PASSWORD_RULE_MESSAGE } = require("../utils/password");
 const { findTextLimitError } = require("../utils/textLimits");
 
@@ -585,9 +584,7 @@ exports.updateCurrentUser = async (req, res) => {
         "SELECT 1 FROM users WHERE avatar_url = $1 AND id != $2 LIMIT 1",
         [previousAvatarUrl, id]
       );
-      if (stillUsed.rows.length === 0) deleteLocalUploadFile(previousAvatarUrl, AVATAR_UPLOAD_DIR, "/uploads/avatars/", {
-        userId: id,
-      });
+      if (stillUsed.rows.length === 0) removeUpload(previousAvatarUrl, "avatars", { userId: id });
     }
 
     res.json({

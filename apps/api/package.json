@@ -15,6 +15,7 @@
     "test:integration": "node --test --test-concurrency=1 \"test-integration/*.test.js\""
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1144.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

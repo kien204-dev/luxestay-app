@@ -1,4 +1,5 @@
 const { isValidTimezone } = require("../utils/time");
+const { getStorageProblems } = require("../services/storage");
 
 const MIN_JWT_SECRET_LENGTH = 32;
 
@@ -22,6 +23,8 @@ function getEnvProblems(env = process.env) {
   if (env.APP_TIMEZONE && !isValidTimezone(env.APP_TIMEZONE)) {
     problems.push(`APP_TIMEZONE "${env.APP_TIMEZONE}" is not a valid IANA timezone (e.g. Asia/Ho_Chi_Minh)`);
   }
+
+  problems.push(...getStorageProblems());
 
   return problems;
 }

@@ -1,7 +1,6 @@
 const pool = require("../db/db.js");
-const { ROOM_UPLOAD_DIR } = require("../middleware/roomImageUpload.js");
 const { autoExpirePendingBookings, syncRoomStatus } = require("./bookingController.js");
-const { deleteLocalUploadFile } = require("../utils/localUploads.js");
+const { removeUpload } = require("../services/storage.js");
 const { findTextLimitError } = require("../utils/textLimits");
 const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
 
@@ -44,9 +43,7 @@ function hasRoomQuery(query) {
 }
 
 function deleteLocalRoomImageFile(imageValue, { roomId } = {}) {
-  deleteLocalUploadFile(imageValue, ROOM_UPLOAD_DIR, "/uploads/rooms/", {
-    roomId: roomId ?? null,
-  });
+  removeUpload(imageValue, "rooms", { roomId: roomId ?? null });
 }
 
 // ======================
@@ -617,11 +614,11 @@ exports.addRoomImage = async (req, res) => {
 
     const roomCheck = await pool.query("SELECT id FROM rooms WHERE id = $1", [roomId]);
     if (roomCheck.rows.length === 0) {
-      deleteLocalRoomImageFile(`/uploads/rooms/${req.file.filename}`, { roomId });
+      deleteLocalRoomImageFile(req.file.storedPath, { roomId });
       return res.status(404).json({ message: "Room not found" });
     }
 
-    const imagePath = `/uploads/rooms/${req.file.filename}`;
+    const imagePath = req.file.storedPath;
     const result = await pool.query(
       `INSERT INTO room_images (room_id, image_path)
        VALUES ($1, $2)

@@ -5,6 +5,7 @@ const { getMomoConfig, isMomoEnabled } = require("../services/momoService");
 const { isEmailConfigured } = require("../services/emailService");
 const { isGoogleLoginConfigured } = require("../services/firebaseAdmin");
 const { getAppTimezone } = require("../utils/time");
+const { describeStorage } = require("../services/storage");
 const { APP_NAME } = require("./brand");
 
 // Variables whose VALUE must never reach a log. They are only ever reported
@@ -21,6 +22,8 @@ const SECRET_VARIABLES = [
   "MOMO_ACCESS_KEY",
   "MOMO_SECRET_KEY",
   "FIREBASE_SERVICE_ACCOUNT_JSON",
+  "S3_ACCESS_KEY_ID",
+  "S3_SECRET_ACCESS_KEY",
   "SEED_ADMIN_PASSWORD",
 ];
 
@@ -71,6 +74,7 @@ function describeConfig() {
     `  Session cookie     secure=${cookie.secure} sameSite=${cookie.sameSite}`,
     `  Timezone           ${getAppTimezone()}`,
     `  Database           ${process.env.DB_HOST || "localhost"}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME || ""}`,
+    `  Uploads            ${describeStorage()}`,
     `  Email              ${onOff(isEmailConfigured())}`,
     `  Google sign-in     ${onOff(isGoogleLoginConfigured())}`,
     `  VNPay              ${onOff(!vnpayMissing, vnpayMissing)}`,

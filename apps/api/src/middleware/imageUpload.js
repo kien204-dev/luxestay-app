@@ -1,7 +1,6 @@
 const crypto = require("crypto");
-const fs = require("fs");
-const path = require("path");
 const multer = require("multer");
+const { storeUpload } = require("../services/storage");
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Map([
@@ -10,12 +9,12 @@ const ALLOWED_IMAGE_TYPES = new Map([
   ["image/webp", "webp"],
 ]);
 
-// Shared upload pipeline for any locally-hosted image field (room photos,
-// user avatars, ...): buffer the upload in memory, verify the real file
-// content by magic bytes (not just the declared mimetype), then persist
-// under the given directory. Callers only need to pick a directory.
-function createImageUploadMiddleware(uploadDir) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Shared upload pipeline for any image field (room photos, user avatars, the
+// logo): buffer the upload in memory, verify the real file content by magic
+// bytes (not just the declared mimetype), then hand it to the storage
+// service (local disk or an S3-compatible bucket). Callers only pick the
+// folder ("rooms", "avatars", "branding").
+function createImageUploadMiddleware(folder) {
 
   const uploadToMemory = multer({
     storage: multer.memoryStorage(),
@@ -34,12 +33,12 @@ function createImageUploadMiddleware(uploadDir) {
     }
 
     const filename = `${crypto.randomUUID()}.${extension}`;
-    const target = path.join(uploadDir, filename);
-    await fs.promises.writeFile(target, req.file.buffer, { flag: "wx" });
 
     req.file.filename = filename;
     req.file.mimetype = detected.mime;
-    req.file.path = target;
+    // What to store in the database for this image: "/uploads/<folder>/<file>"
+    // on local disk, or the object's public URL on S3.
+    req.file.storedPath = await storeUpload(folder, filename, req.file.buffer, detected.mime);
     delete req.file.buffer;
   }
 

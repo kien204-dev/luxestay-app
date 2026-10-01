@@ -5,12 +5,10 @@ const {
   parseDays,
   savePropertySettings,
 } = require("../services/propertySettings");
-const { BRANDING_UPLOAD_DIR } = require("../middleware/brandingUpload");
-const { deleteLocalUploadFile } = require("../utils/localUploads");
+const { removeUpload } = require("../services/storage");
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+\-\s().]{6,30}$/;
-const LOGO_MARKER = "/uploads/branding/";
 
 const TEXT_LIMITS = { name: 100, phone: 30, email: 255, address: 255 };
 const FIELD_LABELS = { name: "Tên", phone: "Số điện thoại", email: "Email", address: "Địa chỉ" };
@@ -105,7 +103,7 @@ exports.updateSettings = async (req, res) => {
 };
 
 function removeLogoFile(logoUrl) {
-  deleteLocalUploadFile(logoUrl, BRANDING_UPLOAD_DIR, LOGO_MARKER, { purpose: "logo" });
+  removeUpload(logoUrl, "branding", { purpose: "logo" });
 }
 
 // The upload middleware has already checked the file really is an image and
@@ -115,7 +113,7 @@ exports.uploadLogo = async (req, res) => {
     if (!req.file) return res.status(400).json({ message: "No image file uploaded" });
 
     const previous = (await getPropertySettingsForAdmin()).stored.logoUrl;
-    const logoUrl = `${LOGO_MARKER}${req.file.filename}`;
+    const logoUrl = req.file.storedPath;
     const saved = await savePropertySettings({ logoUrl });
     if (previous && previous !== logoUrl) removeLogoFile(previous);
 

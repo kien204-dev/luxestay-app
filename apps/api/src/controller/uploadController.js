@@ -1,3 +1,7 @@
+const { publicUrl } = require("../services/storage");
+
+// The image itself was verified and stored by the upload middleware; these
+// just tell the client where it now lives.
 exports.uploadRoomImage = (req, res) => {
   if (!req.file) {
     return res.status(400).json({
@@ -5,12 +9,9 @@ exports.uploadRoomImage = (req, res) => {
     });
   }
 
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
-  const imagePath = `/uploads/rooms/${req.file.filename}`;
-
   res.status(201).json({
     message: "Room image uploaded successfully",
-    image: `${baseUrl}${imagePath}`,
+    image: publicUrl(req, req.file.storedPath),
   });
 };
 
@@ -21,11 +22,8 @@ exports.uploadAvatar = (req, res) => {
     });
   }
 
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
-  const imagePath = `/uploads/avatars/${req.file.filename}`;
-
   res.status(201).json({
     message: "Avatar uploaded successfully",
-    avatarUrl: `${baseUrl}${imagePath}`,
+    avatarUrl: publicUrl(req, req.file.storedPath),
   });
 };
