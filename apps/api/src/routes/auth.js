@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const pool = require("../db/db");
 const { isGoogleLoginConfigured, verifyFirebaseIdToken } = require("../services/firebaseAdmin");
 const { clearAuthCookie, setAuthCookie } = require("../services/authSession");
+const { getPublicWebUrl } = require("../services/allowedOrigins");
 const {
   forgotPasswordRateLimit,
   loginRateLimit,
@@ -166,8 +167,7 @@ router.post("/forgot-password", forgotPasswordRateLimit, async (req, res) => {
       [user.id, tokenHash, expiresAt]
     );
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    const resetUrl = `${frontendUrl.replace(/\/$/, "")}/reset-password?token=${rawToken}`;
+    const resetUrl = `${getPublicWebUrl()}/reset-password?token=${rawToken}`;
     await sendPasswordResetEmail({ to: user.email, name: user.name, resetUrl });
 
     return res.json({ message: RESET_RESPONSE_MESSAGE });

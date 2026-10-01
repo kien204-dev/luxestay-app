@@ -8,6 +8,7 @@ const { listMigrationFiles } = require("../src/db/migrate");
 const { assertResetAllowed } = require("../src/db/reset");
 const { dateInTimezone, daysBetween, isValidTimezone } = require("../src/utils/time");
 const { formatVnpayDate } = require("../src/services/vnpayService");
+const { buildAllowedOrigins, getPublicWebUrl } = require("../src/services/allowedOrigins");
 
 const validEnv = {
   DB_USER: "postgres",
@@ -50,6 +51,31 @@ test("the property date follows its timezone, not the server clock", () => {
 test("VNPay timestamps are GMT+7 whatever the server timezone", () => {
   assert.equal(formatVnpayDate(new Date("2031-03-10T18:30:05Z")), "20310311013005");
   assert.equal(formatVnpayDate(new Date("2030-12-31T17:00:00Z")), "20310101000000");
+});
+
+test("allowed origins accept a comma separated list on top of the main address", () => {
+  const origins = buildAllowedOrigins({
+    NODE_ENV: "production",
+    CLIENT_URL: "https://stay.example.com/",
+    FRONTEND_URL: "https://stay.example.com",
+    ALLOWED_ORIGINS: " https://abc.trycloudflare.com/ , http://localhost:8080,, ",
+  });
+
+  assert.deepEqual(
+    [...origins].sort(),
+    ["http://localhost:8080", "https://abc.trycloudflare.com", "https://stay.example.com"]
+  );
+});
+
+test("allowed origins only include the dev server outside production", () => {
+  assert.deepEqual([...buildAllowedOrigins({ NODE_ENV: "production" })], []);
+  assert.deepEqual([...buildAllowedOrigins({})], ["http://localhost:5173"]);
+});
+
+test("the public web URL is the main address, without a trailing slash", () => {
+  assert.equal(getPublicWebUrl({ FRONTEND_URL: "https://stay.example.com/" }), "https://stay.example.com");
+  assert.equal(getPublicWebUrl({ CLIENT_URL: "https://c.example.com" }), "https://c.example.com");
+  assert.equal(getPublicWebUrl({}), "http://localhost:5173");
 });
 
 test("password rule needs 8+ characters with letters and numbers", () => {
