@@ -2,7 +2,7 @@ const path = require("path");
 const pool = require("../db/db.js");
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
-const { APP_NAME } = require("../config/brand");
+const { getPropertySettings } = require("../services/propertySettings");
 
 // pdfkit's built-in standard fonts (Helvetica etc.) have no Vietnamese
 // glyph coverage, so PDF text needs an embedded Unicode font — Noto Sans
@@ -324,9 +324,9 @@ function styleHeaderRow(row) {
 // analytics is null when the range doesn't support a breakdown (only
 // computeDashboardStats's "all" range lacks one) — the summary sheet still
 // gets built either way, from the exact same stats object /stats returns.
-async function buildDashboardExcelBuffer(stats, analytics) {
+async function buildDashboardExcelBuffer(stats, analytics, propertyName) {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = APP_NAME;
+  workbook.creator = propertyName;
   workbook.created = new Date();
 
   const summarySheet = workbook.addWorksheet("Tổng quan");
@@ -397,7 +397,7 @@ async function buildDashboardExcelBuffer(stats, analytics) {
   return workbook.xlsx.writeBuffer();
 }
 
-function buildDashboardPdfBuffer(stats, analytics) {
+function buildDashboardPdfBuffer(stats, analytics, propertyName) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 40, size: "A4" });
     doc.font(VI_FONT_PATH);
@@ -406,7 +406,7 @@ function buildDashboardPdfBuffer(stats, analytics) {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    doc.fontSize(20).fillColor("#0A1128").text(`Báo cáo Dashboard - ${APP_NAME}`, { align: "center" });
+    doc.fontSize(20).fillColor("#0A1128").text(`Báo cáo Dashboard - ${propertyName}`, { align: "center" });
     doc.moveDown(0.3);
     doc
       .fontSize(11)
@@ -492,10 +492,11 @@ exports.exportDashboardReport = async (req, res) => {
     const hasBreakdown = ANALYTICS_RANGES.includes(stats.range);
     const analytics = hasBreakdown ? await computeDashboardAnalytics(stats.range) : null;
 
+    const propertyName = (await getPropertySettings()).name;
     const filenameBase = `luxestay-dashboard-${stats.range}-${new Date().toISOString().slice(0, 10)}`;
 
     if (format === "xlsx") {
-      const buffer = await buildDashboardExcelBuffer(stats, analytics);
+      const buffer = await buildDashboardExcelBuffer(stats, analytics, propertyName);
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -504,7 +505,7 @@ exports.exportDashboardReport = async (req, res) => {
       return res.send(buffer);
     }
 
-    const buffer = await buildDashboardPdfBuffer(stats, analytics);
+    const buffer = await buildDashboardPdfBuffer(stats, analytics, propertyName);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filenameBase}.pdf"`);
     return res.send(buffer);

@@ -3,11 +3,11 @@ const { applyCouponForBooking, releaseCoupon } = require("./couponController.js"
 const { emitBookingCreated } = require("../services/socket.js");
 const { notifyRefundPending } = require("../services/adminAlerts.js");
 const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
+const { getPropertySettings } = require("../services/propertySettings.js");
 
 const ACTIVE_STATUSES = ["pending", "confirmed"];
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const EXCLUSION_VIOLATION = "23P01";
-const DEFAULT_FREE_CANCELLATION_DAYS = 3;
 
 const STATUS_TRANSITIONS = {
   pending: ["confirmed", "cancelled"],
@@ -37,12 +37,10 @@ function getPendingBookingTtlMinutes() {
 }
 
 // A guest may cancel a paid booking for free until this many days before
-// check-in. 0 means "any time before check-in day ends".
-function getFreeCancellationDays() {
-  const raw = process.env.FREE_CANCELLATION_DAYS;
-  if (raw === undefined || raw === "") return DEFAULT_FREE_CANCELLATION_DAYS;
-  const days = Number(raw);
-  return Number.isInteger(days) && days >= 0 ? days : DEFAULT_FREE_CANCELLATION_DAYS;
+// check-in (0 means "up to and including check-in day"). Set by the admin in
+// the property settings, else FREE_CANCELLATION_DAYS, else 3.
+async function getFreeCancellationDays() {
+  return (await getPropertySettings()).freeCancellationDays;
 }
 
 // Bookings left "pending" past their expires_at never got confirmed/paid in
@@ -318,9 +316,13 @@ exports.getBookings = async (req, res) => {
 
 // What the guest-facing pages need to explain the rules before asking the
 // server to apply them.
-exports.getBookingPolicy = (req, res) => {
+exports.getBookingPolicy = async (req, res) => {
+  const settings = await getPropertySettings();
+
   res.json({
-    freeCancellationDays: getFreeCancellationDays(),
+    freeCancellationDays: settings.freeCancellationDays,
+    checkInTime: settings.checkInTime,
+    checkOutTime: settings.checkOutTime,
     pendingBookingTtlMinutes: getPendingBookingTtlMinutes(),
     today: todayInAppTimezone(),
   });
@@ -662,7 +664,7 @@ exports.cancelBooking = async (req, res) => {
     // The free-cancellation window only matters once money has changed
     // hands; an unpaid booking can always be dropped. Admins are not bound
     // by it (they are the ones a late guest is told to contact).
-    const freeDays = getFreeCancellationDays();
+    const freeDays = await getFreeCancellationDays();
     const daysUntilCheckIn = daysBetween(todayInAppTimezone(), String(booking.check_in).slice(0, 10));
     if (!isAdmin && booking.payment_status === "paid" && daysUntilCheckIn < freeDays) {
       await client.query("ROLLBACK");

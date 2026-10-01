@@ -35,6 +35,7 @@ function makeState() {
     passwordResetTokens: [],
     sentPasswordResetEmails: [],
     sentAdminEmails: [],
+    propertySettings: null,
     roomImages: [],
     payments: [],
     reviews: [],
@@ -436,6 +437,22 @@ function makeFakePool(state) {
         )
         .map((item) => ({ id: item.id }));
       return { rows };
+    }
+
+    if (text.startsWith("select * from property_settings where id = 1")) {
+      return { rows: state.propertySettings ? [state.propertySettings] : [] };
+    }
+
+    if (text.startsWith("insert into property_settings")) {
+      const columns = text.slice(text.indexOf("(") + 1, text.indexOf(")")).split(",").map((c) => c.trim());
+      const row = state.propertySettings || { id: 1 };
+      columns
+        .filter((column) => column !== "id" && column !== "updated_at")
+        .forEach((column, index) => {
+          row[column] = params[index];
+        });
+      state.propertySettings = row;
+      return { rows: [] };
     }
 
     if (text.startsWith("select trim(substring(location from")) {
@@ -2843,6 +2860,164 @@ describe("hotel booking API", () => {
       headers: authHeader(adminToken),
     });
     assert.equal(twice.response.status, 400);
+  });
+
+  it("serves property settings: database over environment over defaults, public fields only", async () => {
+    const savedEnv = { ...process.env };
+    state.propertySettings = null;
+
+    try {
+      delete process.env.APP_NAME;
+      delete process.env.CONTACT_PHONE;
+      delete process.env.FREE_CANCELLATION_DAYS;
+
+      // Nothing stored, nothing in the environment: built-in defaults.
+      let result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.response.status, 200);
+      assert.deepEqual(Object.keys(result.body).sort(), [
+        "address",
+        "checkInTime",
+        "checkOutTime",
+        "email",
+        "freeCancellationDays",
+        "logoUrl",
+        "name",
+        "phone",
+      ]);
+      assert.equal(result.body.name, "LuxeStay");
+      assert.equal(result.body.checkInTime, "14:00");
+      assert.equal(result.body.freeCancellationDays, 3);
+
+      // The environment beats the defaults.
+      process.env.APP_NAME = "Env Homestay";
+      process.env.FREE_CANCELLATION_DAYS = "5";
+      result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.body.name, "Env Homestay");
+      assert.equal(result.body.freeCancellationDays, 5);
+
+      // Only an admin may change them.
+      const anonymous = await request(baseUrl, "/api/settings", { method: "PUT", body: "{}" });
+      assert.equal(anonymous.response.status, 401);
+      const byGuest = await request(baseUrl, "/api/settings", {
+        method: "PUT",
+        headers: authHeader(userToken),
+        body: JSON.stringify({ name: "Hacked" }),
+      });
+      assert.equal(byGuest.response.status, 403);
+      assert.equal((await request(baseUrl, "/api/settings", { headers: authHeader(userToken) })).response.status, 403);
+
+      // What the admin saves beats the environment.
+      const saved = await request(baseUrl, "/api/settings", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({
+          name: "  Nhà Nghỉ Hoa Sữa  ",
+          phone: "0901 234 567",
+          email: "lienhe@hoasua.example",
+          address: "12 Hàng Bông, Hà Nội",
+          checkInTime: "15:00",
+          checkOutTime: "11:30",
+          freeCancellationDays: 7,
+        }),
+      });
+      assert.equal(saved.response.status, 200);
+      assert.equal(saved.body.stored.name, "Nhà Nghỉ Hoa Sữa");
+      assert.equal(saved.body.fallback.name, "Env Homestay");
+
+      result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.body.name, "Nhà Nghỉ Hoa Sữa");
+      assert.equal(result.body.phone, "0901 234 567");
+      assert.equal(result.body.checkOutTime, "11:30");
+      assert.equal(result.body.freeCancellationDays, 7);
+
+      // The booking rules follow the same source.
+      const policy = await request(baseUrl, "/api/bookings/policy");
+      assert.equal(policy.body.freeCancellationDays, 7);
+      assert.equal(policy.body.checkInTime, "15:00");
+
+      // Clearing a field hands it back to the environment.
+      const cleared = await request(baseUrl, "/api/settings", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ name: "", freeCancellationDays: null }),
+      });
+      assert.equal(cleared.body.stored.name, null);
+      result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.body.name, "Env Homestay");
+      assert.equal(result.body.freeCancellationDays, 5);
+      assert.equal(result.body.phone, "0901 234 567");
+
+      // Invalid input is refused with a reason.
+      for (const body of [
+        { checkInTime: "25:00" },
+        { checkOutTime: "noon" },
+        { freeCancellationDays: -1 },
+        { freeCancellationDays: 1.5 },
+        { email: "not-an-email" },
+        { name: "x".repeat(101) },
+        { phone: { nested: true } },
+      ]) {
+        const invalid = await request(baseUrl, "/api/settings", {
+          method: "PUT",
+          headers: authHeader(adminToken),
+          body: JSON.stringify(body),
+        });
+        assert.equal(invalid.response.status, 400, JSON.stringify(body));
+        assert.ok(invalid.body.message);
+      }
+    } finally {
+      process.env = savedEnv;
+      state.propertySettings = null;
+    }
+  });
+
+  it("stores an uploaded logo and removes the previous file", async () => {
+    state.propertySettings = null;
+    const pngBytes = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+      "base64"
+    );
+    const upload = async (token) => {
+      const form = new FormData();
+      form.append("image", new Blob([pngBytes], { type: "image/png" }), "logo.png");
+      const response = await fetch(`${baseUrl}/api/settings/logo`, {
+        method: "POST",
+        headers: token ? { Cookie: token } : {},
+        body: form,
+      });
+      return { status: response.status, body: await response.json() };
+    };
+    const brandingDir = path.join(__dirname, "../uploads/branding");
+
+    try {
+      assert.equal((await upload(userToken)).status, 403);
+
+      const first = await upload(adminToken);
+      assert.equal(first.status, 201);
+      assert.match(first.body.stored.logoUrl, /^\/uploads\/branding\/[0-9a-f-]+\.png$/);
+      const firstFile = path.join(brandingDir, path.basename(first.body.stored.logoUrl));
+      await fs.access(firstFile);
+
+      assert.equal((await request(baseUrl, "/api/settings/public")).body.logoUrl, first.body.stored.logoUrl);
+
+      const second = await upload(adminToken);
+      assert.notEqual(second.body.stored.logoUrl, first.body.stored.logoUrl);
+      // Give the best-effort cleanup a moment.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await assert.rejects(fs.access(firstFile));
+
+      const removed = await request(baseUrl, "/api/settings/logo", {
+        method: "DELETE",
+        headers: authHeader(adminToken),
+      });
+      assert.equal(removed.response.status, 200);
+      assert.equal(removed.body.stored.logoUrl, null);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await assert.rejects(fs.access(path.join(brandingDir, path.basename(second.body.stored.logoUrl))));
+      assert.equal((await request(baseUrl, "/api/settings/public")).body.logoUrl, "");
+    } finally {
+      state.propertySettings = null;
+    }
   });
 
   it("lists destinations from real room data, without login", async () => {

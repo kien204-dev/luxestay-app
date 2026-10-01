@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const dns = require("node:dns").promises;
 const net = require("node:net");
-const { APP_NAME } = require("../config/brand");
+const { getPropertySettings } = require("./propertySettings");
 const { escapeHtml } = require("../utils/html");
 
 function getSmtpConfig() {
@@ -75,6 +75,7 @@ async function createTransporter(config) {
 async function sendPasswordResetEmail({ to, name, resetUrl }) {
   const config = assertEmailConfigured();
   const transporter = await createTransporter(config);
+  const { name: APP_NAME } = await getPropertySettings();
 
   await transporter.sendMail({
     from: config.from,

@@ -1,5 +1,5 @@
 const crypto = require("node:crypto");
-const { APP_NAME } = require("../config/brand");
+const { getPropertySettings } = require("./propertySettings");
 const { getPublicWebUrl } = require("./allowedOrigins");
 
 // Implements MoMo's "Payment with MoMo" (captureWallet) API as documented at
@@ -70,7 +70,7 @@ async function createMomoPayUrl({ amount, transactionRef, orderInfo }) {
 
   const body = {
     partnerCode: config.partnerCode,
-    partnerName: APP_NAME,
+    partnerName: (await getPropertySettings()).name,
     requestId,
     amount: amountStr,
     orderId,

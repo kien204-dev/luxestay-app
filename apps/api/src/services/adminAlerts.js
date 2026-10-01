@@ -1,7 +1,7 @@
 const pool = require("../db/db.js");
 const { emitToAdmins } = require("./socket.js");
 const { isEmailConfigured, sendAdminEmail } = require("./emailService.js");
-const { APP_NAME } = require("../config/brand");
+const { getPropertySettings } = require("./propertySettings");
 
 const REFUND_REASON_TEXT = {
   cancelled_by_guest: "khách hủy booking đã thanh toán",
@@ -16,9 +16,11 @@ function formatAmount(value) {
 // Email is a convenience on top of the socket event and the booking's own
 // refund_pending state (which is the durable record), so a mail failure is
 // logged and never surfaces to the request that triggered it.
+// subject is given without the "[Property name]" prefix; it is added here.
 async function emailAdmins(subject, lines) {
   try {
     if (!isEmailConfigured()) return;
+    const { name } = await getPropertySettings();
 
     const admins = await pool.query(
       "SELECT email FROM users WHERE role = 'admin' AND deleted_at IS NULL AND is_locked = FALSE"
@@ -26,7 +28,7 @@ async function emailAdmins(subject, lines) {
     const recipients = admins.rows.map((row) => row.email).filter(Boolean);
     if (recipients.length === 0) return;
 
-    await sendAdminEmail({ to: recipients, subject, text: lines.join("\n") });
+    await sendAdminEmail({ to: recipients, subject: `[${name}] ${subject}`, text: lines.join("\n") });
   } catch (err) {
     console.error("ADMIN ALERT EMAIL FAILED:", err.message);
   }
@@ -44,7 +46,7 @@ function notifyRefundPending(booking) {
     refund_reason: booking.refund_reason,
   });
 
-  return emailAdmins(`[${APP_NAME}] Booking #${booking.id} cần hoàn tiền`, [
+  return emailAdmins(`Booking #${booking.id} cần hoàn tiền`, [
     `Booking #${booking.id} đang chờ hoàn tiền.`,
     `Số tiền: ${formatAmount(booking.total_price)}`,
     `Lý do: ${reason}`,
@@ -61,7 +63,7 @@ function notifyDuplicatePayment(booking, payment) {
     amount: payment.amount,
   });
 
-  return emailAdmins(`[${APP_NAME}] Booking #${booking.id} bị thanh toán hai lần`, [
+  return emailAdmins(`Booking #${booking.id} bị thanh toán hai lần`, [
     `Booking #${booking.id} đã được thanh toán trước đó, nhưng vừa có thêm một giao dịch thành công.`,
     `Mã giao dịch: ${payment.transaction_ref} (${payment.provider})`,
     `Số tiền cần hoàn lại: ${formatAmount(payment.amount)}`,

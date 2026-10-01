@@ -51,6 +51,7 @@ const roomRoutes = require("./src/routes/roomRoutes");
 const paymentRoutes = require("./src/routes/payments");
 const reviewRoutes = require("./src/routes/reviews");
 const couponRoutes = require("./src/routes/coupons");
+const settingsRoutes = require("./src/routes/settings");
 
 // Only trust X-Forwarded-* when the app really sits behind that many reverse
 // proxies (e.g. 1 on Render or behind the bundled nginx). Trusting it without
@@ -94,6 +95,7 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/settings", settingsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

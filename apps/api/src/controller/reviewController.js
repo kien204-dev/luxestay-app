@@ -1,5 +1,5 @@
 const pool = require("../db/db.js");
-const { APP_NAME } = require("../config/brand");
+const { getPropertySettings } = require("../services/propertySettings");
 
 const MAX_COMMENT_LENGTH = 2000;
 
@@ -20,9 +20,9 @@ function parsePositiveInteger(value, fallback) {
 
 // "Nguyễn Văn An" -> "Nguyễn V. A." — keeps the reviewer recognizable
 // without publishing a stranger's full name next to a public comment.
-function maskReviewerName(name) {
+function maskReviewerName(name, propertyName) {
   const trimmed = String(name || "").trim();
-  if (!trimmed) return `Khách ${APP_NAME}`;
+  if (!trimmed) return `Khách ${propertyName}`;
   const parts = trimmed.split(/\s+/);
   if (parts.length === 1) return parts[0];
   return `${parts[0]} ${parts.slice(1).map((p) => `${p[0].toUpperCase()}.`).join(" ")}`;
@@ -146,13 +146,15 @@ exports.getRoomReviews = async (req, res) => {
       [roomId, limit, offset]
     );
 
+    const propertyName = (await getPropertySettings()).name;
+
     res.json({
       data: result.rows.map((row) => ({
         id: row.id,
         rating: row.rating,
         comment: row.comment,
         created_at: row.created_at,
-        reviewer_name: maskReviewerName(row.user_name),
+        reviewer_name: maskReviewerName(row.user_name, propertyName),
       })),
       averageRating: Math.round(average * 10) / 10,
       totalReviews: total,
