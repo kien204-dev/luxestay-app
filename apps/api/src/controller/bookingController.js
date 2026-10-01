@@ -4,7 +4,8 @@ const { emitBookingCreated } = require("../services/socket.js");
 const { notifyRefundPending } = require("../services/adminAlerts.js");
 const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
 const { getPropertySettings } = require("../services/propertySettings.js");
-const { notifyBooking, SUPPORTED_LANGUAGES } = require("../services/bookingEmails.js");
+const { loadBookingDetails, notifyBooking, SUPPORTED_LANGUAGES } = require("../services/bookingEmails.js");
+const { buildReceiptPdf } = require("../services/bookingReceipt.js");
 
 const ACTIVE_STATUSES = ["pending", "confirmed"];
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -395,6 +396,36 @@ exports.getBookingById = async (req, res) => {
   } catch (err) {
     console.error("GET BOOKING BY ID ERROR:", err);
     res.status(500).json({ message: "Lỗi server khi lấy booking" });
+  }
+};
+
+// The booking as a one-page PDF, for the guest who made it or an admin.
+exports.getBookingReceipt = async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) {
+    return res.status(400).json({ message: "Booking id must be a positive integer" });
+  }
+
+  try {
+    const booking = await loadBookingDetails(id);
+    if (!booking) {
+      return res.status(404).json({ message: "Không tìm thấy booking" });
+    }
+    if (req.user.role !== "admin" && booking.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Bạn không có quyền xem booking này" });
+    }
+
+    const property = await getPropertySettings();
+    // ?lang= lets the person downloading choose; otherwise the language the
+    // booking was made in.
+    const buffer = await buildReceiptPdf(booking, property, { language: req.query.lang });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="booking-BK-${String(id).padStart(4, "0")}.pdf"`);
+    return res.send(buffer);
+  } catch (err) {
+    console.error("BOOKING RECEIPT ERROR:", err);
+    return res.status(500).json({ message: "Lỗi server khi tạo phiếu xác nhận" });
   }
 };
 

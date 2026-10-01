@@ -3200,6 +3200,39 @@ describe("hotel booking API", () => {
     assert.equal(sneaky.body.booking.guest_name, null);
   });
 
+  it("gives the booking's owner or an admin a PDF confirmation, and nobody else", async () => {
+    pushPendingBooking(1970, {
+      user_id: 2,
+      status: "confirmed",
+      payment_status: "paid",
+      total_price: 180,
+      discount_amount: 20,
+      check_in: "2096-02-10",
+      check_out: "2096-02-12",
+      language: "vi",
+    });
+    pushPendingBooking(1971, { user_id: 1, check_in: "2096-03-10", check_out: "2096-03-11" });
+
+    const download = async (id, token, query = "") => {
+      const response = await fetch(`${baseUrl}/api/bookings/${id}/receipt${query}`, {
+        headers: token ? { Cookie: token } : {},
+      });
+      return { response, bytes: Buffer.from(await response.arrayBuffer()) };
+    };
+
+    const own = await download(1970, userToken);
+    assert.equal(own.response.status, 200);
+    assert.equal(own.response.headers.get("content-type"), "application/pdf");
+    assert.match(own.response.headers.get("content-disposition"), /booking-BK-1970\.pdf/);
+    assert.equal(own.bytes.subarray(0, 5).toString(), "%PDF-");
+    assert.ok(own.bytes.length > 5000, "the PDF embeds a font, so it is not tiny");
+
+    assert.equal((await download(1970, adminToken, "?lang=en")).response.status, 200);
+    assert.equal((await download(1971, userToken)).response.status, 403);
+    assert.equal((await download(1970, null)).response.status, 401);
+    assert.equal((await download(999999, adminToken)).response.status, 404);
+  });
+
   it("lists destinations from real room data, without login", async () => {
     const result = await request(baseUrl, "/api/rooms/destinations");
 

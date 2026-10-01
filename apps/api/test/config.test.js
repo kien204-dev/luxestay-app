@@ -178,6 +178,19 @@ test("booking emails escape what guests and admins typed", () => {
   assert.ok(email.text.includes("trước 12:00"));
 });
 
+test("receipt amounts come from what the booking stored", () => {
+  const { receiptAmounts } = require("../src/services/bookingReceipt");
+
+  assert.deepEqual(
+    receiptAmounts({ check_in: "2031-03-11", check_out: "2031-03-14", total_price: "2700000.00", discount_amount: "300000" }),
+    { nights: 3, total: 2700000, discount: 300000, subtotal: 3000000, perNight: 1000000 }
+  );
+  assert.deepEqual(
+    receiptAmounts({ check_in: "2031-03-11", check_out: "2031-03-12", total_price: 0, discount_amount: 500000 }),
+    { nights: 1, total: 0, discount: 500000, subtotal: 500000, perNight: 500000 }
+  );
+});
+
 test("password rule needs 8+ characters with letters and numbers", () => {
   assert.equal(isStrongPassword("abc12345"), true);
   assert.equal(isStrongPassword("abc1234"), false);

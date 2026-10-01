@@ -195,7 +195,9 @@ function buildBookingEmail(kind, booking, property) {
   return { subject: fill(t.subject[kind], { code }), text, html };
 }
 
-async function loadBookingForEmail(bookingId) {
+// A booking with the room, account and coupon details that emails and the
+// PDF confirmation both need.
+async function loadBookingDetails(bookingId) {
   const result = await pool.query(
     `SELECT b.*, u.name AS user_name, u.email AS user_email,
             r.room_name, r.location AS room_location, c.code AS coupon_code
@@ -220,7 +222,7 @@ function recipientOf(booking) {
 async function sendBookingEmail(kind, bookingId) {
   if (!emailService.isEmailConfigured()) return;
 
-  const booking = await loadBookingForEmail(bookingId);
+  const booking = await loadBookingDetails(bookingId);
   if (!booking) return;
 
   const to = recipientOf(booking);
@@ -237,4 +239,4 @@ function notifyBooking(kind, bookingId) {
   });
 }
 
-module.exports = { SUPPORTED_LANGUAGES, buildBookingEmail, notifyBooking };
+module.exports = { SUPPORTED_LANGUAGES, buildBookingEmail, loadBookingDetails, notifyBooking };
