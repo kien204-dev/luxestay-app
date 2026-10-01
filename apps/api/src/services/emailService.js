@@ -43,10 +43,18 @@ async function resolveSmtpIpv4(host, lookup = dns.lookup) {
   return result.address;
 }
 
-async function sendPasswordResetEmail({ to, name, resetUrl }) {
-  const config = assertEmailConfigured();
+function isEmailConfigured() {
+  try {
+    assertEmailConfigured();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function createTransporter(config) {
   const ipv4Host = await resolveSmtpIpv4(config.host);
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host: ipv4Host,
     port: config.port,
     secure: config.secure,
@@ -62,6 +70,11 @@ async function sendPasswordResetEmail({ to, name, resetUrl }) {
       pass: config.pass,
     },
   });
+}
+
+async function sendPasswordResetEmail({ to, name, resetUrl }) {
+  const config = assertEmailConfigured();
+  const transporter = await createTransporter(config);
 
   await transporter.sendMail({
     from: config.from,
@@ -84,8 +97,18 @@ async function sendPasswordResetEmail({ to, name, resetUrl }) {
   });
 }
 
+// Plain-text operational notice to the property's admins.
+async function sendAdminEmail({ to, subject, text }) {
+  const config = assertEmailConfigured();
+  const transporter = await createTransporter(config);
+
+  await transporter.sendMail({ from: config.from, to, subject, text });
+}
+
 module.exports = {
   assertEmailConfigured,
+  isEmailConfigured,
+  sendAdminEmail,
   resolveSmtpIpv4,
   sendPasswordResetEmail,
 };

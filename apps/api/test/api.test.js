@@ -34,6 +34,7 @@ function makeState() {
     nextCouponId: 1,
     passwordResetTokens: [],
     sentPasswordResetEmails: [],
+    sentAdminEmails: [],
     roomImages: [],
     payments: [],
     reviews: [],
@@ -260,6 +261,181 @@ function makeFakePool(state) {
 
     if (text === "begin" || text === "commit" || text === "rollback") {
       return { rows: [] };
+    }
+
+    // --- Booking / payment statements added with the refund + revive flow ---
+    if (text.startsWith("savepoint") || text.startsWith("rollback to savepoint")) {
+      return { rows: [] };
+    }
+
+    if (text.startsWith("select email from users where role = 'admin'")) {
+      return {
+        rows: state.users
+          .filter((user) => user.role === "admin" && !user.deleted_at && !user.is_locked)
+          .map((user) => ({ email: user.email })),
+      };
+    }
+
+    if (text.startsWith("with expired as")) {
+      const nowIso = new Date().toISOString();
+      const roomIds = new Set();
+      state.bookings.forEach((booking) => {
+        if (booking.status === "pending" && booking.expires_at && booking.expires_at < nowIso) {
+          booking.status = "cancelled";
+          booking.cancelled_at = nowIso;
+          roomIds.add(booking.room_id);
+          const coupon = state.coupons.find((item) => item.id === booking.coupon_id);
+          if (coupon) coupon.used_count = Math.max(coupon.used_count - 1, 0);
+        }
+      });
+      return { rows: [...roomIds].map((room_id) => ({ room_id })) };
+    }
+
+    if (text.startsWith("update coupons set used_count = greatest(used_count - 1, 0)")) {
+      const coupon = state.coupons.find((item) => item.id === Number(params[0]));
+      if (coupon) coupon.used_count = Math.max(coupon.used_count - 1, 0);
+      return { rows: [] };
+    }
+
+    if (text.startsWith("insert into bookings")) {
+      const expiresAtParam = params[7];
+      const booking = {
+        id: state.nextBookingId++,
+        user_id: Number(params[0]),
+        room_id: Number(params[1]),
+        check_in: params[2],
+        check_out: params[3],
+        total_price: Number(params[4]),
+        guests: Number(params[5]),
+        status: params[6],
+        payment_status: params[10],
+        expires_at:
+          expiresAtParam instanceof Date ? expiresAtParam.toISOString() : expiresAtParam || null,
+        coupon_id: params[8] != null ? Number(params[8]) : null,
+        discount_amount: Number(params[9]) || 0,
+        created_at: new Date().toISOString(),
+      };
+      state.bookings.push(booking);
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set status = 'cancelled', cancelled_at = now(), expires_at = null")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.status = "cancelled";
+      booking.cancelled_at = new Date().toISOString();
+      booking.expires_at = null;
+      if (params[1]) {
+        booking.payment_status = "refund_pending";
+        booking.refund_reason = params[2];
+      }
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'paid', status = case")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.payment_status = "paid";
+      if (booking.status === "pending") booking.status = "confirmed";
+      booking.expires_at = null;
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'refunded'")) {
+      const booking = state.bookings.find(
+        (item) => item.id === Number(params[0]) && item.payment_status === "refund_pending"
+      );
+      if (!booking) return { rows: [] };
+      booking.payment_status = "refunded";
+      booking.refunded_at = new Date().toISOString();
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("select id from bookings where id = $1")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      return { rows: booking ? [{ id: booking.id }] : [] };
+    }
+
+    if (text.startsWith("select 1 from payments where booking_id = $1 and status = 'success'")) {
+      const found = state.payments.some(
+        (item) => item.booking_id === Number(params[0]) && item.status === "success"
+      );
+      return { rows: found ? [{}] : [] };
+    }
+
+    if (text.startsWith("update payments set status = 'failed'")) {
+      const payment = state.payments.find(
+        (item) => item.transaction_ref === params[0] && item.status === "pending"
+      );
+      if (payment) payment.status = "failed";
+      return { rows: [] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'failed' where id = $1 and payment_status = 'pending'")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (booking && booking.payment_status === "pending") booking.payment_status = "failed";
+      return { rows: [] };
+    }
+
+    if (text.startsWith("select booking_id from payments where transaction_ref = $1")) {
+      const payment = state.payments.find((item) => item.transaction_ref === params[0]);
+      return { rows: payment ? [{ booking_id: payment.booking_id }] : [] };
+    }
+
+    if (text.startsWith("update bookings set status = 'confirmed', payment_status = 'paid', expires_at = null, cancelled_at = null")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      // Stand-in for the database's no-overlap exclusion constraint.
+      const clash = state.bookings.some(
+        (other) =>
+          other.id !== booking.id &&
+          hasOverlap(other, booking.room_id, booking.check_in, booking.check_out, ["pending", "confirmed"])
+      );
+      if (clash) {
+        const error = new Error("conflicting key value violates exclusion constraint");
+        error.code = "23P01";
+        throw error;
+      }
+      booking.status = "confirmed";
+      booking.payment_status = "paid";
+      booking.expires_at = null;
+      booking.cancelled_at = null;
+      booking.refund_reason = null;
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set status = 'confirmed', payment_status = 'paid', expires_at = null where id = $1")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.status = "confirmed";
+      booking.payment_status = "paid";
+      booking.expires_at = null;
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'paid' where id = $1")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (booking) booking.payment_status = "paid";
+      return { rows: [] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'refund_pending', refund_reason = $2")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.payment_status = "refund_pending";
+      booking.refund_reason = params[1];
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("select id from bookings where room_id = $1") && params.length === 5) {
+      const rows = state.bookings
+        .filter(
+          (item) =>
+            item.id !== Number(params[4]) &&
+            hasOverlap(item, Number(params[0]), params[1], params[2], params[3])
+        )
+        .map((item) => ({ id: item.id }));
+      return { rows };
     }
 
     if (text.startsWith("select 1 from users where avatar_url = $1 and id != $2")) {
@@ -1214,6 +1390,10 @@ describe("hotel booking API", () => {
       loaded: true,
       exports: {
         assertEmailConfigured() {},
+        isEmailConfigured: () => true,
+        async sendAdminEmail(payload) {
+          state.sentAdminEmails.push(payload);
+        },
         async sendPasswordResetEmail(payload) {
           state.sentPasswordResetEmails.push(payload);
         },
@@ -2582,16 +2762,83 @@ describe("hotel booking API", () => {
     assert.equal(res.response.status, 403);
   });
 
-  it("rejects payment creation for a booking that is not pending", async () => {
-    pushPendingBooking(1005, { status: "confirmed" });
+  it("turns a cancelled paid booking into a refund the admin is told about and settles by hand", async () => {
+    pushPendingBooking(1950, { status: "confirmed", payment_status: "paid", total_price: 500 });
+    state.sentAdminEmails.length = 0;
 
-    const res = await request(baseUrl, "/api/payments/bookings/1005", {
-      method: "POST",
+    const cancelled = await request(baseUrl, "/api/bookings/1950/cancel", {
+      method: "PATCH",
       headers: authHeader(userToken),
-      body: JSON.stringify({ provider: "vnpay" }),
     });
+    assert.equal(cancelled.response.status, 200);
+    assert.equal(cancelled.body.booking.status, "cancelled");
+    assert.equal(cancelled.body.booking.payment_status, "refund_pending");
+    assert.equal(cancelled.body.booking.refund_reason, "cancelled_by_guest");
 
-    assert.equal(res.response.status, 400);
+    // The alert is sent after the response; give it a moment.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.equal(state.sentAdminEmails.length, 1);
+    assert.deepEqual(state.sentAdminEmails[0].to, ["admin@example.com"]);
+    assert.match(state.sentAdminEmails[0].subject, /#1950/);
+
+    const byGuest = await request(baseUrl, "/api/bookings/1950/refund", {
+      method: "PATCH",
+      headers: authHeader(userToken),
+    });
+    assert.equal(byGuest.response.status, 403);
+
+    const refunded = await request(baseUrl, "/api/bookings/1950/refund", {
+      method: "PATCH",
+      headers: authHeader(adminToken),
+    });
+    assert.equal(refunded.response.status, 200);
+    assert.equal(refunded.body.booking.payment_status, "refunded");
+  });
+
+  it("lets an admin record a payment taken at the desk", async () => {
+    pushPendingBooking(1951);
+
+    const byGuest = await request(baseUrl, "/api/bookings/1951/mark-paid", {
+      method: "PATCH",
+      headers: authHeader(userToken),
+    });
+    assert.equal(byGuest.response.status, 403);
+
+    const paid = await request(baseUrl, "/api/bookings/1951/mark-paid", {
+      method: "PATCH",
+      headers: authHeader(adminToken),
+    });
+    assert.equal(paid.response.status, 200);
+    assert.equal(paid.body.booking.status, "confirmed");
+    assert.equal(paid.body.booking.payment_status, "paid");
+
+    const twice = await request(baseUrl, "/api/bookings/1951/mark-paid", {
+      method: "PATCH",
+      headers: authHeader(adminToken),
+    });
+    assert.equal(twice.response.status, 400);
+  });
+
+  it("only takes payment for bookings that still owe money", async () => {
+    const pay = (id) =>
+      request(baseUrl, `/api/payments/bookings/${id}`, {
+        method: "POST",
+        headers: authHeader(userToken),
+        body: JSON.stringify({ provider: "vnpay" }),
+      });
+
+    pushPendingBooking(1005, { status: "cancelled" });
+    assert.equal((await pay(1005)).response.status, 400);
+
+    pushPendingBooking(1905, { status: "confirmed", payment_status: "paid" });
+    assert.equal((await pay(1905)).response.status, 400);
+
+    pushPendingBooking(1906, { total_price: 0 });
+    assert.equal((await pay(1906)).response.status, 400);
+
+    // Confirmed by the admin before any payment: the guest can still pay online.
+    pushPendingBooking(1907, { status: "confirmed", payment_status: "unpaid" });
+    assert.equal((await pay(1907)).response.status, 201);
   });
 
   it("rejects an unknown payment provider", async () => {

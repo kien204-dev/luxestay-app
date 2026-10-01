@@ -11,6 +11,7 @@ const { initSocket } = require("./src/services/socket");
 const { apiRateLimit } = require("./src/middleware/rateLimit");
 const { getEnvProblems } = require("./src/config/env");
 const pool = require("./src/db/db");
+const { runBookingMaintenance } = require("./src/controller/bookingController");
 
 const app = express();
 
@@ -120,6 +121,21 @@ async function start() {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
   });
   initSocket(httpServer);
+  startBookingMaintenanceJob();
+}
+
+const BOOKING_MAINTENANCE_INTERVAL_MS = 60 * 1000;
+
+// Expires unpaid bookings and completes finished stays on a timer, so state
+// moves on even when nobody is using the site.
+function startBookingMaintenanceJob() {
+  const tick = () =>
+    runBookingMaintenance({ force: true }).catch((err) =>
+      console.error("BOOKING MAINTENANCE ERROR:", err.message)
+    );
+
+  tick();
+  setInterval(tick, BOOKING_MAINTENANCE_INTERVAL_MS).unref();
 }
 
 if (require.main === module) {

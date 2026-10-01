@@ -1,6 +1,6 @@
 const pool = require("../db/db.js");
 const { ROOM_UPLOAD_DIR } = require("../middleware/roomImageUpload.js");
-const { autoExpirePendingBookings } = require("./bookingController.js");
+const { autoExpirePendingBookings, syncRoomStatus } = require("./bookingController.js");
 const { deleteLocalUploadFile } = require("../utils/localUploads.js");
 const { findTextLimitError } = require("../utils/textLimits");
 
@@ -362,17 +362,18 @@ exports.updateRoom = async (req, res) => {
       });
     }
 
-    const roomStatus = status || "available";
-    if (!ROOM_STATUSES.has(roomStatus)) {
+    if (status && !ROOM_STATUSES.has(status)) {
       return res.status(400).json({ message: "Room status is invalid" });
     }
 
-    const existing = await pool.query("SELECT image FROM rooms WHERE id = $1", [id]);
+    const existing = await pool.query("SELECT image, status FROM rooms WHERE id = $1", [id]);
     if (existing.rows.length === 0) {
       return res.status(404).json({
         message: "Room not found",
       });
     }
+    // Leaving status out keeps whatever the room had.
+    const roomStatus = status || existing.rows[0].status;
     const previousImage = existing.rows[0].image;
 
     const result = await pool.query(
@@ -410,6 +411,15 @@ exports.updateRoom = async (req, res) => {
     const newImage = result.rows[0].image;
     if (previousImage && previousImage !== newImage) {
       deleteLocalRoomImageFile(previousImage, { roomId: id });
+    }
+
+    // "available" and "booked" are derived from the room's bookings, so the
+    // only thing an admin really sets here is maintenance on/off. Anything
+    // else is recomputed rather than trusted.
+    if (roomStatus !== "maintenance") {
+      await syncRoomStatus(pool, id);
+      const synced = await pool.query("SELECT status FROM rooms WHERE id = $1", [id]);
+      result.rows[0].status = synced.rows[0]?.status ?? result.rows[0].status;
     }
 
     res.json({
