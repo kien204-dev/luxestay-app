@@ -12,6 +12,7 @@
     "db:migrate": "node src/db/migrate.js",
     "db:seed": "node src/db/seed.js",
     "db:reset": "node src/db/reset.js",
+    "uploads:prune": "node src/scripts/prune-uploads.js",
     "test:integration": "node --test --test-concurrency=1 \"test-integration/*.test.js\""
   },
   "dependencies": {
