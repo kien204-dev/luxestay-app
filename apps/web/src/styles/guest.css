@@ -54,6 +54,10 @@
 .g-btn--gold { background: var(--g-gold); color: #1a1300; }
 .g-btn--outline { background: transparent; color: var(--g-navy); border-color: var(--g-navy); }
 .g-btn--block { width: 100%; }
+/* Links styled as buttons: keep the button colour, not the inherited link colour. */
+.guest a.g-btn--primary { color: #fff; }
+.guest a.g-btn--gold { color: #1a1300; }
+.guest a.g-btn--outline { color: var(--g-navy); }
 .g-btn--small { padding: 8px 14px; font-size: 13px; }
 
 /* ----------------------------------------------------------------- forms */
