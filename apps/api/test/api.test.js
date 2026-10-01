@@ -464,6 +464,21 @@ function makeFakePool(state) {
       };
     }
 
+    if (text.startsWith("select count(*)::int as total, count(*) filter (where status = 'pending')::int as pending")) {
+      return {
+        rows: [
+          {
+            total: state.bookings.length,
+            pending: state.bookings.filter((item) => item.status === "pending").length,
+            refund_pending: state.bookings.filter((item) => item.payment_status === "refund_pending").length,
+            revenue: state.bookings
+              .filter((item) => item.payment_status === "paid")
+              .reduce((sum, item) => sum + Number(item.total_price), 0),
+          },
+        ],
+      };
+    }
+
     if (text.startsWith("select * from property_settings where id = 1")) {
       return { rows: state.propertySettings ? [state.propertySettings] : [] };
     }
@@ -3287,6 +3302,25 @@ describe("hotel booking API", () => {
     assert.equal((await download(1971, userToken)).response.status, 403);
     assert.equal((await download(1970, null)).response.status, 401);
     assert.equal((await download(999999, adminToken)).response.status, 404);
+  });
+
+  it("gives admins order totals without loading every order", async () => {
+    const forbidden = await request(baseUrl, "/api/bookings/summary", { headers: authHeader(userToken) });
+    assert.equal(forbidden.response.status, 403);
+
+    const summary = await request(baseUrl, "/api/bookings/summary", { headers: authHeader(adminToken) });
+    assert.equal(summary.response.status, 200);
+    assert.equal(summary.body.total, state.bookings.length);
+    assert.equal(summary.body.pending, state.bookings.filter((b) => b.status === "pending").length);
+    assert.equal(
+      summary.body.revenue,
+      state.bookings.filter((b) => b.payment_status === "paid").reduce((sum, b) => sum + Number(b.total_price), 0)
+    );
+
+    // The list itself comes a page at a time.
+    const page = await request(baseUrl, "/api/bookings?page=1&limit=5", { headers: authHeader(adminToken) });
+    assert.equal(page.body.data.length, Math.min(5, state.bookings.length));
+    assert.equal(page.body.total, state.bookings.length);
   });
 
   it("lists destinations from real room data, without login", async () => {

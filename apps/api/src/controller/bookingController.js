@@ -351,6 +351,34 @@ exports.getBookings = async (req, res) => {
   }
 };
 
+// Admin: the headline numbers above the orders list, computed over every
+// booking so the list itself can be loaded one page at a time.
+exports.getBookingSummary = async (req, res) => {
+  try {
+    await runBookingMaintenance();
+
+    const result = await pool.query(
+      `SELECT
+         COUNT(*)::int AS total,
+         COUNT(*) FILTER (WHERE status = 'pending')::int AS pending,
+         COUNT(*) FILTER (WHERE payment_status = 'refund_pending')::int AS refund_pending,
+         COALESCE(SUM(total_price) FILTER (WHERE payment_status = 'paid'), 0)::numeric AS revenue
+       FROM bookings`
+    );
+    const row = result.rows[0];
+
+    res.json({
+      total: row.total,
+      pending: row.pending,
+      refundPending: row.refund_pending,
+      revenue: Number(row.revenue) || 0,
+    });
+  } catch (err) {
+    console.error("GET BOOKING SUMMARY ERROR:", err);
+    res.status(500).json({ message: "Lỗi server khi lấy số liệu đơn đặt phòng" });
+  }
+};
+
 // What the guest-facing pages need to explain the rules before asking the
 // server to apply them.
 exports.getBookingPolicy = async (req, res) => {
