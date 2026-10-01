@@ -53,16 +53,23 @@ Tuỳ chọn:
 | `ALLOWED_ORIGINS` | trống | Địa chỉ web bổ sung, phân cách bằng dấu phẩy |
 | `TRUST_PROXY_HOPS` | `0` (Docker: `1`) | Số proxy đứng trước API |
 | `API_RATE_LIMIT_PER_MINUTE` | `300` | Số request mỗi phút từ một địa chỉ IP |
-| `APP_NAME` | `LuxeStay` | Tên trong email và báo cáo |
+| `APP_NAME` | `LuxeStay` | Tên cơ sở lưu trú (xem [Thông tin cơ sở lưu trú](#thông-tin-cơ-sở-lưu-trú)) |
+| `CONTACT_PHONE`, `CONTACT_EMAIL`, `CONTACT_ADDRESS` | trống | Liên hệ trên trang khách, email và PDF |
+| `CHECK_IN_TIME`, `CHECK_OUT_TIME` | `14:00`, `12:00` | Giờ nhận và trả phòng, dạng `HH:MM` |
+| `DEFAULT_LANGUAGE` | `vi` | Ngôn ngữ email khi không biết ngôn ngữ của khách (`vi` hoặc `en`) |
 | `APP_TIMEZONE` | `Asia/Ho_Chi_Minh` | Múi giờ của cơ sở lưu trú |
 | `PENDING_BOOKING_TTL_MINUTES` | `30` | Thời gian giữ chỗ cho booking chưa thanh toán |
-| `FREE_CANCELLATION_DAYS` | `3` | Hạn khách tự hủy booking đã thanh toán |
+| `FREE_CANCELLATION_DAYS` | `3` | Hạn khách tự hủy booking đã thanh toán (trang quản trị ghi đè được) |
 | `AUTH_TOKEN_TTL`, `AUTH_COOKIE_MAX_AGE_MS` | `1d`, 86400000 | Thời hạn phiên đăng nhập |
 | `AUTH_COOKIE_NAME` | `luxestay_session` | Tên cookie |
 | `AUTH_COOKIE_SECURE` | `true` khi `NODE_ENV=production` (Docker: `false`) | Cookie chỉ gửi qua HTTPS |
 | `AUTH_COOKIE_SAME_SITE` | `none` khi production, ngược lại `lax` (Docker: `lax`) | `none` chỉ cần khi web và API ở hai tên miền khác nhau |
 | `RESET_TOKEN_TTL_MINUTES` | `15` | Hạn link đặt lại mật khẩu |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | trống | Email. Thiếu thì tắt tính năng quên mật khẩu và email báo hoàn tiền. `SMTP_PASSWORD` cũng được chấp nhận thay `SMTP_PASS` |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | trống | Email. Bật khi có `SMTP_HOST`, `SMTP_PORT` và `SMTP_FROM`; `SMTP_USER`/`SMTP_PASS` chỉ cần khi máy chủ thư yêu cầu. Thiếu thì không gửi email nào (đặt phòng vẫn chạy). `SMTP_PASSWORD` cũng được chấp nhận thay `SMTP_PASS` |
+| `STORAGE_DRIVER` | `local` | Nơi lưu ảnh tải lên: `local` hoặc `s3` (xem [Lưu ảnh](#lưu-ảnh)) |
+| `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_URL` | trống | Bắt buộc khi `STORAGE_DRIVER=s3` |
+| `S3_ENDPOINT`, `S3_FORCE_PATH_STYLE` | trống | Cho dịch vụ không phải AWS (Cloudflare R2, MinIO...) |
+| `MAILPIT_PORT` | `8025` | Chỉ Docker: cổng của hộp thư thử (profile `mail`) |
 | `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET` | trống | Bật VNPay khi có cả hai |
 | `VNPAY_PAY_URL` | sandbox | Địa chỉ cổng VNPay |
 | `VNPAY_RETURN_URL` | `<địa chỉ web>/payment/result` | Chỉ đặt khi muốn trả khách về nơi khác |
@@ -79,10 +86,44 @@ Tuỳ chọn:
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:3001/api` (Docker: `/api`) | Địa chỉ API |
-| `VITE_APP_NAME` | `LuxeStay` | Tên hiển thị, tiêu đề tab và chữ cái trên favicon (Docker: lấy từ `APP_NAME`) |
-| `VITE_DEFAULT_LANGUAGE` | `vi` | Ngôn ngữ khách thấy ở lần đầu (`vi` hoặc `en`); cũng là `lang` của trang |
-| `VITE_CONTACT_PHONE`, `VITE_CONTACT_EMAIL`, `VITE_CONTACT_ADDRESS` | trống | Thông tin liên hệ ở chân trang; để trống thì không hiện |
+| `VITE_APP_NAME` | `LuxeStay` | Tên hiển thị, tiêu đề tab và chữ cái trên favicon cho tới khi API trả lời (Docker: lấy từ `APP_NAME`) |
+| `VITE_DEFAULT_LANGUAGE` | `vi` | Ngôn ngữ khách thấy ở lần đầu (`vi` hoặc `en`); cũng là `lang` của trang (Docker: lấy từ `DEFAULT_LANGUAGE`) |
+| `VITE_CONTACT_PHONE`, `VITE_CONTACT_EMAIL`, `VITE_CONTACT_ADDRESS` | trống | Liên hệ ở chân trang cho tới khi API trả lời (Docker: lấy từ `CONTACT_*`) |
 | `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` | trống | Đăng nhập Google. Thiếu thì nút bị tắt |
+
+## Thông tin cơ sở lưu trú
+
+Tên, logo, số điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí được sửa ở trang quản trị **Cơ sở lưu trú** (`/admin/property`) và lưu trong cơ sở dữ liệu. Thứ tự ưu tiên cho từng mục:
+
+1. giá trị đã lưu ở trang quản trị;
+2. biến môi trường (`APP_NAME`, `CONTACT_*`, `CHECK_IN_TIME`, `CHECK_OUT_TIME`, `FREE_CANCELLATION_DAYS`);
+3. giá trị mặc định.
+
+Xoá trắng một ô ở trang quản trị thì mục đó quay về bước 2. Trang khách, email và file PDF xác nhận đều đọc từ đây, nên đổi xong là có hiệu lực, không cần build lại (API giữ bản đã đọc tối đa 30 giây; lưu từ trang quản trị thì cập nhật ngay). Logo chỉ đặt được ở trang quản trị.
+
+`GET /api/settings/public` chỉ trả về tám mục trên. Cấu hình SMTP, khoá thanh toán và mọi biến khác không đi qua đường này.
+
+## Email
+
+Khi có `SMTP_HOST`, `SMTP_PORT` và `SMTP_FROM`, khách nhận thư lúc đặt phòng (đã nhận yêu cầu), lúc booking được xác nhận (thanh toán thành công, hoặc quản trị xác nhận) và lúc booking bị hủy. Thư viết bằng ngôn ngữ khách đang dùng khi đặt (`vi` hoặc `en`), tên người gửi là tên cơ sở lưu trú. Thư được gửi sau khi booking đã lưu xong: gửi lỗi chỉ ghi một dòng `BOOKING EMAIL FAILED` vào log, không làm hỏng việc đặt phòng.
+
+Thử mà không cần hộp thư thật (Docker):
+
+```bash
+# .env:  SMTP_HOST=mailpit   SMTP_PORT=1025   SMTP_FROM=no-reply@example.com
+docker compose --profile mail up -d --build
+# Mọi thư ứng dụng gửi hiện ở http://localhost:8025
+```
+
+## Lưu ảnh
+
+Mặc định (`STORAGE_DRIVER=local`) ảnh phòng, ảnh đại diện và logo nằm trong `apps/api/uploads` (Docker: volume `uploads`).
+
+`STORAGE_DRIVER=s3` đưa ảnh mới lên một bucket tương thích S3 (AWS S3, Cloudflare R2, MinIO...). Cần `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` và `S3_PUBLIC_URL` (địa chỉ công khai của bucket, không có dấu `/` cuối); thêm `S3_ENDPOINT` với dịch vụ không phải AWS và `S3_FORCE_PATH_STYLE=true` với MinIO. Thiếu biến nào API dừng ngay khi khởi động và nêu tên biến đó. Bucket phải cho phép đọc công khai, vì trình duyệt tải ảnh thẳng từ `S3_PUBLIC_URL`.
+
+Đổi driver không tự chuyển ảnh cũ: ảnh đã lưu trên đĩa vẫn được phục vụ từ `/uploads` như trước.
+
+Ảnh tải lên rồi không dùng (tải ảnh phòng nhưng không lưu phòng) còn nằm lại trên đĩa. `npm run uploads:prune` liệt kê các file không còn được cơ sở dữ liệu nhắc tới và cũ hơn một ngày; `npm run uploads:prune -- --delete` xoá chúng. Docker: `docker compose exec api npm run uploads:prune`. Lệnh này chỉ chạy với `STORAGE_DRIVER=local`; với S3 hãy dùng lifecycle rule của bucket.
 
 ## Địa chỉ web, origin và cookie
 

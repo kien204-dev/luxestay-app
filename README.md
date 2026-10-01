@@ -34,8 +34,10 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 | `/` | Trang chủ: tìm phòng theo ngày, điểm đến, phòng nổi bật | Mọi người |
 | `/rooms` | Danh sách phòng, lọc theo địa điểm, ngày, số khách; phân trang | Mọi người |
 | `/rooms/:id` | Chi tiết phòng, lịch phòng trống, đặt phòng và thanh toán | Mọi người (đặt phòng cần đăng nhập) |
-| `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá | Đã đăng nhập |
-| `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị | Quản trị |
+| `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá, tải PDF xác nhận | Đã đăng nhập |
+| `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |
+| `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị. Orders có đặt phòng tại quầy, ghi nhận thu tiền tại quầy và PDF xác nhận | Quản trị |
+| `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
 
 Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
 
@@ -70,10 +72,11 @@ API sẽ dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt
 | `npm start` | Chạy API ở chế độ thường |
 | `npm run lint` | ESLint cho cả hai app |
 | `npm test` | Test đơn vị của API (không cần cơ sở dữ liệu) |
-| `npm run test:integration` | Test tích hợp trên PostgreSQL thật; tự dựng và xoá một container tạm (cần Docker) |
+| `npm run test:integration` | Test tích hợp trên PostgreSQL thật và một máy chủ S3 giả lập; tự dựng và xoá các container tạm (cần Docker) |
 | `npm run db:migrate` | Chạy các migration chưa áp dụng |
 | `npm run db:seed` | Nạp dữ liệu mẫu (chạy lại không tạo trùng). Thêm `-- --all-rooms` để nạp khoảng 390 phòng |
 | `npm run db:reset` | Xoá toàn bộ dữ liệu rồi migrate + seed lại. Chỉ chạy với cơ sở dữ liệu cục bộ, trừ khi đặt `ALLOW_DB_RESET=true` |
+| `npm run uploads:prune` | Liệt kê ảnh tải lên không còn được dùng; thêm `-- --delete` để xoá |
 
 ## Cấu hình
 
@@ -108,14 +111,15 @@ Các tính năng dưới đây tắt cho tới khi bạn cấu hình; phần cò
 
 | Tính năng | Cần cấu hình | Ghi chú |
 |---|---|---|
-| Email quên mật khẩu | `SMTP_*` | Gmail: dùng mật khẩu ứng dụng |
+| Email (xác nhận/hủy đặt phòng, quên mật khẩu, báo hoàn tiền) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` (+ `SMTP_USER`, `SMTP_PASS` nếu cần) | Gmail: dùng mật khẩu ứng dụng. Thử bằng Mailpit: `docker compose --profile mail up` |
+| Lưu ảnh trên S3/R2/MinIO | `STORAGE_DRIVER=s3` và `S3_*` | Mặc định lưu trên đĩa của API |
 | Thanh toán VNPay | `VNPAY_*` | VNPay gọi về `GET /api/payments/vnpay/ipn`, địa chỉ này phải truy cập được từ Internet |
 | Thanh toán MoMo (**beta**) | `MOMO_ENABLED=true` và `MOMO_*` | Chưa được kiểm chứng với tài khoản MoMo thật. Nút MoMo chỉ hiện khi bật |
 | Đăng nhập Google | `FIREBASE_*` ở API và `VITE_FIREBASE_*` ở web | Cần một dự án Firebase riêng |
 
 ### Đổi tên thương hiệu
 
-Đặt `APP_NAME` (Docker), hoặc `APP_NAME` trong `apps/api/.env` và `VITE_APP_NAME` trong `apps/web/.env`. Tên này được dùng ở giao diện, tiêu đề tab, favicon (chữ cái đầu), email và báo cáo xuất ra. Ngôn ngữ mặc định và thông tin liên hệ ở chân trang: `VITE_DEFAULT_LANGUAGE`, `VITE_CONTACT_*`. Màu của trang khách nằm ở đầu file `apps/web/src/styles/guest.css`.
+Vào **Cơ sở lưu trú** (`/admin/property`) trong phần quản trị: tên, logo, điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí. Lưu xong là trang khách, email và PDF xác nhận dùng ngay, không cần build lại. Biến môi trường (`APP_NAME`, `CONTACT_*`, `CHECK_IN_TIME`, `CHECK_OUT_TIME`, `FREE_CANCELLATION_DAYS`) chỉ là giá trị khởi đầu cho những mục chưa lưu; xem [docs/configuration.md](docs/configuration.md#thông-tin-cơ-sở-lưu-trú). Ngôn ngữ mặc định: `DEFAULT_LANGUAGE`. Màu của trang khách nằm ở đầu file `apps/web/src/styles/guest.css`.
 
 ### Ảnh phòng mẫu
 
@@ -162,7 +166,8 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, ảnh phòng | Quản trị |
 | Đặt phòng | `GET/POST /bookings`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel` | Chủ booking hoặc quản trị |
 | Đặt phòng | `GET /bookings/policy` | Công khai |
-| Đặt phòng | `PUT/DELETE /bookings/:id`, `GET /bookings/calendar`, `PATCH /bookings/:id/mark-paid`, `PATCH /bookings/:id/refund` | Quản trị |
+| Đặt phòng | `GET /bookings/:id/receipt` (PDF xác nhận, `?lang=vi\|en`) | Chủ booking hoặc quản trị |
+| Đặt phòng | `PUT/DELETE /bookings/:id`, `GET /bookings/calendar`, `GET /bookings/summary`, `PATCH /bookings/:id/mark-paid`, `PATCH /bookings/:id/refund`; `POST /bookings` kèm `guest_name` = đặt tại quầy | Quản trị |
 | Thanh toán | `GET /payments/providers` | Công khai |
 | Thanh toán | `POST/GET /payments/bookings/:id`, `GET /payments/transactions/:ref` | Chủ booking hoặc quản trị |
 | Thanh toán | `GET /payments/vnpay/ipn`, `POST /payments/momo/ipn` | Cổng thanh toán (xác thực bằng chữ ký) |
@@ -171,6 +176,8 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Đánh giá | `POST /rooms/:id/reviews` | Khách đã ở xong |
 | Đánh giá | `GET /reviews`, `PATCH /reviews/:id/hide` | Quản trị |
 | Báo cáo | `GET /dashboard/stats`, `/dashboard/analytics`, `/dashboard/export` | Quản trị |
+| Cơ sở lưu trú | `GET /settings/public` | Công khai |
+| Cơ sở lưu trú | `GET/PUT /settings`, `POST/DELETE /settings/logo` | Quản trị |
 
 ## Kiểm thử
 
@@ -179,7 +186,7 @@ npm run lint
 npm test
 ```
 
-`npm test` chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên nhanh và không cần PostgreSQL. `npm run test:integration` chạy ứng dụng thật trên PostgreSQL thật (trong Docker) để kiểm chứng những gì bản giả lập không thấy được: khoá dòng khi đặt phòng đồng thời, ràng buộc chống trùng lịch, luồng hoàn tiền và múi giờ.
+`npm test` chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên nhanh và không cần PostgreSQL. `npm run test:integration` chạy ứng dụng thật trên PostgreSQL thật (trong Docker) để kiểm chứng những gì bản giả lập không thấy được: khoá dòng khi đặt phòng đồng thời, ràng buộc chống trùng lịch, luồng hoàn tiền và múi giờ, cùng driver lưu ảnh S3 (với máy chủ giả lập S3Mock).
 
 ## Triển khai
 

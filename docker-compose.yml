@@ -59,6 +59,11 @@ services:
       AUTH_COOKIE_SAME_SITE: ${AUTH_COOKIE_SAME_SITE:-lax}
       SEED_ON_START: ${SEED_ON_START:-true}
       APP_NAME: ${APP_NAME:-LuxeStay}
+      # One name in .env for both halves; the older VITE_* names still work.
+      DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-${VITE_DEFAULT_LANGUAGE:-vi}}
+      CONTACT_PHONE: ${CONTACT_PHONE:-${VITE_CONTACT_PHONE:-}}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-${VITE_CONTACT_EMAIL:-}}
+      CONTACT_ADDRESS: ${CONTACT_ADDRESS:-${VITE_CONTACT_ADDRESS:-}}
     volumes:
       - uploads:/app/apps/api/uploads
       - api-data:/data
@@ -84,10 +89,12 @@ services:
       args:
         VITE_API_URL: /api
         VITE_APP_NAME: ${APP_NAME:-LuxeStay}
-        VITE_DEFAULT_LANGUAGE: ${VITE_DEFAULT_LANGUAGE:-vi}
-        VITE_CONTACT_PHONE: ${VITE_CONTACT_PHONE:-}
-        VITE_CONTACT_EMAIL: ${VITE_CONTACT_EMAIL:-}
-        VITE_CONTACT_ADDRESS: ${VITE_CONTACT_ADDRESS:-}
+        VITE_DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-${VITE_DEFAULT_LANGUAGE:-vi}}
+        # Only what the page shows until the API answers; the live values come
+        # from /api/settings/public.
+        VITE_CONTACT_PHONE: ${CONTACT_PHONE:-${VITE_CONTACT_PHONE:-}}
+        VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-${VITE_CONTACT_EMAIL:-}}
+        VITE_CONTACT_ADDRESS: ${CONTACT_ADDRESS:-${VITE_CONTACT_ADDRESS:-}}
         VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
         VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-}
         VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-}

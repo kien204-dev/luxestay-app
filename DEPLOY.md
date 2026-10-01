@@ -54,7 +54,7 @@ Cập nhật phiên bản mới: lấy mã nguồn mới rồi chạy lại `doc
 
 > Phần cấu hình Render và Vercel dưới đây được viết theo bố cục workspaces mới và **chưa được chạy thử** trên hai nền tảng này. Hãy kiểm tra ở lần triển khai đầu.
 
-> Ảnh tải lên được lưu trên đĩa của API. Đĩa của Render (gói không có persistent disk) bị xoá sau mỗi lần triển khai, nên ảnh phòng sẽ mất. Cần gắn persistent disk vào `apps/api/uploads`, hoặc dùng Cách 1.
+> Ảnh tải lên mặc định được lưu trên đĩa của API. Đĩa của Render (gói không có persistent disk) bị xoá sau mỗi lần triển khai, nên ảnh phòng sẽ mất. Chọn một trong ba: đặt `STORAGE_DRIVER=s3` với một bucket S3/R2 (xem [docs/configuration.md](docs/configuration.md#lưu-ảnh)), gắn persistent disk vào `apps/api/uploads`, hoặc dùng Cách 1.
 
 ### 1. Cơ sở dữ liệu trên Neon
 
@@ -135,6 +135,7 @@ Cả hai cổng gọi IPN từ máy chủ của họ, nên địa chỉ API ph�
 - [ ] `CLIENT_URL` / `PUBLIC_URL` khớp chính xác địa chỉ web.
 - [ ] `TRUST_PROXY_HOPS` bằng đúng số lớp proxy đứng trước API.
 - [ ] Đã thử: đăng ký, đăng nhập, đặt phòng, huỷ phòng, tải ảnh phòng, xuất báo cáo.
-- [ ] Nếu dùng email: thư quên mật khẩu tới được hộp thư thật.
+- [ ] Đã điền thông tin ở **Cơ sở lưu trú** (`/admin/property`): tên, logo, liên hệ, giờ nhận/trả phòng.
+- [ ] Nếu dùng email: thư xác nhận đặt phòng và thư quên mật khẩu tới được hộp thư thật.
 - [ ] Nếu dùng VNPay: một giao dịch thử đi trọn vòng và booking chuyển sang "đã xác nhận".
 - [ ] Có lịch sao lưu cơ sở dữ liệu và thư mục ảnh.
