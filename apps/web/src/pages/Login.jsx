@@ -13,6 +13,7 @@ import {
 } from "../utils/googleAuthError";
 import { useToast } from "../context/ToastContext";
 import { APP_NAME } from "../config/brand";
+import { postLoginPath } from "../utils/authRedirect";
 
 function Login() {
 
@@ -40,15 +41,7 @@ useEffect(() => {
 
   // ✅ Hàm phân quyền dùng chung
   const redirectByRole = (user) => {
-    if (user.must_change_password) {
-      navigate("/settings");
-      return;
-    }
-    if (user.role === "admin") {
-      navigate("/dashboard");
-    } else {
-      navigate("/booking");
-    }
+    navigate(postLoginPath(user, window.location.search), { replace: true });
   };
 
   const handleGoogleLogin = async () => {
@@ -271,7 +264,7 @@ useEffect(() => {
 
           <p className="mt-6 text-center text-gray-400 text-sm">
             {t("login.noAccount")}{" "}
-            <Link to="/register" className="text-[#9fa7ff] hover:underline">
+            <Link to={`/register${location.search}`} className="text-[#9fa7ff] hover:underline">
               {t("login.createAccount")}
             </Link>
           </p>

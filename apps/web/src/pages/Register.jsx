@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 import { isStrongPassword } from "../utils/password";
+import { postLoginPath } from "../utils/authRedirect";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider, isFirebaseConfigured } from "../firebase";
 import { useNavigate, Link } from "react-router-dom";
@@ -22,15 +23,7 @@ export default function Register() {
     const navigate = useNavigate();
 
     const redirectByRole = (user) => {
-        if (user.must_change_password) {
-            navigate("/settings");
-            return;
-        }
-        if (user.role === "admin") {
-            navigate("/dashboard");
-        } else {
-            navigate("/booking");
-        }
+      navigate(postLoginPath(user, window.location.search), { replace: true });
     };
 
     const colors = { onSurfaceVariant: "#a3aac4" };
@@ -129,7 +122,7 @@ const handleChange = (e) => {
                 password: form.password,
             });
 
-            navigate("/login", {
+            navigate(`/login${window.location.search}`, {
                 state: {
                     success: t("errors.registerSuccess")
                 }
@@ -236,7 +229,7 @@ const handleChange = (e) => {
 
                     <p className="mt-6 text-center text-gray-400 text-sm">
                         {t("register.alreadyHaveAccount")}{" "}
-                        <Link to="/login" className="text-[#9fa7ff] hover:underline">{t("register.signIn")}</Link>
+                        <Link to={`/login${window.location.search}`} className="text-[#9fa7ff] hover:underline">{t("register.signIn")}</Link>
                     </p>
 
                 </div>
