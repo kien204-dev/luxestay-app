@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAsyncData } from "../utils/useAsyncData";
 import {
   getBookings,
   updateBooking,
@@ -15,6 +16,8 @@ import ConfirmModal from "../components/ConfirmModal";
 import StarRating from "../components/StarRating";
 
 const REVIEWS_PAGE_SIZE = 20;
+// One shared empty list, so "no data yet" does not look like new data to useMemo.
+const EMPTY_LIST = [];
 
 const STATUS_TRANSITIONS = {
   pending: ["confirmed", "cancelled"],
@@ -166,44 +169,33 @@ function Orders() {
   const toast = useToast();
   const isMobile = useIsMobile();
   const { clearNewBookingCount } = useBookingNotifications();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const bookingsQuery = useAsyncData("orders", () => getBookings().then((res) => res.data));
+  const bookings = bookingsQuery.data || EMPTY_LIST;
+  const loading = bookingsQuery.loading;
+  const error = bookingsQuery.error ? bookingsQuery.error.response?.data?.message || "Không tải được danh sách đơn đặt phòng" : "";
+  const loadBookings = bookingsQuery.reload;
+  // Accepts a new list or an updater, like a state setter.
+  const setBookings = (update) =>
+    bookingsQuery.setData((current) => (typeof update === "function" ? update(current || []) : update));
   const [updatingId, setUpdatingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [bookingToDelete, setBookingToDelete] = useState(null);
   const [paymentAction, setPaymentAction] = useState(null);
   const [paymentBusyId, setPaymentBusyId] = useState(null);
 
-  const [reviews, setReviews] = useState([]);
-  const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [reviewsError, setReviewsError] = useState("");
   const [reviewsPage, setReviewsPage] = useState(1);
-  const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
+  const reviewsQuery = useAsyncData(`reviews:${reviewsPage}`, () =>
+    listReviews({ page: reviewsPage, limit: REVIEWS_PAGE_SIZE })
+  );
+  const reviews = reviewsQuery.data?.data || EMPTY_LIST;
+  const reviewsLoading = reviewsQuery.loading;
+  const reviewsError = reviewsQuery.error ? reviewsQuery.error.response?.data?.message || "Không tải được danh sách đánh giá" : "";
+  const reviewsTotalPages = reviewsQuery.data?.pagination?.totalPages ?? 1;
+  const setReviews = (update) =>
+    reviewsQuery.setData((current) => (current ? { ...current, data: update(current.data) } : current));
   const [roomNameFilter, setRoomNameFilter] = useState("");
   const [togglingReviewId, setTogglingReviewId] = useState(null);
   const [reviewToToggle, setReviewToToggle] = useState(null);
-
-  const loadReviews = async (targetPage) => {
-    try {
-      setReviewsLoading(true);
-      setReviewsError("");
-      const res = await listReviews({ page: targetPage, limit: REVIEWS_PAGE_SIZE });
-      setReviews(res.data);
-      setReviewsPage(res.pagination.page);
-      setReviewsTotalPages(res.pagination.totalPages);
-    } catch (err) {
-      setReviewsError(
-        err.response?.data?.message || "Không tải được danh sách đánh giá"
-      );
-    } finally {
-      setReviewsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadReviews(1);
-  }, []);
 
   // Simplest "seen" model this feature commits to: opening Orders at all
   // counts as catching up, no per-booking read tracking.
@@ -238,26 +230,6 @@ function Orders() {
       setTogglingReviewId(null);
     }
   };
-
-  const loadBookings = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const res = await getBookings();
-      setBookings(res.data);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Không tải được danh sách đơn đặt phòng"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadBookings();
-  }, []);
 
   const cards = useMemo(() => {
     const revenue = bookings
@@ -773,7 +745,7 @@ function Orders() {
             }}
           >
             <button
-              onClick={() => loadReviews(reviewsPage - 1)}
+              onClick={() => setReviewsPage(reviewsPage - 1)}
               disabled={reviewsPage <= 1}
               style={{
                 padding: "8px 16px",
@@ -791,7 +763,7 @@ function Orders() {
               Trang {reviewsPage} / {reviewsTotalPages}
             </span>
             <button
-              onClick={() => loadReviews(reviewsPage + 1)}
+              onClick={() => setReviewsPage(reviewsPage + 1)}
               disabled={reviewsPage >= reviewsTotalPages}
               style={{
                 padding: "8px 16px",

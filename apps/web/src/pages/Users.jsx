@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useAsyncData } from "../utils/useAsyncData";
 import {
   createUser,
   deleteUser,
@@ -87,10 +88,10 @@ export default function Users() {
   const toast = useToast();
   const isMobile = useIsMobile();
 
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [pageError, setPageError] = useState("");
+  // Error from an action on the page (delete, lock), shown where a failed
+  // load would be.
+  const [actionError, setPageError] = useState("");
   const [modalError, setModalError] = useState("");
   const [editError, setEditError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
@@ -140,32 +141,26 @@ export default function Users() {
     return pages;
   };
 
-  const fetchUsers = useCallback(async () => {
+  const usersQuery = useAsyncData("users", async () => {
     try {
-      setLoading(true);
-      setPageError("");
-
       const data = await getUsers();
-      const rows = data.map((u) => buildUserRow(u));
-
-      setUsers(rows);
+      return data.map((u) => buildUserRow(u));
     } catch (err) {
-      setPageError(err.response?.data?.message || "Không tải được danh sách user");
-      if (err.response?.status === 401) {
-        toast.error("Bạn chưa đăng nhập hoặc token đã hết hạn");
-      } else if (err.response?.status === 403) {
+      if (err.response?.status === 403) {
         toast.error("Bạn không có quyền truy cập trang quản lý user");
-      } else {
+      } else if (err.response?.status !== 401) {
         toast.error(err.response?.data?.message || "Lỗi khi tải danh sách user");
       }
-    } finally {
-      setLoading(false);
+      throw err;
     }
-  }, [toast]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  });
+  const users = useMemo(() => usersQuery.data || [], [usersQuery.data]);
+  const loading = usersQuery.loading;
+  const pageError =
+    actionError ||
+    (usersQuery.error ? usersQuery.error.response?.data?.message || "Không tải được danh sách user" : "");
+  const fetchUsers = usersQuery.reload;
+  const setUsers = (update) => usersQuery.setData((current) => update(current || []));
 
   const handleAddUser = async () => {
     setModalError("");

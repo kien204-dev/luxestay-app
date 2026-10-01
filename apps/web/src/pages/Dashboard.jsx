@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useAsyncData } from "../utils/useAsyncData";
 import { useTranslation } from "react-i18next";
 import Icon from "../utils/icon";
 import RevenueChart from "../layout/components/chart/RevenueChart";
@@ -291,46 +292,42 @@ export default function Dashboard() {
   const lang = i18n.language;
   const rangeOptions = getRangeOptions(t);
   const rangeNote = getRangeNote(t);
-  const [stats, setStats] = useState(DEFAULT_STATS);
-  const [analytics, setAnalytics] = useState(DEFAULT_ANALYTICS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [range, setRange] = useState("year");
   const [exportingFormat, setExportingFormat] = useState(null);
   const toast = useToast();
 
-  const loadDashboard = async (targetRange, options = {}) => {
+  // Set by the Refresh button so that one reload reports its outcome in a
+  // toast; ordinary loads (first visit, changing the range) stay quiet.
+  const announceNextLoad = useRef(false);
+
+  const dashboardQuery = useAsyncData(`dashboard:${range}`, async () => {
+    const announce = announceNextLoad.current;
+    announceNextLoad.current = false;
+
     try {
-      setLoading(true);
-      setError("");
-
       const [statsData, analyticsData] = await Promise.all([
-        getDashboardStats(targetRange),
-        getDashboardAnalytics(targetRange),
+        getDashboardStats(range),
+        getDashboardAnalytics(range),
       ]);
-
-      setStats(normalizeStats(statsData));
-      setAnalytics(normalizeAnalytics(analyticsData));
-      if (options.announce) {
-        toast.success(t("errors.refreshed"));
-      }
+      if (announce) toast.success(t("errors.refreshed"));
+      return { stats: normalizeStats(statsData), analytics: normalizeAnalytics(analyticsData) };
     } catch (err) {
-      const message = err.response?.data?.message || t("errors.loadFailed");
-      setError(message);
-      setStats(DEFAULT_STATS);
-      setAnalytics(DEFAULT_ANALYTICS);
-      if (options.announce) {
-        toast.error(message);
-      }
-    } finally {
-      setLoading(false);
+      if (announce) toast.error(err.response?.data?.message || t("errors.loadFailed"));
+      throw err;
     }
-  };
+  });
 
-  useEffect(() => {
-    loadDashboard(range);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range]);
+  const loading = dashboardQuery.loading;
+  const error = dashboardQuery.error
+    ? dashboardQuery.error.response?.data?.message || t("errors.loadFailed")
+    : "";
+  const stats = dashboardQuery.data?.stats || DEFAULT_STATS;
+  const analytics = dashboardQuery.data?.analytics || DEFAULT_ANALYTICS;
+
+  const refreshDashboard = () => {
+    announceNextLoad.current = true;
+    dashboardQuery.reload();
+  };
 
   const handleExport = async (format) => {
     setExportingFormat(format);
@@ -550,7 +547,7 @@ export default function Dashboard() {
             </div>
 
             <button
-              onClick={() => loadDashboard(range, { announce: true })}
+              onClick={refreshDashboard}
               disabled={loading}
               style={{
                 padding: "8px 20px",

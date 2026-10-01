@@ -25,10 +25,6 @@ export default defineConfig([
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       'react-refresh/only-export-components': 'off',
-      // Every page loads its data with the classic fetch-in-useEffect pattern.
-      // Moving that to a data layer is tracked in docs/known-issues.md, so this
-      // rule stays off until those pages are split up.
-      'react-hooks/set-state-in-effect': 'off',
     },
   },
   {

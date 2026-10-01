@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useAsyncData } from "../utils/useAsyncData";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getBookings, cancelBooking, getBookingPolicy } from "../services/bookingService";
@@ -140,9 +141,6 @@ export default function MyBookings() {
   const statusFilterOptions = getStatusFilterOptions(t);
   const statusLabel = getStatusLabel(t);
   const paymentStatusLabel = getPaymentStatusLabel(t);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
   const [bookingToCancel, setBookingToCancel] = useState(null);
   const [payingBooking, setPayingBooking] = useState(null);
@@ -155,37 +153,41 @@ export default function MyBookings() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [page, setPage] = useState(1);
-  const [meta, setMeta] = useState({ total: 0, totalPages: 1 });
 
-  const loadBookings = useCallback(
-    async (targetPage) => {
-      try {
-        setLoading(true);
-        setError("");
-        const res = await getBookings({
-          page: targetPage,
-          limit: PAGE_SIZE,
-          ...(statusFilter ? { status: statusFilter } : {}),
-          ...(fromDate ? { from: fromDate } : {}),
-          ...(toDate ? { to: toDate } : {}),
-        });
-        setBookings(res.data.data);
-        setMeta({ total: res.data.total, totalPages: res.data.totalPages });
-        setPage(res.data.page);
-      } catch (err) {
-        setError(
-          err.response?.data?.message || t("myBookings:errors.loadFailed")
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [statusFilter, fromDate, toDate, t]
+  // One request per combination of filters and page; changing any of them
+  // (see changeFilter / setPage) loads the matching list.
+  const bookingsQuery = useAsyncData(
+    `my-bookings:${statusFilter}:${fromDate}:${toDate}:${page}`,
+    async () => {
+      const res = await getBookings({
+        page,
+        limit: PAGE_SIZE,
+        ...(statusFilter ? { status: statusFilter } : {}),
+        ...(fromDate ? { from: fromDate } : {}),
+        ...(toDate ? { to: toDate } : {}),
+      });
+      return res.data;
+    }
   );
 
-  useEffect(() => {
-    loadBookings(1);
-  }, [loadBookings]);
+  const bookings = bookingsQuery.data?.data || [];
+  const meta = {
+    total: bookingsQuery.data?.total ?? 0,
+    totalPages: bookingsQuery.data?.totalPages ?? 1,
+  };
+  const loading = bookingsQuery.loading;
+  const error = bookingsQuery.error
+    ? bookingsQuery.error.response?.data?.message || t("myBookings:errors.loadFailed")
+    : "";
+  const reloadBookings = bookingsQuery.reload;
+  const setBookings = (update) =>
+    bookingsQuery.setData((current) => (current ? { ...current, data: update(current.data) } : current));
+
+  // A new filter always starts again from the first page.
+  const changeFilter = (apply) => {
+    apply();
+    setPage(1);
+  };
 
   const requestCancel = (id) => setBookingToCancel(id);
 
@@ -202,7 +204,7 @@ export default function MyBookings() {
           ? { ...booking, status: "cancelled", payment_status: cancelled.payment_status ?? booking.payment_status }
           : booking
       );
-      await loadBookings(page);
+      reloadBookings();
       toast.success(
         cancelled.payment_status === "refund_pending"
           ? t("myBookings:errors.cancelSuccessRefund")
@@ -307,7 +309,7 @@ export default function MyBookings() {
           </h1>
         </div>
         <button
-          onClick={() => loadBookings(page)}
+          onClick={reloadBookings}
           disabled={loading}
           style={{
             padding: "8px 16px",
@@ -352,7 +354,7 @@ export default function MyBookings() {
             </label>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => changeFilter(() => setStatusFilter(e.target.value))}
               style={{
                 padding: "8px 10px",
                 borderRadius: 6,
@@ -384,7 +386,7 @@ export default function MyBookings() {
             <input
               type="date"
               value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
+              onChange={(e) => changeFilter(() => setFromDate(e.target.value))}
               style={{
                 padding: "8px 10px",
                 borderRadius: 6,
@@ -409,7 +411,7 @@ export default function MyBookings() {
             <input
               type="date"
               value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
+              onChange={(e) => changeFilter(() => setToDate(e.target.value))}
               style={{
                 padding: "8px 10px",
                 borderRadius: 6,
@@ -420,11 +422,13 @@ export default function MyBookings() {
           </div>
           {(statusFilter || fromDate || toDate) && (
             <button
-              onClick={() => {
-                setStatusFilter("");
-                setFromDate("");
-                setToDate("");
-              }}
+              onClick={() =>
+                changeFilter(() => {
+                  setStatusFilter("");
+                  setFromDate("");
+                  setToDate("");
+                })
+              }
               style={{
                 padding: "8px 14px",
                 background: "transparent",
@@ -721,7 +725,7 @@ export default function MyBookings() {
             }}
           >
             <button
-              onClick={() => loadBookings(page - 1)}
+              onClick={() => setPage(page - 1)}
               disabled={page <= 1 || loading}
               style={{
                 padding: "8px 16px",
@@ -740,7 +744,7 @@ export default function MyBookings() {
               {t("myBookings:pagination.pageInfo", { page, totalPages: meta.totalPages, total: meta.total })}
             </span>
             <button
-              onClick={() => loadBookings(page + 1)}
+              onClick={() => setPage(page + 1)}
               disabled={page >= meta.totalPages || loading}
               style={{
                 padding: "8px 16px",
