@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Người dùng",
+    "orders": "Đơn đặt phòng",
+    "settings": "Cài đặt",
+    "accountSettings": "Cài đặt tài khoản",
+    "myBookings": "Đặt phòng của tôi",
+    "booking": "Đặt phòng",
+    "rooms": "Phòng",
+    "calendar": "Lịch",
+    "coupons": "Mã giảm giá",
+    "logout": "Đăng xuất",
+    "close": "Đóng",
+    "menu": "Menu"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "Tiếng Anh"
+  }
+}

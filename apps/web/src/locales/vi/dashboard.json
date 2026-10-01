@@ -1,0 +1,75 @@
+{
+  "header": {
+    "title": "Bảng Điều Khiển Quản Trị",
+    "subtitle": "Tổng quan vận hành khách sạn theo thời gian thực"
+  },
+  "rangeOptions": {
+    "today": "Hôm nay",
+    "week": "7 ngày qua",
+    "month": "Tháng này",
+    "year": "Năm nay",
+    "all": "Tất cả"
+  },
+  "rangeNote": {
+    "today": "Hôm nay",
+    "week": "7 ngày qua",
+    "month": "Tháng này",
+    "year": "Năm nay",
+    "all": "Toàn bộ thời gian"
+  },
+  "status": {
+    "confirmed": "Đã xác nhận",
+    "pending": "Chờ xác nhận",
+    "completed": "Hoàn tất",
+    "cancelled": "Đã hủy"
+  },
+  "refresh": {
+    "loading": "Đang tải...",
+    "refresh": "Làm mới"
+  },
+  "export": {
+    "exporting": "Đang xuất...",
+    "excel": "Xuất Excel",
+    "pdf": "Xuất PDF"
+  },
+  "errors": {
+    "loadFailed": "Không thể tải dữ liệu dashboard",
+    "exportFailed": "Xuất báo cáo thất bại, vui lòng thử lại",
+    "refreshed": "Đã làm mới dữ liệu dashboard"
+  },
+  "statCards": {
+    "totalRooms": { "label": "Tổng số phòng", "note": "Tất cả phòng trong PostgreSQL" },
+    "availableRooms": { "label": "Phòng còn trống", "note": "Phòng có trạng thái còn trống" },
+    "bookedRooms": { "label": "Phòng đã đặt", "note": "Phòng có trạng thái đã đặt" },
+    "totalUsers": { "label": "Tổng người dùng", "note": "Tài khoản đã đăng ký" },
+    "totalBookings": { "label": "Tổng đặt phòng", "noteSuffix": "· mọi trạng thái" },
+    "revenue": { "label": "Doanh thu", "noteSuffix": "· đã xác nhận & hoàn tất" }
+  },
+  "occupancy": {
+    "title": "Tỷ Lệ Lấp Đầy Phòng",
+    "subtitle": "Tỷ lệ phòng đã đặt hiện tại"
+  },
+  "recentBookings": {
+    "title": "Đặt Phòng Gần Đây",
+    "empty": "Chưa có đặt phòng nào trong khoảng thời gian này.",
+    "columns": {
+      "bookingId": "Mã đặt phòng",
+      "guest": "Khách",
+      "room": "Phòng",
+      "checkIn": "Nhận phòng",
+      "checkOut": "Trả phòng",
+      "status": "Trạng thái",
+      "amount": "Số tiền"
+    }
+  },
+  "revenueOverview": "Tổng Quan Doanh Thu",
+  "bookingsByMonth": "Đặt Phòng Theo Tháng",
+  "topBookedRooms": {
+    "title": "Phòng Được Đặt Nhiều Nhất",
+    "empty": "Chưa có dữ liệu đặt phòng."
+  },
+  "bookingStatus": {
+    "title": "Trạng Thái Đặt Phòng",
+    "empty": "Chưa có dữ liệu trạng thái đặt phòng."
+  }
+}

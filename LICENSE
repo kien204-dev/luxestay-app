@@ -1,0 +1,40 @@
+LuxeStay — Giấy phép sử dụng mã nguồn (BẢN NHÁP)
+
+>>> PLACEHOLDER: văn bản này là khung nháp, chưa có giá trị pháp lý. <<<
+>>> Chủ sở hữu cần rà soát (nên có tư vấn pháp lý) và điền các mục [ ... ] trước khi bán. <<<
+
+Bản quyền (c) [NĂM] [TÊN CHỦ SỞ HỮU]. Bảo lưu mọi quyền.
+
+Mã nguồn này được cấp phép sử dụng, không phải bán đứt. Người mua nhận một trong
+hai loại giấy phép dưới đây, tuỳ theo gói đã mua.
+
+1. GÓI REGULAR
+   - Dùng cho MỘT sản phẩm cuối (một website/hệ thống đặt phòng) của chính người
+     mua hoặc của một khách hàng của người mua.
+   - Người dùng cuối KHÔNG bị thu phí để sử dụng sản phẩm.
+   - [Điền: số lượng tên miền/môi trường được phép, thời hạn hỗ trợ, cập nhật]
+
+2. GÓI EXTENDED
+   - Dùng cho MỘT sản phẩm cuối mà người dùng cuối CÓ THỂ bị thu phí
+     (ví dụ: dịch vụ SaaS, nền tảng thu phí thuê bao).
+   - [Điền: phạm vi, số lượng sản phẩm, thời hạn hỗ trợ, cập nhật]
+
+3. ĐƯỢC PHÉP (cả hai gói)
+   - Sửa đổi, tuỳ biến, đổi thương hiệu mã nguồn cho sản phẩm cuối của mình.
+   - Triển khai sản phẩm cuối lên máy chủ của mình hoặc của khách hàng.
+
+4. KHÔNG ĐƯỢC PHÉP (cả hai gói)
+   - Bán lại, cho thuê lại, phân phối lại hoặc chia sẻ công khai mã nguồn này,
+     dù nguyên trạng hay đã sửa đổi, dưới dạng mã nguồn, template, starter kit
+     hay sản phẩm tương đương.
+   - Dùng một giấy phép cho nhiều sản phẩm cuối.
+   - Gỡ bỏ thông báo bản quyền này khỏi mã nguồn.
+
+5. THÀNH PHẦN CỦA BÊN THỨ BA
+   Các thư viện mã nguồn mở và tài nguyên đi kèm (ví dụ phông Noto Sans theo
+   SIL Open Font License, xem apps/api/assets/fonts/OFL.txt) thuộc về chủ sở hữu
+   tương ứng và tuân theo giấy phép riêng của chúng.
+
+6. MIỄN TRỪ TRÁCH NHIỆM
+   Mã nguồn được cung cấp "nguyên trạng", không kèm bảo đảm dưới bất kỳ hình thức
+   nào. [Điền: giới hạn trách nhiệm, luật áp dụng, cách liên hệ]

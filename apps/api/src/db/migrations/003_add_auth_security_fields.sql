@@ -1,0 +1,8 @@
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;
+
+CREATE INDEX IF NOT EXISTS idx_users_active_email
+  ON users(email)
+  WHERE deleted_at IS NULL;

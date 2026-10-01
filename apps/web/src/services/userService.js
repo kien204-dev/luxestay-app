@@ -1,0 +1,89 @@
+import api from "./api";
+
+// =========================
+// GET ALL USERS
+// =========================
+export const getUsers = async () => {
+  const response = await api.get("/users");
+  return response.data;
+};
+
+// =========================
+// GET USER BY ID
+// =========================
+export const getUserById = async (id) => {
+  const response = await api.get(`/users/${id}`);
+  return response.data;
+};
+
+// =========================
+// GET CURRENT USER PROFILE
+// =========================
+export const getCurrentUser = async () => {
+  const response = await api.get("/users/me");
+  return response.data;
+};
+
+// =========================
+// UPDATE CURRENT USER PROFILE
+// =========================
+export const updateCurrentUserProfile = async (profileData) => {
+  const response = await api.put("/users/me", profileData);
+  return response.data;
+};
+
+// =========================
+// CHANGE CURRENT USER PASSWORD
+// =========================
+export const changeCurrentUserPassword = async (passwordData) => {
+  const response = await api.put("/users/me/password", passwordData);
+  return response.data;
+};
+
+// =========================
+// UPLOAD CURRENT USER AVATAR
+// =========================
+export const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api.post("/users/me/avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
+// =========================
+// CREATE USER
+// =========================
+export const createUser = async (userData) => {
+  const response = await api.post("/users", userData);
+  return response.data;
+};
+
+// =========================
+// UPDATE USER
+// =========================
+export const updateUser = async (id, userData) => {
+  const response = await api.put(`/users/${id}`, userData);
+  return response.data;
+};
+
+// =========================
+// DELETE USER
+// =========================
+export const deleteUser = async (id) => {
+  const response = await api.delete(`/users/${id}`);
+  return response.data;
+};
+
+// =========================
+// LOCK / UNLOCK USER
+// =========================
+export const setUserLock = async (id, locked) => {
+  const response = await api.patch(`/users/${id}/lock`, { locked });
+  return response.data;
+};

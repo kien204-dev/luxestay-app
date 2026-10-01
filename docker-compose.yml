@@ -1,0 +1,73 @@
+# One-command setup:  docker compose up --build
+# Then open http://localhost:8080 (sample logins are in the README).
+#
+# Every ${VAR:-default} below can be overridden from a .env file next to this
+# one; see .env.example.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: luxestay
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-luxestay}
+      POSTGRES_DB: luxestay
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U luxestay -d luxestay"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: luxestay
+      DB_PASSWORD: ${DB_PASSWORD:-luxestay}
+      DB_NAME: luxestay
+      DB_SSL: "false"
+      # Left empty, the container generates a secret and keeps it in api-data.
+      JWT_SECRET: ${JWT_SECRET:-}
+      CLIENT_URL: ${PUBLIC_URL:-http://localhost:8080}
+      FRONTEND_URL: ${PUBLIC_URL:-http://localhost:8080}
+      # nginx in the web container is the one proxy in front of the API.
+      TRUST_PROXY_HOPS: 1
+      # Plain http on localhost. Set to "true" once the site is behind HTTPS.
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      AUTH_COOKIE_SAME_SITE: lax
+      SEED_ON_START: ${SEED_ON_START:-true}
+      APP_NAME: ${APP_NAME:-LuxeStay}
+    volumes:
+      - uploads:/app/apps/api/uploads
+      - api-data:/data
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: /api
+        VITE_APP_NAME: ${APP_NAME:-LuxeStay}
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  db-data:
+  uploads:
+  api-data:

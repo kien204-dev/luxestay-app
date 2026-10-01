@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "orders": "Orders",
+    "settings": "Settings",
+    "accountSettings": "Account settings",
+    "myBookings": "My Bookings",
+    "booking": "Booking",
+    "rooms": "Rooms",
+    "calendar": "Calendar",
+    "coupons": "Coupons",
+    "logout": "Logout",
+    "close": "Close",
+    "menu": "Menu"
+  },
+  "language": {
+    "label": "Language",
+    "vi": "Vietnamese",
+    "en": "English"
+  }
+}

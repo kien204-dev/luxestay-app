@@ -1,0 +1,116 @@
+{
+  "header": {
+    "back": "← Quay lại",
+    "title": "Đặt phòng của tôi",
+    "refreshing": "Đang tải...",
+    "refresh": "Làm mới"
+  },
+  "filters": {
+    "status": "Trạng thái",
+    "fromDate": "Từ ngày",
+    "toDate": "Đến ngày",
+    "clear": "Xóa bộ lọc",
+    "statusOptions": {
+      "all": "Tất cả trạng thái",
+      "pending": "Chờ xác nhận",
+      "confirmed": "Đã xác nhận",
+      "completed": "Hoàn tất",
+      "cancelled": "Đã hủy"
+    }
+  },
+  "status": {
+    "confirmed": "Đã xác nhận",
+    "pending": "Chờ xác nhận",
+    "cancelled": "Đã hủy",
+    "completed": "Hoàn tất"
+  },
+  "paymentStatus": {
+    "unpaid": "Chưa thanh toán",
+    "pending": "Đang xử lý thanh toán",
+    "paid": "Đã thanh toán",
+    "failed": "Thanh toán thất bại",
+    "refunded": "Đã hoàn tiền"
+  },
+  "empty": {
+    "filtered": "Không có đặt phòng nào khớp với bộ lọc hiện tại.",
+    "none": "Chưa có booking nào — đặt phòng ngay để bắt đầu hành trình của bạn.",
+    "exploreRooms": "Khám phá phòng"
+  },
+  "card": {
+    "maxGuests": "Tối đa {{count}} khách",
+    "totalLocked": "Tổng đã chốt",
+    "details": "Chi tiết",
+    "pay": "Thanh toán",
+    "cancelling": "Đang hủy...",
+    "cancelBooking": "Hủy đặt phòng",
+    "reviewed": "Đã đánh giá",
+    "reviewThisRoom": "Đánh giá phòng này"
+  },
+  "pagination": {
+    "prev": "← Trước",
+    "next": "Sau →",
+    "pageInfo": "Trang {{page}} / {{totalPages}} · {{total}} đặt phòng"
+  },
+  "cancelModal": {
+    "title": "Hủy đặt phòng",
+    "message": "Bạn có chắc muốn hủy đặt phòng #BK-{{id}}? Hành động này không thể hoàn tác.",
+    "confirmLabel": "Hủy đặt phòng",
+    "cancelLabel": "Không"
+  },
+  "paymentModal": {
+    "title": "Chọn phương thức thanh toán",
+    "summary": "Đặt phòng #{{id}} · {{amount}}",
+    "redirecting": "Đang chuyển hướng...",
+    "payVnpay": "Thanh toán qua VNPay",
+    "payMomo": "Thanh toán qua MoMo",
+    "cancel": "Hủy"
+  },
+  "reviewModal": {
+    "title": "Đánh giá {{roomName}}",
+    "starsLabel": "Số sao",
+    "commentLabel": "Nhận xét (không bắt buộc)",
+    "commentPlaceholder": "Chia sẻ trải nghiệm của bạn về phòng này...",
+    "cancel": "Hủy",
+    "submitting": "Đang gửi...",
+    "submit": "Gửi đánh giá"
+  },
+  "detailModal": {
+    "bookingId": "Booking ID #{{id}}",
+    "title": "Chi tiết đặt phòng",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "nights": "Số đêm",
+    "nightsValue": "{{count}} đêm",
+    "guests": "Số khách",
+    "guestsValue": "{{count}} khách",
+    "roomCapacity": "Sức chứa phòng",
+    "roomCapacityValue": "{{count}} khách",
+    "currentRoomPrice": "Giá phòng hiện tại",
+    "perNight": "{{amount}} / đêm",
+    "createdAt": "Ngày tạo",
+    "totalLocked": "Tổng tiền đã chốt",
+    "status": "Trạng thái",
+    "timelineTitle": "Timeline trạng thái",
+    "timelineNote": "Timeline này được suy luận từ trạng thái hiện tại, ngày tạo và ngày lưu trú; chưa phải log lịch sử chi tiết.",
+    "asOfCurrentStatus": "Theo trạng thái hiện tại"
+  },
+  "timeline": {
+    "created": "Đã tạo yêu cầu đặt phòng",
+    "cancelled": "Đã hủy",
+    "cancelledNote": "Thời điểm hủy chính xác chưa có trong dữ liệu hiện tại.",
+    "pending": "Chờ xác nhận",
+    "confirmed": "Đã xác nhận",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "checkOutCompleted": "Check-out / Hoàn tất"
+  },
+  "errors": {
+    "loadFailed": "Không tải được danh sách đặt phòng",
+    "cancelSuccess": "Đã hủy đặt phòng",
+    "cancelFailed": "Hủy đặt phòng thất bại",
+    "paymentInitFailed": "Không thể khởi tạo thanh toán, vui lòng thử lại",
+    "reviewRatingRequired": "Vui lòng chọn số sao đánh giá.",
+    "reviewSuccess": "Cảm ơn bạn đã đánh giá!",
+    "reviewFailed": "Gửi đánh giá thất bại, vui lòng thử lại"
+  }
+}

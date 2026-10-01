@@ -1,0 +1,116 @@
+{
+  "header": {
+    "back": "← Back",
+    "title": "My Bookings",
+    "refreshing": "Loading...",
+    "refresh": "Refresh"
+  },
+  "filters": {
+    "status": "Status",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "clear": "Clear filters",
+    "statusOptions": {
+      "all": "All statuses",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "status": {
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "cancelled": "Cancelled",
+    "completed": "Completed"
+  },
+  "paymentStatus": {
+    "unpaid": "Unpaid",
+    "pending": "Payment processing",
+    "paid": "Paid",
+    "failed": "Payment failed",
+    "refunded": "Refunded"
+  },
+  "empty": {
+    "filtered": "No bookings match the current filters.",
+    "none": "No bookings yet — book a stay to start your journey.",
+    "exploreRooms": "Explore rooms"
+  },
+  "card": {
+    "maxGuests": "Up to {{count}} guests",
+    "totalLocked": "Total locked in",
+    "details": "Details",
+    "pay": "Pay",
+    "cancelling": "Cancelling...",
+    "cancelBooking": "Cancel booking",
+    "reviewed": "Reviewed",
+    "reviewThisRoom": "Review this room"
+  },
+  "pagination": {
+    "prev": "← Prev",
+    "next": "Next →",
+    "pageInfo": "Page {{page}} / {{totalPages}} · {{total}} bookings"
+  },
+  "cancelModal": {
+    "title": "Cancel booking",
+    "message": "Are you sure you want to cancel booking #BK-{{id}}? This action cannot be undone.",
+    "confirmLabel": "Cancel booking",
+    "cancelLabel": "No"
+  },
+  "paymentModal": {
+    "title": "Choose a payment method",
+    "summary": "Booking #{{id}} · {{amount}}",
+    "redirecting": "Redirecting...",
+    "payVnpay": "Pay with VNPay",
+    "payMomo": "Pay with MoMo",
+    "cancel": "Cancel"
+  },
+  "reviewModal": {
+    "title": "Review {{roomName}}",
+    "starsLabel": "Rating",
+    "commentLabel": "Comment (optional)",
+    "commentPlaceholder": "Share your experience with this room...",
+    "cancel": "Cancel",
+    "submitting": "Submitting...",
+    "submit": "Submit review"
+  },
+  "detailModal": {
+    "bookingId": "Booking ID #{{id}}",
+    "title": "Booking details",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "nights": "Nights",
+    "nightsValue": "{{count}} nights",
+    "guests": "Guests",
+    "guestsValue": "{{count}} guests",
+    "roomCapacity": "Room capacity",
+    "roomCapacityValue": "{{count}} guests",
+    "currentRoomPrice": "Current room price",
+    "perNight": "{{amount}} / night",
+    "createdAt": "Created",
+    "totalLocked": "Total locked in",
+    "status": "Status",
+    "timelineTitle": "Status timeline",
+    "timelineNote": "This timeline is inferred from the current status, creation date, and stay dates; it isn't a detailed history log yet.",
+    "asOfCurrentStatus": "As of current status"
+  },
+  "timeline": {
+    "created": "Booking request created",
+    "cancelled": "Cancelled",
+    "cancelledNote": "The exact cancellation time isn't available in the current data.",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "checkOutCompleted": "Check-out / Completed"
+  },
+  "errors": {
+    "loadFailed": "Could not load your bookings",
+    "cancelSuccess": "Booking cancelled",
+    "cancelFailed": "Failed to cancel booking",
+    "paymentInitFailed": "Could not start the payment, please try again",
+    "reviewRatingRequired": "Please choose a star rating.",
+    "reviewSuccess": "Thank you for your review!",
+    "reviewFailed": "Failed to submit review, please try again"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "topNav": {
+    "destinations": "Destinations",
+    "experiences": "Experiences",
+    "offers": "Offers",
+    "concierge": "Concierge"
+  },
+  "hero": {
+    "title": "The Art of Refined Living",
+    "subtitle": "Exclusively Curated Global Sanctuaries",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "location": "Location",
+    "guests": "Guests",
+    "anyGuests": "Any",
+    "allLocations": "All locations",
+    "searchButton": "Find Available Rooms"
+  },
+  "destinationsSection": {
+    "eyebrow": "Curated Journeys",
+    "title": "Signature Destinations",
+    "properties": "Properties"
+  },
+  "featuredRooms": {
+    "eyebrow": "Heritage & Elegance",
+    "title": "Featured Rooms",
+    "description": "Choose a room from the {{brand}} system — pricing and availability are updated in real time.",
+    "filtering": "Filtering:",
+    "availableRange": "available {{checkIn}} → {{checkOut}}",
+    "guestsPlus": "{{count}}+ guests",
+    "clearFilters": "Clear filters",
+    "loading": "Loading rooms...",
+    "noRoomsFiltered": "No rooms available for the selected dates. Please try different dates.",
+    "noRoomsAtAll": "No rooms yet. Admins can add rooms from the Rooms page.",
+    "perNight": "/night",
+    "maxGuestsBadge": "Up to {{count}} guests",
+    "maxCapacityLabel": "Max capacity: {{count}} guests",
+    "bookNow": "Book now →"
+  },
+  "whySection": {
+    "handpickedTitle": "Handpicked Selection",
+    "handpickedDesc": "Every property in our collection is personally inspected to meet our rigorous 200-point standard of excellence.",
+    "conciergeTitle": "24/7 Concierge",
+    "conciergeDesc": "Your personal travel artisan is available around the clock to handle everything from reservations to private charters.",
+    "priceTitle": "Best Price Guarantee",
+    "priceDesc": "Luxury shouldn't be overpaid. We guarantee the most competitive rates for the world's most prestigious suites."
+  },
+  "quote": {
+    "text": "The level of detail and personal attention provided by {{brand}} transformed our honeymoon into a masterpiece of memories. Simply unparalleled service.",
+    "author": "Eleanor Vanderbilt",
+    "location": "New York, NY"
+  },
+  "cta": {
+    "title": "Elevate Your Travel Identity",
+    "description": "Join the {{brand}} Circle and unlock private member rates, room upgrades, and complimentary chauffeur services at over 2,000 locations worldwide.",
+    "joinButton": "Join The Membership"
+  },
+  "footer": {
+    "tagline": "Redefining the standards of global hospitality and travel curation since 2012.",
+    "discover": "Discover",
+    "destinations": "Destinations",
+    "experiences": "Experiences",
+    "collections": "Collections",
+    "about": "About",
+    "ourStory": "Our Story",
+    "conciergeServices": "Concierge Services",
+    "press": "Press",
+    "legal": "Legal",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "copyright": "© 2024 {{brand}} International. All rights reserved."
+  },
+  "modal": {
+    "bookYourStay": "Book your stay",
+    "reserveRoom": "Reserve Room",
+    "viewReviews": "View guest reviews",
+    "hideReviews": "Hide reviews",
+    "pricePerNight": "Price / night",
+    "maxGuests": "Max guests",
+    "guestsLabel": "guests",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guestsMax": "Guests (max {{count}})",
+    "couponLabel": "Coupon code (optional)",
+    "couponPlaceholder": "Enter coupon code",
+    "couponApply": "Apply",
+    "couponApplied": "Applied ✓",
+    "couponChecking": "Checking...",
+    "estimatedTotal": "Estimated total",
+    "discountAppliedWith": "{{amount}} VND off with code {{code}}",
+    "confirmBooking": "Confirm Booking",
+    "bookingInProgress": "Booking...",
+    "bookingCreated": "Booking created",
+    "completePayment": "Complete your payment",
+    "pendingPaymentNotice": "Booking #{{id}} is awaiting payment. Please pay within the hold period, or it will be automatically cancelled.",
+    "totalToPay": "Total to pay",
+    "payVnpay": "Pay with VNPay",
+    "payMomo": "Pay with MoMo",
+    "redirecting": "Redirecting...",
+    "payLater": "Pay later"
+  },
+  "errors": {
+    "showcaseRoom": "This showcase room is for viewing only. Please choose a room from the live room list.",
+    "selectBothDates": "Please select both check-in and check-out dates.",
+    "checkOutAfterCheckIn": "Check-out date must be after check-in date.",
+    "loadRoomsFailed": "Could not load the room list. Please try again later.",
+    "paymentInitFailed": "Could not start the payment, please try again",
+    "couponEmpty": "Please enter a coupon code.",
+    "couponNeedsDates": "Please select check-in/check-out dates first.",
+    "couponInvalid": "Invalid coupon code",
+    "invalidRoom": "Invalid room. Please choose a room from the list.",
+    "checkInPast": "Check-in date cannot be in the past.",
+    "guestsPositive": "Number of guests must be greater than 0.",
+    "guestsExceedCapacity": "Number of guests exceeds the room's capacity ({{count}} guests).",
+    "bookingFailed": "Booking failed"
+  },
+  "toasts": {
+    "couponApplied": "Coupon applied — {{amount}} đ off"
+  }
+}

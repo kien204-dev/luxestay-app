@@ -1,0 +1,34 @@
+# Dependencies & build output
+node_modules
+dist
+dist-ssr
+
+# Logs
+logs
+*.log
+
+# Environment files (only the .env.example templates are committed)
+.env
+.env.*
+!.env.example
+*.local
+
+# Runtime uploads (room photos, avatars)
+apps/api/uploads/
+
+# Database dumps; migrations are the only SQL kept in the repo
+*.sql
+!apps/api/src/db/migrations/*.sql
+
+# Personal tooling
+.claude/
+.agents/
+
+# Editor / OS files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?
+desktop.ini
+Thumbs.db

@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/*
+  Shared LuxeStay design tokens. One source of truth for both plain CSS and
+  React inline styles (which can reference these via style={{ color: "var(--color-gold-500)" }}).
+  Matches the navy/gold brand established on the public Booking page —
+  admin screens are being migrated to it one area at a time, starting with
+  the Dashboard.
+*/
+:root {
+  --color-navy-950: #05070f;
+  --color-navy-900: #0a1128;
+  --color-navy-800: #101a34;
+  --color-navy-700: #182545;
+  --color-gold-500: #c5a059;
+  --color-gold-400: #d8bb80;
+  --color-gold-100: rgba(197, 160, 89, 0.12);
+
+  --color-text-primary: #ede7da;
+  --color-text-secondary: #a3aac4;
+  --color-text-muted: #6f7794;
+
+  --color-border: rgba(197, 160, 89, 0.18);
+  --color-border-soft: rgba(148, 163, 184, 0.14);
+
+  --color-success: #67e8b4;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #7dd3fc;
+
+  /*
+    System font stacks only (no external @font-face/CDN import): webfonts
+    are a render-blocking network dependency, and a slow or unreachable
+    font host must never be able to hang the app's first paint.
+  */
+  /*
+    Georgia is deliberately excluded: on this project's target systems it
+    renders Vietnamese tone marks as a separate floating glyph instead of a
+    properly composed character (e.g. "Phố" → "Phô´") even though it reports
+    partial glyph support — which means the browser never falls through to
+    the next font in the stack for those characters. Times New Roman and
+    Noto Serif were verified (screenshot comparison) to render the same
+    precomposed Vietnamese text correctly.
+  */
+  --font-serif: 'Times New Roman', 'Noto Serif', 'Liberation Serif', serif;
+  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.28);
+  --shadow-card-hover: 0 14px 40px rgba(0, 0, 0, 0.34);
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/*
+  Shared typography classes for the public-facing pages (Booking, MyBookings).
+  Defined globally rather than injected per-page, so they still apply on any
+  route that uses them regardless of which component last mounted a <style> tag.
+*/
+.font-headline { font-family: var(--font-serif); }
+.font-body { font-family: var(--font-sans); }
+.font-label { font-family: var(--font-sans); }
+
+@keyframes luxe-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.luxe-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(197, 160, 89, 0.06) 25%,
+    rgba(197, 160, 89, 0.14) 37%,
+    rgba(197, 160, 89, 0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: luxe-shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+/* Same shimmer, tuned for light backgrounds (public-facing pages). */
+.luxe-skeleton-light {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 35, 102, 0.06) 25%,
+    rgba(0, 35, 102, 0.12) 37%,
+    rgba(0, 35, 102, 0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: luxe-shimmer 1.6s ease-in-out infinite;
+  border-radius: 12px;
+}

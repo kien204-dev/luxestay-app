@@ -1,0 +1,75 @@
+{
+  "header": {
+    "title": "Admin Dashboard",
+    "subtitle": "Live hotel operations overview"
+  },
+  "rangeOptions": {
+    "today": "Today",
+    "week": "Last 7 days",
+    "month": "This month",
+    "year": "This year",
+    "all": "All time"
+  },
+  "rangeNote": {
+    "today": "Today",
+    "week": "Last 7 days",
+    "month": "This month",
+    "year": "This year",
+    "all": "All time"
+  },
+  "status": {
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "refresh": {
+    "loading": "Loading...",
+    "refresh": "Refresh"
+  },
+  "export": {
+    "exporting": "Exporting...",
+    "excel": "Export Excel",
+    "pdf": "Export PDF"
+  },
+  "errors": {
+    "loadFailed": "Cannot load dashboard data",
+    "exportFailed": "Export failed, please try again",
+    "refreshed": "Dashboard data refreshed"
+  },
+  "statCards": {
+    "totalRooms": { "label": "Total Rooms", "note": "All rooms in PostgreSQL" },
+    "availableRooms": { "label": "Available Rooms", "note": "Rooms with available status" },
+    "bookedRooms": { "label": "Booked Rooms", "note": "Rooms with booked status" },
+    "totalUsers": { "label": "Total Users", "note": "Registered accounts" },
+    "totalBookings": { "label": "Total Bookings", "noteSuffix": "· all statuses" },
+    "revenue": { "label": "Revenue", "noteSuffix": "· confirmed & completed" }
+  },
+  "occupancy": {
+    "title": "Room Occupancy",
+    "subtitle": "Current booked room ratio"
+  },
+  "recentBookings": {
+    "title": "Recent Bookings",
+    "empty": "No bookings in this period yet.",
+    "columns": {
+      "bookingId": "Booking ID",
+      "guest": "Guest",
+      "room": "Room",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "status": "Status",
+      "amount": "Amount"
+    }
+  },
+  "revenueOverview": "Revenue Overview",
+  "bookingsByMonth": "Bookings By Month",
+  "topBookedRooms": {
+    "title": "Top Booked Rooms",
+    "empty": "No room booking data."
+  },
+  "bookingStatus": {
+    "title": "Booking Status",
+    "empty": "No booking status data."
+  }
+}
