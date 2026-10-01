@@ -10,6 +10,7 @@ const { globalErrorHandler } = require("./src/middleware/errorHandler");
 const { initSocket } = require("./src/services/socket");
 const { apiRateLimit } = require("./src/middleware/rateLimit");
 const { getEnvProblems } = require("./src/config/env");
+const { describeConfig } = require("./src/config/summary");
 const pool = require("./src/db/db");
 const { runBookingMaintenance } = require("./src/controller/bookingController");
 
@@ -109,6 +110,10 @@ async function start() {
     problems.forEach((problem) => console.error(`  - ${problem}`));
     process.exit(1);
   }
+
+  // What was actually loaded, so a wrong .env file or an overridden value is
+  // visible at a glance. Secrets are reported as set/empty only.
+  describeConfig().forEach((line) => console.log(line));
 
   try {
     await pool.query("SELECT 1");
