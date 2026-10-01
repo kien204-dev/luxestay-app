@@ -438,6 +438,27 @@ function makeFakePool(state) {
       return { rows };
     }
 
+    if (text.startsWith("select trim(substring(location from")) {
+      const groups = new Map();
+      for (const room of state.rooms) {
+        if (!room.location || room.status === "maintenance") continue;
+        const name = room.location.split(",").pop().trim();
+        const group = groups.get(name) || { name, room_count: 0, min_price: room.price, image: null };
+        group.room_count += 1;
+        group.min_price = Math.min(group.min_price, room.price);
+        group.image = group.image || room.image || null;
+        groups.set(name, group);
+      }
+      return { rows: [...groups.values()] };
+    }
+
+    if (text.startsWith("select check_in, check_out from bookings where room_id = $1")) {
+      const rows = state.bookings
+        .filter((item) => hasOverlap(item, Number(params[0]), params[2], params[3], params[1]))
+        .map((item) => ({ check_in: item.check_in, check_out: item.check_out }));
+      return { rows };
+    }
+
     if (text.startsWith("select 1 from users where avatar_url = $1 and id != $2")) {
       const inUse = state.users.some(
         (user) => user.avatar_url === params[0] && user.id !== params[1]
@@ -2822,6 +2843,48 @@ describe("hotel booking API", () => {
       headers: authHeader(adminToken),
     });
     assert.equal(twice.response.status, 400);
+  });
+
+  it("lists destinations from real room data, without login", async () => {
+    const result = await request(baseUrl, "/api/rooms/destinations");
+
+    assert.equal(result.response.status, 200);
+    const names = result.body.map((item) => item.name);
+    assert.ok(names.includes("Hà Nội"));
+    assert.ok(names.includes("Đà Nẵng"));
+    for (const item of result.body) {
+      assert.ok(item.room_count >= 1);
+      assert.deepEqual(Object.keys(item).sort(), ["image", "min_price", "name", "room_count"]);
+    }
+  });
+
+  it("shows a room's taken nights publicly, and nothing about who booked them", async () => {
+    pushPendingBooking(1960, { room_id: 2, check_in: "2098-03-10", check_out: "2098-03-12", status: "confirmed" });
+    pushPendingBooking(1961, { room_id: 2, check_in: "2098-03-13", check_out: "2098-03-14", status: "cancelled" });
+
+    const result = await request(baseUrl, "/api/rooms/2/availability?from=2098-03-08&to=2098-03-15");
+
+    assert.equal(result.response.status, 200);
+    assert.deepEqual(Object.keys(result.body).sort(), [
+      "bookable",
+      "from",
+      "room_id",
+      "to",
+      "today",
+      "unavailable",
+    ]);
+    // Nights of the 10th and 11th; the 12th is checkout day and free again.
+    assert.deepEqual(result.body.unavailable, ["2098-03-10", "2098-03-11"]);
+    assert.doesNotMatch(JSON.stringify(result.body), /user|email|name|guest|price|status/i);
+
+    const badRange = await request(baseUrl, "/api/rooms/2/availability?from=2099-01-15&to=2099-01-08");
+    assert.equal(badRange.response.status, 400);
+
+    const tooLong = await request(baseUrl, "/api/rooms/2/availability?from=2099-01-01&to=2100-01-01");
+    assert.equal(tooLong.response.status, 400);
+
+    const missing = await request(baseUrl, "/api/rooms/999999/availability");
+    assert.equal(missing.response.status, 404);
   });
 
   it("only takes payment for bookings that still owe money", async () => {
