@@ -1,201 +1,92 @@
-import { Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import MainLayout from "./layout/MainLayout";
-
-import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
-import Orders from "./pages/Orders";
-import Settings from "./pages/Settings";
-import Booking from "./pages/Booking";
-import MyBookings from "./pages/MyBookings";
-import Rooms from "./pages/Rooms";
-import Calendar from "./pages/Calendar";
-import Coupons from "./pages/Coupons";
-import PaymentResult from "./pages/PaymentResult";
-
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound";
-import Unauthorized from "./pages/Unauthorized";
-
+import GuestLayout from "./layout/GuestLayout";
+import Home from "./pages/guest/Home";
+import RoomList from "./pages/guest/RoomList";
+import RoomDetail from "./pages/guest/RoomDetail";
+import PageLoader from "./components/PageLoader";
 import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
+import { ADMIN_HOME } from "./utils/authRedirect";
 
+// The public pages above ship in the first bundle. Everything behind a
+// login is loaded on demand, so a guest browsing rooms never downloads the
+// admin screens (or the charting library they use).
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const MyBookings = lazy(() => import("./pages/MyBookings"));
+const PaymentResult = lazy(() => import("./pages/PaymentResult"));
+const Settings = lazy(() => import("./pages/Settings"));
+const MainLayout = lazy(() => import("./layout/MainLayout"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Users = lazy(() => import("./pages/Users"));
+const Rooms = lazy(() => import("./pages/Rooms"));
+const Orders = lazy(() => import("./pages/Orders"));
+const Calendar = lazy(() => import("./pages/Calendar"));
+const Coupons = lazy(() => import("./pages/Coupons"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized"));
+
+const guestOnly = (page) => <PublicRoute>{page}</PublicRoute>;
+const signedIn = (page) => <PrivateRoute>{page}</PrivateRoute>;
+const admin = (page) => (
+  <PrivateRoute role="admin">
+    <MainLayout>{page}</MainLayout>
+  </PrivateRoute>
+);
+
+// Admin screens used to live at the top level (/dashboard, /users, ...).
+// They are now under /admin; the old addresses still work.
+const LEGACY_ADMIN_PATHS = {
+  "/dashboard": ADMIN_HOME,
+  "/users": `${ADMIN_HOME}/users`,
+  "/orders": `${ADMIN_HOME}/orders`,
+  "/calendar": `${ADMIN_HOME}/calendar`,
+  "/coupons": `${ADMIN_HOME}/coupons`,
+};
 
 function App() {
   return (
-    <Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Public guest site: no login needed to browse */}
+        <Route element={<GuestLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/rooms" element={<RoomList />} />
+          <Route path="/rooms/:id" element={<RoomDetail />} />
+        </Route>
+        <Route path="/booking" element={<Navigate to="/rooms" replace />} />
 
-      {/* PUBLIC */}
-      <Route
-        path="/"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
+        {/* Sign-in pages */}
+        <Route path="/login" element={guestOnly(<Login />)} />
+        <Route path="/register" element={guestOnly(<Register />)} />
+        <Route path="/forgot-password" element={guestOnly(<ForgotPassword />)} />
+        <Route path="/reset-password" element={guestOnly(<ResetPassword />)} />
 
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
+        {/* Signed-in guests and admins */}
+        <Route path="/my-bookings" element={signedIn(<MyBookings />)} />
+        <Route path="/payment/result" element={signedIn(<PaymentResult />)} />
+        <Route path="/settings" element={signedIn(<MainLayout><Settings /></MainLayout>)} />
+        <Route path="/profile" element={signedIn(<MainLayout><Settings /></MainLayout>)} />
 
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        }
-      />
+        {/* Admin */}
+        <Route path={ADMIN_HOME} element={admin(<Dashboard />)} />
+        <Route path={`${ADMIN_HOME}/users`} element={admin(<Users />)} />
+        <Route path={`${ADMIN_HOME}/rooms`} element={admin(<Rooms />)} />
+        <Route path={`${ADMIN_HOME}/orders`} element={admin(<Orders />)} />
+        <Route path={`${ADMIN_HOME}/calendar`} element={admin(<Calendar />)} />
+        <Route path={`${ADMIN_HOME}/coupons`} element={admin(<Coupons />)} />
+        {Object.entries(LEGACY_ADMIN_PATHS).map(([from, to]) => (
+          <Route key={from} path={from} element={<Navigate to={to} replace />} />
+        ))}
 
-      <Route
-        path="/forgot-password"
-        element={
-          <PublicRoute>
-            <ForgotPassword />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/reset-password"
-        element={
-          <PublicRoute>
-            <ResetPassword />
-          </PublicRoute>
-        }
-      />
-
-      {/* USER + ADMIN */}
-      <Route
-        path="/booking"
-        element={
-          <PrivateRoute>
-            <Booking />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/my-bookings"
-        element={
-          <PrivateRoute>
-            <MyBookings />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/payment/result"
-        element={
-          <PrivateRoute>
-            <PaymentResult />
-          </PrivateRoute>
-        }
-      />
-
-      {/* ADMIN */}
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute role="admin">
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/users"
-        element={
-          <PrivateRoute role="admin">
-            <MainLayout>
-              <Users />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/rooms"
-        element={
-          <PrivateRoute role="admin">
-            <MainLayout>
-              <Rooms />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/orders"
-        element={
-          <PrivateRoute role="admin">
-            <MainLayout>
-              <Orders />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/calendar"
-        element={
-          <PrivateRoute role="admin">
-            <MainLayout>
-              <Calendar />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/coupons"
-        element={
-          <PrivateRoute role="admin">
-            <MainLayout>
-              <Coupons />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/settings"
-        element={
-          <PrivateRoute>
-            <MainLayout>
-              <Settings />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/profile"
-        element={
-          <PrivateRoute>
-            <MainLayout>
-              <Settings />
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
-
-      <Route path="/unauthorized" element={<Unauthorized />} />
-
-      {/* 404 */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }
 

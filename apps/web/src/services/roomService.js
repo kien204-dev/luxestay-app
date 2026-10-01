@@ -17,6 +17,22 @@ export const getRoomLocations = async () => {
 };
 
 // =========================
+// GET DESTINATIONS (cities with room counts, for the landing page)
+// =========================
+export const getRoomDestinations = async () => {
+  const response = await api.get("/rooms/destinations");
+  return response.data;
+};
+
+// =========================
+// GET TAKEN NIGHTS OF ONE ROOM (public calendar)
+// =========================
+export const getRoomAvailability = async (id, params) => {
+  const response = await api.get(`/rooms/${id}/availability`, { params });
+  return response.data;
+};
+
+// =========================
 // GET ROOM BY ID
 // =========================
 export const getRoomById = async (id) => {

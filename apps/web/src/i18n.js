@@ -1,15 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-import { APP_NAME } from "./config/brand";
+import { APP_NAME, DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from "./config/brand";
 
 import viCommon from "./locales/vi/common.json";
-import viBooking from "./locales/vi/booking.json";
+import viSite from "./locales/vi/site.json";
 import viAuth from "./locales/vi/auth.json";
 import viMyBookings from "./locales/vi/myBookings.json";
 import viDashboard from "./locales/vi/dashboard.json";
 import enCommon from "./locales/en/common.json";
-import enBooking from "./locales/en/booking.json";
+import enSite from "./locales/en/site.json";
 import enAuth from "./locales/en/auth.json";
 import enMyBookings from "./locales/en/myBookings.json";
 import enDashboard from "./locales/en/dashboard.json";
@@ -19,14 +19,14 @@ import enDashboard from "./locales/en/dashboard.json";
 const resources = {
   vi: {
     common: viCommon,
-    booking: viBooking,
+    site: viSite,
     auth: viAuth,
     myBookings: viMyBookings,
     dashboard: viDashboard,
   },
   en: {
     common: enCommon,
-    booking: enBooking,
+    site: enSite,
     auth: enAuth,
     myBookings: enMyBookings,
     dashboard: enDashboard,
@@ -38,13 +38,12 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    // The product targets Vietnamese hotels (34-province Vietnam data) —
-    // Vietnamese is the actual default, not just a fallback. Deliberately
-    // no "navigator" in the detection order: a first-time visitor with an
-    // English browser locale should still see Vietnamese first and choose
-    // English explicitly, not have it auto-selected for them.
-    fallbackLng: "vi",
-    ns: ["common", "booking", "auth", "myBookings", "dashboard"],
+    // A first-time visitor sees the property's own default language
+    // (VITE_DEFAULT_LANGUAGE), whatever their browser is set to, and can
+    // switch from the header. Their choice is remembered.
+    fallbackLng: DEFAULT_LANGUAGE,
+    supportedLngs: SUPPORTED_LANGUAGES,
+    ns: ["common", "site", "auth", "myBookings", "dashboard"],
     defaultNS: "common",
     detection: {
       order: ["localStorage"],
@@ -57,5 +56,13 @@ i18n
       defaultVariables: { brand: APP_NAME },
     },
   });
+
+// Keep <html lang> in step with the language actually shown (screen readers
+// and browser translation rely on it).
+function syncDocumentLanguage(language) {
+  document.documentElement.lang = SUPPORTED_LANGUAGES.includes(language) ? language : DEFAULT_LANGUAGE;
+}
+syncDocumentLanguage(i18n.resolvedLanguage || i18n.language);
+i18n.on("languageChanged", syncDocumentLanguage);
 
 export default i18n;

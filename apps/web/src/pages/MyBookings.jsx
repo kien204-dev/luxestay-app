@@ -284,7 +284,7 @@ export default function MyBookings() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button
-            onClick={() => navigate("/booking")}
+            onClick={() => navigate("/rooms")}
             style={{
               background: "transparent",
               border: "none",
@@ -492,7 +492,7 @@ export default function MyBookings() {
                 : t("myBookings:empty.none")}
             </p>
             <button
-              onClick={() => navigate("/booking")}
+              onClick={() => navigate("/rooms")}
               style={{
                 padding: "12px 24px",
                 background: "#002366",

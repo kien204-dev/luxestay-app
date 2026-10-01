@@ -11,13 +11,13 @@ export default function Sidebar({ compact = false }) {
   const { newBookingCount } = useBookingNotifications();
 
   const navItems = [
-    { path: "/dashboard", label: "Dashboard", icon: "Dashboard", adminOnly: true },
-    { path: "/booking", label: "Bookings", icon: "Booking" },
-    { path: "/rooms", label: "Rooms", icon: "Rooms", adminOnly: true },
-    { path: "/users", label: "Users", icon: "Users", adminOnly: true },
-    { path: "/orders", label: "Orders", icon: "Orders", adminOnly: true },
-    { path: "/calendar", label: "Calendar", icon: "Calendar", adminOnly: true },
-    { path: "/coupons", label: "Coupons", icon: "Tag", adminOnly: true },
+    { path: "/admin", label: "Dashboard", icon: "Dashboard", adminOnly: true },
+    { path: "/", label: "Guest site", icon: "Booking" },
+    { path: "/admin/rooms", label: "Rooms", icon: "Rooms", adminOnly: true },
+    { path: "/admin/users", label: "Users", icon: "Users", adminOnly: true },
+    { path: "/admin/orders", label: "Orders", icon: "Orders", adminOnly: true },
+    { path: "/admin/calendar", label: "Calendar", icon: "Calendar", adminOnly: true },
+    { path: "/admin/coupons", label: "Coupons", icon: "Tag", adminOnly: true },
     { path: "/settings", label: "Settings", icon: "Settings" },
   ].filter((item) => !item.adminOnly || user?.role === "admin");
 
@@ -43,7 +43,7 @@ export default function Sidebar({ compact = false }) {
       }}
     >
       <div
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate(user?.role === "admin" ? "/admin" : "/")}
         style={{
           display: "flex",
           alignItems: "center",
@@ -133,7 +133,7 @@ export default function Sidebar({ compact = false }) {
       <button
         onClick={() => {
           logout();
-          navigate("/login");
+          navigate("/");
         }}
         style={{
           display: "flex",

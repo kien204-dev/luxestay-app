@@ -1,0 +1,150 @@
+{
+  "nav": {
+    "menu": "Menu",
+    "rooms": "Phòng",
+    "myBookings": "Đặt phòng của tôi",
+    "admin": "Quản trị",
+    "account": "Tài khoản",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất"
+  },
+  "footer": {
+    "tagline": "Đặt phòng trực tiếp: xem phòng trống theo thời gian thực, thanh toán trực tuyến, quy định hủy rõ ràng.",
+    "explore": "Khám phá",
+    "contact": "Liên hệ",
+    "phone": "Điện thoại",
+    "email": "Email"
+  },
+  "search": {
+    "location": "Địa điểm",
+    "locationPlaceholder": "Thành phố, khu vực…",
+    "checkIn": "Nhận phòng",
+    "checkOut": "Trả phòng",
+    "guests": "Số khách",
+    "anyGuests": "Bất kỳ",
+    "guestsOption": "{{count}} khách",
+    "submit": "Tìm phòng trống",
+    "errors": {
+      "bothDates": "Vui lòng chọn cả ngày nhận phòng và ngày trả phòng.",
+      "checkOutAfterCheckIn": "Ngày trả phòng phải sau ngày nhận phòng."
+    }
+  },
+  "home": {
+    "documentTitle": "Đặt phòng trực tuyến",
+    "heroTitle": "Tìm phòng cho kỳ nghỉ của bạn",
+    "heroSubtitle": "Chọn ngày, xem phòng còn trống và đặt trong vài phút tại {{brand}}.",
+    "destinationsEyebrow": "Nơi chúng tôi có phòng",
+    "destinationsTitle": "Điểm đến",
+    "destinationMeta": "{{count}} phòng · từ {{price}}",
+    "roomsEyebrow": "Mới nhất",
+    "roomsTitle": "Phòng nổi bật",
+    "viewAllRooms": "Xem tất cả phòng",
+    "whyEyebrow": "Đặt phòng tại đây",
+    "whyTitle": "Rõ ràng từ đầu đến cuối",
+    "why": {
+      "availabilityTitle": "Phòng trống theo thời gian thực",
+      "availabilityText": "Lịch của từng phòng được cập nhật ngay khi có người đặt. Phòng bạn thấy còn trống là phòng đặt được.",
+      "cancelTitle": "Quy định hủy rõ ràng",
+      "cancelText": "Đặt phòng đã thanh toán được hủy miễn phí và hoàn tiền đến trước ngày nhận phòng {{count}} ngày. Chưa thanh toán thì hủy lúc nào cũng được.",
+      "cancelTextGeneric": "Quy định hủy và hoàn tiền được hiển thị trước khi bạn xác nhận đặt phòng.",
+      "paymentTitle": "Thanh toán trực tuyến",
+      "paymentText": "Thanh toán qua cổng thanh toán ngay sau khi đặt, hoặc để sau trong thời gian giữ chỗ."
+    }
+  },
+  "room": {
+    "perNight": "/ đêm",
+    "maxGuests": "Tối đa {{count}} khách",
+    "view": "Xem phòng"
+  },
+  "list": {
+    "documentTitle": "Danh sách phòng",
+    "title": "Danh sách phòng",
+    "loading": "Đang tải danh sách phòng…",
+    "count": "{{count}} phòng",
+    "countForDates": "{{count}} phòng còn trống từ {{checkIn}} đến {{checkOut}}",
+    "clearFilters": "Xóa bộ lọc",
+    "sort": "Sắp xếp",
+    "sortNewest": "Mới nhất",
+    "sortPriceAsc": "Giá thấp đến cao",
+    "sortPriceDesc": "Giá cao đến thấp",
+    "noMatches": "Không có phòng nào phù hợp. Hãy thử ngày khác hoặc bỏ bớt điều kiện tìm kiếm.",
+    "noRoomsYet": "Hiện chưa có phòng nào để đặt.",
+    "loadFailed": "Không tải được dữ liệu. Vui lòng thử lại.",
+    "retry": "Thử lại",
+    "pagination": "Phân trang",
+    "previous": "Trước",
+    "next": "Sau",
+    "pageOf": "Trang {{page}} / {{total}}"
+  },
+  "detail": {
+    "documentTitle": "Chi tiết phòng",
+    "loading": "Đang tải thông tin phòng…",
+    "notFound": "Không tìm thấy phòng này.",
+    "backToRooms": "Danh sách phòng",
+    "about": "Về phòng này",
+    "noDescription": "Phòng này chưa có mô tả.",
+    "availability": "Lịch phòng trống",
+    "reviews": "Đánh giá của khách"
+  },
+  "calendar": {
+    "weekdays": ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
+    "previous": "Tháng trước",
+    "next": "Tháng sau",
+    "free": "Còn trống",
+    "taken": "Đã có người đặt",
+    "selected": "Ngày bạn chọn",
+    "hintCheckIn": "Bấm vào một ngày để chọn ngày nhận phòng.",
+    "hintCheckOut": "Bấm vào ngày trả phòng. Có thể trả phòng vào ngày đã có khách khác nhận phòng.",
+    "loadFailed": "Không tải được lịch phòng.",
+    "notBookable": "Phòng này đang tạm ngưng nhận khách."
+  },
+  "booking": {
+    "title": "Đặt phòng",
+    "guests": "Số khách (tối đa {{count}})",
+    "coupon": "Mã giảm giá (không bắt buộc)",
+    "couponPlaceholder": "Nhập mã",
+    "couponApply": "Áp dụng",
+    "couponApplied": "Đã áp dụng",
+    "nightsLine": "{{count}} đêm × {{price}}",
+    "discount": "Mã {{code}}",
+    "total": "Tổng cộng",
+    "submit": "Xác nhận đặt phòng",
+    "submitting": "Đang đặt phòng…",
+    "loginToBook": "Đăng nhập để đặt phòng",
+    "loginHint": "Ngày và số khách bạn chọn sẽ được giữ nguyên sau khi đăng nhập.",
+    "notBookable": "Phòng này đang tạm ngưng nhận khách.",
+    "confirmedToast": "Đặt phòng thành công và đã được xác nhận.",
+    "paymentTitle": "Thanh toán",
+    "errors": {
+      "bothDates": "Vui lòng chọn ngày nhận phòng và ngày trả phòng.",
+      "checkInPast": "Ngày nhận phòng không được ở quá khứ.",
+      "checkOutAfterCheckIn": "Ngày trả phòng phải sau ngày nhận phòng.",
+      "datesTaken": "Trong khoảng ngày bạn chọn có đêm đã có người đặt. Xem lịch phòng trống và chọn ngày khác.",
+      "couponEmpty": "Vui lòng nhập mã giảm giá.",
+      "couponNeedsDates": "Vui lòng chọn ngày trước khi áp dụng mã.",
+      "couponInvalid": "Mã giảm giá không hợp lệ.",
+      "failed": "Đặt phòng thất bại. Vui lòng thử lại."
+    }
+  },
+  "policy": {
+    "title": "Quy định giữ chỗ và hủy phòng",
+    "hold": "Sau khi đặt, phòng được giữ {{count}} phút để bạn thanh toán; quá thời gian này đặt phòng tự hủy.",
+    "unpaid": "Đặt phòng chưa thanh toán: hủy miễn phí bất cứ lúc nào.",
+    "paid": "Đặt phòng đã thanh toán: hủy miễn phí và được hoàn tiền đến trước ngày nhận phòng {{count}} ngày.",
+    "paidUntil": "Đặt phòng đã thanh toán: hủy miễn phí và được hoàn tiền đến hết ngày {{date}} (trước ngày nhận phòng {{count}} ngày). Sau đó vui lòng liên hệ cơ sở lưu trú.",
+    "paidClosed": "Ngày nhận phòng đã gần hơn {{count}} ngày: sau khi thanh toán, bạn không tự hủy trực tuyến được nữa. Cần hủy, vui lòng liên hệ cơ sở lưu trú."
+  },
+  "payment": {
+    "created": "Đã tạo đặt phòng",
+    "title": "Hoàn tất thanh toán",
+    "notice": "Đặt phòng #{{id}} đang chờ thanh toán.",
+    "stay": "Thời gian ở",
+    "total": "Cần thanh toán",
+    "pay": "Thanh toán",
+    "payVnpay": "Thanh toán qua VNPay",
+    "payMomo": "Thanh toán qua MoMo",
+    "redirecting": "Đang chuyển tới cổng thanh toán…",
+    "payLater": "Thanh toán sau",
+    "initFailed": "Không khởi tạo được thanh toán. Vui lòng thử lại."
+  }
+}
