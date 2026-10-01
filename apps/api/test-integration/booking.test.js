@@ -16,10 +16,14 @@ process.env.DB_USER = "luxestay";
 process.env.DB_PASSWORD = "luxestay";
 process.env.DB_NAME = "luxestay_test";
 process.env.DB_SSL = "false";
-process.env.JWT_SECRET = "integration-test-secret-0123456789abcdef";
+// No secret is written into this file: each run signs with throwaway random
+// values (or whatever the environment already provides), and the tests read
+// them back from the environment like the app does.
+const randomSecret = () => require("node:crypto").randomBytes(32).toString("hex");
+process.env.JWT_SECRET = randomSecret();
 process.env.SEED_ADMIN_PASSWORD = "Admin-Integration-1";
-process.env.VNPAY_TMN_CODE = "TESTTMN01";
-process.env.VNPAY_HASH_SECRET = "integration-vnpay-hash-secret";
+process.env.VNPAY_TMN_CODE = process.env.TEST_VNPAY_TMN_CODE || "TESTTMN01";
+process.env.VNPAY_HASH_SECRET = process.env.TEST_VNPAY_HASH_SECRET || randomSecret();
 process.env.VNPAY_RETURN_URL = "http://localhost:5173/payment/result";
 process.env.MOMO_ENABLED = "false";
 // Set (even to empty) so a developer's own apps/api/.env cannot switch on
@@ -253,6 +257,131 @@ describe("booking and payment rules on real PostgreSQL", () => {
     assert.equal(result.body.booking.status, "confirmed");
     assert.equal(result.body.booking.payment_status, "paid");
     assert.equal(result.body.booking.expires_at, null);
+  });
+
+  // The gateway's server-to-server callback, simulated: each request is
+  // signed here with VNPAY_HASH_SECRET from the environment, exactly as VNPay
+  // would sign it. (A real sandbox round trip needs an activated merchant.)
+  describe("VNPay IPN", () => {
+    it("confirms a waiting booking on a correctly signed success callback, once", async () => {
+      const roomId = await freshRoomId();
+      const booking = (await book(roomId, dayFromToday(120), dayFromToday(122))).body.booking;
+      const payment = await startVnpayPayment(booking.id);
+      assert.equal((await bookingRow(booking.id)).payment_status, "pending");
+
+      const ipn = await sendVnpayIpn(payment.transactionRef, booking.total_price);
+      assert.deepEqual(ipn.body, { RspCode: "00", Message: "Confirm Success" });
+
+      const row = await bookingRow(booking.id);
+      assert.equal(row.status, "confirmed");
+      assert.equal(row.payment_status, "paid");
+      assert.equal(row.expires_at, null);
+
+      const paymentRow = (
+        await pool.query("SELECT * FROM payments WHERE transaction_ref = $1", [payment.transactionRef])
+      ).rows[0];
+      assert.equal(paymentRow.status, "success");
+      assert.equal(paymentRow.provider_transaction_id, "14123456");
+      assert.equal(paymentRow.raw_callback.vnp_TxnRef, payment.transactionRef);
+      // The signature itself is not kept with the stored callback.
+      assert.equal(paymentRow.raw_callback.vnp_SecureHash, undefined);
+
+      // What the guest's result page asks for.
+      const status = await api(`/api/payments/transactions/${payment.transactionRef}`, {
+        cookie: guestCookie,
+      });
+      assert.equal(status.body.payment.status, "success");
+      assert.equal(status.body.bookingStatus, "confirmed");
+      assert.equal(status.body.bookingPaymentStatus, "paid");
+
+      // VNPay repeats callbacks until acknowledged; a repeat must change nothing.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const replay = await sendVnpayIpn(payment.transactionRef, booking.total_price);
+        assert.equal(replay.body.RspCode, "02");
+      }
+      const after = await bookingRow(booking.id);
+      assert.equal(after.status, "confirmed");
+      assert.equal(after.payment_status, "paid");
+      const attempts = await pool.query("SELECT COUNT(*)::int AS n FROM payments WHERE booking_id = $1", [
+        booking.id,
+      ]);
+      assert.equal(attempts.rows[0].n, 1);
+    });
+
+    it("refuses a callback with a wrong, missing or foreign signature and changes nothing", async () => {
+      const booking = (await book(await freshRoomId(), dayFromToday(123), dayFromToday(124))).body.booking;
+      const payment = await startVnpayPayment(booking.id);
+      const signed = vnpayIpnQuery(payment.transactionRef, booking.total_price);
+
+      // A field changed after signing.
+      const tampered = await api(`/api/payments/vnpay/ipn?${signed.replace("vnp_BankCode=NCB", "vnp_BankCode=XXX")}`);
+      assert.equal(tampered.body.RspCode, "97");
+
+      // No signature at all.
+      const unsigned = new URLSearchParams(signed);
+      unsigned.delete("vnp_SecureHash");
+      assert.equal((await api(`/api/payments/vnpay/ipn?${unsigned}`)).body.RspCode, "97");
+
+      // Signed, but with a different secret.
+      const foreign = new URLSearchParams(signed);
+      foreign.delete("vnp_SecureHash");
+      const sorted = Object.fromEntries([...foreign.entries()].sort(([a], [b]) => a.localeCompare(b)));
+      const foreignHash = crypto
+        .createHmac("sha512", randomSecret())
+        .update(new URLSearchParams(sorted).toString(), "utf-8")
+        .digest("hex");
+      foreign.set("vnp_SecureHash", foreignHash);
+      assert.equal((await api(`/api/payments/vnpay/ipn?${foreign}`)).body.RspCode, "97");
+
+      const row = await bookingRow(booking.id);
+      assert.equal(row.status, "pending");
+      assert.equal(row.payment_status, "pending");
+    });
+
+    it("refuses a correctly signed callback for the wrong amount, or for an unknown order", async () => {
+      const booking = (await book(await freshRoomId(), dayFromToday(125), dayFromToday(126))).body.booking;
+      const payment = await startVnpayPayment(booking.id);
+
+      for (const amount of [Number(booking.total_price) - 1, Number(booking.total_price) * 100, 0]) {
+        const wrong = await sendVnpayIpn(payment.transactionRef, amount);
+        assert.equal(wrong.body.RspCode, "04", `amount ${amount}`);
+      }
+
+      const unknown = await sendVnpayIpn("LX-NO-SUCH-ORDER", booking.total_price);
+      assert.equal(unknown.body.RspCode, "01");
+
+      const row = await bookingRow(booking.id);
+      assert.equal(row.status, "pending");
+      assert.equal(row.payment_status, "pending");
+
+      // The right amount still goes through afterwards.
+      const ok = await sendVnpayIpn(payment.transactionRef, booking.total_price);
+      assert.equal(ok.body.RspCode, "00");
+      assert.equal((await bookingRow(booking.id)).status, "confirmed");
+    });
+
+    it("records a failed payment without confirming, and lets the guest try again", async () => {
+      const booking = (await book(await freshRoomId(), dayFromToday(127), dayFromToday(128))).body.booking;
+      const first = await startVnpayPayment(booking.id);
+
+      const failed = await sendVnpayIpn(first.transactionRef, booking.total_price, {
+        vnp_ResponseCode: "24",
+        vnp_TransactionStatus: "02",
+      });
+      assert.equal(failed.body.RspCode, "00");
+
+      let row = await bookingRow(booking.id);
+      assert.equal(row.status, "pending");
+      assert.equal(row.payment_status, "failed");
+
+      const second = await startVnpayPayment(booking.id);
+      assert.notEqual(second.transactionRef, first.transactionRef);
+      assert.equal((await sendVnpayIpn(second.transactionRef, booking.total_price)).body.RspCode, "00");
+
+      row = await bookingRow(booking.id);
+      assert.equal(row.status, "confirmed");
+      assert.equal(row.payment_status, "paid");
+    });
   });
 
   it("revives an expired booking when its payment arrives and the room is still free", async () => {
