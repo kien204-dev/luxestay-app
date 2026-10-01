@@ -12,6 +12,7 @@ import { normalizeImageUrl, useFallbackImage } from "../utils/imageUrl";
 import { useToast } from "../context/ToastContext";
 import { usePaymentProviders } from "../utils/usePaymentProviders";
 import { APP_NAME } from "../config/brand";
+import { localDateString } from "../utils/date";
 
 function mapRoomForDisplay(room) {
   return {
@@ -391,6 +392,13 @@ function Booking() {
             });
 
             toast.success(res.data.message);
+            // Nothing to pay (fully discounted): the booking is already
+            // confirmed, so there is no payment step to show.
+            if (res.data.booking.status === "confirmed") {
+                closeBookingModal();
+                navigate("/my-bookings");
+                return;
+            }
             setCreatedBooking(res.data.booking);
         } catch (err) {
             setBookingError(
@@ -412,7 +420,7 @@ function Booking() {
     const vnTotalPages = Math.max(1, Math.ceil(rooms.length / vnPerPage));
     const vnVisible = rooms.slice(vnPage * vnPerPage, vnPage * vnPerPage + vnPerPage);
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = localDateString();
 
     return (
         <div className="font-body" style={{ minHeight: "max(884px, 100dvh)", background: "#fafafa", color: "#1A1C1E" }}>

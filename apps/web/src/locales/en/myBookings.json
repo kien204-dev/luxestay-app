@@ -29,7 +29,8 @@
     "pending": "Payment processing",
     "paid": "Paid",
     "failed": "Payment failed",
-    "refunded": "Refunded"
+    "refunded": "Refunded",
+    "refund_pending": "Refund pending"
   },
   "empty": {
     "filtered": "No bookings match the current filters.",
@@ -55,7 +56,8 @@
     "title": "Cancel booking",
     "message": "Are you sure you want to cancel booking #BK-{{id}}? This action cannot be undone.",
     "confirmLabel": "Cancel booking",
-    "cancelLabel": "No"
+    "cancelLabel": "No",
+    "policy": "A paid booking can only be cancelled at least {{count}} day(s) before check-in, and will be refunded."
   },
   "paymentModal": {
     "title": "Choose a payment method",
@@ -111,6 +113,7 @@
     "paymentInitFailed": "Could not start the payment, please try again",
     "reviewRatingRequired": "Please choose a star rating.",
     "reviewSuccess": "Thank you for your review!",
-    "reviewFailed": "Failed to submit review, please try again"
+    "reviewFailed": "Failed to submit review, please try again",
+    "cancelSuccessRefund": "Booking cancelled. Your payment will be refunded once the property confirms it."
   }
 }

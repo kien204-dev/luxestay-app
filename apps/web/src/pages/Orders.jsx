@@ -3,6 +3,8 @@ import {
   getBookings,
   updateBooking,
   deleteBooking,
+  markBookingPaid,
+  confirmRefund,
 } from "../services/bookingService";
 import { listReviews, setReviewHidden } from "../services/reviewService";
 import { useToast } from "../context/ToastContext";
@@ -45,6 +47,84 @@ function formatDate(value) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleDateString("vi-VN");
+}
+
+const PAYMENT_LABEL = {
+  unpaid: "Chưa thanh toán",
+  pending: "Đang thanh toán",
+  paid: "Đã thanh toán",
+  failed: "Thanh toán lỗi",
+  refund_pending: "Chờ hoàn tiền",
+  refunded: "Đã hoàn tiền",
+};
+
+const PAYMENT_COLOR = {
+  unpaid: "var(--color-text-muted)",
+  pending: "var(--color-warning)",
+  paid: "var(--color-success)",
+  failed: "var(--color-danger)",
+  refund_pending: "var(--color-warning)",
+  refunded: "var(--color-text-muted)",
+};
+
+const REFUND_REASON_LABEL = {
+  cancelled_by_guest: "Khách hủy sau khi đã thanh toán",
+  cancelled_by_admin: "Quản trị hủy sau khi đã thanh toán",
+  paid_after_cancellation: "Tiền về sau khi booking đã hủy/hết hạn, phòng không còn trống",
+};
+
+function canMarkPaid(order) {
+  return (
+    ["pending", "confirmed", "completed"].includes(order.status) &&
+    ["unpaid", "pending", "failed"].includes(order.payment_status || "unpaid")
+  );
+}
+
+// Payment state of one booking plus the one money action that applies to it:
+// record a desk payment, or confirm a refund has been sent.
+function OrderPayment({ order, busyId, onAction }) {
+  const paymentStatus = order.payment_status || "unpaid";
+  const busy = busyId === order.id;
+  const action =
+    paymentStatus === "refund_pending"
+      ? { type: "refund", label: "Xác nhận hoàn tiền" }
+      : canMarkPaid(order)
+        ? { type: "mark-paid", label: "Đã thu tiền" }
+        : null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
+      <span
+        title={REFUND_REASON_LABEL[order.refund_reason] || undefined}
+        style={{ fontSize: 12, fontWeight: 700, color: PAYMENT_COLOR[paymentStatus] }}
+      >
+        {PAYMENT_LABEL[paymentStatus] || paymentStatus}
+      </span>
+      {paymentStatus === "refund_pending" && REFUND_REASON_LABEL[order.refund_reason] && (
+        <span style={{ fontSize: 11, color: "var(--color-text-muted)", maxWidth: 220 }}>
+          {REFUND_REASON_LABEL[order.refund_reason]}
+        </span>
+      )}
+      {action && (
+        <button
+          onClick={() => onAction({ id: order.id, type: action.type })}
+          disabled={busy}
+          style={{
+            background: "transparent",
+            color: "var(--color-gold-400)",
+            border: "1px solid var(--color-border)",
+            borderRadius: 8,
+            padding: "4px 10px",
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: busy ? "not-allowed" : "pointer",
+          }}
+        >
+          {busy ? "..." : action.label}
+        </button>
+      )}
+    </div>
+  );
 }
 
 function OrderStatusSelect({ order, updatingId, onChange, fullWidth = false }) {
@@ -92,6 +172,8 @@ function Orders() {
   const [updatingId, setUpdatingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [bookingToDelete, setBookingToDelete] = useState(null);
+  const [paymentAction, setPaymentAction] = useState(null);
+  const [paymentBusyId, setPaymentBusyId] = useState(null);
 
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
@@ -199,8 +281,24 @@ function Orders() {
     );
 
     try {
-      await updateBooking(id, newStatus);
-      toast.success("Đã cập nhật trạng thái đơn đặt phòng");
+      const res = await updateBooking(id, newStatus);
+      // The server may have changed more than the status (cancelling a paid
+      // booking turns it into a pending refund).
+      const saved = res.data?.booking;
+      if (saved) {
+        setBookings((list) =>
+          list.map((b) =>
+            b.id === id
+              ? { ...b, status: saved.status, payment_status: saved.payment_status, refund_reason: saved.refund_reason }
+              : b
+          )
+        );
+      }
+      toast.success(
+        saved?.payment_status === "refund_pending"
+          ? "Đã hủy đơn. Đơn này đã thanh toán nên cần hoàn tiền cho khách."
+          : "Đã cập nhật trạng thái đơn đặt phòng"
+      );
     } catch (err) {
       setBookings(prev);
       toast.error(
@@ -209,6 +307,28 @@ function Orders() {
       );
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const confirmPaymentAction = async () => {
+    if (!paymentAction) return;
+    const { id, type } = paymentAction;
+
+    setPaymentBusyId(id);
+    try {
+      const res = type === "refund" ? await confirmRefund(id) : await markBookingPaid(id);
+      const saved = res.data.booking;
+      setBookings((list) =>
+        list.map((b) =>
+          b.id === id ? { ...b, status: saved.status, payment_status: saved.payment_status } : b
+        )
+      );
+      toast.success(res.data.message);
+      setPaymentAction(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Thao tác thất bại, vui lòng thử lại");
+    } finally {
+      setPaymentBusyId(null);
     }
   };
 
@@ -386,6 +506,8 @@ function Orders() {
                   </span>
                 </div>
 
+                <OrderPayment order={order} busyId={paymentBusyId} onAction={setPaymentAction} />
+
                 <button
                   onClick={() => requestDelete(order.id)}
                   disabled={deletingId === order.id}
@@ -466,7 +588,10 @@ function Orders() {
                           onChange={handleStatusChange}
                         />
                       </td>
-                      <td style={tdStyle}>{formatMoney(order.total_price)}</td>
+                      <td style={tdStyle}>
+                        <div style={{ marginBottom: 6 }}>{formatMoney(order.total_price)}</div>
+                        <OrderPayment order={order} busyId={paymentBusyId} onAction={setPaymentAction} />
+                      </td>
                       <td style={tdStyle}>
                         <button
                           onClick={() => requestDelete(order.id)}
@@ -696,6 +821,20 @@ function Orders() {
         loading={deletingId === bookingToDelete}
         onConfirm={confirmDelete}
         onCancel={() => setBookingToDelete(null)}
+      />
+
+      <ConfirmModal
+        open={paymentAction != null}
+        title={paymentAction?.type === "refund" ? "Xác nhận hoàn tiền" : "Ghi nhận đã thu tiền"}
+        message={
+          paymentAction?.type === "refund"
+            ? `Xác nhận bạn ĐÃ chuyển tiền hoàn lại cho khách của đơn #BK-${String(paymentAction?.id).padStart(4, "0")}? Ứng dụng không tự chuyển tiền.`
+            : `Xác nhận đã thu đủ tiền (tiền mặt/chuyển khoản) cho đơn #BK-${String(paymentAction?.id).padStart(4, "0")}? Đơn đang chờ sẽ được xác nhận.`
+        }
+        confirmLabel={paymentAction?.type === "refund" ? "Đã hoàn tiền" : "Đã thu tiền"}
+        loading={paymentBusyId != null}
+        onConfirm={confirmPaymentAction}
+        onCancel={() => setPaymentAction(null)}
       />
 
       <ConfirmModal

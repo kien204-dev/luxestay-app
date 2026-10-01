@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getBookings, cancelBooking } from "../services/bookingService";
+import { getBookings, cancelBooking, getBookingPolicy } from "../services/bookingService";
 import { createPayment } from "../services/paymentService";
 import { createReview } from "../services/reviewService";
 import { normalizeImageUrl, useFallbackImage } from "../utils/imageUrl";
@@ -44,6 +44,7 @@ const PAYMENT_STATUS_STYLE = {
   pending: { color: "#fbbf24", bg: "rgba(251,191,36,0.12)" },
   paid: { color: "#059669", bg: "rgba(5,150,105,0.12)" },
   failed: { color: "#dc2626", bg: "rgba(220,38,38,0.12)" },
+  refund_pending: { color: "#d97706", bg: "rgba(217,119,6,0.12)" },
   refunded: { color: "#94a3b8", bg: "rgba(148,163,184,0.12)" },
 };
 
@@ -53,6 +54,7 @@ function getPaymentStatusLabel(t) {
     pending: t("myBookings:paymentStatus.pending"),
     paid: t("myBookings:paymentStatus.paid"),
     failed: t("myBookings:paymentStatus.failed"),
+    refund_pending: t("myBookings:paymentStatus.refund_pending"),
     refunded: t("myBookings:paymentStatus.refunded"),
   };
 }
@@ -120,6 +122,19 @@ export default function MyBookings() {
   const navigate = useNavigate();
   const toast = useToast();
   const paymentProviders = usePaymentProviders();
+  const [freeCancellationDays, setFreeCancellationDays] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getBookingPolicy()
+      .then((res) => {
+        if (!cancelled) setFreeCancellationDays(res.data?.freeCancellationDays ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const { t, i18n } = useTranslation("myBookings");
   const lang = i18n.language;
   const statusFilterOptions = getStatusFilterOptions(t);
@@ -180,12 +195,19 @@ export default function MyBookings() {
 
     setCancellingId(id);
     try {
-      await cancelBooking(id);
+      const res = await cancelBooking(id);
+      const cancelled = res.data?.booking || {};
       setSelectedBooking((booking) =>
-        booking?.id === id ? { ...booking, status: "cancelled" } : booking
+        booking?.id === id
+          ? { ...booking, status: "cancelled", payment_status: cancelled.payment_status ?? booking.payment_status }
+          : booking
       );
       await loadBookings(page);
-      toast.success(t("myBookings:errors.cancelSuccess"));
+      toast.success(
+        cancelled.payment_status === "refund_pending"
+          ? t("myBookings:errors.cancelSuccessRefund")
+          : t("myBookings:errors.cancelSuccess")
+      );
       setBookingToCancel(null);
     } catch (err) {
       toast.error(err.response?.data?.message || t("myBookings:errors.cancelFailed"));
@@ -614,7 +636,7 @@ export default function MyBookings() {
                     >
                       {t("myBookings:card.details")}
                     </button>
-                    {b.status === "pending" && ["unpaid", "failed", undefined].includes(b.payment_status) && (
+                    {["pending", "confirmed"].includes(b.status) && ["unpaid", "failed", undefined].includes(b.payment_status) && (
                       <button
                         onClick={() => {
                           setPayError("");
@@ -757,7 +779,12 @@ export default function MyBookings() {
         variant="light"
         open={bookingToCancel != null}
         title={t("myBookings:cancelModal.title")}
-        message={t("myBookings:cancelModal.message", { id: String(bookingToCancel).padStart(4, "0") })}
+        message={
+          t("myBookings:cancelModal.message", { id: String(bookingToCancel).padStart(4, "0") }) +
+          (freeCancellationDays != null
+            ? ` ${t("myBookings:cancelModal.policy", { count: freeCancellationDays })}`
+            : "")
+        }
         confirmLabel={t("myBookings:cancelModal.confirmLabel")}
         cancelLabel={t("myBookings:cancelModal.cancelLabel")}
         tone="danger"

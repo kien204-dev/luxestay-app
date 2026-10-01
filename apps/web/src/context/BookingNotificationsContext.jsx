@@ -31,10 +31,25 @@ export function BookingNotificationsProvider({ children }) {
       toast.info(`Có booking mới: ${formatBookingLabel(booking)}`);
     };
 
+    // Money that has to be sent back by hand: keep these on screen longer.
+    const handleRefundPending = (booking) => {
+      toast.error(`Booking #${booking.id} cần hoàn tiền. Xem trang Orders.`, 15000);
+    };
+    const handleDuplicatePayment = (payment) => {
+      toast.error(
+        `Booking #${payment.booking_id} bị thanh toán hai lần (${payment.transaction_ref}). Cần hoàn lại khoản thừa.`,
+        15000
+      );
+    };
+
     socket.on("booking:created", handleCreated);
+    socket.on("booking:refund-pending", handleRefundPending);
+    socket.on("payment:duplicate", handleDuplicatePayment);
 
     return () => {
       socket.off("booking:created", handleCreated);
+      socket.off("booking:refund-pending", handleRefundPending);
+      socket.off("payment:duplicate", handleDuplicatePayment);
       socket.disconnect();
     };
     // toast identity is stable (useMemo'd in ToastProvider); only the admin

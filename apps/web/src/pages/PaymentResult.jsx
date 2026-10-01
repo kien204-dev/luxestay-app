@@ -17,6 +17,7 @@ export default function PaymentResult() {
   const transactionRef = extractTransactionRef(searchParams);
 
   const [payment, setPayment] = useState(null);
+  const [bookingPaymentStatus, setBookingPaymentStatus] = useState(null);
   const [error, setError] = useState("");
   const [pollCount, setPollCount] = useState(0);
 
@@ -35,6 +36,7 @@ export default function PaymentResult() {
         if (cancelled) return;
 
         setPayment(res.data.payment);
+        setBookingPaymentStatus(res.data.bookingPaymentStatus || null);
 
         if (res.data.payment.status === "pending" && attempts < MAX_POLLS) {
           attempts += 1;
@@ -104,6 +106,19 @@ export default function PaymentResult() {
             </h1>
             <p style={{ color: "#6b7280", fontSize: 14, lineHeight: 1.6, marginBottom: 28 }}>
               Vui lòng đợi trong giây lát, chúng tôi đang xác thực giao dịch với ngân hàng/cổng thanh toán.
+            </p>
+          </>
+        ) : payment.status === "success" && bookingPaymentStatus === "refund_pending" ? (
+          // The money arrived after the booking had lapsed and the room had
+          // gone to someone else: do not tell the guest they have a room.
+          <>
+            <StatusIcon variant="pending" />
+            <h1 className="font-headline" style={{ color: "#002366", fontSize: 24, margin: "18px 0 8px" }}>
+              Đã nhận thanh toán, nhưng phòng không còn trống
+            </h1>
+            <p style={{ color: "#6b7280", fontSize: 14, lineHeight: 1.6, marginBottom: 28 }}>
+              Đặt phòng #{payment.booking_id} đã hết thời gian giữ chỗ trước khi thanh toán hoàn tất và phòng đã
+              được đặt bởi khách khác. Khoản thanh toán của bạn sẽ được hoàn lại; {APP_NAME} sẽ liên hệ với bạn.
             </p>
           </>
         ) : payment.status === "success" ? (

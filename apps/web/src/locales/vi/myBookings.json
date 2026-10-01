@@ -29,7 +29,8 @@
     "pending": "Đang xử lý thanh toán",
     "paid": "Đã thanh toán",
     "failed": "Thanh toán thất bại",
-    "refunded": "Đã hoàn tiền"
+    "refunded": "Đã hoàn tiền",
+    "refund_pending": "Chờ hoàn tiền"
   },
   "empty": {
     "filtered": "Không có đặt phòng nào khớp với bộ lọc hiện tại.",
@@ -55,7 +56,8 @@
     "title": "Hủy đặt phòng",
     "message": "Bạn có chắc muốn hủy đặt phòng #BK-{{id}}? Hành động này không thể hoàn tác.",
     "confirmLabel": "Hủy đặt phòng",
-    "cancelLabel": "Không"
+    "cancelLabel": "Không",
+    "policy": "Đặt phòng đã thanh toán chỉ hủy được trước ngày nhận phòng ít nhất {{count}} ngày và sẽ được hoàn tiền."
   },
   "paymentModal": {
     "title": "Chọn phương thức thanh toán",
@@ -111,6 +113,7 @@
     "paymentInitFailed": "Không thể khởi tạo thanh toán, vui lòng thử lại",
     "reviewRatingRequired": "Vui lòng chọn số sao đánh giá.",
     "reviewSuccess": "Cảm ơn bạn đã đánh giá!",
-    "reviewFailed": "Gửi đánh giá thất bại, vui lòng thử lại"
+    "reviewFailed": "Gửi đánh giá thất bại, vui lòng thử lại",
+    "cancelSuccessRefund": "Đã hủy đặt phòng. Khoản đã thanh toán sẽ được hoàn lại sau khi cơ sở lưu trú xác nhận."
   }
 }
