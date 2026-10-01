@@ -2703,6 +2703,11 @@ describe("hotel booking API", () => {
     assert.ok(res.body.payUrl.includes("vnp_TxnRef="));
     assert.ok(res.body.transactionRef);
 
+    // VNPay rejects descriptions with accents or special characters.
+    const orderInfo = new URL(res.body.payUrl).searchParams.get("vnp_OrderInfo");
+    assert.equal(orderInfo, "Thanh toan dat phong 1002");
+    assert.match(orderInfo, /^[A-Za-z0-9 ]+$/);
+
     const payment = state.payments.find((p) => p.booking_id === 1002);
     assert.ok(payment);
     assert.equal(payment.provider, "vnpay");

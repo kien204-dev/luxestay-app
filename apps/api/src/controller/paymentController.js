@@ -10,7 +10,6 @@ const { reclaimCoupon } = require("./couponController.js");
 const vnpayService = require("../services/vnpayService.js");
 const momoService = require("../services/momoService.js");
 const { notifyRefundPending, notifyDuplicatePayment } = require("../services/adminAlerts.js");
-const { APP_NAME } = require("../config/brand");
 const { todayInAppTimezone } = require("../utils/time.js");
 
 // Read per request, not at load time, so the list follows the environment.
@@ -27,6 +26,15 @@ function parseId(value) {
   const id = Number(value);
   return Number.isInteger(id) && id > 0 ? id : null;
 }
+
+// What the guest sees as the payment description at the gateway. VNPay only
+// accepts unaccented Vietnamese without special characters, so this is kept
+// to plain letters, digits and spaces (no "#", no brand name that might
+// carry accents or punctuation).
+function buildOrderInfo(bookingId) {
+  return `Thanh toan dat phong ${bookingId}`;
+}
+exports.buildOrderInfo = buildOrderInfo;
 
 function generateTransactionRef(bookingId) {
   const random = crypto.randomBytes(3).toString("hex");
@@ -124,7 +132,7 @@ exports.createPayment = async (req, res) => {
 
   // Step 2: ask the gateway for a pay URL.
   try {
-    const orderInfo = `Thanh toan booking #${bookingId} - ${APP_NAME}`;
+    const orderInfo = buildOrderInfo(bookingId);
     let payUrl;
 
     if (provider === "vnpay") {
