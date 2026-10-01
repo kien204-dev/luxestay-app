@@ -62,11 +62,17 @@ function normalizeIpAddr(ipAddr) {
   return mapped ? mapped[1] : ipAddr;
 }
 
+// VNPay reads vnp_CreateDate / vnp_ExpireDate as GMT+7 wall-clock time
+// (yyyyMMddHHmmss), whatever timezone this server runs in. Vietnam has no
+// daylight saving, so a fixed +7h shift read back through UTC getters is exact.
+const VNPAY_UTC_OFFSET_MS = 7 * 60 * 60 * 1000;
+
 function formatVnpayDate(date) {
+  const shifted = new Date(date.getTime() + VNPAY_UTC_OFFSET_MS);
   const pad = (n) => String(n).padStart(2, "0");
   return (
-    `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}` +
-    `${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+    `${shifted.getUTCFullYear()}${pad(shifted.getUTCMonth() + 1)}${pad(shifted.getUTCDate())}` +
+    `${pad(shifted.getUTCHours())}${pad(shifted.getUTCMinutes())}${pad(shifted.getUTCSeconds())}`
   );
 }
 
@@ -123,6 +129,7 @@ function verifyVnpaySignature(query) {
 
 module.exports = {
   assertVnpayConfigured,
+  formatVnpayDate,
   buildVnpayPayUrl,
   verifyVnpaySignature,
 };

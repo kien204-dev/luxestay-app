@@ -43,6 +43,8 @@ function assertMomoConfigured() {
   return config;
 }
 
+const MOMO_REQUEST_TIMEOUT_MS = 10 * 1000;
+
 function sign(rawSignature, secretKey) {
   return crypto.createHmac("sha256", secretKey).update(rawSignature, "utf-8").digest("hex");
 }
@@ -84,6 +86,8 @@ async function createMomoPayUrl({ amount, transactionRef, orderInfo }) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    // Never let a slow gateway hang the guest's request indefinitely.
+    signal: AbortSignal.timeout(MOMO_REQUEST_TIMEOUT_MS),
   });
 
   const data = await response.json();

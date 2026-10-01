@@ -6,6 +6,8 @@ const { isStrongPassword } = require("../src/utils/password");
 const { escapeHtml } = require("../src/utils/html");
 const { listMigrationFiles } = require("../src/db/migrate");
 const { assertResetAllowed } = require("../src/db/reset");
+const { dateInTimezone, daysBetween, isValidTimezone } = require("../src/utils/time");
+const { formatVnpayDate } = require("../src/services/vnpayService");
 
 const validEnv = {
   DB_USER: "postgres",
@@ -25,6 +27,29 @@ test("startup config check reports missing, short and placeholder values", () =>
     getEnvProblems({ ...validEnv, JWT_SECRET: "replace_with_a_long_random_secret" })[0],
     /placeholder/
   );
+});
+
+test("startup config check rejects an unknown timezone", () => {
+  assert.match(getEnvProblems({ ...validEnv, APP_TIMEZONE: "Mars/Olympus" })[0], /APP_TIMEZONE/);
+  assert.deepEqual(getEnvProblems({ ...validEnv, APP_TIMEZONE: "Asia/Ho_Chi_Minh" }), []);
+  assert.equal(isValidTimezone("Asia/Ho_Chi_Minh"), true);
+});
+
+test("the property date follows its timezone, not the server clock", () => {
+  // 18:30 UTC on the 10th is already 01:30 on the 11th in Vietnam.
+  const instant = new Date("2031-03-10T18:30:00Z");
+  assert.equal(dateInTimezone(instant, "Asia/Ho_Chi_Minh"), "2031-03-11");
+  assert.equal(dateInTimezone(instant, "UTC"), "2031-03-10");
+  assert.equal(dateInTimezone(new Date("2031-03-10T16:59:59Z"), "Asia/Ho_Chi_Minh"), "2031-03-10");
+
+  assert.equal(daysBetween("2031-03-11", "2031-03-14"), 3);
+  assert.equal(daysBetween("2031-03-11", "2031-03-10"), -1);
+  assert.equal(daysBetween("2031-02-27", "2031-03-01"), 2);
+});
+
+test("VNPay timestamps are GMT+7 whatever the server timezone", () => {
+  assert.equal(formatVnpayDate(new Date("2031-03-10T18:30:05Z")), "20310311013005");
+  assert.equal(formatVnpayDate(new Date("2030-12-31T17:00:00Z")), "20310101000000");
 });
 
 test("password rule needs 8+ characters with letters and numbers", () => {
