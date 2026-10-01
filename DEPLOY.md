@@ -38,6 +38,12 @@ Phù hợp với VPS chạy Linux có Docker.
 
    Sau đó đăng nhập `admin@example.com` / `Admin@12345`, đổi mật khẩu, rồi khoá hoặc đổi mật khẩu tài khoản `user@example.com`. Để đặt sẵn email và mật khẩu quản trị, thêm `SEED_ADMIN_EMAIL` và `SEED_ADMIN_PASSWORD` vào `.env` trước khi chạy lệnh trên.
 
+### Bảo vệ cơ sở dữ liệu
+
+- **Đặt `DB_PASSWORD` mạnh trước lần khởi động đầu tiên.** Giá trị mặc định `luxestay` chỉ dành cho máy cá nhân. Mật khẩu được ghi vào volume `db-data` ở lần chạy đầu; đổi `DB_PASSWORD` sau đó không tự đổi mật khẩu trong PostgreSQL (phải `ALTER USER luxestay PASSWORD ...` trong container `db`, hoặc xoá volume nếu chưa có dữ liệu thật).
+- **Không mở cổng 5432 ra ngoài.** `docker-compose.yml` cố ý không có mục `ports` cho dịch vụ `db`: chỉ container `api` trong cùng mạng Docker kết nối được. Đừng thêm `ports: "5432:5432"`. Nếu cần truy cập để quản trị, dùng `docker compose exec db psql -U luxestay luxestay`, hoặc SSH tunnel tới máy chủ.
+- Kiểm tra tường lửa của máy chủ: chỉ nên mở 80/443 (và SSH).
+
 Dữ liệu nằm trong ba volume: `db-data` (cơ sở dữ liệu), `uploads` (ảnh), `api-data` (khoá ký phiên đăng nhập). Hãy sao lưu `db-data` và `uploads`.
 
 Cập nhật phiên bản mới: lấy mã nguồn mới rồi chạy lại `docker compose up --build -d`. Migration tự chạy khi API khởi động.
@@ -122,6 +128,7 @@ Cả hai cổng gọi IPN từ máy chủ của họ, nên địa chỉ API ph�
 - [ ] `JWT_SECRET` là chuỗi ngẫu nhiên riêng của bạn; không file `.env` nào nằm trong git.
 - [ ] Đã đổi mật khẩu quản trị mặc định; tài khoản `user@example.com` đã bị khoá hoặc đổi mật khẩu.
 - [ ] `SEED_ON_START=false`.
+- [ ] `DB_PASSWORD` là mật khẩu mạnh, và cổng 5432 không truy cập được từ Internet.
 - [ ] Trang web chạy qua HTTPS và `AUTH_COOKIE_SECURE=true`.
 - [ ] `CLIENT_URL` / `PUBLIC_URL` khớp chính xác địa chỉ web.
 - [ ] `TRUST_PROXY_HOPS` bằng đúng số lớp proxy đứng trước API.

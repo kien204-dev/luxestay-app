@@ -33,6 +33,5 @@ Vì sao chưa sửa: `@firebase/firestore` ghim `@grpc/grpc-js` ở `~1.9.0`, n�
 
 - **MoMo là bản beta**: chưa được kiểm chứng với tài khoản MoMo thật; tắt mặc định (`MOMO_ENABLED`).
 - **Test của API dùng cơ sở dữ liệu giả lập**: không kiểm chứng câu SQL trên PostgreSQL thật.
-- **Độ dài tên chưa được kiểm tra**: tên người dùng dài hơn 100 ký tự hoặc tên phòng dài hơn 150 ký tự vượt giới hạn cột và làm API trả lỗi 500 thay vì 400.
 - **Cấu hình Render/Vercel trong `DEPLOY.md`** chưa được chạy thử trên hai nền tảng đó.
 - **Ảnh lưu trên đĩa của API**: nền tảng không có đĩa bền (ví dụ Render gói thường) sẽ mất ảnh sau mỗi lần triển khai.

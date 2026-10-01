@@ -2,6 +2,7 @@ const pool = require("../db/db.js");
 const { ROOM_UPLOAD_DIR } = require("../middleware/roomImageUpload.js");
 const { autoExpirePendingBookings } = require("./bookingController.js");
 const { deleteLocalUploadFile } = require("../utils/localUploads.js");
+const { findTextLimitError } = require("../utils/textLimits");
 
 const ROOM_SORT_COLUMNS = {
   name: "room_name",
@@ -259,6 +260,13 @@ exports.createRoom = async (req, res) => {
       });
     }
 
+    const lengthError = findTextLimitError({ room_name, room_type, location });
+    if (lengthError) {
+      return res.status(400).json({
+        message: lengthError,
+      });
+    }
+
     const parsedPrice = parseRoomPrice(price);
     const parsedCapacity = parsePositiveInteger(capacity, null);
 
@@ -329,6 +337,13 @@ exports.updateRoom = async (req, res) => {
     if (!room_name || !room_type) {
       return res.status(400).json({
         message: "room_name and room_type are required",
+      });
+    }
+
+    const lengthError = findTextLimitError({ room_name, room_type, location });
+    if (lengthError) {
+      return res.status(400).json({
+        message: lengthError,
       });
     }
 

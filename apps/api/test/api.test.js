@@ -1418,6 +1418,61 @@ describe("hotel booking API", () => {
     }
   });
 
+  it("rejects over-long text with a 400 instead of failing in the database", async () => {
+    const longName = await request(baseUrl, "/api/register", {
+      method: "POST",
+      body: JSON.stringify({ name: "n".repeat(101), email: "long@example.com", password: "guest123" }),
+    });
+    assert.equal(longName.response.status, 400);
+    assert.match(longName.body.message, /Name must be at most 100 characters/);
+
+    const longEmail = await request(baseUrl, "/api/register", {
+      method: "POST",
+      body: JSON.stringify({ name: "Ok", email: `${"e".repeat(250)}@example.com`, password: "guest123" }),
+    });
+    assert.equal(longEmail.response.status, 400);
+    assert.match(longEmail.body.message, /Email must be at most 255 characters/);
+
+    const profile = await request(baseUrl, "/api/users/me", {
+      method: "PUT",
+      headers: authHeader(userToken),
+      body: JSON.stringify({ name: "n".repeat(101), email: "user@example.com" }),
+    });
+    assert.equal(profile.response.status, 400);
+
+    const adminCreate = await request(baseUrl, "/api/users", {
+      method: "POST",
+      headers: authHeader(adminToken),
+      body: JSON.stringify({ name: "n".repeat(101), email: "x@example.com", password: "Temp-Pass-42" }),
+    });
+    assert.equal(adminCreate.response.status, 400);
+
+    const room = { room_name: "Room", room_type: "Deluxe", price: 100, capacity: 2 };
+    for (const [field, max] of [["room_name", 150], ["room_type", 100], ["location", 255]]) {
+      const created = await request(baseUrl, "/api/rooms", {
+        method: "POST",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ ...room, [field]: "x".repeat(max + 1) }),
+      });
+      assert.equal(created.response.status, 400, field);
+      assert.match(created.body.message, new RegExp(`at most ${max} characters`));
+
+      const updated = await request(baseUrl, "/api/rooms/1", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ ...room, [field]: "x".repeat(max + 1) }),
+      });
+      assert.equal(updated.response.status, 400, field);
+    }
+
+    const notText = await request(baseUrl, "/api/rooms", {
+      method: "POST",
+      headers: authHeader(adminToken),
+      body: JSON.stringify({ ...room, room_name: { nested: true } }),
+    });
+    assert.equal(notText.response.status, 400);
+  });
+
   it("registers a new user without exposing password", async () => {
     const result = await request(baseUrl, "/api/register", {
       method: "POST",
