@@ -65,6 +65,8 @@ API sẽ dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt
 
 ## Cấu hình
 
+**Chạy bằng Docker: sửa `.env` ở thư mục gốc. Chạy bằng `npm run dev`: sửa `apps/api/.env` và `apps/web/.env`.** Chi tiết từng biến, biến nào do compose đặt cố định, cách kiểm tra cấu hình đã nạp và ví dụ chạy thử VNPay qua tunnel: [docs/configuration.md](docs/configuration.md).
+
 Mọi biến đều có chú thích trong file mẫu:
 
 - [`.env.example`](.env.example) — dùng với Docker Compose

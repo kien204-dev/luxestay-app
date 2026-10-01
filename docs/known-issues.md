@@ -31,6 +31,7 @@ Vì sao chưa sửa: `@firebase/firestore` ghim `@grpc/grpc-js` ở `~1.9.0`, n�
 
 ## Khác
 
+- **VNPay sandbox chưa chạy trọn vòng với cổng thật: chờ VNPay kích hoạt merchant.** Đường dẫn thanh toán tạo ra hợp lệ nhưng sandbox trả lời "Website này chưa được phê duyệt" với cả hai tài khoản đã thử, kể cả khi địa chỉ trả về là tên miền đã đăng ký; đây là trạng thái merchant phía VNPay. Phần xử lý của ứng dụng (ký, kiểm tra chữ ký và số tiền, xác nhận booking, gửi lặp, tiền về sau khi hết hạn) được kiểm chứng bằng IPN giả lập trong `npm run test:integration`. Việc còn lại khi merchant được kích hoạt: một giao dịch thật đi hết vòng tạo → trả → IPN → booking "đã xác nhận".
 - **MoMo là bản beta**: chưa được kiểm chứng với tài khoản MoMo thật; tắt mặc định (`MOMO_ENABLED`).
 - **Thống kê Dashboard**: số phòng trống/đã đặt và doanh thu vẫn tính theo cách cũ (theo trạng thái phòng và ngày tạo booking, gồm cả booking chưa thanh toán); biểu đồ theo giờ/ngày dùng giờ của máy chủ chứ chưa theo `APP_TIMEZONE`. Sẽ sửa ở Giai đoạn 4.
 - **Migration 013 thêm ràng buộc chống trùng lịch**: nếu cơ sở dữ liệu cũ đã có hai booking đang hoạt động chồng ngày cho cùng một phòng, migration sẽ dừng với lỗi. Hủy một trong hai booking rồi chạy lại.
