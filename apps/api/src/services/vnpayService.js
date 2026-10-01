@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const { getPublicWebUrl } = require("./allowedOrigins");
 
 // Implements VNPay's "Payment URL" (API v2.1.0) signing scheme as documented
 // at https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html: the
@@ -9,12 +10,16 @@ const crypto = require("node:crypto");
 // VNPay's "Invalid signature" / code 70 error; this encoded version was
 // confirmed accepted).
 
+const PAYMENT_RESULT_PATH = "/payment/result";
+
 function getVnpayConfig() {
   return {
     tmnCode: process.env.VNPAY_TMN_CODE,
     hashSecret: process.env.VNPAY_HASH_SECRET,
     payUrl: process.env.VNPAY_PAY_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
-    returnUrl: process.env.VNPAY_RETURN_URL,
+    // Where VNPay sends the guest back to. Follows the web address unless
+    // set explicitly.
+    returnUrl: process.env.VNPAY_RETURN_URL || `${getPublicWebUrl()}${PAYMENT_RESULT_PATH}`,
   };
 }
 
@@ -24,7 +29,6 @@ function assertVnpayConfigured() {
 
   if (!config.tmnCode) missing.push("VNPAY_TMN_CODE");
   if (!config.hashSecret) missing.push("VNPAY_HASH_SECRET");
-  if (!config.returnUrl) missing.push("VNPAY_RETURN_URL");
 
   if (missing.length > 0) {
     throw new Error(`VNPay is not configured. Missing: ${missing.join(", ")}`);
@@ -129,6 +133,7 @@ function verifyVnpaySignature(query) {
 
 module.exports = {
   assertVnpayConfigured,
+  getVnpayConfig,
   formatVnpayDate,
   buildVnpayPayUrl,
   verifyVnpaySignature,

@@ -7,7 +7,7 @@ const { escapeHtml } = require("../src/utils/html");
 const { listMigrationFiles } = require("../src/db/migrate");
 const { assertResetAllowed } = require("../src/db/reset");
 const { dateInTimezone, daysBetween, isValidTimezone } = require("../src/utils/time");
-const { formatVnpayDate } = require("../src/services/vnpayService");
+const { formatVnpayDate, getVnpayConfig } = require("../src/services/vnpayService");
 const { buildAllowedOrigins, getPublicWebUrl } = require("../src/services/allowedOrigins");
 
 const validEnv = {
@@ -76,6 +76,21 @@ test("the public web URL is the main address, without a trailing slash", () => {
   assert.equal(getPublicWebUrl({ FRONTEND_URL: "https://stay.example.com/" }), "https://stay.example.com");
   assert.equal(getPublicWebUrl({ CLIENT_URL: "https://c.example.com" }), "https://c.example.com");
   assert.equal(getPublicWebUrl({}), "http://localhost:5173");
+});
+
+test("the VNPay return URL follows the web address unless set explicitly", () => {
+  const saved = { ...process.env };
+  try {
+    delete process.env.VNPAY_RETURN_URL;
+    delete process.env.CLIENT_URL;
+    process.env.FRONTEND_URL = "https://stay.example.com/";
+    assert.equal(getVnpayConfig().returnUrl, "https://stay.example.com/payment/result");
+
+    process.env.VNPAY_RETURN_URL = "https://other.example.com/done";
+    assert.equal(getVnpayConfig().returnUrl, "https://other.example.com/done");
+  } finally {
+    process.env = saved;
+  }
 });
 
 test("password rule needs 8+ characters with letters and numbers", () => {
