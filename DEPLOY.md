@@ -28,7 +28,7 @@ Phù hợp với VPS chạy Linux có Docker.
 
 4. Đặt một reverse proxy có HTTPS (Caddy, nginx, Cloudflare Tunnel…) trỏ tên miền về cổng `WEB_PORT`. `PUBLIC_URL` phải khớp chính xác địa chỉ người dùng mở trên trình duyệt.
 
-   Khi có thêm proxy này phía trước, API đứng sau hai lớp proxy: thêm `TRUST_PROXY_HOPS=2` vào `.env` để giới hạn tần suất tính đúng địa chỉ IP của khách.
+   Khi có thêm proxy này phía trước, API đứng sau hai lớp proxy (proxy của bạn và nginx trong container `web`): thêm `TRUST_PROXY_HOPS=2` vào `.env` để giới hạn tần suất tính đúng địa chỉ IP của khách. Nếu trang còn được mở qua địa chỉ khác (một tunnel, tên miền phụ), liệt kê chúng trong `ALLOWED_ORIGINS`, phân cách bằng dấu phẩy.
 
 5. Tạo tài khoản quản trị. Nếu muốn dùng dữ liệu mẫu, chạy một lần:
 
