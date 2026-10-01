@@ -9,4 +9,8 @@ apps/api/uploads
 *.log
 *.md
 docs
+scripts
+docker-compose.test.yml
+apps/api/test
+apps/api/test-integration
 !apps/api/seed-assets/**/*.md

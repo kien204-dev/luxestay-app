@@ -57,7 +57,8 @@ API sẽ dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt
 | `npm run build` | Build web ra `apps/web/dist` |
 | `npm start` | Chạy API ở chế độ thường |
 | `npm run lint` | ESLint cho cả hai app |
-| `npm test` | Test của API |
+| `npm test` | Test đơn vị của API (không cần cơ sở dữ liệu) |
+| `npm run test:integration` | Test tích hợp trên PostgreSQL thật; tự dựng và xoá một container tạm (cần Docker) |
 | `npm run db:migrate` | Chạy các migration chưa áp dụng |
 | `npm run db:seed` | Nạp dữ liệu mẫu (chạy lại không tạo trùng). Thêm `-- --all-rooms` để nạp khoảng 390 phòng |
 | `npm run db:reset` | Xoá toàn bộ dữ liệu rồi migrate + seed lại. Chỉ chạy với cơ sở dữ liệu cục bộ, trừ khi đặt `ALLOW_DB_RESET=true` |
@@ -71,6 +72,21 @@ Mọi biến đều có chú thích trong file mẫu:
 - [`apps/web/.env.example`](apps/web/.env.example) — web khi chạy thủ công
 
 Bắt buộc với API: `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` (từ 32 ký tự). Với Docker Compose, các giá trị này đã có sẵn; `JWT_SECRET` được tự sinh và lưu lại nếu bạn không đặt.
+
+### Quy tắc đặt phòng
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---|---|
+| `APP_TIMEZONE` | `Asia/Ho_Chi_Minh` | Múi giờ của cơ sở lưu trú. "Hôm nay" được tính theo múi giờ này, không theo giờ máy chủ |
+| `PENDING_BOOKING_TTL_MINUTES` | `30` | Booking chưa thanh toán được giữ chỗ bao lâu trước khi tự hủy |
+| `FREE_CANCELLATION_DAYS` | `3` | Khách tự hủy được booking **đã thanh toán** cho tới trước ngày nhận phòng bấy nhiêu ngày. Booking chưa thanh toán luôn hủy được; quản trị luôn hủy được |
+
+Tiền và hoàn tiền:
+
+- Hủy một booking đã thanh toán chuyển nó sang **Chờ hoàn tiền**. Ứng dụng không tự chuyển tiền: quản trị hoàn tiền cho khách bằng tay rồi bấm **Xác nhận hoàn tiền** ở trang Orders.
+- Nếu tiền về sau khi booking đã hết hạn hoặc đã hủy: phòng còn trống thì booking được khôi phục và xác nhận; phòng đã có người khác đặt thì booking chuyển sang Chờ hoàn tiền và quản trị được báo (thông báo trên trang quản trị, và email nếu đã cấu hình SMTP).
+- Khách trả tiền mặt hoặc chuyển khoản: quản trị bấm **Đã thu tiền** ở trang Orders.
+- Booking đã có thanh toán không xoá được, chỉ hủy được, để giữ lại lịch sử giao dịch.
 
 ### Tính năng tuỳ chọn
 
@@ -129,7 +145,8 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/:id`, `/rooms/:id/reviews` | Công khai |
 | Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, ảnh phòng | Quản trị |
 | Đặt phòng | `GET/POST /bookings`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel` | Chủ booking hoặc quản trị |
-| Đặt phòng | `PUT/DELETE /bookings/:id`, `GET /bookings/calendar` | Quản trị |
+| Đặt phòng | `GET /bookings/policy` | Công khai |
+| Đặt phòng | `PUT/DELETE /bookings/:id`, `GET /bookings/calendar`, `PATCH /bookings/:id/mark-paid`, `PATCH /bookings/:id/refund` | Quản trị |
 | Thanh toán | `GET /payments/providers` | Công khai |
 | Thanh toán | `POST/GET /payments/bookings/:id`, `GET /payments/transactions/:ref` | Chủ booking hoặc quản trị |
 | Thanh toán | `GET /payments/vnpay/ipn`, `POST /payments/momo/ipn` | Cổng thanh toán (xác thực bằng chữ ký) |
@@ -146,7 +163,7 @@ npm run lint
 npm test
 ```
 
-Test của API chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên không cần PostgreSQL, và vì vậy cũng không kiểm chứng câu SQL thật. Để thử trên PostgreSQL thật, dùng `npm run db:reset` rồi chạy ứng dụng.
+`npm test` chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên nhanh và không cần PostgreSQL. `npm run test:integration` chạy ứng dụng thật trên PostgreSQL thật (trong Docker) để kiểm chứng những gì bản giả lập không thấy được: khoá dòng khi đặt phòng đồng thời, ràng buộc chống trùng lịch, luồng hoàn tiền và múi giờ.
 
 ## Triển khai
 

@@ -32,6 +32,8 @@ Vì sao chưa sửa: `@firebase/firestore` ghim `@grpc/grpc-js` ở `~1.9.0`, n�
 ## Khác
 
 - **MoMo là bản beta**: chưa được kiểm chứng với tài khoản MoMo thật; tắt mặc định (`MOMO_ENABLED`).
-- **Test của API dùng cơ sở dữ liệu giả lập**: không kiểm chứng câu SQL trên PostgreSQL thật.
+- **Thống kê Dashboard**: số phòng trống/đã đặt và doanh thu vẫn tính theo cách cũ (theo trạng thái phòng và ngày tạo booking, gồm cả booking chưa thanh toán); biểu đồ theo giờ/ngày dùng giờ của máy chủ chứ chưa theo `APP_TIMEZONE`. Sẽ sửa ở Giai đoạn 4.
+- **Migration 013 thêm ràng buộc chống trùng lịch**: nếu cơ sở dữ liệu cũ đã có hai booking đang hoạt động chồng ngày cho cùng một phòng, migration sẽ dừng với lỗi. Hủy một trong hai booking rồi chạy lại.
+- **Cột `created_at` của users/rooms/bookings** là `TIMESTAMP` không kèm múi giờ, nên giờ tạo hiển thị có thể lệch theo múi giờ của cơ sở dữ liệu. Ngày nhận/trả phòng không bị ảnh hưởng.
 - **Cấu hình Render/Vercel trong `DEPLOY.md`** chưa được chạy thử trên hai nền tảng đó.
 - **Ảnh lưu trên đĩa của API**: nền tảng không có đĩa bền (ví dụ Render gói thường) sẽ mất ảnh sau mỗi lần triển khai.

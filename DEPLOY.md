@@ -46,6 +46,8 @@ Phù hợp với VPS chạy Linux có Docker.
 
 Dữ liệu nằm trong ba volume: `db-data` (cơ sở dữ liệu), `uploads` (ảnh), `api-data` (khoá ký phiên đăng nhập). Hãy sao lưu `db-data` và `uploads`.
 
+Trước khi cập nhật lên bản có migration `013` trên dữ liệu thật: xem mục "Migration 013" trong `docs/known-issues.md`.
+
 Cập nhật phiên bản mới: lấy mã nguồn mới rồi chạy lại `docker compose up --build -d`. Migration tự chạy khi API khởi động.
 
 ## Cách 2 — Tách dịch vụ: Neon + Render + Vercel
