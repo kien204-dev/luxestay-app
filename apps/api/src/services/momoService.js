@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
-const { APP_NAME } = require("../config/brand");
+const { getPropertySettings } = require("./propertySettings");
+const { getPublicWebUrl } = require("./allowedOrigins");
 
 // Implements MoMo's "Payment with MoMo" (captureWallet) API as documented at
 // https://developers.momo.vn/v3/docs/payment/api/wallet/onetime — the create
@@ -21,7 +22,8 @@ function getMomoConfig() {
     accessKey: process.env.MOMO_ACCESS_KEY,
     secretKey: process.env.MOMO_SECRET_KEY,
     apiUrl: process.env.MOMO_API_URL || "https://test-payment.momo.vn/v2/gateway/api/create",
-    redirectUrl: process.env.MOMO_RETURN_URL,
+    // Follows the web address unless set explicitly.
+    redirectUrl: process.env.MOMO_RETURN_URL || `${getPublicWebUrl()}/payment/result`,
     ipnUrl: process.env.MOMO_IPN_URL,
   };
 }
@@ -33,7 +35,6 @@ function assertMomoConfigured() {
   if (!config.partnerCode) missing.push("MOMO_PARTNER_CODE");
   if (!config.accessKey) missing.push("MOMO_ACCESS_KEY");
   if (!config.secretKey) missing.push("MOMO_SECRET_KEY");
-  if (!config.redirectUrl) missing.push("MOMO_RETURN_URL");
   if (!config.ipnUrl) missing.push("MOMO_IPN_URL");
 
   if (missing.length > 0) {
@@ -42,6 +43,8 @@ function assertMomoConfigured() {
 
   return config;
 }
+
+const MOMO_REQUEST_TIMEOUT_MS = 10 * 1000;
 
 function sign(rawSignature, secretKey) {
   return crypto.createHmac("sha256", secretKey).update(rawSignature, "utf-8").digest("hex");
@@ -67,7 +70,7 @@ async function createMomoPayUrl({ amount, transactionRef, orderInfo }) {
 
   const body = {
     partnerCode: config.partnerCode,
-    partnerName: APP_NAME,
+    partnerName: (await getPropertySettings()).name,
     requestId,
     amount: amountStr,
     orderId,
@@ -84,6 +87,8 @@ async function createMomoPayUrl({ amount, transactionRef, orderInfo }) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    // Never let a slow gateway hang the guest's request indefinitely.
+    signal: AbortSignal.timeout(MOMO_REQUEST_TIMEOUT_MS),
   });
 
   const data = await response.json();
@@ -125,6 +130,7 @@ function verifyMomoSignature(body) {
 
 module.exports = {
   assertMomoConfigured,
+  getMomoConfig,
   isMomoEnabled,
   createMomoPayUrl,
   verifyMomoSignature,

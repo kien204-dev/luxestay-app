@@ -1,9 +1,9 @@
 const pool = require("../db/db.js");
 const bcrypt = require("bcryptjs");
 const { setAuthCookie } = require("../services/authSession");
-const { deleteLocalUploadFile } = require("../utils/localUploads.js");
-const { AVATAR_UPLOAD_DIR } = require("../middleware/avatarUpload.js");
+const { removeUpload } = require("../services/storage.js");
 const { isStrongPassword, PASSWORD_RULE_MESSAGE } = require("../utils/password");
+const { findTextLimitError } = require("../utils/textLimits");
 
 const ALLOWED_ROLES = ["admin", "user"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -121,6 +121,13 @@ exports.createUser = async (req, res) => {
       });
     }
 
+    const lengthError = findTextLimitError({ name, email });
+    if (lengthError) {
+      return res.status(400).json({
+        message: lengthError,
+      });
+    }
+
     // Kiểm tra email tồn tại
     if (!validateEmail(email)) {
       return res.status(400).json({
@@ -210,6 +217,13 @@ exports.updateUser = async (req, res) => {
     if (!name || !email) {
       return res.status(400).json({
         message: "Name and email are required",
+      });
+    }
+
+    const lengthError = findTextLimitError({ name, email });
+    if (lengthError) {
+      return res.status(400).json({
+        message: lengthError,
       });
     }
 
@@ -493,6 +507,13 @@ exports.updateCurrentUser = async (req, res) => {
       });
     }
 
+    const lengthError = findTextLimitError({ name, email, bio });
+    if (lengthError) {
+      return res.status(400).json({
+        message: lengthError,
+      });
+    }
+
     if (!validateEmail(email)) {
       return res.status(400).json({
         message: "Email is invalid",
@@ -563,9 +584,7 @@ exports.updateCurrentUser = async (req, res) => {
         "SELECT 1 FROM users WHERE avatar_url = $1 AND id != $2 LIMIT 1",
         [previousAvatarUrl, id]
       );
-      if (stillUsed.rows.length === 0) deleteLocalUploadFile(previousAvatarUrl, AVATAR_UPLOAD_DIR, "/uploads/avatars/", {
-        userId: id,
-      });
+      if (stillUsed.rows.length === 0) removeUpload(previousAvatarUrl, "avatars", { userId: id });
     }
 
     res.json({

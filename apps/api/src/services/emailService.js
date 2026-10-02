@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const dns = require("node:dns").promises;
 const net = require("node:net");
-const { APP_NAME } = require("../config/brand");
+const { getPropertySettings } = require("./propertySettings");
 const { escapeHtml } = require("../utils/html");
 
 function getSmtpConfig() {
@@ -21,8 +21,12 @@ function assertEmailConfigured() {
 
   if (!config.host) missing.push("SMTP_HOST");
   if (!process.env.SMTP_PORT) missing.push("SMTP_PORT");
-  if (!config.user) missing.push("SMTP_USER");
-  if (!config.pass) missing.push("SMTP_PASS (or SMTP_PASSWORD)");
+  // SMTP_USER/SMTP_PASS are optional: a relay on a private network (or a
+  // test inbox such as Mailpit) takes mail without signing in. Giving only
+  // one of the two is a mistake, though.
+  if (Boolean(config.user) !== Boolean(config.pass)) {
+    missing.push(config.user ? "SMTP_PASS (or SMTP_PASSWORD)" : "SMTP_USER");
+  }
   if (!config.from) missing.push("SMTP_FROM");
 
   if (missing.length > 0) {
@@ -43,10 +47,18 @@ async function resolveSmtpIpv4(host, lookup = dns.lookup) {
   return result.address;
 }
 
-async function sendPasswordResetEmail({ to, name, resetUrl }) {
-  const config = assertEmailConfigured();
+function isEmailConfigured() {
+  try {
+    assertEmailConfigured();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function createTransporter(config) {
   const ipv4Host = await resolveSmtpIpv4(config.host);
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host: ipv4Host,
     port: config.port,
     secure: config.secure,
@@ -57,11 +69,14 @@ async function sendPasswordResetEmail({ to, name, resetUrl }) {
       // TLS certificate verification must still use the original SMTP hostname.
       servername: config.host,
     },
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
+    ...(config.user ? { auth: { user: config.user, pass: config.pass } } : {}),
   });
+}
+
+async function sendPasswordResetEmail({ to, name, resetUrl }) {
+  const config = assertEmailConfigured();
+  const transporter = await createTransporter(config);
+  const { name: APP_NAME } = await getPropertySettings();
 
   await transporter.sendMail({
     from: config.from,
@@ -84,8 +99,36 @@ async function sendPasswordResetEmail({ to, name, resetUrl }) {
   });
 }
 
+// "Some Name <a@b.c>" or "a@b.c" -> "a@b.c"
+function addressOf(from) {
+  const match = String(from).match(/<([^>]+)>/);
+  return (match ? match[1] : String(from)).trim();
+}
+
+// Any message to a guest. html is optional. fromName replaces the display
+// name of SMTP_FROM (the address itself stays as configured), so mail shows
+// the property's current name even after an admin renames it.
+async function sendEmail({ to, subject, text, html, fromName }) {
+  const config = assertEmailConfigured();
+  const transporter = await createTransporter(config);
+  const from = fromName ? { name: fromName, address: addressOf(config.from) } : config.from;
+
+  await transporter.sendMail({ from, to, subject, text, ...(html ? { html } : {}) });
+}
+
+// Plain-text operational notice to the property's admins.
+async function sendAdminEmail({ to, subject, text }) {
+  const config = assertEmailConfigured();
+  const transporter = await createTransporter(config);
+
+  await transporter.sendMail({ from: config.from, to, subject, text });
+}
+
 module.exports = {
   assertEmailConfigured,
+  isEmailConfigured,
+  sendAdminEmail,
+  sendEmail,
   resolveSmtpIpv4,
   sendPasswordResetEmail,
 };

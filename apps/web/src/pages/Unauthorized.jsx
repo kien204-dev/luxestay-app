@@ -6,8 +6,8 @@ function Unauthorized() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const homePath = !user ? "/login" : user.role === "admin" ? "/dashboard" : "/booking";
-  const homeLabel = !user ? "Về trang đăng nhập" : user.role === "admin" ? "Về Dashboard" : "Về trang đặt phòng";
+  const homePath = user?.role === "admin" ? "/admin" : "/";
+  const homeLabel = user?.role === "admin" ? "Về Dashboard" : "Về trang chủ";
 
   return (
     <div

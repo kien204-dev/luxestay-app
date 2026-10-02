@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import api from "../services/api";
+import api, { SESSION_EXPIRED_EVENT } from "../services/api";
 
 const AuthContext = createContext();
 
@@ -19,15 +19,13 @@ function readStoredUser() {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(readStoredUser);
-  // Only wait on a server round-trip when we have a cached user to verify;
-  // guests skip straight to loading:false so anonymous pages never stall.
+  // Only wait on a server round-trip when there is a cached user to verify;
+  // guests start with loading:false so public pages never stall.
   const [loading, setLoading] = useState(() => Boolean(readStoredUser()));
 
+  // Runs once on mount to verify the session cached from a previous visit.
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return undefined;
-    }
+    if (!readStoredUser()) return undefined;
 
     let cancelled = false;
 
@@ -54,8 +52,13 @@ export const AuthProvider = ({ children }) => {
     return () => {
       cancelled = true;
     };
-    // Runs once on mount to verify the session cached from a previous visit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Any API call can discover that the session has ended (see services/api.js).
+  useEffect(() => {
+    const handleExpired = () => setUser(null);
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired);
   }, []);
 
   const login = useCallback((userData) => {
@@ -65,11 +68,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     localStorage.removeItem("user");
-    const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
-    fetch(`${apiBaseUrl}/logout`, {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => {});
+    api.post("/logout").catch(() => {});
     setUser(null);
   }, []);
 

@@ -99,3 +99,8 @@ html, body, #root {
   animation: luxe-shimmer 1.6s ease-in-out infinite;
   border-radius: 12px;
 }
+/* The account page lays its columns out with inline grid styles; on a phone
+   they stack instead of squeezing the form off the screen. */
+@media (max-width: 760px) {
+  .settings-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}

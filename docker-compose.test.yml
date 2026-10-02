@@ -1,0 +1,25 @@
+# Throwaway PostgreSQL for `npm run test:integration`. Data lives in memory
+# and the port is bound to this machine only.
+services:
+  db-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: luxestay
+      POSTGRES_PASSWORD: luxestay
+      POSTGRES_DB: luxestay_test
+    ports:
+      - "127.0.0.1:${TEST_DB_PORT:-54330}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U luxestay -d luxestay_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # A stand-in S3 server for the storage driver tests: in-memory, accepts any
+  # credentials, bound to this machine only.
+  s3-test:
+    image: adobe/s3mock:latest
+    ports:
+      - "127.0.0.1:${TEST_S3_PORT:-54331}:9090"

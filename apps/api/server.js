@@ -10,7 +10,9 @@ const { globalErrorHandler } = require("./src/middleware/errorHandler");
 const { initSocket } = require("./src/services/socket");
 const { apiRateLimit } = require("./src/middleware/rateLimit");
 const { getEnvProblems } = require("./src/config/env");
+const { describeConfig } = require("./src/config/summary");
 const pool = require("./src/db/db");
+const { runBookingMaintenance } = require("./src/controller/bookingController");
 
 const app = express();
 
@@ -49,6 +51,7 @@ const roomRoutes = require("./src/routes/roomRoutes");
 const paymentRoutes = require("./src/routes/payments");
 const reviewRoutes = require("./src/routes/reviews");
 const couponRoutes = require("./src/routes/coupons");
+const settingsRoutes = require("./src/routes/settings");
 
 // Only trust X-Forwarded-* when the app really sits behind that many reverse
 // proxies (e.g. 1 on Render or behind the bundled nginx). Trusting it without
@@ -92,6 +95,7 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/settings", settingsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
@@ -109,6 +113,10 @@ async function start() {
     process.exit(1);
   }
 
+  // What was actually loaded, so a wrong .env file or an overridden value is
+  // visible at a glance. Secrets are reported as set/empty only.
+  describeConfig().forEach((line) => console.log(line));
+
   try {
     await pool.query("SELECT 1");
   } catch (err) {
@@ -120,6 +128,21 @@ async function start() {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
   });
   initSocket(httpServer);
+  startBookingMaintenanceJob();
+}
+
+const BOOKING_MAINTENANCE_INTERVAL_MS = 60 * 1000;
+
+// Expires unpaid bookings and completes finished stays on a timer, so state
+// moves on even when nobody is using the site.
+function startBookingMaintenanceJob() {
+  const tick = () =>
+    runBookingMaintenance({ force: true }).catch((err) =>
+      console.error("BOOKING MAINTENANCE ERROR:", err.message)
+    );
+
+  tick();
+  setInterval(tick, BOOKING_MAINTENANCE_INTERVAL_MS).unref();
 }
 
 if (require.main === module) {

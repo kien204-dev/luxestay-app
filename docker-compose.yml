@@ -1,8 +1,9 @@
 # One-command setup:  docker compose up --build
 # Then open http://localhost:8080 (sample logins are in the README).
 #
-# Every ${VAR:-default} below can be overridden from a .env file next to this
-# one; see .env.example.
+# Configuration lives in ONE file: .env next to this one (copy .env.example).
+# It is used twice: for the ${VAR} placeholders below, and passed as-is to
+# the api container (env_file). See docs/configuration.md.
 
 services:
   db:
@@ -28,39 +29,78 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Everything in .env reaches the API (VNPAY_*, SMTP_*, MOMO_*, ...).
     env_file:
       - path: .env
         required: false
+    # Values here win over .env.
     environment:
+      # --- Fixed by this file: they describe the containers themselves, so
+      # --- setting them in .env has no effect.
       PORT: 3001
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: luxestay
-      DB_PASSWORD: ${DB_PASSWORD:-luxestay}
       DB_NAME: luxestay
       DB_SSL: "false"
-      # Left empty, the container generates a secret and keeps it in api-data.
-      JWT_SECRET: ${JWT_SECRET:-}
+      # --- The web address. Set PUBLIC_URL, not CLIENT_URL/FRONTEND_URL.
+      # --- More addresses (a tunnel, a second domain): ALLOWED_ORIGINS in .env.
       CLIENT_URL: ${PUBLIC_URL:-http://localhost:8080}
       FRONTEND_URL: ${PUBLIC_URL:-http://localhost:8080}
-      # nginx in the web container is the one proxy in front of the API.
-      TRUST_PROXY_HOPS: 1
-      # Plain http on localhost. Set to "true" once the site is behind HTTPS.
+      # --- Defaults you can change in .env.
+      DB_PASSWORD: ${DB_PASSWORD:-luxestay}
+      # Left empty, the container generates a secret and keeps it in api-data.
+      JWT_SECRET: ${JWT_SECRET:-}
+      # nginx in the web container is one proxy in front of the API. Add one
+      # for each further proxy or tunnel in front of that.
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+      # Plain http on localhost. Set to "true" once the site is HTTPS only.
       AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
-      AUTH_COOKIE_SAME_SITE: lax
+      AUTH_COOKIE_SAME_SITE: ${AUTH_COOKIE_SAME_SITE:-lax}
       SEED_ON_START: ${SEED_ON_START:-true}
       APP_NAME: ${APP_NAME:-LuxeStay}
+      # One name in .env for both halves; the older VITE_* names still work.
+      DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-${VITE_DEFAULT_LANGUAGE:-vi}}
+      CONTACT_PHONE: ${CONTACT_PHONE:-${VITE_CONTACT_PHONE:-}}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-${VITE_CONTACT_EMAIL:-}}
+      CONTACT_ADDRESS: ${CONTACT_ADDRESS:-${VITE_CONTACT_ADDRESS:-}}
     volumes:
       - uploads:/app/apps/api/uploads
       - api-data:/data
+
+  # Optional test inbox: catches every email the app sends and shows it at
+  # http://localhost:8025 instead of delivering it. Start it with
+  #   docker compose --profile mail up
+  # and point the API at it in .env: SMTP_HOST=mailpit, SMTP_PORT=1025,
+  # SMTP_FROM="Your Property <no-reply@example.com>" (no user/password).
+  mailpit:
+    image: axllent/mailpit:v1.27
+    profiles: ["mail"]
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      # Baked into the JavaScript when the image is built: after changing any
+      # of these in .env, rebuild with `docker compose up --build`.
       args:
         VITE_API_URL: /api
         VITE_APP_NAME: ${APP_NAME:-LuxeStay}
+        VITE_DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-${VITE_DEFAULT_LANGUAGE:-vi}}
+        # Only what the page shows until the API answers; the live values come
+        # from /api/settings/public.
+        VITE_CONTACT_PHONE: ${CONTACT_PHONE:-${VITE_CONTACT_PHONE:-}}
+        VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-${VITE_CONTACT_EMAIL:-}}
+        VITE_CONTACT_ADDRESS: ${CONTACT_ADDRESS:-${VITE_CONTACT_ADDRESS:-}}
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-}
+        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET:-}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID:-}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-}
     restart: unless-stopped
     depends_on:
       - api

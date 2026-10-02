@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const pool = require("../db/db");
 const { isGoogleLoginConfigured, verifyFirebaseIdToken } = require("../services/firebaseAdmin");
 const { clearAuthCookie, setAuthCookie } = require("../services/authSession");
+const { getPublicWebUrl } = require("../services/allowedOrigins");
 const {
   forgotPasswordRateLimit,
   loginRateLimit,
@@ -11,6 +12,7 @@ const {
   resetPasswordRateLimit,
 } = require("../middleware/rateLimit");
 const { isStrongPassword, PASSWORD_RULE_MESSAGE } = require("../utils/password");
+const { TEXT_LIMITS, findTextLimitError } = require("../utils/textLimits");
 const {
   assertEmailConfigured,
   sendPasswordResetEmail,
@@ -97,6 +99,10 @@ router.post("/register", registerRateLimit, async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email and password are required" });
     }
+    const lengthError = findTextLimitError({ name, email });
+    if (lengthError) {
+      return res.status(400).json({ message: lengthError });
+    }
     if (!EMAIL_PATTERN.test(email)) {
       return res.status(400).json({ message: "Email is invalid" });
     }
@@ -161,8 +167,7 @@ router.post("/forgot-password", forgotPasswordRateLimit, async (req, res) => {
       [user.id, tokenHash, expiresAt]
     );
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    const resetUrl = `${frontendUrl.replace(/\/$/, "")}/reset-password?token=${rawToken}`;
+    const resetUrl = `${getPublicWebUrl()}/reset-password?token=${rawToken}`;
     await sendPasswordResetEmail({ to: user.email, name: user.name, resetUrl });
 
     return res.json({ message: RESET_RESPONSE_MESSAGE });
@@ -260,8 +265,8 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
 
     const email = decoded.email.trim().toLowerCase();
     const name = typeof decoded.name === "string" && decoded.name.trim()
-      ? decoded.name.trim()
-      : email.split("@")[0];
+      ? decoded.name.trim().slice(0, TEXT_LIMITS.name)
+      : email.split("@")[0].slice(0, TEXT_LIMITS.name);
 
     let result = await pool.query(
       `SELECT ${AUTH_USER_FIELDS}, google_uid

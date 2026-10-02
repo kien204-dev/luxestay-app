@@ -1,28 +1,17 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { loginPathFor } from "../utils/authRedirect";
+import PageLoader from "../components/PageLoader";
 
 function PrivateRoute({ children, role }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
-    return (
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: "var(--color-navy-950)",
-        color: "var(--color-text-primary)",
-      }}>
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return <PageLoader />;
 
-  // Chưa login
+  // Not signed in: come back to this exact page afterwards.
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={loginPathFor(location)} replace />;
   }
 
   if (
@@ -32,7 +21,6 @@ function PrivateRoute({ children, role }) {
     return <Navigate to="/settings" replace />;
   }
 
-  // Không đúng role
   if (role && user.role !== role) {
     return <Navigate to="/unauthorized" replace />;
   }

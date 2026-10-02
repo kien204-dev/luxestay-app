@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { APP_NAME } from "../config/brand";
+import { useProperty } from "../context/PropertyContext";
 import {
   changeCurrentUserPassword,
   getCurrentUser,
@@ -28,6 +28,7 @@ const initialPassword = {
 function Settings() {
   const menu = ["Profile", "Security", "Notifications", "System"];
   const { updateCurrentUser } = useAuth();
+  const { name: APP_NAME } = useProperty();
   const [profile, setProfile] = useState(initialProfile);
   const [savedProfile, setSavedProfile] = useState(initialProfile);
   const [passwordForm, setPasswordForm] = useState(initialPassword);
@@ -212,7 +213,7 @@ function Settings() {
     return (
       <div style={{ minHeight: 320 }}>
         <div className="luxe-skeleton" style={{ height: 32, width: "20%", marginBottom: 28 }} />
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(180px, 240px) minmax(0, 1fr)", gap: 28 }}>
+        <div className="settings-grid" style={{ display: "grid", gridTemplateColumns: "minmax(180px, 240px) minmax(0, 1fr)", gap: 28 }}>
           <div className="luxe-skeleton" style={{ height: 220, borderRadius: "var(--radius-lg)" }} />
           <div className="luxe-skeleton" style={{ height: 380, borderRadius: "var(--radius-lg)" }} />
         </div>
@@ -248,6 +249,7 @@ function Settings() {
       </header>
 
       <div
+        className="settings-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(180px, 240px) minmax(0, 1fr)",
@@ -317,6 +319,7 @@ function Settings() {
             {profileSuccess && <Alert type="success">{profileSuccess}</Alert>}
 
             <div
+              className="settings-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "160px minmax(0, 1fr)",
@@ -391,6 +394,7 @@ function Settings() {
 
               <div>
                 <div
+                  className="settings-grid"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
@@ -496,6 +500,7 @@ function Settings() {
             {passwordSuccess && <Alert type="success">{passwordSuccess}</Alert>}
 
             <div
+              className="settings-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -555,6 +560,7 @@ function Settings() {
           </p>
 
           <div
+            className="settings-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(2, minmax(0, 1fr))",

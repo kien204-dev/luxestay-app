@@ -5,6 +5,11 @@ const {
   getBookings,
   getBookingById,
   getBookingCalendar,
+  getBookingPolicy,
+  getBookingSummary,
+  getBookingReceipt,
+  markBookingPaid,
+  confirmRefund,
   createBooking,
   updateBookingStatus,
   cancelBooking,
@@ -14,10 +19,15 @@ const {
 const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 
 router.get("/", verifyToken, getBookings);
+router.get("/policy", getBookingPolicy);
+router.get("/summary", verifyToken, checkRole("admin"), getBookingSummary);
 router.get("/calendar", verifyToken, checkRole("admin"), getBookingCalendar);
+router.get("/:id/receipt", verifyToken, getBookingReceipt);
 router.get("/:id", verifyToken, getBookingById);
 router.post("/", verifyToken, createBooking);
 router.patch("/:id/cancel", verifyToken, cancelBooking);
+router.patch("/:id/mark-paid", verifyToken, checkRole("admin"), markBookingPaid);
+router.patch("/:id/refund", verifyToken, checkRole("admin"), confirmRefund);
 router.put("/:id", verifyToken, checkRole("admin"), updateBookingStatus);
 router.delete("/:id", verifyToken, checkRole("admin"), deleteBooking);
 

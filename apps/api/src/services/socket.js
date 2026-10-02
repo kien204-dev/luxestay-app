@@ -81,8 +81,15 @@ function emitBookingCreated(booking) {
   io.to("admins").emit("booking:created", booking);
 }
 
+// Generic admin-only broadcast (refund alerts and the like). Same rule as
+// above: only call it once the change it announces has been committed.
+function emitToAdmins(event, payload) {
+  if (!io) return;
+  io.to("admins").emit(event, payload);
+}
+
 function getIO() {
   return io;
 }
 
-module.exports = { initSocket, emitBookingCreated, getIO };
+module.exports = { initSocket, emitBookingCreated, emitToAdmins, getIO };

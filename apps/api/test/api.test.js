@@ -34,6 +34,9 @@ function makeState() {
     nextCouponId: 1,
     passwordResetTokens: [],
     sentPasswordResetEmails: [],
+    sentAdminEmails: [],
+    sentEmails: [],
+    propertySettings: null,
     roomImages: [],
     payments: [],
     reviews: [],
@@ -262,6 +265,257 @@ function makeFakePool(state) {
       return { rows: [] };
     }
 
+    // --- Booking / payment statements added with the refund + revive flow ---
+    if (text.startsWith("savepoint") || text.startsWith("rollback to savepoint")) {
+      return { rows: [] };
+    }
+
+    if (text.startsWith("select email from users where role = 'admin'")) {
+      return {
+        rows: state.users
+          .filter((user) => user.role === "admin" && !user.deleted_at && !user.is_locked)
+          .map((user) => ({ email: user.email })),
+      };
+    }
+
+    if (text.startsWith("with expired as")) {
+      const nowIso = new Date().toISOString();
+      const roomIds = new Set();
+      state.bookings.forEach((booking) => {
+        if (booking.status === "pending" && booking.expires_at && booking.expires_at < nowIso) {
+          booking.status = "cancelled";
+          booking.cancelled_at = nowIso;
+          roomIds.add(booking.room_id);
+          const coupon = state.coupons.find((item) => item.id === booking.coupon_id);
+          if (coupon) coupon.used_count = Math.max(coupon.used_count - 1, 0);
+        }
+      });
+      return { rows: [...roomIds].map((room_id) => ({ room_id })) };
+    }
+
+    if (text.startsWith("update coupons set used_count = greatest(used_count - 1, 0)")) {
+      const coupon = state.coupons.find((item) => item.id === Number(params[0]));
+      if (coupon) coupon.used_count = Math.max(coupon.used_count - 1, 0);
+      return { rows: [] };
+    }
+
+    if (text.startsWith("insert into bookings")) {
+      const expiresAtParam = params[7];
+      const booking = {
+        id: state.nextBookingId++,
+        user_id: Number(params[0]),
+        room_id: Number(params[1]),
+        check_in: params[2],
+        check_out: params[3],
+        total_price: Number(params[4]),
+        guests: Number(params[5]),
+        status: params[6],
+        payment_status: params[10],
+        expires_at:
+          expiresAtParam instanceof Date ? expiresAtParam.toISOString() : expiresAtParam || null,
+        coupon_id: params[8] != null ? Number(params[8]) : null,
+        discount_amount: Number(params[9]) || 0,
+        language: params[11],
+        guest_name: params[12],
+        guest_phone: params[13],
+        guest_email: params[14],
+        created_at: new Date().toISOString(),
+      };
+      state.bookings.push(booking);
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set status = 'cancelled', cancelled_at = now(), expires_at = null")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.status = "cancelled";
+      booking.cancelled_at = new Date().toISOString();
+      booking.expires_at = null;
+      if (params[1]) {
+        booking.payment_status = "refund_pending";
+        booking.refund_reason = params[2];
+      }
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'paid', status = case")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.payment_status = "paid";
+      if (booking.status === "pending") booking.status = "confirmed";
+      booking.expires_at = null;
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'refunded'")) {
+      const booking = state.bookings.find(
+        (item) => item.id === Number(params[0]) && item.payment_status === "refund_pending"
+      );
+      if (!booking) return { rows: [] };
+      booking.payment_status = "refunded";
+      booking.refunded_at = new Date().toISOString();
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("select id from bookings where id = $1")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      return { rows: booking ? [{ id: booking.id }] : [] };
+    }
+
+    if (text.startsWith("select 1 from payments where booking_id = $1 and status = 'success'")) {
+      const found = state.payments.some(
+        (item) => item.booking_id === Number(params[0]) && item.status === "success"
+      );
+      return { rows: found ? [{}] : [] };
+    }
+
+    if (text.startsWith("update payments set status = 'failed'")) {
+      const payment = state.payments.find(
+        (item) => item.transaction_ref === params[0] && item.status === "pending"
+      );
+      if (payment) payment.status = "failed";
+      return { rows: [] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'failed' where id = $1 and payment_status = 'pending'")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (booking && booking.payment_status === "pending") booking.payment_status = "failed";
+      return { rows: [] };
+    }
+
+    if (text.startsWith("select booking_id from payments where transaction_ref = $1")) {
+      const payment = state.payments.find((item) => item.transaction_ref === params[0]);
+      return { rows: payment ? [{ booking_id: payment.booking_id }] : [] };
+    }
+
+    if (text.startsWith("update bookings set status = 'confirmed', payment_status = 'paid', expires_at = null, cancelled_at = null")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      // Stand-in for the database's no-overlap exclusion constraint.
+      const clash = state.bookings.some(
+        (other) =>
+          other.id !== booking.id &&
+          hasOverlap(other, booking.room_id, booking.check_in, booking.check_out, ["pending", "confirmed"])
+      );
+      if (clash) {
+        const error = new Error("conflicting key value violates exclusion constraint");
+        error.code = "23P01";
+        throw error;
+      }
+      booking.status = "confirmed";
+      booking.payment_status = "paid";
+      booking.expires_at = null;
+      booking.cancelled_at = null;
+      booking.refund_reason = null;
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set status = 'confirmed', payment_status = 'paid', expires_at = null where id = $1")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.status = "confirmed";
+      booking.payment_status = "paid";
+      booking.expires_at = null;
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'paid' where id = $1")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (booking) booking.payment_status = "paid";
+      return { rows: [] };
+    }
+
+    if (text.startsWith("update bookings set payment_status = 'refund_pending', refund_reason = $2")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      booking.payment_status = "refund_pending";
+      booking.refund_reason = params[1];
+      return { rows: [booking] };
+    }
+
+    if (text.startsWith("select id from bookings where room_id = $1") && params.length === 5) {
+      const rows = state.bookings
+        .filter(
+          (item) =>
+            item.id !== Number(params[4]) &&
+            hasOverlap(item, Number(params[0]), params[1], params[2], params[3])
+        )
+        .map((item) => ({ id: item.id }));
+      return { rows };
+    }
+
+    if (text.startsWith("select b.*, u.name as user_name, u.email as user_email, r.room_name")) {
+      const booking = state.bookings.find((item) => item.id === Number(params[0]));
+      if (!booking) return { rows: [] };
+      const user = state.users.find((item) => item.id === booking.user_id);
+      const room = state.rooms.find((item) => item.id === booking.room_id);
+      const coupon = state.coupons.find((item) => item.id === booking.coupon_id);
+      return {
+        rows: [
+          {
+            ...booking,
+            user_name: user?.name,
+            user_email: user?.email,
+            room_name: room?.room_name,
+            room_location: room?.location,
+            coupon_code: coupon?.code || null,
+          },
+        ],
+      };
+    }
+
+    if (text.startsWith("select count(*)::int as total, count(*) filter (where status = 'pending')::int as pending")) {
+      return {
+        rows: [
+          {
+            total: state.bookings.length,
+            pending: state.bookings.filter((item) => item.status === "pending").length,
+            refund_pending: state.bookings.filter((item) => item.payment_status === "refund_pending").length,
+            revenue: state.bookings
+              .filter((item) => item.payment_status === "paid")
+              .reduce((sum, item) => sum + Number(item.total_price), 0),
+          },
+        ],
+      };
+    }
+
+    if (text.startsWith("select * from property_settings where id = 1")) {
+      return { rows: state.propertySettings ? [state.propertySettings] : [] };
+    }
+
+    if (text.startsWith("insert into property_settings")) {
+      const columns = text.slice(text.indexOf("(") + 1, text.indexOf(")")).split(",").map((c) => c.trim());
+      const row = state.propertySettings || { id: 1 };
+      columns
+        .filter((column) => column !== "id" && column !== "updated_at")
+        .forEach((column, index) => {
+          row[column] = params[index];
+        });
+      state.propertySettings = row;
+      return { rows: [] };
+    }
+
+    if (text.startsWith("select trim(substring(location from")) {
+      const groups = new Map();
+      for (const room of state.rooms) {
+        if (!room.location || room.status === "maintenance") continue;
+        const name = room.location.split(",").pop().trim();
+        const group = groups.get(name) || { name, room_count: 0, min_price: room.price, image: null };
+        group.room_count += 1;
+        group.min_price = Math.min(group.min_price, room.price);
+        group.image = group.image || room.image || null;
+        groups.set(name, group);
+      }
+      return { rows: [...groups.values()] };
+    }
+
+    if (text.startsWith("select check_in, check_out from bookings where room_id = $1")) {
+      const rows = state.bookings
+        .filter((item) => hasOverlap(item, Number(params[0]), params[2], params[3], params[1]))
+        .map((item) => ({ check_in: item.check_in, check_out: item.check_out }));
+      return { rows };
+    }
+
     if (text.startsWith("select 1 from users where avatar_url = $1 and id != $2")) {
       const inUse = state.users.some(
         (user) => user.avatar_url === params[0] && user.id !== params[1]
@@ -463,9 +717,14 @@ function makeFakePool(state) {
         return ts >= start && ts < end;
       };
       const bookingsInRange = state.bookings.filter(inRange);
-      const revenueEligible = bookingsInRange.filter((item) =>
-        ["confirmed", "completed"].includes(item.status)
-      );
+      const revenueEligible = bookingsInRange.filter((item) => item.payment_status === "paid");
+      const outstanding = bookingsInRange
+        .filter(
+          (item) =>
+            ["confirmed", "completed"].includes(item.status) &&
+            ["unpaid", "pending", "failed"].includes(item.payment_status || "unpaid")
+        )
+        .reduce((sum, item) => sum + Number(item.total_price), 0);
       const revenue = revenueEligible.reduce((sum, item) => sum + Number(item.total_price), 0);
       const totalDiscount = revenueEligible.reduce(
         (sum, item) => sum + Number(item.discount_amount || 0),
@@ -475,12 +734,11 @@ function makeFakePool(state) {
         rows: [
           {
             totalRooms: state.rooms.length,
-            availableRooms: state.rooms.filter((item) => item.status === "available").length,
-            bookedRooms: state.rooms.filter((item) => item.status === "booked").length,
             totalUsers: state.users.length,
             totalBookings: bookingsInRange.length,
             revenue,
             totalDiscount,
+            outstanding,
           },
         ],
       };
@@ -501,6 +759,7 @@ function makeFakePool(state) {
           ts: b.created_at || b.check_in,
           total_price: b.total_price,
           status: b.status,
+          payment_status: b.payment_status,
         }));
       return { rows };
     }
@@ -537,7 +796,7 @@ function makeFakePool(state) {
             return ts >= start && ts < end;
           });
           const revenue = bookings
-            .filter((booking) => ["confirmed", "completed"].includes(booking.status))
+            .filter((booking) => booking.payment_status === "paid")
             .reduce((sum, booking) => sum + Number(booking.total_price), 0);
 
           return {
@@ -555,14 +814,23 @@ function makeFakePool(state) {
       return { rows };
     }
 
-    if (text.includes("from rooms") && text.includes("filter (where status = 'booked')")) {
+    if (text.includes("from rooms") && text.includes('as "occupiedrooms"')) {
+      const today = params[0];
+      const usable = state.rooms.filter((item) => item.status !== "maintenance");
       return {
         rows: [
           {
             totalRooms: state.rooms.length,
-            bookedRooms: state.rooms.filter((item) => item.status === "booked").length,
-            availableRooms: state.rooms.filter((item) => item.status === "available").length,
-            maintenanceRooms: state.rooms.filter((item) => item.status === "maintenance").length,
+            maintenanceRooms: state.rooms.length - usable.length,
+            occupiedRooms: usable.filter((room) =>
+              state.bookings.some(
+                (booking) =>
+                  booking.room_id === room.id &&
+                  booking.status === "confirmed" &&
+                  booking.check_in <= today &&
+                  booking.check_out > today
+              )
+            ).length,
           },
         ],
       };
@@ -1214,6 +1482,13 @@ describe("hotel booking API", () => {
       loaded: true,
       exports: {
         assertEmailConfigured() {},
+        isEmailConfigured: () => true,
+        async sendAdminEmail(payload) {
+          state.sentAdminEmails.push(payload);
+        },
+        async sendEmail(payload) {
+          state.sentEmails.push(payload);
+        },
         async sendPasswordResetEmail(payload) {
           state.sentPasswordResetEmails.push(payload);
         },
@@ -1416,6 +1691,61 @@ describe("hotel booking API", () => {
       assert.equal(result.response.status, 400);
       assert.match(result.body.message, /letters and numbers/);
     }
+  });
+
+  it("rejects over-long text with a 400 instead of failing in the database", async () => {
+    const longName = await request(baseUrl, "/api/register", {
+      method: "POST",
+      body: JSON.stringify({ name: "n".repeat(101), email: "long@example.com", password: "guest123" }),
+    });
+    assert.equal(longName.response.status, 400);
+    assert.match(longName.body.message, /Name must be at most 100 characters/);
+
+    const longEmail = await request(baseUrl, "/api/register", {
+      method: "POST",
+      body: JSON.stringify({ name: "Ok", email: `${"e".repeat(250)}@example.com`, password: "guest123" }),
+    });
+    assert.equal(longEmail.response.status, 400);
+    assert.match(longEmail.body.message, /Email must be at most 255 characters/);
+
+    const profile = await request(baseUrl, "/api/users/me", {
+      method: "PUT",
+      headers: authHeader(userToken),
+      body: JSON.stringify({ name: "n".repeat(101), email: "user@example.com" }),
+    });
+    assert.equal(profile.response.status, 400);
+
+    const adminCreate = await request(baseUrl, "/api/users", {
+      method: "POST",
+      headers: authHeader(adminToken),
+      body: JSON.stringify({ name: "n".repeat(101), email: "x@example.com", password: "Temp-Pass-42" }),
+    });
+    assert.equal(adminCreate.response.status, 400);
+
+    const room = { room_name: "Room", room_type: "Deluxe", price: 100, capacity: 2 };
+    for (const [field, max] of [["room_name", 150], ["room_type", 100], ["location", 255]]) {
+      const created = await request(baseUrl, "/api/rooms", {
+        method: "POST",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ ...room, [field]: "x".repeat(max + 1) }),
+      });
+      assert.equal(created.response.status, 400, field);
+      assert.match(created.body.message, new RegExp(`at most ${max} characters`));
+
+      const updated = await request(baseUrl, "/api/rooms/1", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ ...room, [field]: "x".repeat(max + 1) }),
+      });
+      assert.equal(updated.response.status, 400, field);
+    }
+
+    const notText = await request(baseUrl, "/api/rooms", {
+      method: "POST",
+      headers: authHeader(adminToken),
+      body: JSON.stringify({ ...room, room_name: { nested: true } }),
+    });
+    assert.equal(notText.response.status, 400);
   });
 
   it("registers a new user without exposing password", async () => {
@@ -2214,6 +2544,48 @@ describe("hotel booking API", () => {
     assert.equal(invalidRange.body.range, "year");
   });
 
+  it("counts revenue from paid bookings only and occupancy from tonight's guests", async () => {
+    // The property's own "today", as the dashboard uses it.
+    const today = require("../src/utils/time").todayInAppTimezone();
+    const tomorrow = new Date(Date.parse(today + "T00:00:00Z") + 86400000).toISOString().slice(0, 10);
+    const before = (await request(baseUrl, "/api/dashboard/stats", { headers: authHeader(adminToken) })).body;
+
+    // Confirmed but not paid: a room is occupied tonight, no money yet.
+    const staying = pushPendingBooking(1980, {
+      room_id: 2,
+      status: "confirmed",
+      payment_status: "unpaid",
+      total_price: 700,
+      check_in: today,
+      check_out: tomorrow,
+    });
+    // Paid for a stay far in the future: money in, nobody in the room.
+    pushPendingBooking(1981, {
+      room_id: 2,
+      status: "confirmed",
+      payment_status: "paid",
+      total_price: 900,
+      check_in: "2095-01-01",
+      check_out: "2095-01-02",
+    });
+
+    const after = (await request(baseUrl, "/api/dashboard/stats", { headers: authHeader(adminToken) })).body;
+
+    assert.equal(after.revenue, before.revenue + 900);
+    assert.equal(after.outstanding, before.outstanding + 700);
+    assert.equal(after.bookedRooms, before.bookedRooms + 1);
+    assert.equal(after.availableRooms, before.availableRooms - 1);
+    assert.equal(after.totalRooms, after.availableRooms + after.bookedRooms + after.maintenanceRooms);
+
+    staying.status = "cancelled";
+    const later = (await request(baseUrl, "/api/dashboard/stats", { headers: authHeader(adminToken) })).body;
+    assert.equal(later.bookedRooms, before.bookedRooms);
+    assert.equal(later.outstanding, before.outstanding);
+
+    // Leave the shared state as the following tests expect it.
+    state.bookings = state.bookings.filter((booking) => ![1980, 1981].includes(booking.id));
+  });
+
   it("scopes dashboard stats totals to the requested range", async () => {
     const allTime = await request(baseUrl, "/api/dashboard/stats", {
       headers: authHeader(adminToken),
@@ -2468,6 +2840,11 @@ describe("hotel booking API", () => {
     assert.ok(res.body.payUrl.includes("vnp_TxnRef="));
     assert.ok(res.body.transactionRef);
 
+    // VNPay rejects descriptions with accents or special characters.
+    const orderInfo = new URL(res.body.payUrl).searchParams.get("vnp_OrderInfo");
+    assert.equal(orderInfo, "Thanh toan dat phong 1002");
+    assert.match(orderInfo, /^[A-Za-z0-9 ]+$/);
+
     const payment = state.payments.find((p) => p.booking_id === 1002);
     assert.ok(payment);
     assert.equal(payment.provider, "vnpay");
@@ -2527,16 +2904,487 @@ describe("hotel booking API", () => {
     assert.equal(res.response.status, 403);
   });
 
-  it("rejects payment creation for a booking that is not pending", async () => {
-    pushPendingBooking(1005, { status: "confirmed" });
+  it("turns a cancelled paid booking into a refund the admin is told about and settles by hand", async () => {
+    pushPendingBooking(1950, { status: "confirmed", payment_status: "paid", total_price: 500 });
+    state.sentAdminEmails.length = 0;
 
-    const res = await request(baseUrl, "/api/payments/bookings/1005", {
-      method: "POST",
+    const cancelled = await request(baseUrl, "/api/bookings/1950/cancel", {
+      method: "PATCH",
       headers: authHeader(userToken),
-      body: JSON.stringify({ provider: "vnpay" }),
     });
+    assert.equal(cancelled.response.status, 200);
+    assert.equal(cancelled.body.booking.status, "cancelled");
+    assert.equal(cancelled.body.booking.payment_status, "refund_pending");
+    assert.equal(cancelled.body.booking.refund_reason, "cancelled_by_guest");
 
-    assert.equal(res.response.status, 400);
+    // The alert is sent after the response; give it a moment.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.equal(state.sentAdminEmails.length, 1);
+    assert.deepEqual(state.sentAdminEmails[0].to, ["admin@example.com"]);
+    assert.match(state.sentAdminEmails[0].subject, /#1950/);
+
+    const byGuest = await request(baseUrl, "/api/bookings/1950/refund", {
+      method: "PATCH",
+      headers: authHeader(userToken),
+    });
+    assert.equal(byGuest.response.status, 403);
+
+    const refunded = await request(baseUrl, "/api/bookings/1950/refund", {
+      method: "PATCH",
+      headers: authHeader(adminToken),
+    });
+    assert.equal(refunded.response.status, 200);
+    assert.equal(refunded.body.booking.payment_status, "refunded");
+  });
+
+  it("lets an admin record a payment taken at the desk", async () => {
+    pushPendingBooking(1951);
+
+    const byGuest = await request(baseUrl, "/api/bookings/1951/mark-paid", {
+      method: "PATCH",
+      headers: authHeader(userToken),
+    });
+    assert.equal(byGuest.response.status, 403);
+
+    const paid = await request(baseUrl, "/api/bookings/1951/mark-paid", {
+      method: "PATCH",
+      headers: authHeader(adminToken),
+    });
+    assert.equal(paid.response.status, 200);
+    assert.equal(paid.body.booking.status, "confirmed");
+    assert.equal(paid.body.booking.payment_status, "paid");
+
+    const twice = await request(baseUrl, "/api/bookings/1951/mark-paid", {
+      method: "PATCH",
+      headers: authHeader(adminToken),
+    });
+    assert.equal(twice.response.status, 400);
+  });
+
+  it("serves property settings: database over environment over defaults, public fields only", async () => {
+    const savedEnv = { ...process.env };
+    state.propertySettings = null;
+
+    try {
+      delete process.env.APP_NAME;
+      delete process.env.CONTACT_PHONE;
+      delete process.env.FREE_CANCELLATION_DAYS;
+
+      // Nothing stored, nothing in the environment: built-in defaults.
+      let result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.response.status, 200);
+      assert.deepEqual(Object.keys(result.body).sort(), [
+        "address",
+        "checkInTime",
+        "checkOutTime",
+        "email",
+        "freeCancellationDays",
+        "logoUrl",
+        "name",
+        "phone",
+      ]);
+      assert.equal(result.body.name, "LuxeStay");
+      assert.equal(result.body.checkInTime, "14:00");
+      assert.equal(result.body.freeCancellationDays, 3);
+
+      // The environment beats the defaults.
+      process.env.APP_NAME = "Env Homestay";
+      process.env.FREE_CANCELLATION_DAYS = "5";
+      result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.body.name, "Env Homestay");
+      assert.equal(result.body.freeCancellationDays, 5);
+
+      // Only an admin may change them.
+      const anonymous = await request(baseUrl, "/api/settings", { method: "PUT", body: "{}" });
+      assert.equal(anonymous.response.status, 401);
+      const byGuest = await request(baseUrl, "/api/settings", {
+        method: "PUT",
+        headers: authHeader(userToken),
+        body: JSON.stringify({ name: "Hacked" }),
+      });
+      assert.equal(byGuest.response.status, 403);
+      assert.equal((await request(baseUrl, "/api/settings", { headers: authHeader(userToken) })).response.status, 403);
+
+      // What the admin saves beats the environment.
+      const saved = await request(baseUrl, "/api/settings", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({
+          name: "  Nhà Nghỉ Hoa Sữa  ",
+          phone: "0901 234 567",
+          email: "lienhe@hoasua.example",
+          address: "12 Hàng Bông, Hà Nội",
+          checkInTime: "15:00",
+          checkOutTime: "11:30",
+          freeCancellationDays: 7,
+        }),
+      });
+      assert.equal(saved.response.status, 200);
+      assert.equal(saved.body.stored.name, "Nhà Nghỉ Hoa Sữa");
+      assert.equal(saved.body.fallback.name, "Env Homestay");
+
+      result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.body.name, "Nhà Nghỉ Hoa Sữa");
+      assert.equal(result.body.phone, "0901 234 567");
+      assert.equal(result.body.checkOutTime, "11:30");
+      assert.equal(result.body.freeCancellationDays, 7);
+
+      // The booking rules follow the same source.
+      const policy = await request(baseUrl, "/api/bookings/policy");
+      assert.equal(policy.body.freeCancellationDays, 7);
+      assert.equal(policy.body.checkInTime, "15:00");
+
+      // Clearing a field hands it back to the environment.
+      const cleared = await request(baseUrl, "/api/settings", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ name: "", freeCancellationDays: null }),
+      });
+      assert.equal(cleared.body.stored.name, null);
+      result = await request(baseUrl, "/api/settings/public");
+      assert.equal(result.body.name, "Env Homestay");
+      assert.equal(result.body.freeCancellationDays, 5);
+      assert.equal(result.body.phone, "0901 234 567");
+
+      // Invalid input is refused with a reason.
+      for (const body of [
+        { checkInTime: "25:00" },
+        { checkOutTime: "noon" },
+        { freeCancellationDays: -1 },
+        { freeCancellationDays: 1.5 },
+        { email: "not-an-email" },
+        { name: "x".repeat(101) },
+        { phone: { nested: true } },
+      ]) {
+        const invalid = await request(baseUrl, "/api/settings", {
+          method: "PUT",
+          headers: authHeader(adminToken),
+          body: JSON.stringify(body),
+        });
+        assert.equal(invalid.response.status, 400, JSON.stringify(body));
+        assert.ok(invalid.body.message);
+      }
+    } finally {
+      process.env = savedEnv;
+      state.propertySettings = null;
+    }
+  });
+
+  it("stores an uploaded logo and removes the previous file", async () => {
+    state.propertySettings = null;
+    const pngBytes = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+      "base64"
+    );
+    const upload = async (token) => {
+      const form = new FormData();
+      form.append("image", new Blob([pngBytes], { type: "image/png" }), "logo.png");
+      const response = await fetch(`${baseUrl}/api/settings/logo`, {
+        method: "POST",
+        headers: token ? { Cookie: token } : {},
+        body: form,
+      });
+      return { status: response.status, body: await response.json() };
+    };
+    const brandingDir = path.join(__dirname, "../uploads/branding");
+
+    try {
+      assert.equal((await upload(userToken)).status, 403);
+
+      const first = await upload(adminToken);
+      assert.equal(first.status, 201);
+      assert.match(first.body.stored.logoUrl, /^\/uploads\/branding\/[0-9a-f-]+\.png$/);
+      const firstFile = path.join(brandingDir, path.basename(first.body.stored.logoUrl));
+      await fs.access(firstFile);
+
+      assert.equal((await request(baseUrl, "/api/settings/public")).body.logoUrl, first.body.stored.logoUrl);
+
+      const second = await upload(adminToken);
+      assert.notEqual(second.body.stored.logoUrl, first.body.stored.logoUrl);
+      // Give the best-effort cleanup a moment.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await assert.rejects(fs.access(firstFile));
+
+      const removed = await request(baseUrl, "/api/settings/logo", {
+        method: "DELETE",
+        headers: authHeader(adminToken),
+      });
+      assert.equal(removed.response.status, 200);
+      assert.equal(removed.body.stored.logoUrl, null);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await assert.rejects(fs.access(path.join(brandingDir, path.basename(second.body.stored.logoUrl))));
+      assert.equal((await request(baseUrl, "/api/settings/public")).body.logoUrl, "");
+    } finally {
+      state.propertySettings = null;
+    }
+  });
+
+  it("emails the guest once when a booking is made, in their language, and again when it is confirmed or cancelled", async () => {
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
+    const book = (headers, body) =>
+      request(baseUrl, "/api/bookings", {
+        method: "POST",
+        headers: { ...authHeader(userToken), ...headers },
+        body: JSON.stringify({ room_id: 1, guests: 1, ...body }),
+      });
+
+    state.sentEmails.length = 0;
+    const created = await book({}, { check_in: "2097-05-10", check_out: "2097-05-12" });
+    assert.equal(created.response.status, 201);
+    await settle();
+
+    // Exactly one email, to the account holder, with the facts of the booking.
+    assert.equal(state.sentEmails.length, 1);
+    const [received] = state.sentEmails;
+    const code = `#BK-${String(created.body.booking.id).padStart(4, "0")}`;
+    assert.equal(received.to, state.users.find((user) => user.id === 2).email);
+    assert.ok(received.subject.includes(code));
+    assert.match(received.subject, /chờ thanh toán/);
+    for (const part of [code, "Deluxe Room", "10/05/2097", "12/05/2097", "200 đ", "Chưa thanh toán"]) {
+      assert.ok(received.text.includes(part), `text should mention ${part}`);
+      assert.ok(received.html.includes(part), `html should mention ${part}`);
+    }
+
+    // Recorded at the desk as paid: one "confirmed" email.
+    state.sentEmails.length = 0;
+    await request(baseUrl, `/api/bookings/${created.body.booking.id}/mark-paid`, {
+      method: "PATCH",
+      headers: authHeader(adminToken),
+    });
+    await settle();
+    assert.equal(state.sentEmails.length, 1);
+    assert.match(state.sentEmails[0].subject, /Xác nhận đặt phòng/);
+    assert.ok(state.sentEmails[0].text.includes("Đã thanh toán"));
+
+    // Cancelled by the guest after paying: one "cancelled" email that
+    // mentions the refund.
+    state.sentEmails.length = 0;
+    await request(baseUrl, `/api/bookings/${created.body.booking.id}/cancel`, {
+      method: "PATCH",
+      headers: authHeader(userToken),
+    });
+    await settle();
+    assert.equal(state.sentEmails.length, 1);
+    assert.match(state.sentEmails[0].subject, /đã được hủy/);
+    assert.match(state.sentEmails[0].text, /hoàn lại/);
+
+    // A visitor using the English site gets English emails for that booking.
+    state.sentEmails.length = 0;
+    const english = await book({ "Accept-Language": "en" }, { check_in: "2097-06-10", check_out: "2097-06-11" });
+    await settle();
+    assert.equal(english.body.booking.language, "en");
+    assert.match(state.sentEmails[0].subject, /received – awaiting payment/);
+    assert.ok(state.sentEmails[0].text.includes("Check-in"));
+  });
+
+  it("still makes the booking when the confirmation email cannot be sent", async () => {
+    const emailStub = require("../src/services/emailService.js");
+    const originalSend = emailStub.sendEmail;
+    const originalError = console.error;
+    const logged = [];
+    emailStub.sendEmail = async () => {
+      throw new Error("SMTP connection refused");
+    };
+    console.error = (...args) => logged.push(args.join(" "));
+
+    try {
+      const created = await request(baseUrl, "/api/bookings", {
+        method: "POST",
+        headers: authHeader(userToken),
+        body: JSON.stringify({ room_id: 1, check_in: "2097-07-01", check_out: "2097-07-02", guests: 1 }),
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      assert.equal(created.response.status, 201);
+      assert.equal(created.body.booking.status, "pending");
+      // The failure is only in the log.
+      assert.ok(logged.some((line) => /BOOKING EMAIL FAILED/.test(line) && /SMTP connection refused/.test(line)));
+    } finally {
+      emailStub.sendEmail = originalSend;
+      console.error = originalError;
+    }
+  });
+
+  it("lets an admin book for a walk-in guest, confirmed on the spot", async () => {
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
+    const book = (token, body) =>
+      request(baseUrl, "/api/bookings", {
+        method: "POST",
+        headers: authHeader(token),
+        body: JSON.stringify({ room_id: 1, guests: 2, ...body }),
+      });
+
+    state.sentEmails.length = 0;
+    const paid = await book(adminToken, {
+      check_in: "2097-08-01",
+      check_out: "2097-08-03",
+      guest_name: "  Trần Thị Bình ",
+      guest_phone: "0912 345 678",
+      guest_email: "Binh@Example.com",
+      paid: true,
+    });
+    await settle();
+
+    assert.equal(paid.response.status, 201);
+    assert.equal(paid.body.booking.status, "confirmed");
+    assert.equal(paid.body.booking.payment_status, "paid");
+    assert.equal(paid.body.booking.expires_at, null);
+    assert.equal(paid.body.booking.guest_name, "Trần Thị Bình");
+    assert.equal(paid.body.booking.guest_email, "binh@example.com");
+    // The guest gets the confirmation; the admin's own address does not.
+    assert.equal(state.sentEmails.length, 1);
+    assert.equal(state.sentEmails[0].to, "binh@example.com");
+    assert.ok(state.sentEmails[0].text.includes("Trần Thị Bình"));
+
+    // No email address given: confirmed and unpaid, nothing sent.
+    state.sentEmails.length = 0;
+    const unpaid = await book(adminToken, {
+      check_in: "2097-08-05",
+      check_out: "2097-08-06",
+      guest_name: "Khách lẻ",
+    });
+    await settle();
+    assert.equal(unpaid.body.booking.status, "confirmed");
+    assert.equal(unpaid.body.booking.payment_status, "unpaid");
+    assert.equal(state.sentEmails.length, 0);
+
+    for (const body of [
+      { guest_name: "   " },
+      { guest_name: "x".repeat(101) },
+      { guest_name: "A", guest_phone: "abc" },
+      { guest_name: "A", guest_email: "not-an-email" },
+    ]) {
+      const invalid = await book(adminToken, { check_in: "2097-08-10", check_out: "2097-08-11", ...body });
+      assert.equal(invalid.response.status, 400, JSON.stringify(body));
+    }
+
+    // An ordinary guest cannot book in someone else's name or skip payment.
+    const sneaky = await book(userToken, {
+      check_in: "2097-08-12",
+      check_out: "2097-08-13",
+      guest_name: "Someone Else",
+      paid: true,
+    });
+    assert.equal(sneaky.response.status, 201);
+    assert.equal(sneaky.body.booking.status, "pending");
+    assert.equal(sneaky.body.booking.payment_status, "unpaid");
+    assert.equal(sneaky.body.booking.guest_name, null);
+  });
+
+  it("gives the booking's owner or an admin a PDF confirmation, and nobody else", async () => {
+    pushPendingBooking(1970, {
+      user_id: 2,
+      status: "confirmed",
+      payment_status: "paid",
+      total_price: 180,
+      discount_amount: 20,
+      check_in: "2096-02-10",
+      check_out: "2096-02-12",
+      language: "vi",
+    });
+    pushPendingBooking(1971, { user_id: 1, check_in: "2096-03-10", check_out: "2096-03-11" });
+
+    const download = async (id, token, query = "") => {
+      const response = await fetch(`${baseUrl}/api/bookings/${id}/receipt${query}`, {
+        headers: token ? { Cookie: token } : {},
+      });
+      return { response, bytes: Buffer.from(await response.arrayBuffer()) };
+    };
+
+    const own = await download(1970, userToken);
+    assert.equal(own.response.status, 200);
+    assert.equal(own.response.headers.get("content-type"), "application/pdf");
+    assert.match(own.response.headers.get("content-disposition"), /booking-BK-1970\.pdf/);
+    assert.equal(own.bytes.subarray(0, 5).toString(), "%PDF-");
+    assert.ok(own.bytes.length > 5000, "the PDF embeds a font, so it is not tiny");
+
+    assert.equal((await download(1970, adminToken, "?lang=en")).response.status, 200);
+    assert.equal((await download(1971, userToken)).response.status, 403);
+    assert.equal((await download(1970, null)).response.status, 401);
+    assert.equal((await download(999999, adminToken)).response.status, 404);
+  });
+
+  it("gives admins order totals without loading every order", async () => {
+    const forbidden = await request(baseUrl, "/api/bookings/summary", { headers: authHeader(userToken) });
+    assert.equal(forbidden.response.status, 403);
+
+    const summary = await request(baseUrl, "/api/bookings/summary", { headers: authHeader(adminToken) });
+    assert.equal(summary.response.status, 200);
+    assert.equal(summary.body.total, state.bookings.length);
+    assert.equal(summary.body.pending, state.bookings.filter((b) => b.status === "pending").length);
+    assert.equal(
+      summary.body.revenue,
+      state.bookings.filter((b) => b.payment_status === "paid").reduce((sum, b) => sum + Number(b.total_price), 0)
+    );
+
+    // The list itself comes a page at a time.
+    const page = await request(baseUrl, "/api/bookings?page=1&limit=5", { headers: authHeader(adminToken) });
+    assert.equal(page.body.data.length, Math.min(5, state.bookings.length));
+    assert.equal(page.body.total, state.bookings.length);
+  });
+
+  it("lists destinations from real room data, without login", async () => {
+    const result = await request(baseUrl, "/api/rooms/destinations");
+
+    assert.equal(result.response.status, 200);
+    const names = result.body.map((item) => item.name);
+    assert.ok(names.includes("Hà Nội"));
+    assert.ok(names.includes("Đà Nẵng"));
+    for (const item of result.body) {
+      assert.ok(item.room_count >= 1);
+      assert.deepEqual(Object.keys(item).sort(), ["image", "min_price", "name", "room_count"]);
+    }
+  });
+
+  it("shows a room's taken nights publicly, and nothing about who booked them", async () => {
+    pushPendingBooking(1960, { room_id: 2, check_in: "2098-03-10", check_out: "2098-03-12", status: "confirmed" });
+    pushPendingBooking(1961, { room_id: 2, check_in: "2098-03-13", check_out: "2098-03-14", status: "cancelled" });
+
+    const result = await request(baseUrl, "/api/rooms/2/availability?from=2098-03-08&to=2098-03-15");
+
+    assert.equal(result.response.status, 200);
+    assert.deepEqual(Object.keys(result.body).sort(), [
+      "bookable",
+      "from",
+      "room_id",
+      "to",
+      "today",
+      "unavailable",
+    ]);
+    // Nights of the 10th and 11th; the 12th is checkout day and free again.
+    assert.deepEqual(result.body.unavailable, ["2098-03-10", "2098-03-11"]);
+    assert.doesNotMatch(JSON.stringify(result.body), /user|email|name|guest|price|status/i);
+
+    const badRange = await request(baseUrl, "/api/rooms/2/availability?from=2099-01-15&to=2099-01-08");
+    assert.equal(badRange.response.status, 400);
+
+    const tooLong = await request(baseUrl, "/api/rooms/2/availability?from=2099-01-01&to=2100-01-01");
+    assert.equal(tooLong.response.status, 400);
+
+    const missing = await request(baseUrl, "/api/rooms/999999/availability");
+    assert.equal(missing.response.status, 404);
+  });
+
+  it("only takes payment for bookings that still owe money", async () => {
+    const pay = (id) =>
+      request(baseUrl, `/api/payments/bookings/${id}`, {
+        method: "POST",
+        headers: authHeader(userToken),
+        body: JSON.stringify({ provider: "vnpay" }),
+      });
+
+    pushPendingBooking(1005, { status: "cancelled" });
+    assert.equal((await pay(1005)).response.status, 400);
+
+    pushPendingBooking(1905, { status: "confirmed", payment_status: "paid" });
+    assert.equal((await pay(1905)).response.status, 400);
+
+    pushPendingBooking(1906, { total_price: 0 });
+    assert.equal((await pay(1906)).response.status, 400);
+
+    // Confirmed by the admin before any payment: the guest can still pay online.
+    pushPendingBooking(1907, { status: "confirmed", payment_status: "unpaid" });
+    assert.equal((await pay(1907)).response.status, 201);
   });
 
   it("rejects an unknown payment provider", async () => {

@@ -1,3 +1,6 @@
+const { isValidTimezone } = require("../utils/time");
+const { getStorageProblems } = require("../services/storage");
+
 const MIN_JWT_SECRET_LENGTH = 32;
 
 // Checked once at startup so a misconfigured server stops immediately with a
@@ -16,6 +19,12 @@ function getEnvProblems(env = process.env) {
   if (env.JWT_SECRET && /^replace_with/i.test(env.JWT_SECRET)) {
     problems.push("JWT_SECRET still has its placeholder value from .env.example");
   }
+
+  if (env.APP_TIMEZONE && !isValidTimezone(env.APP_TIMEZONE)) {
+    problems.push(`APP_TIMEZONE "${env.APP_TIMEZONE}" is not a valid IANA timezone (e.g. Asia/Ho_Chi_Minh)`);
+  }
+
+  problems.push(...getStorageProblems());
 
   return problems;
 }

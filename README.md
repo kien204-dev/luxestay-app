@@ -27,6 +27,20 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 
 > Trước khi đưa lên mạng thật: đổi mật khẩu tài khoản khách mẫu (hoặc khoá tài khoản đó trong trang Users), đặt `SEED_ON_START=false`, và đọc [DEPLOY.md](DEPLOY.md).
 
+## Các trang
+
+| Địa chỉ | Nội dung | Ai xem được |
+|---|---|---|
+| `/` | Trang chủ: tìm phòng theo ngày, điểm đến, phòng nổi bật | Mọi người |
+| `/rooms` | Danh sách phòng, lọc theo địa điểm, ngày, số khách; phân trang | Mọi người |
+| `/rooms/:id` | Chi tiết phòng, lịch phòng trống, đặt phòng và thanh toán | Mọi người (đặt phòng cần đăng nhập) |
+| `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá, tải PDF xác nhận | Đã đăng nhập |
+| `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |
+| `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị. Orders có đặt phòng tại quầy, ghi nhận thu tiền tại quầy và PDF xác nhận | Quản trị |
+| `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
+
+Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
+
 ## Chạy thủ công để phát triển
 
 Cần Node.js 22 trở lên và PostgreSQL 14 trở lên.
@@ -57,12 +71,16 @@ API sẽ dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt
 | `npm run build` | Build web ra `apps/web/dist` |
 | `npm start` | Chạy API ở chế độ thường |
 | `npm run lint` | ESLint cho cả hai app |
-| `npm test` | Test của API |
+| `npm test` | Test đơn vị của API (không cần cơ sở dữ liệu) |
+| `npm run test:integration` | Test tích hợp trên PostgreSQL thật và một máy chủ S3 giả lập; tự dựng và xoá các container tạm (cần Docker) |
 | `npm run db:migrate` | Chạy các migration chưa áp dụng |
 | `npm run db:seed` | Nạp dữ liệu mẫu (chạy lại không tạo trùng). Thêm `-- --all-rooms` để nạp khoảng 390 phòng |
 | `npm run db:reset` | Xoá toàn bộ dữ liệu rồi migrate + seed lại. Chỉ chạy với cơ sở dữ liệu cục bộ, trừ khi đặt `ALLOW_DB_RESET=true` |
+| `npm run uploads:prune` | Liệt kê ảnh tải lên không còn được dùng; thêm `-- --delete` để xoá |
 
 ## Cấu hình
+
+**Chạy bằng Docker: sửa `.env` ở thư mục gốc. Chạy bằng `npm run dev`: sửa `apps/api/.env` và `apps/web/.env`.** Chi tiết từng biến, biến nào do compose đặt cố định, cách kiểm tra cấu hình đã nạp và ví dụ chạy thử VNPay qua tunnel: [docs/configuration.md](docs/configuration.md).
 
 Mọi biến đều có chú thích trong file mẫu:
 
@@ -72,20 +90,36 @@ Mọi biến đều có chú thích trong file mẫu:
 
 Bắt buộc với API: `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` (từ 32 ký tự). Với Docker Compose, các giá trị này đã có sẵn; `JWT_SECRET` được tự sinh và lưu lại nếu bạn không đặt.
 
+### Quy tắc đặt phòng
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---|---|
+| `APP_TIMEZONE` | `Asia/Ho_Chi_Minh` | Múi giờ của cơ sở lưu trú. "Hôm nay" được tính theo múi giờ này, không theo giờ máy chủ |
+| `PENDING_BOOKING_TTL_MINUTES` | `30` | Booking chưa thanh toán được giữ chỗ bao lâu trước khi tự hủy |
+| `FREE_CANCELLATION_DAYS` | `3` | Khách tự hủy được booking **đã thanh toán** cho tới trước ngày nhận phòng bấy nhiêu ngày. Booking chưa thanh toán luôn hủy được; quản trị luôn hủy được |
+
+Tiền và hoàn tiền:
+
+- Hủy một booking đã thanh toán chuyển nó sang **Chờ hoàn tiền**. Ứng dụng không tự chuyển tiền: quản trị hoàn tiền cho khách bằng tay rồi bấm **Xác nhận hoàn tiền** ở trang Orders.
+- Nếu tiền về sau khi booking đã hết hạn hoặc đã hủy: phòng còn trống thì booking được khôi phục và xác nhận; phòng đã có người khác đặt thì booking chuyển sang Chờ hoàn tiền và quản trị được báo (thông báo trên trang quản trị, và email nếu đã cấu hình SMTP).
+- Khách trả tiền mặt hoặc chuyển khoản: quản trị bấm **Đã thu tiền** ở trang Orders.
+- Booking đã có thanh toán không xoá được, chỉ hủy được, để giữ lại lịch sử giao dịch.
+
 ### Tính năng tuỳ chọn
 
 Các tính năng dưới đây tắt cho tới khi bạn cấu hình; phần còn lại của ứng dụng vẫn chạy đầy đủ.
 
 | Tính năng | Cần cấu hình | Ghi chú |
 |---|---|---|
-| Email quên mật khẩu | `SMTP_*` | Gmail: dùng mật khẩu ứng dụng |
+| Email (xác nhận/hủy đặt phòng, quên mật khẩu, báo hoàn tiền) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` (+ `SMTP_USER`, `SMTP_PASS` nếu cần) | Gmail: dùng mật khẩu ứng dụng. Thử bằng Mailpit: `docker compose --profile mail up` |
+| Lưu ảnh trên S3/R2/MinIO | `STORAGE_DRIVER=s3` và `S3_*` | Mặc định lưu trên đĩa của API |
 | Thanh toán VNPay | `VNPAY_*` | VNPay gọi về `GET /api/payments/vnpay/ipn`, địa chỉ này phải truy cập được từ Internet |
 | Thanh toán MoMo (**beta**) | `MOMO_ENABLED=true` và `MOMO_*` | Chưa được kiểm chứng với tài khoản MoMo thật. Nút MoMo chỉ hiện khi bật |
 | Đăng nhập Google | `FIREBASE_*` ở API và `VITE_FIREBASE_*` ở web | Cần một dự án Firebase riêng |
 
 ### Đổi tên thương hiệu
 
-Đặt `APP_NAME` (Docker), hoặc `APP_NAME` trong `apps/api/.env` và `VITE_APP_NAME` trong `apps/web/.env`. Tên này được dùng ở giao diện, email, mô tả thanh toán và báo cáo xuất ra.
+Vào **Cơ sở lưu trú** (`/admin/property`) trong phần quản trị: tên, logo, điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí. Lưu xong là trang khách, email và PDF xác nhận dùng ngay, không cần build lại. Biến môi trường (`APP_NAME`, `CONTACT_*`, `CHECK_IN_TIME`, `CHECK_OUT_TIME`, `FREE_CANCELLATION_DAYS`) chỉ là giá trị khởi đầu cho những mục chưa lưu; xem [docs/configuration.md](docs/configuration.md#thông-tin-cơ-sở-lưu-trú). Ngôn ngữ mặc định: `DEFAULT_LANGUAGE`. Màu của trang khách nằm ở đầu file `apps/web/src/styles/guest.css`.
 
 ### Ảnh phòng mẫu
 
@@ -108,8 +142,10 @@ apps/
     test/
   web/
     src/
-      pages/         mỗi trang một file
-      components/    thành phần dùng chung
+      pages/         mỗi trang một file (pages/guest: trang khách)
+      components/    thành phần dùng chung (guest/, myBookings/)
+      layout/        khung trang khách và khung quản trị
+      styles/        CSS của trang khách (đổi màu thương hiệu ở guest.css)
       context/       đăng nhập, thông báo
       services/      gọi API
       locales/       bản dịch vi/en
@@ -126,10 +162,12 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Tài khoản | `POST /login`, `/register`, `/logout`, `/forgot-password`, `/reset-password`, `/google-login` | Công khai |
 | Hồ sơ | `GET/PUT /users/me`, `PUT /users/me/password`, `POST /users/me/avatar` | Đã đăng nhập |
 | Người dùng | `GET/POST /users`, `GET/PUT/DELETE /users/:id`, `PATCH /users/:id/lock` | Quản trị |
-| Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/:id`, `/rooms/:id/reviews` | Công khai |
+| Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/destinations`, `/rooms/:id`, `/rooms/:id/availability`, `/rooms/:id/reviews` | Công khai |
 | Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, ảnh phòng | Quản trị |
 | Đặt phòng | `GET/POST /bookings`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel` | Chủ booking hoặc quản trị |
-| Đặt phòng | `PUT/DELETE /bookings/:id`, `GET /bookings/calendar` | Quản trị |
+| Đặt phòng | `GET /bookings/policy` | Công khai |
+| Đặt phòng | `GET /bookings/:id/receipt` (PDF xác nhận, `?lang=vi\|en`) | Chủ booking hoặc quản trị |
+| Đặt phòng | `PUT/DELETE /bookings/:id`, `GET /bookings/calendar`, `GET /bookings/summary`, `PATCH /bookings/:id/mark-paid`, `PATCH /bookings/:id/refund`; `POST /bookings` kèm `guest_name` = đặt tại quầy | Quản trị |
 | Thanh toán | `GET /payments/providers` | Công khai |
 | Thanh toán | `POST/GET /payments/bookings/:id`, `GET /payments/transactions/:ref` | Chủ booking hoặc quản trị |
 | Thanh toán | `GET /payments/vnpay/ipn`, `POST /payments/momo/ipn` | Cổng thanh toán (xác thực bằng chữ ký) |
@@ -138,6 +176,8 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Đánh giá | `POST /rooms/:id/reviews` | Khách đã ở xong |
 | Đánh giá | `GET /reviews`, `PATCH /reviews/:id/hide` | Quản trị |
 | Báo cáo | `GET /dashboard/stats`, `/dashboard/analytics`, `/dashboard/export` | Quản trị |
+| Cơ sở lưu trú | `GET /settings/public` | Công khai |
+| Cơ sở lưu trú | `GET/PUT /settings`, `POST/DELETE /settings/logo` | Quản trị |
 
 ## Kiểm thử
 
@@ -146,7 +186,7 @@ npm run lint
 npm test
 ```
 
-Test của API chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên không cần PostgreSQL, và vì vậy cũng không kiểm chứng câu SQL thật. Để thử trên PostgreSQL thật, dùng `npm run db:reset` rồi chạy ứng dụng.
+`npm test` chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên nhanh và không cần PostgreSQL. `npm run test:integration` chạy ứng dụng thật trên PostgreSQL thật (trong Docker) để kiểm chứng những gì bản giả lập không thấy được: khoá dòng khi đặt phòng đồng thời, ràng buộc chống trùng lịch, luồng hoàn tiền và múi giờ, cùng driver lưu ảnh S3 (với máy chủ giả lập S3Mock).
 
 ## Triển khai
 

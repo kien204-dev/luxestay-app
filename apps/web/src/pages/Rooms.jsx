@@ -1,5 +1,6 @@
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useAsyncData } from "../utils/useAsyncData";
 import { useSearchParams } from "react-router-dom";
 import {
   getRooms,
@@ -53,15 +54,9 @@ export default function Rooms() {
   const toast = useToast();
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 1,
-  });
+  // Error from an action on the page (deleting a room), shown in the same
+  // place as a failed load.
+  const [actionError, setActionError] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
@@ -118,43 +113,20 @@ export default function Rooms() {
     setSearchParams(next);
   };
 
-  const loadRooms = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const result = await getRooms(queryParams);
-
-      if (Array.isArray(result)) {
-        setRooms(result);
-        setPagination({
-          page: 1,
-          limit: result.length || 10,
-          total: result.length,
-          totalPages: 1,
-        });
-      } else {
-        setRooms(result.data || []);
-        setPagination(
-          result.pagination || {
-            page: 1,
-            limit: 10,
-            total: 0,
-            totalPages: 1,
-          }
-        );
-      }
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Không tải được danh sách phòng"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [queryParams]);
-
-  useEffect(() => {
-    loadRooms();
-  }, [loadRooms]);
+  const roomsQuery = useAsyncData(`rooms:${JSON.stringify(queryParams)}`, () => getRooms(queryParams));
+  const result = roomsQuery.data;
+  const rooms = Array.isArray(result) ? result : result?.data || [];
+  const pagination = (!Array.isArray(result) && result?.pagination) || {
+    page: 1,
+    limit: rooms.length || 10,
+    total: rooms.length,
+    totalPages: 1,
+  };
+  const loading = roomsQuery.loading;
+  const error =
+    actionError ||
+    (roomsQuery.error ? roomsQuery.error.response?.data?.message || "Không tải được danh sách phòng" : "");
+  const loadRooms = roomsQuery.reload;
 
   const openCreateModal = () => {
     setEditingRoom(null);
@@ -325,7 +297,7 @@ export default function Rooms() {
     if (!room) return;
 
     setDeletingId(room.id);
-    setError("");
+    setActionError("");
     try {
       await deleteRoom(room.id);
       toast.success(`Đã xóa phòng "${room.room_name}"`);
@@ -333,7 +305,7 @@ export default function Rooms() {
       await loadRooms();
     } catch (err) {
       const message = err.response?.data?.message || "Xóa phòng thất bại";
-      setError(message);
+      setActionError(message);
       toast.error(message);
     } finally {
       setDeletingId(null);

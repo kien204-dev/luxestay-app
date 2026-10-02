@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useAsyncData } from "../utils/useAsyncData";
 import {
   listCoupons,
   createCoupon,
@@ -78,9 +79,12 @@ function toDateTimeLocalValue(isoString) {
 export default function Coupons() {
   const toast = useToast();
   const isMobile = useIsMobile();
-  const [coupons, setCoupons] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const couponsQuery = useAsyncData("coupons", listCoupons);
+  const coupons = couponsQuery.data || [];
+  const loading = couponsQuery.loading;
+  const error = couponsQuery.error ? couponsQuery.error.response?.data?.message || "Không tải được danh sách mã giảm giá" : "";
+  const loadCoupons = couponsQuery.reload;
+  const setCoupons = couponsQuery.setData;
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -90,23 +94,6 @@ export default function Coupons() {
 
   const [toggleTarget, setToggleTarget] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
-
-  const loadCoupons = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await listCoupons();
-      setCoupons(data);
-    } catch (err) {
-      setError(err.response?.data?.message || "Không tải được danh sách mã giảm giá");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCoupons();
-  }, []);
 
   const openCreateForm = () => {
     setEditingId(null);

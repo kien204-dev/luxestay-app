@@ -1,7 +1,8 @@
 const pool = require("../db/db.js");
-const { ROOM_UPLOAD_DIR } = require("../middleware/roomImageUpload.js");
-const { autoExpirePendingBookings } = require("./bookingController.js");
-const { deleteLocalUploadFile } = require("../utils/localUploads.js");
+const { autoExpirePendingBookings, syncRoomStatus } = require("./bookingController.js");
+const { removeUpload } = require("../services/storage.js");
+const { findTextLimitError } = require("../utils/textLimits");
+const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
 
 const ROOM_SORT_COLUMNS = {
   name: "room_name",
@@ -42,9 +43,7 @@ function hasRoomQuery(query) {
 }
 
 function deleteLocalRoomImageFile(imageValue, { roomId } = {}) {
-  deleteLocalUploadFile(imageValue, ROOM_UPLOAD_DIR, "/uploads/rooms/", {
-    roomId: roomId ?? null,
-  });
+  removeUpload(imageValue, "rooms", { roomId: roomId ?? null });
 }
 
 // ======================
@@ -86,6 +85,11 @@ exports.getRooms = async (req, res) => {
       if (location && String(location).trim()) {
         values.push(`%${String(location).trim()}%`);
         filters.push(`location ILIKE $${values.length}`);
+      }
+
+      // Guest-facing lists never offer a room that cannot be booked at all.
+      if (req.query.bookable === "true") {
+        filters.push("status != 'maintenance'");
       }
 
       const parsedMinPrice = parseNonNegativeNumber(minPrice);
@@ -200,6 +204,113 @@ exports.getRoomLocations = async (req, res) => {
 };
 
 // ======================
+// GET DESTINATIONS (public landing page)
+// ======================
+// Rooms grouped by the last part of their location ("Hoàn Kiếm, Hà Nội" ->
+// "Hà Nội"), with real counts and a starting price, so the landing page
+// shows where the property actually has rooms instead of invented places.
+exports.getRoomDestinations = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT TRIM(SUBSTRING(location FROM '[^,]*$')) AS name,
+              COUNT(*)::int AS room_count,
+              MIN(price) AS min_price,
+              (ARRAY_AGG(image ORDER BY id) FILTER (WHERE image IS NOT NULL))[1] AS image
+       FROM rooms
+       WHERE location IS NOT NULL AND location != '' AND status != 'maintenance'
+       GROUP BY 1
+       ORDER BY room_count DESC, name ASC
+       LIMIT 12`
+    );
+
+    res.json(result.rows.filter((row) => row.name));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+const AVAILABILITY_DEFAULT_DAYS = 62;
+const AVAILABILITY_MAX_DAYS = 186;
+
+function addDays(dateStr, days) {
+  const date = new Date(`${dateStr}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+// ======================
+// GET ROOM AVAILABILITY (public)
+// ======================
+// Which nights of one room are already taken, for the guest-facing calendar.
+// Deliberately returns dates only: nothing about who booked, how many
+// bookings there are, their status or their price.
+exports.getRoomAvailability = async (req, res) => {
+  try {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ message: "Room id must be a positive integer" });
+
+    const today = todayInAppTimezone();
+    const from = req.query.from === undefined ? today : parseDateOnly(req.query.from);
+    const to =
+      req.query.to === undefined
+        ? from && addDays(from, AVAILABILITY_DEFAULT_DAYS)
+        : parseDateOnly(req.query.to);
+
+    if (!from || !to || to <= from) {
+      return res.status(400).json({ message: "from/to phải là ngày hợp lệ (YYYY-MM-DD) và to sau from" });
+    }
+    if (daysBetween(from, to) > AVAILABILITY_MAX_DAYS) {
+      return res.status(400).json({
+        message: `Khoảng ngày tối đa là ${AVAILABILITY_MAX_DAYS} ngày`,
+      });
+    }
+
+    const room = await pool.query("SELECT status FROM rooms WHERE id = $1", [id]);
+    if (room.rows.length === 0) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    await autoExpirePendingBookings();
+
+    const taken = await pool.query(
+      `SELECT check_in, check_out FROM bookings
+       WHERE room_id = $1
+       AND status = ANY($2::text[])
+       AND check_in < $4::date
+       AND check_out > $3::date`,
+      [id, ACTIVE_BOOKING_STATUSES, from, to]
+    );
+
+    // A stay occupies its nights: check-in day up to, not including, checkout.
+    const unavailable = new Set();
+    for (const row of taken.rows) {
+      const start = String(row.check_in).slice(0, 10);
+      const end = String(row.check_out).slice(0, 10);
+      for (let day = start > from ? start : from; day < end && day < to; day = addDays(day, 1)) {
+        unavailable.add(day);
+      }
+    }
+
+    res.json({
+      room_id: id,
+      from,
+      to,
+      today,
+      bookable: room.rows[0].status !== "maintenance",
+      unavailable: [...unavailable].sort(),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+// ======================
 // GET ROOM BY ID
 // ======================
 exports.getRoomById = async (req, res) => {
@@ -256,6 +367,13 @@ exports.createRoom = async (req, res) => {
     if (!room_name || !room_type || price === undefined || price === null) {
       return res.status(400).json({
         message: "room_name, room_type và price là bắt buộc",
+      });
+    }
+
+    const lengthError = findTextLimitError({ room_name, room_type, location });
+    if (lengthError) {
+      return res.status(400).json({
+        message: lengthError,
       });
     }
 
@@ -332,6 +450,13 @@ exports.updateRoom = async (req, res) => {
       });
     }
 
+    const lengthError = findTextLimitError({ room_name, room_type, location });
+    if (lengthError) {
+      return res.status(400).json({
+        message: lengthError,
+      });
+    }
+
     const parsedPrice = parseRoomPrice(price);
     const parsedCapacity = parsePositiveInteger(capacity, null);
 
@@ -347,17 +472,18 @@ exports.updateRoom = async (req, res) => {
       });
     }
 
-    const roomStatus = status || "available";
-    if (!ROOM_STATUSES.has(roomStatus)) {
+    if (status && !ROOM_STATUSES.has(status)) {
       return res.status(400).json({ message: "Room status is invalid" });
     }
 
-    const existing = await pool.query("SELECT image FROM rooms WHERE id = $1", [id]);
+    const existing = await pool.query("SELECT image, status FROM rooms WHERE id = $1", [id]);
     if (existing.rows.length === 0) {
       return res.status(404).json({
         message: "Room not found",
       });
     }
+    // Leaving status out keeps whatever the room had.
+    const roomStatus = status || existing.rows[0].status;
     const previousImage = existing.rows[0].image;
 
     const result = await pool.query(
@@ -395,6 +521,15 @@ exports.updateRoom = async (req, res) => {
     const newImage = result.rows[0].image;
     if (previousImage && previousImage !== newImage) {
       deleteLocalRoomImageFile(previousImage, { roomId: id });
+    }
+
+    // "available" and "booked" are derived from the room's bookings, so the
+    // only thing an admin really sets here is maintenance on/off. Anything
+    // else is recomputed rather than trusted.
+    if (roomStatus !== "maintenance") {
+      await syncRoomStatus(pool, id);
+      const synced = await pool.query("SELECT status FROM rooms WHERE id = $1", [id]);
+      result.rows[0].status = synced.rows[0]?.status ?? result.rows[0].status;
     }
 
     res.json({
@@ -479,11 +614,11 @@ exports.addRoomImage = async (req, res) => {
 
     const roomCheck = await pool.query("SELECT id FROM rooms WHERE id = $1", [roomId]);
     if (roomCheck.rows.length === 0) {
-      deleteLocalRoomImageFile(`/uploads/rooms/${req.file.filename}`, { roomId });
+      deleteLocalRoomImageFile(req.file.storedPath, { roomId });
       return res.status(404).json({ message: "Room not found" });
     }
 
-    const imagePath = `/uploads/rooms/${req.file.filename}`;
+    const imagePath = req.file.storedPath;
     const result = await pool.query(
       `INSERT INTO room_images (room_id, image_path)
        VALUES ($1, $2)

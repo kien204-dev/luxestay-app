@@ -2,13 +2,9 @@
 
 Cập nhật: 2026-10-01.
 
-## Rule ESLint đang tắt tạm
+## Các trang quản trị còn lớn
 
-`react-hooks/set-state-in-effect` đang tắt trong `eslint.config.mjs`.
-
-- **Lý do**: các trang tải dữ liệu theo kiểu gọi API trong `useEffect` rồi `setState`. Rule này (có từ `eslint-plugin-react-hooks` 7.1) báo lỗi ở 9 file: `AuthContext`, `Booking`, `Coupons`, `Dashboard`, `MyBookings`, `Orders` (2 chỗ), `Rooms`, `Users`.
-- **Ảnh hưởng**: không có lỗi chức năng; đây là cảnh báo về hiệu năng (render thừa một lượt).
-- **Kế hoạch**: bật lại ở Giai đoạn 3, khi các trang lớn được tách nhỏ và phần tải dữ liệu được gom về một lớp riêng.
+Trang phía khách đã được tách nhỏ (không file nào trên 400 dòng). Các trang quản trị thì chưa: `Users` (~1.300 dòng), `Rooms` (~1.100), `Dashboard` (~1.000), `Orders` (~840), `Settings` (~710), `Coupons` (~620), `Calendar` (~510). Chúng hoạt động bình thường; việc tách là để dễ bảo trì và sẽ làm cùng lúc với việc dịch các trang này (Giai đoạn 5).
 
 ## Cảnh báo `npm audit`
 
@@ -31,8 +27,20 @@ Vì sao chưa sửa: `@firebase/firestore` ghim `@grpc/grpc-js` ở `~1.9.0`, n�
 
 ## Khác
 
+- **Ảnh phòng mẫu chưa có**: `apps/api/seed-assets/rooms/` đang trống, nên phòng mẫu hiện hình vẽ thay thế. Bỏ ảnh vào thư mục đó rồi chạy lại `npm run db:seed` là phòng mẫu có ảnh.
+- **Ngôn ngữ mặc định** (`DEFAULT_LANGUAGE`) vẫn là biến môi trường, đổi xong phải build lại web. Các thông tin khác của cơ sở lưu trú đã sửa được ở `/admin/property`.
+- **Trang Users vẫn tải toàn bộ danh sách** rồi phân trang trên trình duyệt. Orders đã phân trang ở máy chủ; Users sẽ làm cùng lúc với việc tách trang này (Giai đoạn 5).
+- **Booking tự hủy vì quá hạn thanh toán không gửi email** cho khách (hủy bởi khách hoặc quản trị thì có).
+- **Booking tại quầy không có email khách** thì không có thư nào được gửi; lễ tân tải PDF xác nhận ở trang Orders để in.
+- **PDF xác nhận chỉ in logo dạng PNG/JPEG lưu trên đĩa của API**. Logo WebP, hoặc logo lưu trên S3, vẫn hiện trên web nhưng không có trong PDF; phần còn lại của PDF không đổi.
+- **`db:seed` luôn chép ảnh mẫu vào đĩa của API**, kể cả khi `STORAGE_DRIVER=s3`.
+- **`uploads:prune` chỉ dọn thư mục trên đĩa**; với S3 dùng lifecycle rule của bucket.
+- **Đánh giá trên thẻ phòng** được tải riêng cho từng phòng (mỗi thẻ một yêu cầu). Với 12 phòng mỗi trang thì không đáng kể; nếu tăng số phòng mỗi trang nên gộp vào truy vấn danh sách.
+
+- **VNPay sandbox chưa chạy trọn vòng với cổng thật: chờ VNPay kích hoạt merchant.** Đường dẫn thanh toán tạo ra hợp lệ nhưng sandbox trả lời "Website này chưa được phê duyệt" với cả hai tài khoản đã thử, kể cả khi địa chỉ trả về là tên miền đã đăng ký; đây là trạng thái merchant phía VNPay. Phần xử lý của ứng dụng (ký, kiểm tra chữ ký và số tiền, xác nhận booking, gửi lặp, tiền về sau khi hết hạn) được kiểm chứng bằng IPN giả lập trong `npm run test:integration`. Việc còn lại khi merchant được kích hoạt: một giao dịch thật đi hết vòng tạo → trả → IPN → booking "đã xác nhận".
 - **MoMo là bản beta**: chưa được kiểm chứng với tài khoản MoMo thật; tắt mặc định (`MOMO_ENABLED`).
-- **Test của API dùng cơ sở dữ liệu giả lập**: không kiểm chứng câu SQL trên PostgreSQL thật.
-- **Độ dài tên chưa được kiểm tra**: tên người dùng dài hơn 100 ký tự hoặc tên phòng dài hơn 150 ký tự vượt giới hạn cột và làm API trả lỗi 500 thay vì 400.
+- **Biểu đồ Dashboard theo giờ/ngày** dùng giờ của máy chủ cơ sở dữ liệu chứ chưa theo `APP_TIMEZONE`. (Số phòng đang có khách và doanh thu đã tính đúng: theo booking đã xác nhận phủ ngày hôm nay, và chỉ tính booking đã thanh toán.)
+- **Migration 013 thêm ràng buộc chống trùng lịch**: nếu cơ sở dữ liệu cũ đã có hai booking đang hoạt động chồng ngày cho cùng một phòng, migration sẽ dừng với lỗi. Hủy một trong hai booking rồi chạy lại.
+- **Cột `created_at` của users/rooms/bookings** là `TIMESTAMP` không kèm múi giờ, nên giờ tạo hiển thị có thể lệch theo múi giờ của cơ sở dữ liệu. Ngày nhận/trả phòng không bị ảnh hưởng.
 - **Cấu hình Render/Vercel trong `DEPLOY.md`** chưa được chạy thử trên hai nền tảng đó.
-- **Ảnh lưu trên đĩa của API**: nền tảng không có đĩa bền (ví dụ Render gói thường) sẽ mất ảnh sau mỗi lần triển khai.
+- **Ảnh mặc định lưu trên đĩa của API**: nền tảng không có đĩa bền (ví dụ Render gói thường) sẽ mất ảnh sau mỗi lần triển khai; ở đó hãy đặt `STORAGE_DRIVER=s3`. Driver S3 được kiểm thử với máy chủ giả lập S3Mock, **chưa chạy thử với AWS S3 hay Cloudflare R2 thật**.

@@ -4,6 +4,8 @@ const router = express.Router();
 const {
   getRooms,
   getRoomLocations,
+  getRoomDestinations,
+  getRoomAvailability,
   getRoomById,
   createRoom,
   updateRoom,
@@ -20,6 +22,8 @@ const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 // Ai cũng xem được danh sách phòng (khách chưa đăng nhập vẫn cần duyệt phòng)
 router.get("/", getRooms);
 router.get("/locations", getRoomLocations);
+router.get("/destinations", getRoomDestinations);
+router.get("/:id/availability", getRoomAvailability);
 router.get("/:id", getRoomById);
 
 // Chỉ admin mới được thêm/sửa/xóa phòng

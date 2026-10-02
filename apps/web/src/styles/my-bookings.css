@@ -1,0 +1,25 @@
+/* Small-screen adjustments for the "My bookings" page. */
+@media (max-width: 720px) {
+  .my-bookings-header {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    padding: 14px 18px !important;
+  }
+  .my-booking-card {
+    grid-template-columns: 1fr !important;
+  }
+  .my-booking-image {
+    min-height: 180px !important;
+  }
+  .my-booking-actions {
+    align-items: flex-start !important;
+    padding-top: 0 !important;
+  }
+  .booking-detail-panel {
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+  }
+  .booking-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

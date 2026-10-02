@@ -1,0 +1,171 @@
+{
+  "nav": {
+    "menu": "Menu",
+    "rooms": "Rooms",
+    "myBookings": "My bookings",
+    "admin": "Admin",
+    "account": "Account",
+    "login": "Sign in",
+    "logout": "Sign out"
+  },
+  "footer": {
+    "tagline": "Book direct: live availability, online payment and clear cancellation rules.",
+    "explore": "Explore",
+    "contact": "Contact",
+    "phone": "Phone",
+    "email": "Email"
+  },
+  "search": {
+    "location": "Location",
+    "locationPlaceholder": "City, area…",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guests": "Guests",
+    "anyGuests": "Any",
+    "guestsOption_one": "{{count}} guest",
+    "guestsOption_other": "{{count}} guests",
+    "submit": "Search availability",
+    "errors": {
+      "bothDates": "Please choose both a check-in and a check-out date.",
+      "checkOutAfterCheckIn": "Check-out must be after check-in."
+    }
+  },
+  "home": {
+    "documentTitle": "Book online",
+    "heroTitle": "Find a room for your stay",
+    "heroSubtitle": "Pick your dates, see what is free and book in minutes at {{brand}}.",
+    "destinationsEyebrow": "Where we have rooms",
+    "destinationsTitle": "Destinations",
+    "destinationMeta_one": "{{count}} room · from {{price}}",
+    "destinationMeta_other": "{{count}} rooms · from {{price}}",
+    "roomsEyebrow": "Latest",
+    "roomsTitle": "Featured rooms",
+    "viewAllRooms": "View all rooms",
+    "whyEyebrow": "Booking here",
+    "whyTitle": "Clear from start to finish",
+    "why": {
+      "availabilityTitle": "Live availability",
+      "availabilityText": "Each room's calendar updates the moment someone books. If a room shows as free, you can book it.",
+      "cancelTitle": "Clear cancellation rules",
+      "cancelText_one": "A paid booking can be cancelled for free, with a refund, until {{count}} day before check-in. Unpaid bookings can be cancelled at any time.",
+      "cancelText_other": "A paid booking can be cancelled for free, with a refund, until {{count}} days before check-in. Unpaid bookings can be cancelled at any time.",
+      "cancelTextGeneric": "Cancellation and refund rules are shown before you confirm a booking.",
+      "paymentTitle": "Online payment",
+      "paymentText": "Pay through the payment gateway right after booking, or later while your room is held."
+    }
+  },
+  "room": {
+    "perNight": "/ night",
+    "maxGuests_one": "Up to {{count}} guest",
+    "maxGuests_other": "Up to {{count}} guests",
+    "view": "View room"
+  },
+  "list": {
+    "documentTitle": "Rooms",
+    "title": "Rooms",
+    "loading": "Loading rooms…",
+    "count_one": "{{count}} room",
+    "count_other": "{{count}} rooms",
+    "countForDates_one": "{{count}} room available from {{checkIn}} to {{checkOut}}",
+    "countForDates_other": "{{count}} rooms available from {{checkIn}} to {{checkOut}}",
+    "clearFilters": "Clear filters",
+    "sort": "Sort",
+    "sortNewest": "Newest",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "noMatches": "No rooms match. Try other dates or remove a filter.",
+    "noRoomsYet": "There are no rooms to book yet.",
+    "loadFailed": "Could not load the data. Please try again.",
+    "retry": "Try again",
+    "pagination": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "detail": {
+    "documentTitle": "Room",
+    "loading": "Loading room…",
+    "notFound": "This room could not be found.",
+    "backToRooms": "All rooms",
+    "about": "About this room",
+    "noDescription": "This room has no description yet.",
+    "availability": "Availability",
+    "reviews": "Guest reviews",
+    "checkInFrom": "Check-in from {{time}}",
+    "checkOutBefore": "Check-out before {{time}}"
+  },
+  "calendar": {
+    "weekdays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "previous": "Previous month",
+    "next": "Next month",
+    "free": "Available",
+    "taken": "Booked",
+    "selected": "Your dates",
+    "hintCheckIn": "Click a day to choose your check-in date.",
+    "hintCheckOut": "Now click your check-out date. You can check out on a day another guest checks in.",
+    "loadFailed": "Could not load the calendar.",
+    "notBookable": "This room is not taking guests at the moment."
+  },
+  "booking": {
+    "title": "Book this room",
+    "guests": "Guests (up to {{count}})",
+    "coupon": "Coupon code (optional)",
+    "couponPlaceholder": "Enter code",
+    "couponApply": "Apply",
+    "couponApplied": "Applied",
+    "nightsLine_one": "{{count}} night × {{price}}",
+    "nightsLine_other": "{{count}} nights × {{price}}",
+    "discount": "Code {{code}}",
+    "total": "Total",
+    "submit": "Confirm booking",
+    "submitting": "Booking…",
+    "loginToBook": "Sign in to book",
+    "loginHint": "Your dates and guests are kept while you sign in.",
+    "notBookable": "This room is not taking guests at the moment.",
+    "confirmedToast": "Booking made and confirmed.",
+    "paymentTitle": "Payment",
+    "errors": {
+      "bothDates": "Please choose a check-in and a check-out date.",
+      "checkInPast": "Check-in cannot be in the past.",
+      "checkOutAfterCheckIn": "Check-out must be after check-in.",
+      "datesTaken": "Some nights in your dates are already booked. Check the availability calendar and pick other dates.",
+      "couponEmpty": "Please enter a coupon code.",
+      "couponNeedsDates": "Choose your dates before applying a code.",
+      "couponInvalid": "This coupon code is not valid.",
+      "failed": "The booking could not be made. Please try again."
+    }
+  },
+  "policy": {
+    "title": "Holding and cancellation rules",
+    "hold_one": "After booking, the room is held for {{count}} minute while you pay; after that the booking cancels itself.",
+    "hold_other": "After booking, the room is held for {{count}} minutes while you pay; after that the booking cancels itself.",
+    "unpaid": "Unpaid booking: cancel for free at any time.",
+    "paid_one": "Paid booking: cancel for free, with a refund, until {{count}} day before check-in.",
+    "paid_other": "Paid booking: cancel for free, with a refund, until {{count}} days before check-in.",
+    "paidUntil_one": "Paid booking: cancel for free, with a refund, until the end of {{date}} ({{count}} day before check-in). After that, please contact the property.",
+    "paidUntil_other": "Paid booking: cancel for free, with a refund, until the end of {{date}} ({{count}} days before check-in). After that, please contact the property.",
+    "paidClosed_one": "Check-in is less than {{count}} day away: once paid, this booking can no longer be cancelled online. To cancel, please contact the property.",
+    "paidClosed_other": "Check-in is less than {{count}} days away: once paid, this booking can no longer be cancelled online. To cancel, please contact the property."
+  },
+  "payment": {
+    "created": "Booking created",
+    "title": "Complete your payment",
+    "notice": "Booking #{{id}} is waiting for payment.",
+    "stay": "Stay",
+    "total": "Amount due",
+    "pay": "Pay",
+    "payVnpay": "Pay with VNPay",
+    "payMomo": "Pay with MoMo",
+    "redirecting": "Taking you to the payment gateway…",
+    "payLater": "Pay later",
+    "initFailed": "Payment could not be started. Please try again."
+  }
+}

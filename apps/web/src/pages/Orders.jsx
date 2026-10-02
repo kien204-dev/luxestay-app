@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAsyncData } from "../utils/useAsyncData";
 import {
   getBookings,
   updateBooking,
   deleteBooking,
+  markBookingPaid,
+  confirmRefund,
+  getBookingSummary,
+  downloadBookingReceipt,
 } from "../services/bookingService";
+import WalkInBookingModal from "../components/orders/WalkInBookingModal";
 import { listReviews, setReviewHidden } from "../services/reviewService";
 import { useToast } from "../context/ToastContext";
 import { useBookingNotifications } from "../context/BookingNotificationsContext";
@@ -13,6 +19,9 @@ import ConfirmModal from "../components/ConfirmModal";
 import StarRating from "../components/StarRating";
 
 const REVIEWS_PAGE_SIZE = 20;
+// One shared empty list, so "no data yet" does not look like new data to useMemo.
+const EMPTY_LIST = [];
+const ORDERS_PAGE_SIZE = 20;
 
 const STATUS_TRANSITIONS = {
   pending: ["confirmed", "cancelled"],
@@ -45,6 +54,84 @@ function formatDate(value) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleDateString("vi-VN");
+}
+
+const PAYMENT_LABEL = {
+  unpaid: "Chưa thanh toán",
+  pending: "Đang thanh toán",
+  paid: "Đã thanh toán",
+  failed: "Thanh toán lỗi",
+  refund_pending: "Chờ hoàn tiền",
+  refunded: "Đã hoàn tiền",
+};
+
+const PAYMENT_COLOR = {
+  unpaid: "var(--color-text-muted)",
+  pending: "var(--color-warning)",
+  paid: "var(--color-success)",
+  failed: "var(--color-danger)",
+  refund_pending: "var(--color-warning)",
+  refunded: "var(--color-text-muted)",
+};
+
+const REFUND_REASON_LABEL = {
+  cancelled_by_guest: "Khách hủy sau khi đã thanh toán",
+  cancelled_by_admin: "Quản trị hủy sau khi đã thanh toán",
+  paid_after_cancellation: "Tiền về sau khi booking đã hủy/hết hạn, phòng không còn trống",
+};
+
+function canMarkPaid(order) {
+  return (
+    ["pending", "confirmed", "completed"].includes(order.status) &&
+    ["unpaid", "pending", "failed"].includes(order.payment_status || "unpaid")
+  );
+}
+
+// Payment state of one booking plus the one money action that applies to it:
+// record a desk payment, or confirm a refund has been sent.
+function OrderPayment({ order, busyId, onAction }) {
+  const paymentStatus = order.payment_status || "unpaid";
+  const busy = busyId === order.id;
+  const action =
+    paymentStatus === "refund_pending"
+      ? { type: "refund", label: "Xác nhận hoàn tiền" }
+      : canMarkPaid(order)
+        ? { type: "mark-paid", label: "Đã thu tiền" }
+        : null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
+      <span
+        title={REFUND_REASON_LABEL[order.refund_reason] || undefined}
+        style={{ fontSize: 12, fontWeight: 700, color: PAYMENT_COLOR[paymentStatus] }}
+      >
+        {PAYMENT_LABEL[paymentStatus] || paymentStatus}
+      </span>
+      {paymentStatus === "refund_pending" && REFUND_REASON_LABEL[order.refund_reason] && (
+        <span style={{ fontSize: 11, color: "var(--color-text-muted)", maxWidth: 220 }}>
+          {REFUND_REASON_LABEL[order.refund_reason]}
+        </span>
+      )}
+      {action && (
+        <button
+          onClick={() => onAction({ id: order.id, type: action.type })}
+          disabled={busy}
+          style={{
+            background: "transparent",
+            color: "var(--color-gold-400)",
+            border: "1px solid var(--color-border)",
+            borderRadius: 8,
+            padding: "4px 10px",
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: busy ? "not-allowed" : "pointer",
+          }}
+        >
+          {busy ? "..." : action.label}
+        </button>
+      )}
+    </div>
+  );
 }
 
 function OrderStatusSelect({ order, updatingId, onChange, fullWidth = false }) {
@@ -86,42 +173,83 @@ function Orders() {
   const toast = useToast();
   const isMobile = useIsMobile();
   const { clearNewBookingCount } = useBookingNotifications();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [updatingId, setUpdatingId] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
-  const [bookingToDelete, setBookingToDelete] = useState(null);
+  // The list is loaded one page at a time; the totals above it come from
+  // their own request, so neither needs every booking in the browser.
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("");
+  const [walkInOpen, setWalkInOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
 
-  const [reviews, setReviews] = useState([]);
-  const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [reviewsError, setReviewsError] = useState("");
-  const [reviewsPage, setReviewsPage] = useState(1);
-  const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
-  const [roomNameFilter, setRoomNameFilter] = useState("");
-  const [togglingReviewId, setTogglingReviewId] = useState(null);
-  const [reviewToToggle, setReviewToToggle] = useState(null);
+  const bookingsQuery = useAsyncData(`orders:${page}:${statusFilter}:${paymentFilter}`, () =>
+    getBookings({
+      page,
+      limit: ORDERS_PAGE_SIZE,
+      ...(statusFilter ? { status: statusFilter } : {}),
+      ...(paymentFilter ? { payment_status: paymentFilter } : {}),
+    }).then((res) => res.data)
+  );
+  const summaryQuery = useAsyncData("orders-summary", getBookingSummary);
+  const summary = summaryQuery.data;
+  const bookings = bookingsQuery.data?.data || EMPTY_LIST;
+  const totalPages = bookingsQuery.data?.totalPages ?? 1;
+  const totalMatching = bookingsQuery.data?.total ?? 0;
+  const loading = bookingsQuery.loading;
+  const error = bookingsQuery.error ? bookingsQuery.error.response?.data?.message || "Không tải được danh sách đơn đặt phòng" : "";
+  const loadBookings = () => {
+    bookingsQuery.reload();
+    summaryQuery.reload();
+  };
+  // Accepts a new list or an updater, like a state setter; edits the rows of
+  // the page currently shown.
+  const setBookings = (update) =>
+    bookingsQuery.setData((current) =>
+      current
+        ? { ...current, data: typeof update === "function" ? update(current.data) : update }
+        : current
+    );
 
-  const loadReviews = async (targetPage) => {
+  const changeFilter = (apply) => {
+    apply();
+    setPage(1);
+  };
+
+  const handleDownload = async (id) => {
+    setDownloadingId(id);
     try {
-      setReviewsLoading(true);
-      setReviewsError("");
-      const res = await listReviews({ page: targetPage, limit: REVIEWS_PAGE_SIZE });
-      setReviews(res.data);
-      setReviewsPage(res.pagination.page);
-      setReviewsTotalPages(res.pagination.totalPages);
+      await downloadBookingReceipt(id);
     } catch (err) {
-      setReviewsError(
-        err.response?.data?.message || "Không tải được danh sách đánh giá"
-      );
+      toast.error(err.response?.data?.message || "Không tải được phiếu xác nhận");
     } finally {
-      setReviewsLoading(false);
+      setDownloadingId(null);
     }
   };
 
-  useEffect(() => {
-    loadReviews(1);
-  }, []);
+  const handleWalkInCreated = (booking) => {
+    setWalkInOpen(false);
+    toast.success(`Đã tạo đặt phòng #BK-${String(booking.id).padStart(4, "0")}`);
+    setPage(1);
+    loadBookings();
+  };
+  const [updatingId, setUpdatingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [bookingToDelete, setBookingToDelete] = useState(null);
+  const [paymentAction, setPaymentAction] = useState(null);
+  const [paymentBusyId, setPaymentBusyId] = useState(null);
+
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const reviewsQuery = useAsyncData(`reviews:${reviewsPage}`, () =>
+    listReviews({ page: reviewsPage, limit: REVIEWS_PAGE_SIZE })
+  );
+  const reviews = reviewsQuery.data?.data || EMPTY_LIST;
+  const reviewsLoading = reviewsQuery.loading;
+  const reviewsError = reviewsQuery.error ? reviewsQuery.error.response?.data?.message || "Không tải được danh sách đánh giá" : "";
+  const reviewsTotalPages = reviewsQuery.data?.pagination?.totalPages ?? 1;
+  const setReviews = (update) =>
+    reviewsQuery.setData((current) => (current ? { ...current, data: update(current.data) } : current));
+  const [roomNameFilter, setRoomNameFilter] = useState("");
+  const [togglingReviewId, setTogglingReviewId] = useState(null);
+  const [reviewToToggle, setReviewToToggle] = useState(null);
 
   // Simplest "seen" model this feature commits to: opening Orders at all
   // counts as catching up, no per-booking read tracking.
@@ -157,39 +285,12 @@ function Orders() {
     }
   };
 
-  const loadBookings = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const res = await getBookings();
-      setBookings(res.data);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Không tải được danh sách đơn đặt phòng"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadBookings();
-  }, []);
-
-  const cards = useMemo(() => {
-    const revenue = bookings
-      .filter((b) => b.status === "confirmed" || b.status === "completed")
-      .reduce((sum, b) => sum + Number(b.total_price || 0), 0);
-
-    const pending = bookings.filter((b) => b.status === "pending").length;
-
-    return [
-      { label: "Revenue", value: formatMoney(revenue) },
-      { label: "Pending", value: pending },
-      { label: "Orders", value: bookings.length },
-    ];
-  }, [bookings]);
+  const cards = [
+    { label: "Đã thu", value: summary ? formatMoney(summary.revenue) : "—" },
+    { label: "Chờ thanh toán", value: summary ? summary.pending : "—" },
+    { label: "Chờ hoàn tiền", value: summary ? summary.refundPending : "—" },
+    { label: "Tổng số đơn", value: summary ? summary.total : "—" },
+  ];
 
   const handleStatusChange = async (id, newStatus) => {
     const prev = bookings;
@@ -199,8 +300,25 @@ function Orders() {
     );
 
     try {
-      await updateBooking(id, newStatus);
-      toast.success("Đã cập nhật trạng thái đơn đặt phòng");
+      const res = await updateBooking(id, newStatus);
+      // The server may have changed more than the status (cancelling a paid
+      // booking turns it into a pending refund).
+      const saved = res.data?.booking;
+      if (saved) {
+        setBookings((list) =>
+          list.map((b) =>
+            b.id === id
+              ? { ...b, status: saved.status, payment_status: saved.payment_status, refund_reason: saved.refund_reason }
+              : b
+          )
+        );
+      }
+      toast.success(
+        saved?.payment_status === "refund_pending"
+          ? "Đã hủy đơn. Đơn này đã thanh toán nên cần hoàn tiền cho khách."
+          : "Đã cập nhật trạng thái đơn đặt phòng"
+      );
+      summaryQuery.reload();
     } catch (err) {
       setBookings(prev);
       toast.error(
@@ -209,6 +327,29 @@ function Orders() {
       );
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const confirmPaymentAction = async () => {
+    if (!paymentAction) return;
+    const { id, type } = paymentAction;
+
+    setPaymentBusyId(id);
+    try {
+      const res = type === "refund" ? await confirmRefund(id) : await markBookingPaid(id);
+      const saved = res.data.booking;
+      setBookings((list) =>
+        list.map((b) =>
+          b.id === id ? { ...b, status: saved.status, payment_status: saved.payment_status } : b
+        )
+      );
+      toast.success(res.data.message);
+      setPaymentAction(null);
+      summaryQuery.reload();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Thao tác thất bại, vui lòng thử lại");
+    } finally {
+      setPaymentBusyId(null);
     }
   };
 
@@ -224,6 +365,7 @@ function Orders() {
       setBookings((list) => list.filter((b) => b.id !== id));
       toast.success("Đã xóa đơn đặt phòng");
       setBookingToDelete(null);
+      loadBookings();
     } catch (err) {
       toast.error(err.response?.data?.message || "Xóa đơn đặt phòng thất bại");
     } finally {
@@ -283,7 +425,7 @@ function Orders() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
           gap: 20,
           marginBottom: 28,
         }}
@@ -320,7 +462,40 @@ function Orders() {
             alignItems: "center",
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 18, color: "var(--color-text-primary)" }}>Order List</h2>
+          <h2 style={{ margin: 0, fontSize: 18, color: "var(--color-text-primary)" }}>
+            Order List
+            <span style={{ color: "var(--color-text-muted)", fontSize: 13, fontWeight: 400, marginLeft: 10 }}>
+              {totalMatching} đơn
+            </span>
+          </h2>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <select
+              aria-label="Lọc theo trạng thái"
+              value={statusFilter}
+              onChange={(e) => changeFilter(() => setStatusFilter(e.target.value))}
+              style={filterSelectStyle}
+            >
+              <option value="">Mọi trạng thái</option>
+              <option value="pending">Chờ thanh toán</option>
+              <option value="confirmed">Đã xác nhận</option>
+              <option value="completed">Hoàn tất</option>
+              <option value="cancelled">Đã hủy</option>
+            </select>
+            <select
+              aria-label="Lọc theo thanh toán"
+              value={paymentFilter}
+              onChange={(e) => changeFilter(() => setPaymentFilter(e.target.value))}
+              style={filterSelectStyle}
+            >
+              <option value="">Mọi thanh toán</option>
+              {Object.entries(PAYMENT_LABEL).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <button type="button" onClick={() => setWalkInOpen(true)} style={primaryActionStyle}>
+              + Đặt phòng tại quầy
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -370,8 +545,13 @@ function Orders() {
                 </div>
 
                 <div style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
-                  {order.user_name}
-                  <span style={{ color: "var(--color-text-muted)" }}> · {order.user_email}</span>
+                  {order.guest_name || order.user_name}
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    {" · "}
+                    {order.guest_name
+                      ? [order.guest_phone, order.guest_email, "tại quầy"].filter(Boolean).join(" · ")
+                      : order.user_email}
+                  </span>
                 </div>
 
                 <div style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
@@ -385,6 +565,16 @@ function Orders() {
                     {formatMoney(order.total_price)}
                   </span>
                 </div>
+
+                <OrderPayment order={order} busyId={paymentBusyId} onAction={setPaymentAction} />
+
+                <button
+                  onClick={() => handleDownload(order.id)}
+                  disabled={downloadingId === order.id}
+                  style={pdfButtonStyle}
+                >
+                  {downloadingId === order.id ? "..." : "Tải phiếu PDF"}
+                </button>
 
                 <button
                   onClick={() => requestDelete(order.id)}
@@ -446,9 +636,11 @@ function Orders() {
                     <tr key={order.id}>
                       <td style={tdStyle}>#BK-{String(order.id).padStart(4, "0")}</td>
                       <td style={tdStyle}>
-                        <div>{order.user_name}</div>
+                        <div>{order.guest_name || order.user_name}</div>
                         <div style={{ color: "var(--color-text-muted)", fontSize: 12 }}>
-                          {order.user_email}
+                          {order.guest_name
+                            ? [order.guest_phone, order.guest_email, "tại quầy"].filter(Boolean).join(" · ")
+                            : order.user_email}
                         </div>
                       </td>
                       <td style={tdStyle}>
@@ -466,8 +658,19 @@ function Orders() {
                           onChange={handleStatusChange}
                         />
                       </td>
-                      <td style={tdStyle}>{formatMoney(order.total_price)}</td>
                       <td style={tdStyle}>
+                        <div style={{ marginBottom: 6 }}>{formatMoney(order.total_price)}</div>
+                        <OrderPayment order={order} busyId={paymentBusyId} onAction={setPaymentAction} />
+                      </td>
+                      <td style={tdStyle}>
+                        <button
+                          onClick={() => handleDownload(order.id)}
+                          disabled={downloadingId === order.id}
+                          data-testid="order-receipt"
+                          style={{ ...pdfButtonStyle, marginRight: 8 }}
+                        >
+                          {downloadingId === order.id ? "..." : "PDF"}
+                        </button>
                         <button
                           onClick={() => requestDelete(order.id)}
                           disabled={deletingId === order.id}
@@ -491,6 +694,29 @@ function Orders() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 16,
+              padding: "18px 22px",
+              borderTop: "1px solid var(--color-border-soft)",
+            }}
+          >
+            <button onClick={() => setPage(page - 1)} disabled={page <= 1 || loading} style={pagerButtonStyle}>
+              ← Trước
+            </button>
+            <span style={{ color: "var(--color-text-muted)", fontSize: 13 }} data-testid="orders-page">
+              Trang {page} / {totalPages}
+            </span>
+            <button onClick={() => setPage(page + 1)} disabled={page >= totalPages || loading} style={pagerButtonStyle}>
+              Sau →
+            </button>
           </div>
         )}
       </div>
@@ -648,7 +874,7 @@ function Orders() {
             }}
           >
             <button
-              onClick={() => loadReviews(reviewsPage - 1)}
+              onClick={() => setReviewsPage(reviewsPage - 1)}
               disabled={reviewsPage <= 1}
               style={{
                 padding: "8px 16px",
@@ -666,7 +892,7 @@ function Orders() {
               Trang {reviewsPage} / {reviewsTotalPages}
             </span>
             <button
-              onClick={() => loadReviews(reviewsPage + 1)}
+              onClick={() => setReviewsPage(reviewsPage + 1)}
               disabled={reviewsPage >= reviewsTotalPages}
               style={{
                 padding: "8px 16px",
@@ -687,6 +913,10 @@ function Orders() {
         )}
       </div>
 
+      {walkInOpen && (
+        <WalkInBookingModal onClose={() => setWalkInOpen(false)} onCreated={handleWalkInCreated} />
+      )}
+
       <ConfirmModal
         open={bookingToDelete != null}
         title="Xóa đơn đặt phòng"
@@ -696,6 +926,20 @@ function Orders() {
         loading={deletingId === bookingToDelete}
         onConfirm={confirmDelete}
         onCancel={() => setBookingToDelete(null)}
+      />
+
+      <ConfirmModal
+        open={paymentAction != null}
+        title={paymentAction?.type === "refund" ? "Xác nhận hoàn tiền" : "Ghi nhận đã thu tiền"}
+        message={
+          paymentAction?.type === "refund"
+            ? `Xác nhận bạn ĐÃ chuyển tiền hoàn lại cho khách của đơn #BK-${String(paymentAction?.id).padStart(4, "0")}? Ứng dụng không tự chuyển tiền.`
+            : `Xác nhận đã thu đủ tiền (tiền mặt/chuyển khoản) cho đơn #BK-${String(paymentAction?.id).padStart(4, "0")}? Đơn đang chờ sẽ được xác nhận.`
+        }
+        confirmLabel={paymentAction?.type === "refund" ? "Đã hoàn tiền" : "Đã thu tiền"}
+        loading={paymentBusyId != null}
+        onConfirm={confirmPaymentAction}
+        onCancel={() => setPaymentAction(null)}
       />
 
       <ConfirmModal
@@ -715,6 +959,47 @@ function Orders() {
     </div>
   );
 }
+
+const filterSelectStyle = {
+  background: "var(--color-navy-950)",
+  color: "var(--color-text-primary)",
+  border: "1px solid var(--color-border-soft)",
+  borderRadius: 8,
+  padding: "8px 10px",
+  fontSize: 13,
+};
+
+const primaryActionStyle = {
+  background: "linear-gradient(135deg, var(--color-gold-400), var(--color-gold-500))",
+  color: "var(--color-navy-950)",
+  border: "none",
+  borderRadius: 8,
+  padding: "8px 14px",
+  fontSize: 13,
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const pdfButtonStyle = {
+  background: "transparent",
+  color: "var(--color-gold-400)",
+  border: "1px solid var(--color-border)",
+  borderRadius: 8,
+  padding: "6px 12px",
+  fontSize: 12,
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const pagerButtonStyle = {
+  padding: "8px 16px",
+  borderRadius: 6,
+  border: "1px solid var(--color-border-soft)",
+  background: "transparent",
+  color: "var(--color-text-primary)",
+  cursor: "pointer",
+  fontSize: 13,
+};
 
 const tdStyle = {
   padding: "16px 18px",

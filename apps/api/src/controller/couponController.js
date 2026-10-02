@@ -151,6 +151,24 @@ exports.applyCouponForBooking = async function applyCouponForBooking(client, raw
   return { discountAmount: evaluation.discountAmount, couponId: coupon.id };
 };
 
+// A booking that held a usage slot stopped being active (cancelled, expired
+// or deleted): hand the slot back. No-op for bookings without a coupon.
+exports.releaseCoupon = async function releaseCoupon(client, couponId) {
+  if (!couponId) return;
+  await client.query(
+    "UPDATE coupons SET used_count = GREATEST(used_count - 1, 0) WHERE id = $1",
+    [couponId]
+  );
+};
+
+// The reverse: a cancelled booking came back to life (paid for after all), so
+// it holds its slot again. Deliberately ignores usage_limit — the discount
+// was granted when the booking was made and the guest has now paid that price.
+exports.reclaimCoupon = async function reclaimCoupon(client, couponId) {
+  if (!couponId) return;
+  await client.query("UPDATE coupons SET used_count = used_count + 1 WHERE id = $1", [couponId]);
+};
+
 // ======================
 // ADMIN: LIST
 // ======================
