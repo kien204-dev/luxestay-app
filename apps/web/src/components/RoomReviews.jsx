@@ -30,13 +30,13 @@ export function RoomRatingSummary({ roomId }) {
   }, [roomId]);
 
   if (!stats || stats.totalReviews === 0) {
-    return <span style={{ color: "#94a3b8", fontSize: 12 }}>Chưa có đánh giá</span>;
+    return <span style={{ color: "#4f5d70", fontSize: 14 }}>Chưa có đánh giá</span>;
   }
 
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
       <StarRating value={stats.averageRating} size={13} />
-      <span style={{ color: "#475569", fontSize: 12, fontWeight: 600 }}>
+      <span style={{ color: "#475569", fontSize: 14, fontWeight: 600 }}>
         {stats.averageRating.toFixed(1)} ({stats.totalReviews} đánh giá)
       </span>
     </span>

@@ -64,14 +64,21 @@ export function placeholderFor(name, kind = "room") {
   const key = `${kind}:${name}`;
   if (placeholderCache.has(key)) return placeholderCache.get(key);
 
+  // Independent picks from different bits of the hash: 6 colours x 3
+  // textures x 4 angles (x 3 motifs for places), so two cards rarely match.
   const hash = hashOf(name);
-  const [from, to, line] = PALETTES[hash % PALETTES.length];
+  const pick = (count, shift) => (hash >>> shift) % count;
+  const [from, to, line] = PALETTES[pick(PALETTES.length, 0)];
   const landscapes = ["mountains", "sea", "city"];
-  const motif = kind === "room" ? MOTIFS.bed : MOTIFS[landscapes[Math.floor(hash / PALETTES.length) % landscapes.length]];
-  // Light diagonal stripes at an angle that also depends on the name.
-  const angle = [20, 45, 70, 110, 135][hash % 5];
+  const motif = kind === "room" ? MOTIFS.bed : MOTIFS[landscapes[pick(landscapes.length, 8)]];
+  const angle = [20, 60, 110, 150][pick(4, 12)];
+  const texture = [
+    '<path d="M0 0v28" stroke="#ffffff" stroke-opacity="0.06" stroke-width="10"/>',
+    '<circle cx="14" cy="14" r="3" fill="#ffffff" fill-opacity="0.08"/>',
+    '<path d="M0 0h28M0 0v28" stroke="#ffffff" stroke-opacity="0.07" stroke-width="2"/>',
+  ][pick(3, 16)];
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient><pattern id="p" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(${angle})"><path d="M0 0v28" stroke="#ffffff" stroke-opacity="0.05" stroke-width="10"/></pattern></defs><rect width="800" height="600" fill="url(#bg)"/><rect width="800" height="600" fill="url(#p)"/><g fill="none" stroke="${line}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" transform="translate(0 -60)">${motif}</g></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient><pattern id="p" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(${angle})">${texture}</pattern></defs><rect width="800" height="600" fill="url(#bg)"/><rect width="800" height="600" fill="url(#p)"/><g fill="none" stroke="${line}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" transform="translate(0 -60)">${motif}</g></svg>`;
 
   const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
   placeholderCache.set(key, uri);
