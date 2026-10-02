@@ -31,13 +31,15 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 
 | Địa chỉ | Nội dung | Ai xem được |
 |---|---|---|
-| `/` | Trang chủ: tìm phòng theo ngày, điểm đến, phòng nổi bật | Mọi người |
+| `/` | Trang chủ: tìm phòng theo ngày, điểm đến (có ảnh), phòng nổi bật | Mọi người |
+| `/credits` | Ghi công ảnh: tác giả, giấy phép và nguồn của từng ảnh điểm đến (link ở chân trang) | Mọi người |
 | `/rooms` | Danh sách phòng, lọc theo địa điểm, ngày, số khách; phân trang | Mọi người |
 | `/rooms/:id` | Chi tiết phòng, lịch phòng trống, đặt phòng và thanh toán | Mọi người (đặt phòng cần đăng nhập) |
 | `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá, tải PDF xác nhận | Đã đăng nhập |
 | `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |
 | `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị. Orders có đặt phòng tại quầy, ghi nhận thu tiền tại quầy và PDF xác nhận | Quản trị |
-| `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
+| `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, ảnh nền trang chủ, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
+| `/admin/destinations` | Ảnh và ghi công ảnh của từng điểm đến | Quản trị |
 
 Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
 
@@ -123,7 +125,20 @@ Vào **Cơ sở lưu trú** (`/admin/property`) trong phần quản trị: tên,
 
 ### Ảnh phòng mẫu
 
-Đặt ảnh vào [`apps/api/seed-assets/rooms/`](apps/api/seed-assets/rooms/README.md); `db:seed` sẽ gán cho các phòng mẫu. Không có ảnh thì phòng vẫn được tạo và trang web hiện ảnh thay thế.
+Đặt ảnh vào [`apps/api/seed-assets/rooms/`](apps/api/seed-assets/rooms/README.md); `db:seed` sẽ gán cho các phòng mẫu. Không có ảnh thì phòng vẫn được tạo và trang web hiện hình vẽ thay thế (màu và hoạ tiết khác nhau theo tên phòng).
+
+## Ảnh mẫu & giấy phép
+
+| Thư mục | Nội dung | Giấy phép |
+|---|---|---|
+| [`apps/api/seed-assets/destinations/`](apps/api/seed-assets/destinations/CREDITS.md) | 12 ảnh điểm đến (một ảnh cho mỗi tỉnh/thành có trong dữ liệu mẫu), lấy từ Wikimedia Commons | Riêng từng ảnh: CC0, Public domain, CC BY hoặc CC BY-SA. Xem [CREDITS.md](apps/api/seed-assets/destinations/CREDITS.md) |
+| `apps/api/seed-assets/rooms/` | Ảnh phòng mẫu (hiện để trống) | Do người bỏ ảnh vào chịu trách nhiệm |
+| `apps/api/seed-assets/hero/` | Ảnh nền trang chủ cho `db:seed` (không kèm sẵn ảnh nào) | Như trên |
+
+- **Các ảnh này không thuộc giấy phép thương mại của LuxeStay** (xem mục 5 của [LICENSE](LICENSE)). Người mua được dùng chúng theo đúng giấy phép riêng của từng ảnh, không phải theo giấy phép của sản phẩm.
+- Ảnh CC BY / CC BY-SA bắt buộc ghi tác giả và giấy phép nơi ảnh hiển thị. Trang web làm việc đó: chú thích nhỏ trên thẻ điểm đến (đầy đủ hơn khi rê chuột) và trang `/credits`, có link ở chân trang. Đừng gỡ hai chỗ này khi còn dùng các ảnh đó.
+- `db:seed` gán ảnh theo tên tỉnh/thành trong `credits.json` (khớp với phần sau dấu phẩy cuối của địa chỉ phòng); điểm đến đã có ảnh thì giữ nguyên. Đổi ảnh hoặc sửa ghi công ở **Ảnh điểm đến** (`/admin/destinations`); ảnh tự chụp thì để trống phần giấy phép.
+- Muốn bán sản phẩm không kèm ảnh của bên thứ ba: xoá các file `.webp` và `credits.json` trong `seed-assets/destinations/`; thẻ điểm đến sẽ dùng ảnh phòng hoặc hình vẽ.
 
 ## Cấu trúc thư mục
 
@@ -177,7 +192,9 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Đánh giá | `GET /reviews`, `PATCH /reviews/:id/hide` | Quản trị |
 | Báo cáo | `GET /dashboard/stats`, `/dashboard/analytics`, `/dashboard/export` | Quản trị |
 | Cơ sở lưu trú | `GET /settings/public` | Công khai |
-| Cơ sở lưu trú | `GET/PUT /settings`, `POST/DELETE /settings/logo` | Quản trị |
+| Cơ sở lưu trú | `GET/PUT /settings`, `POST/DELETE /settings/logo`, `POST/DELETE /settings/hero` | Quản trị |
+| Điểm đến | `GET /destinations/credits` | Công khai |
+| Điểm đến | `GET /destinations`, `POST/DELETE /destinations/:name/image`, `PUT /destinations/:name/credit` | Quản trị |
 
 ## Kiểm thử
 
@@ -198,4 +215,4 @@ Xem [docs/known-issues.md](docs/known-issues.md): rule ESLint đang tắt tạm,
 
 ## Giấy phép
 
-Xem [LICENSE](LICENSE). Không được bán lại hay phân phối lại mã nguồn.
+Xem [LICENSE](LICENSE). Không được bán lại hay phân phối lại mã nguồn. Ảnh trong `apps/api/seed-assets/` theo giấy phép riêng, xem [Ảnh mẫu & giấy phép](#ảnh-mẫu--giấy-phép).

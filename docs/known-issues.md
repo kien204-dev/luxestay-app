@@ -35,6 +35,9 @@ Vì sao chưa sửa: `@firebase/firestore` ghim `@grpc/grpc-js` ở `~1.9.0`, n�
 - **PDF xác nhận chỉ in logo dạng PNG/JPEG lưu trên đĩa của API**. Logo WebP, hoặc logo lưu trên S3, vẫn hiện trên web nhưng không có trong PDF; phần còn lại của PDF không đổi.
 - **`db:seed` luôn chép ảnh mẫu vào đĩa của API**, kể cả khi `STORAGE_DRIVER=s3`.
 - **`uploads:prune` chỉ dọn thư mục trên đĩa**; với S3 dùng lifecycle rule của bucket.
+- **Ảnh điểm đến chỉ có cho 12 tỉnh/thành của dữ liệu mẫu.** Với `db:seed -- --all-rooms` (34 tỉnh/thành) hoặc dữ liệu thật, các điểm đến khác dùng ảnh phòng đầu tiên ở đó, không có thì dùng hình vẽ; quản trị đặt ảnh ở `/admin/destinations`.
+- **Ảnh điểm đến và ảnh nền tối đa 2 MB** (cùng giới hạn với mọi ảnh tải lên); trang không tự nén hay đổi kích thước ảnh tải lên.
+- **Trang chủ chỉ hiện 8 điểm đến nhiều phòng nhất**; 4 ảnh còn lại của dữ liệu mẫu (Quảng Ninh, Huế, Ninh Bình, Gia Lai) chỉ thấy ở `/credits` và khi dữ liệu thay đổi.
 - **Đánh giá trên thẻ phòng** được tải riêng cho từng phòng (mỗi thẻ một yêu cầu). Với 12 phòng mỗi trang thì không đáng kể; nếu tăng số phòng mỗi trang nên gộp vào truy vấn danh sách.
 
 - **VNPay sandbox chưa chạy trọn vòng với cổng thật: chờ VNPay kích hoạt merchant.** Đường dẫn thanh toán tạo ra hợp lệ nhưng sandbox trả lời "Website này chưa được phê duyệt" với cả hai tài khoản đã thử, kể cả khi địa chỉ trả về là tên miền đã đăng ký; đây là trạng thái merchant phía VNPay. Phần xử lý của ứng dụng (ký, kiểm tra chữ ký và số tiền, xác nhận booking, gửi lặp, tiền về sau khi hết hạn) được kiểm chứng bằng IPN giả lập trong `npm run test:integration`. Việc còn lại khi merchant được kích hoạt: một giao dịch thật đi hết vòng tạo → trả → IPN → booking "đã xác nhận".
