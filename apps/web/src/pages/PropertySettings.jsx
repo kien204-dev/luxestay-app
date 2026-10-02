@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useProperty } from "../context/PropertyContext";
 import { useToast } from "../context/ToastContext";
 import {
+  deleteHeroImage,
   deleteLogo,
   getAdminSettings,
   updateSettings,
+  uploadHeroImage,
   uploadLogo,
 } from "../services/settingsService";
 import { normalizeImageUrl } from "../utils/imageUrl";
@@ -74,9 +76,11 @@ function SettingsForm({ settings, onSaved }) {
   const [form, setForm] = useState(() => toForm(settings.stored));
   const [saving, setSaving] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
+  const [heroBusy, setHeroBusy] = useState(false);
   const [error, setError] = useState("");
 
   const storedLogo = settings.stored.logoUrl;
+  const storedHero = settings.stored.heroImageUrl;
 
   // Everything that shows the property (header, tab title, footer) reads the
   // public settings; refresh them so this very page updates too.
@@ -140,6 +144,45 @@ function SettingsForm({ settings, onSaved }) {
       setError(err.response?.data?.message || "Không xóa được logo");
     } finally {
       setLogoBusy(false);
+    }
+  };
+
+  const handleHeroChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!LOGO_TYPES.includes(file.type)) {
+      setError("Ảnh nền phải là ảnh PNG, JPG hoặc WebP");
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      setError("Ảnh nền không được lớn hơn 2 MB (nên dùng ảnh ngang khoảng 1600–2000 px)");
+      return;
+    }
+
+    setHeroBusy(true);
+    setError("");
+    try {
+      const saved = await uploadHeroImage(file);
+      afterChange(saved, saved.message);
+    } catch (err) {
+      setError(err.response?.data?.message || "Không tải được ảnh nền lên");
+    } finally {
+      setHeroBusy(false);
+    }
+  };
+
+  const handleHeroRemove = async () => {
+    setHeroBusy(true);
+    setError("");
+    try {
+      const saved = await deleteHeroImage();
+      afterChange(saved, saved.message);
+    } catch (err) {
+      setError(err.response?.data?.message || "Không xóa được ảnh nền");
+    } finally {
+      setHeroBusy(false);
     }
   };
 
@@ -207,6 +250,56 @@ function SettingsForm({ settings, onSaved }) {
             </p>
           </div>
         </div>
+      </section>
+
+      <section style={PANEL} aria-label="Ảnh nền trang chủ">
+        <h2 style={{ margin: "0 0 16px", fontSize: 18, color: "var(--color-text-primary)" }}>Ảnh nền trang chủ</h2>
+        <div
+          style={{
+            aspectRatio: "16 / 6",
+            borderRadius: 12,
+            overflow: "hidden",
+            background: "linear-gradient(135deg, #002366, #001640)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "rgba(255,255,255,0.75)",
+            fontSize: 14,
+          }}
+        >
+          {storedHero ? (
+            <img
+              src={normalizeImageUrl(storedHero, "")}
+              alt="Ảnh nền hiện tại"
+              data-testid="hero-preview"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            "Chưa có ảnh: trang chủ dùng nền màu"
+          )}
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+          <label style={{ ...BUTTON, opacity: heroBusy ? 0.6 : 1 }}>
+            {heroBusy ? "Đang xử lý..." : storedHero ? "Đổi ảnh nền" : "Tải ảnh nền lên"}
+            <input
+              type="file"
+              accept={LOGO_TYPES.join(",")}
+              onChange={handleHeroChange}
+              disabled={heroBusy}
+              data-testid="hero-input"
+              style={{ display: "none" }}
+            />
+          </label>
+          {storedHero && (
+            <button type="button" style={GHOST_BUTTON} onClick={handleHeroRemove} disabled={heroBusy}>
+              Xóa ảnh nền
+            </button>
+          )}
+        </div>
+        <p style={HINT}>
+          Ảnh ngang, PNG, JPG hoặc WebP, tối đa 2 MB. Trang chủ phủ một lớp tối lên ảnh để chữ trắng và ô tìm kiếm
+          luôn dễ đọc. Chỉ dùng ảnh bạn có quyền sử dụng.
+        </p>
       </section>
 
       <form onSubmit={handleSubmit} style={PANEL} aria-label="Thông tin cơ sở lưu trú">
