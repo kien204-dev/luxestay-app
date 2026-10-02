@@ -37,6 +37,7 @@ function makeState() {
     sentAdminEmails: [],
     sentEmails: [],
     propertySettings: null,
+    destinationImages: [],
     roomImages: [],
     payments: [],
     reviews: [],
@@ -493,6 +494,80 @@ function makeFakePool(state) {
         });
       state.propertySettings = row;
       return { rows: [] };
+    }
+
+    if (text.startsWith("with places as (")) {
+      const groups = new Map();
+      for (const room of state.rooms) {
+        if (!room.location || room.status === "maintenance") continue;
+        const name = room.location.split(",").pop().trim();
+        const group = groups.get(name) || { name, room_count: 0, min_price: room.price, room_image: null };
+        group.room_count += 1;
+        group.min_price = Math.min(group.min_price, room.price);
+        group.room_image = group.room_image || room.image || null;
+        groups.set(name, group);
+      }
+      return {
+        rows: [...groups.values()].map(({ room_image, ...group }) => {
+          const own = state.destinationImages.find((item) => item.name === group.name);
+          return { ...(own || {}), ...group, image: own ? own.image_url : room_image };
+        }),
+      };
+    }
+
+    if (text.startsWith("select 1 from rooms where location is not null and trim(substring")) {
+      const exists = state.rooms.some((room) => room.location && room.location.split(",").pop().trim() === params[0]);
+      return { rows: exists ? [{ "?column?": 1 }] : [] };
+    }
+
+    if (text.startsWith("select image_url from destination_images where name = $1")) {
+      return { rows: state.destinationImages.filter((item) => item.name === params[0]) };
+    }
+
+    if (text.startsWith("insert into destination_images")) {
+      const columns = text.slice(text.indexOf("(") + 1, text.indexOf(")")).split(",").map((c) => c.trim());
+      const row = {};
+      columns.filter((column) => column !== "updated_at").forEach((column, index) => {
+        row[column] = params[index];
+      });
+      state.destinationImages = state.destinationImages.filter((item) => item.name !== row.name).concat(row);
+      return { rows: [{ name: row.name }] };
+    }
+
+    if (text.startsWith("update destination_images set")) {
+      const row = state.destinationImages.find((item) => item.name === params[0]);
+      if (!row) return { rows: [] };
+      for (const [, column, index] of text.matchAll(/([a-z_]+) = \$(\d+)/g)) {
+        row[column] = params[Number(index) - 1];
+      }
+      return { rows: [{ name: row.name }] };
+    }
+
+    if (text.startsWith("delete from destination_images where name = $1")) {
+      const row = state.destinationImages.find((item) => item.name === params[0]);
+      state.destinationImages = state.destinationImages.filter((item) => item !== row);
+      return { rows: row ? [{ image_url: row.image_url }] : [] };
+    }
+
+    if (text.startsWith("select name, image_url, place, credit_title")) {
+      return { rows: state.destinationImages.filter((item) => item.credit_license) };
+    }
+
+    if (text.startsWith("with names as (")) {
+      const counts = new Map();
+      for (const room of state.rooms) {
+        if (!room.location) continue;
+        const name = room.location.split(",").pop().trim();
+        counts.set(name, (counts.get(name) || 0) + 1);
+      }
+      const names = new Set([...counts.keys(), ...state.destinationImages.map((item) => item.name)]);
+      return {
+        rows: [...names].map((name) => ({
+          ...(state.destinationImages.find((item) => item.name === name) || {}),
+          name,
+          room_count: counts.get(name) || 0,
+        })),
+      };
     }
 
     if (text.startsWith("select trim(substring(location from")) {
@@ -2979,6 +3054,7 @@ describe("hotel booking API", () => {
         "checkOutTime",
         "email",
         "freeCancellationDays",
+        "heroImageUrl",
         "logoUrl",
         "name",
         "phone",
@@ -3332,7 +3408,110 @@ describe("hotel booking API", () => {
     assert.ok(names.includes("Đà Nẵng"));
     for (const item of result.body) {
       assert.ok(item.room_count >= 1);
-      assert.deepEqual(Object.keys(item).sort(), ["image", "min_price", "name", "room_count"]);
+      assert.deepEqual(Object.keys(item).sort(), ["credit", "image", "min_price", "name", "place", "room_count"]);
+    }
+  });
+
+  it("lets an admin set a destination photo with its credit, shown on the card and the credits page", async () => {
+    state.destinationImages = [];
+    const pngBytes = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+      "base64"
+    );
+    const upload = async (token, name, fields = {}) => {
+      const form = new FormData();
+      form.append("image", new Blob([pngBytes], { type: "image/png" }), "place.png");
+      for (const [key, value] of Object.entries(fields)) form.append(key, value);
+      const response = await fetch(`${baseUrl}/api/destinations/${encodeURIComponent(name)}/image`, {
+        method: "POST",
+        headers: token ? { Cookie: token } : {},
+        body: form,
+      });
+      return { status: response.status, body: await response.json() };
+    };
+    const card = async (name) => (await request(baseUrl, "/api/rooms/destinations")).body.find((item) => item.name === name);
+    const folder = path.join(__dirname, "../uploads/destinations");
+
+    try {
+      assert.equal((await upload(null, "Hà Nội")).status, 401);
+      assert.equal((await upload(userToken, "Hà Nội")).status, 403);
+      assert.equal((await upload(adminToken, "Nowhere")).status, 404);
+
+      const first = await upload(adminToken, "Hà Nội", { author: "Jane Doe", license: "CC BY 4.0", licenseUrl: "https://creativecommons.org/licenses/by/4.0/" });
+      assert.equal(first.status, 201);
+      assert.match(first.body.image, /^\/uploads\/destinations\/[0-9a-f-]+\.png$/);
+      await fs.access(path.join(folder, path.basename(first.body.image)));
+
+      let shown = await card("Hà Nội");
+      assert.equal(shown.image, first.body.image);
+      assert.deepEqual(shown.credit, { title: null, author: "Jane Doe", license: "CC BY 4.0", licenseUrl: "https://creativecommons.org/licenses/by/4.0/", sourceUrl: null });
+
+      // Credit links must be web addresses.
+      const badLink = await request(baseUrl, "/api/destinations/H%C3%A0%20N%E1%BB%99i/credit", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ sourceUrl: "javascript:alert(1)" }),
+      });
+      assert.equal(badLink.response.status, 400);
+
+      const fixed = await request(baseUrl, "/api/destinations/H%C3%A0%20N%E1%BB%99i/credit", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ title: "Hoan Kiem Lake", sourceUrl: "https://commons.wikimedia.org/wiki/File:Example.jpg" }),
+      });
+      assert.equal(fixed.response.status, 200);
+
+      const credits = await request(baseUrl, "/api/destinations/credits");
+      assert.equal(credits.response.status, 200);
+      assert.equal(credits.body.length, 1);
+      assert.equal(credits.body[0].name, "Hà Nội");
+      assert.equal(credits.body[0].title, "Hoan Kiem Lake");
+
+      // A new photo without credit fields drops the old photo's credit and file.
+      const second = await upload(adminToken, "Hà Nội");
+      assert.equal(second.status, 201);
+      shown = await card("Hà Nội");
+      assert.equal(shown.credit, null);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await assert.rejects(fs.access(path.join(folder, path.basename(first.body.image))));
+
+      const listed = await request(baseUrl, "/api/destinations", { headers: authHeader(adminToken) });
+      assert.equal(listed.response.status, 200);
+      assert.ok(listed.body.some((item) => item.name === "Đà Nẵng" && item.image === null));
+
+      const removed = await request(baseUrl, "/api/destinations/H%C3%A0%20N%E1%BB%99i/image", {
+        method: "DELETE",
+        headers: authHeader(adminToken),
+      });
+      assert.equal(removed.response.status, 200);
+      assert.notEqual((await card("Hà Nội")).image, second.body.image);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await assert.rejects(fs.access(path.join(folder, path.basename(second.body.image))));
+    } finally {
+      state.destinationImages = [];
+    }
+  });
+
+  it("stores a home page background image and publishes it with the settings", async () => {
+    state.propertySettings = null;
+    const pngBytes = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+      "base64"
+    );
+    try {
+      const form = new FormData();
+      form.append("image", new Blob([pngBytes], { type: "image/png" }), "hero.png");
+      const response = await fetch(`${baseUrl}/api/settings/hero`, { method: "POST", headers: { Cookie: adminToken }, body: form });
+      const body = await response.json();
+      assert.equal(response.status, 201);
+      assert.match(body.stored.heroImageUrl, /^\/uploads\/branding\/[0-9a-f-]+\.png$/);
+      assert.equal((await request(baseUrl, "/api/settings/public")).body.heroImageUrl, body.stored.heroImageUrl);
+
+      const removed = await request(baseUrl, "/api/settings/hero", { method: "DELETE", headers: authHeader(adminToken) });
+      assert.equal(removed.response.status, 200);
+      assert.equal((await request(baseUrl, "/api/settings/public")).body.heroImageUrl, "");
+    } finally {
+      state.propertySettings = null;
     }
   });
 

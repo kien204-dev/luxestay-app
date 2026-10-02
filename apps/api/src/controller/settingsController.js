@@ -22,6 +22,7 @@ exports.getPublicSettings = async (req, res) => {
   res.json({
     name: settings.name,
     logoUrl: settings.logoUrl,
+    heroImageUrl: settings.heroImageUrl,
     phone: settings.phone,
     email: settings.email,
     address: settings.address,
@@ -102,37 +103,55 @@ exports.updateSettings = async (req, res) => {
   }
 };
 
-function removeLogoFile(logoUrl) {
-  removeUpload(logoUrl, "branding", { purpose: "logo" });
+// The logo and the home page background are both a single image kept in
+// property_settings. The upload middleware has already checked the file
+// really is an image and stored it; these record it and drop the previous
+// file.
+function imageSetting(setting, purpose, messages) {
+  const upload = async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ message: "No image file uploaded" });
+
+      const previous = (await getPropertySettingsForAdmin()).stored[setting];
+      const stored = req.file.storedPath;
+      const saved = await savePropertySettings({ [setting]: stored });
+      if (previous && previous !== stored) removeUpload(previous, "branding", { purpose });
+
+      return res.status(201).json({ message: messages.saved, ...saved });
+    } catch (err) {
+      console.error(`UPLOAD ${purpose.toUpperCase()} ERROR:`, err);
+      return res.status(500).json({ message: messages.failed });
+    }
+  };
+
+  const remove = async (req, res) => {
+    try {
+      const previous = (await getPropertySettingsForAdmin()).stored[setting];
+      const saved = await savePropertySettings({ [setting]: null });
+      if (previous) removeUpload(previous, "branding", { purpose });
+
+      return res.json({ message: messages.removed, ...saved });
+    } catch (err) {
+      console.error(`DELETE ${purpose.toUpperCase()} ERROR:`, err);
+      return res.status(500).json({ message: messages.failed });
+    }
+  };
+
+  return { upload, remove };
 }
 
-// The upload middleware has already checked the file really is an image and
-// stored it; this records it as the logo and drops the previous file.
-exports.uploadLogo = async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ message: "No image file uploaded" });
+const logo = imageSetting("logoUrl", "logo", {
+  saved: "Đã cập nhật logo",
+  removed: "Đã xóa logo",
+  failed: "Lỗi server khi lưu logo",
+});
+const hero = imageSetting("heroImageUrl", "hero", {
+  saved: "Đã cập nhật ảnh nền trang chủ",
+  removed: "Đã xóa ảnh nền trang chủ",
+  failed: "Lỗi server khi lưu ảnh nền",
+});
 
-    const previous = (await getPropertySettingsForAdmin()).stored.logoUrl;
-    const logoUrl = req.file.storedPath;
-    const saved = await savePropertySettings({ logoUrl });
-    if (previous && previous !== logoUrl) removeLogoFile(previous);
-
-    return res.status(201).json({ message: "Đã cập nhật logo", ...saved });
-  } catch (err) {
-    console.error("UPLOAD LOGO ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi lưu logo" });
-  }
-};
-
-exports.deleteLogo = async (req, res) => {
-  try {
-    const previous = (await getPropertySettingsForAdmin()).stored.logoUrl;
-    const saved = await savePropertySettings({ logoUrl: null });
-    if (previous) removeLogoFile(previous);
-
-    return res.json({ message: "Đã xóa logo", ...saved });
-  } catch (err) {
-    console.error("DELETE LOGO ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi xóa logo" });
-  }
-};
+exports.uploadLogo = logo.upload;
+exports.deleteLogo = logo.remove;
+exports.uploadHero = hero.upload;
+exports.deleteHero = hero.remove;

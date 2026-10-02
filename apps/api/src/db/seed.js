@@ -19,6 +19,10 @@ const { FEATURED_ROOMS, buildGeneratedRooms } = require("./seed-data/rooms");
 
 const SEED_ASSETS_DIR = path.join(__dirname, "../../seed-assets/rooms");
 const UPLOAD_DIR = path.join(__dirname, "../../uploads/rooms");
+const DESTINATION_ASSETS_DIR = path.join(__dirname, "../../seed-assets/destinations");
+const DESTINATION_UPLOAD_DIR = path.join(__dirname, "../../uploads/destinations");
+const HERO_ASSETS_DIR = path.join(__dirname, "../../seed-assets/hero");
+const BRANDING_UPLOAD_DIR = path.join(__dirname, "../../uploads/branding");
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const GALLERY_SIZE = 3;
 
@@ -173,6 +177,75 @@ async function seedRooms(pool, log, { allRooms }) {
   return roomIds;
 }
 
+// One photo per destination from seed-assets/destinations, with the credit
+// recorded in credits.json there. A destination that already has a photo
+// (an earlier seed, or one an admin chose) is left alone.
+async function seedDestinationImages(pool, log) {
+  const creditsFile = path.join(DESTINATION_ASSETS_DIR, "credits.json");
+  if (!fs.existsSync(creditsFile)) return;
+
+  const credits = JSON.parse(fs.readFileSync(creditsFile, "utf8"));
+  fs.mkdirSync(DESTINATION_UPLOAD_DIR, { recursive: true });
+  let added = 0;
+
+  for (const credit of credits) {
+    const source = path.join(DESTINATION_ASSETS_DIR, credit.file);
+    if (!fs.existsSync(source)) continue;
+
+    const targetName = `seed-${credit.file}`;
+    const target = path.join(DESTINATION_UPLOAD_DIR, targetName);
+    if (!fs.existsSync(target)) fs.copyFileSync(source, target);
+
+    const inserted = await pool.query(
+      `INSERT INTO destination_images
+         (name, image_url, place, credit_title, credit_author, credit_license,
+          credit_license_url, credit_source_url, credit_changes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (name) DO NOTHING
+       RETURNING name`,
+      [
+        credit.destination,
+        `/uploads/destinations/${targetName}`,
+        credit.place,
+        credit.title,
+        credit.author,
+        credit.license,
+        credit.licenseUrl,
+        credit.sourceUrl,
+        credit.changes,
+      ]
+    );
+    added += inserted.rows.length;
+  }
+
+  log(`  destination photos: ${added} added, ${credits.length - added} already set`);
+}
+
+// The first image in seed-assets/hero (none is bundled) becomes the home page
+// background, unless one is already set.
+async function seedHeroImage(pool, log) {
+  if (!fs.existsSync(HERO_ASSETS_DIR)) return;
+  const file = fs
+    .readdirSync(HERO_ASSETS_DIR)
+    .filter((name) => IMAGE_EXTENSIONS.has(path.extname(name).toLowerCase()))
+    .sort()[0];
+  if (!file) return;
+
+  fs.mkdirSync(BRANDING_UPLOAD_DIR, { recursive: true });
+  const targetName = `seed-hero-${file}`;
+  const target = path.join(BRANDING_UPLOAD_DIR, targetName);
+  if (!fs.existsSync(target)) fs.copyFileSync(path.join(HERO_ASSETS_DIR, file), target);
+
+  const result = await pool.query(
+    `INSERT INTO property_settings (id, hero_image_url) VALUES (1, $1)
+     ON CONFLICT (id) DO UPDATE SET hero_image_url = EXCLUDED.hero_image_url
+       WHERE property_settings.hero_image_url IS NULL
+     RETURNING id`,
+    [`/uploads/branding/${targetName}`]
+  );
+  if (result.rows.length > 0) log(`  home page background: ${file}`);
+}
+
 async function seedCoupon(pool, log) {
   const result = await pool.query(
     `INSERT INTO coupons (code, discount_type, discount_value, max_discount_amount, expires_at)
@@ -230,6 +303,8 @@ async function seed(pool, { log = console.log, allRooms = false } = {}) {
   log("Seeding database...");
   const userIds = await seedUsers(pool, log);
   const roomIds = await seedRooms(pool, log, { allRooms });
+  await seedDestinationImages(pool, log);
+  await seedHeroImage(pool, log);
   await seedCoupon(pool, log);
   await seedBookings(pool, log, { guestId: userIds.user, roomIds });
   log("Seed complete");

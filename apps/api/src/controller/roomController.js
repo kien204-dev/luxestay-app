@@ -1,6 +1,7 @@
 const pool = require("../db/db.js");
 const { autoExpirePendingBookings, syncRoomStatus } = require("./bookingController.js");
 const { removeUpload } = require("../services/storage.js");
+const { DESTINATION_NAME_SQL, creditOf } = require("./destinationController.js");
 const { findTextLimitError } = require("../utils/textLimits");
 const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
 
@@ -211,19 +212,40 @@ exports.getRoomLocations = async (req, res) => {
 // shows where the property actually has rooms instead of invented places.
 exports.getRoomDestinations = async (req, res) => {
   try {
+    // The destination's own photo when it has one, else the first room
+    // photo there; the web app draws a placeholder when both are missing.
     const result = await pool.query(
-      `SELECT TRIM(SUBSTRING(location FROM '[^,]*$')) AS name,
-              COUNT(*)::int AS room_count,
-              MIN(price) AS min_price,
-              (ARRAY_AGG(image ORDER BY id) FILTER (WHERE image IS NOT NULL))[1] AS image
-       FROM rooms
-       WHERE location IS NOT NULL AND location != '' AND status != 'maintenance'
-       GROUP BY 1
-       ORDER BY room_count DESC, name ASC
-       LIMIT 12`
+      `WITH places AS (
+         SELECT ${DESTINATION_NAME_SQL} AS name,
+                COUNT(*)::int AS room_count,
+                MIN(price) AS min_price,
+                (ARRAY_AGG(image ORDER BY id) FILTER (WHERE image IS NOT NULL))[1] AS room_image
+         FROM rooms
+         WHERE location IS NOT NULL AND location != '' AND status != 'maintenance'
+         GROUP BY 1
+         ORDER BY room_count DESC, name ASC
+         LIMIT 12
+       )
+       SELECT p.name, p.room_count, p.min_price, COALESCE(d.image_url, p.room_image) AS image,
+              d.place, d.credit_title, d.credit_author, d.credit_license,
+              d.credit_license_url, d.credit_source_url
+       FROM places p
+       LEFT JOIN destination_images d ON d.name = p.name
+       ORDER BY p.room_count DESC, p.name ASC`
     );
 
-    res.json(result.rows.filter((row) => row.name));
+    res.json(
+      result.rows
+        .filter((row) => row.name)
+        .map((row) => ({
+          name: row.name,
+          room_count: row.room_count,
+          min_price: row.min_price,
+          image: row.image,
+          place: row.place || null,
+          credit: creditOf(row),
+        }))
+    );
   } catch (err) {
     console.error(err);
     res.status(500).json({
