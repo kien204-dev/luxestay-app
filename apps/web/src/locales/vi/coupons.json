@@ -41,7 +41,8 @@
     "noLimit": "Không giới hạn",
     "noMinimum": "Không yêu cầu",
     "create": "Tạo mã",
-    "saveFailed": "Không lưu được mã giảm giá."
+    "saveFailed": "Không lưu được mã giảm giá.",
+    "currency": "đ"
   },
   "confirm": {
     "title": "Tắt mã giảm giá",

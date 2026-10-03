@@ -52,7 +52,7 @@ export default function CouponFormModal({ coupon, onClose, onSaved }) {
     }
   };
 
-  const unit = form.discount_type === "percent" ? "%" : "đ";
+  const unit = form.discount_type === "percent" ? "%" : t("form.currency");
 
   return (
     <Modal title={coupon ? t("form.editTitle") : t("form.addTitle")} onClose={onClose} busy={saving} labelledBy="coupon-form-title">

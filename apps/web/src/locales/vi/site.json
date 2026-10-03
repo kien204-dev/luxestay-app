@@ -157,7 +157,37 @@
     "payMomo": "Thanh toán qua MoMo",
     "redirecting": "Đang chuyển tới cổng thanh toán…",
     "payLater": "Thanh toán sau",
-    "initFailed": "Không khởi tạo được thanh toán. Vui lòng thử lại."
+    "initFailed": "Không khởi tạo được thanh toán. Vui lòng thử lại.",
+    "result": {
+      "documentTitle": "Kết quả thanh toán",
+      "toMyBookings": "Xem đặt phòng của tôi",
+      "loadFailed": "Không tải được thông tin giao dịch.",
+      "missingRef": "Không tìm thấy thông tin giao dịch.",
+      "unknown": {
+        "title": "Không xác nhận được giao dịch",
+        "text": "Hãy xem trạng thái đặt phòng trong \"Đặt phòng của tôi\"."
+      },
+      "checking": {
+        "title": "Đang xác nhận thanh toán...",
+        "text": "Vui lòng đợi giây lát, chúng tôi đang xác thực giao dịch với cổng thanh toán."
+      },
+      "refund": {
+        "title": "Đã nhận thanh toán, nhưng phòng không còn trống",
+        "text": "Đặt phòng {{code}} đã hết thời gian giữ chỗ trước khi thanh toán xong và phòng đã có khách khác đặt. Khoản thanh toán sẽ được hoàn lại; {{brand}} sẽ liên hệ với bạn."
+      },
+      "success": {
+        "title": "Thanh toán thành công",
+        "text": "Đặt phòng {{code}} đã được xác nhận. Cảm ơn bạn đã đặt phòng tại {{brand}}."
+      },
+      "slow": {
+        "title": "Vẫn đang chờ xác nhận",
+        "text": "Giao dịch có thể mất thêm chút thời gian. Bạn có thể xem lại trạng thái trong \"Đặt phòng của tôi\"."
+      },
+      "failed": {
+        "title": "Thanh toán không thành công",
+        "text": "Giao dịch đã bị hủy hoặc không thành công. Bạn có thể thanh toán lại từ \"Đặt phòng của tôi\"."
+      }
+    }
   },
   "credits": {
     "documentTitle": "Ghi công ảnh",
@@ -172,5 +202,29 @@
     "changes": "Thay đổi",
     "empty": "Hiện chưa có ảnh nào cần ghi công.",
     "loadFailed": "Không tải được danh sách ảnh."
+  },
+  "errorPage": {
+    "toHome": "Về trang chủ",
+    "toAdmin": "Về trang quản trị",
+    "notFound": {
+      "title": "Không tìm thấy trang",
+      "text": "Đường dẫn này có thể đã đổi, bị xóa hoặc chưa từng tồn tại."
+    },
+    "forbidden": {
+      "title": "Không có quyền truy cập",
+      "text": "Tài khoản của bạn không được mở trang này. Nếu bạn cho rằng đây là nhầm lẫn, hãy liên hệ quản trị viên."
+    }
+  },
+  "reviews": {
+    "none": "Chưa có đánh giá",
+    "count": "{{count}} đánh giá",
+    "count_one": "{{count}} đánh giá",
+    "loading": "Đang tải đánh giá...",
+    "loadFailed": "Không tải được đánh giá.",
+    "retry": "Thử lại",
+    "empty": "Chưa có đánh giá nào cho phòng này.",
+    "previous": "Trước",
+    "next": "Sau",
+    "page": "Trang {{page}}/{{total}}"
   }
 }

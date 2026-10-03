@@ -1,29 +1,24 @@
-const firebaseAuthMessages = {
-  "auth/unauthorized-domain":
-    "Domain hiện tại chưa được cấp quyền trong Firebase Authentication.",
-  "auth/popup-blocked":
-    "Trình duyệt đã chặn cửa sổ đăng nhập Google. Hãy cho phép popup rồi thử lại.",
-  "auth/popup-closed-by-user":
-    "Cửa sổ đăng nhập Google đã bị đóng trước khi hoàn tất.",
-  "auth/cancelled-popup-request":
-    "Một yêu cầu đăng nhập Google khác đang được xử lý. Hãy thử lại.",
-  "auth/invalid-api-key":
-    "Firebase API key không hợp lệ hoặc chưa được cấu hình.",
-  "auth/network-request-failed":
-    "Không thể kết nối tới Firebase. Hãy kiểm tra mạng rồi thử lại.",
-};
+import i18n from "../i18n";
+import { apiErrorText } from "./apiError";
+
+// Firebase error codes with a translation in auth.json (google.errors.*).
+const KNOWN_CODES = [
+  "auth/unauthorized-domain",
+  "auth/popup-blocked",
+  "auth/popup-closed-by-user",
+  "auth/cancelled-popup-request",
+  "auth/invalid-api-key",
+  "auth/network-request-failed",
+];
 
 export function getGoogleAuthErrorMessage(error) {
-  const apiMessage = error?.response?.data?.message;
-  if (apiMessage) return apiMessage;
+  // The API answered (e.g. the account is locked): show its message.
+  if (error?.response) return apiErrorText(error, "auth:google.errors.generic");
 
   const code = error?.code;
-  const message = firebaseAuthMessages[code];
-
-  if (message) return `${message} (${code})`;
-  if (code?.startsWith("auth/")) return `Đăng nhập Google thất bại (${code}).`;
-
-  return "Đăng nhập Google thất bại. Vui lòng thử lại.";
+  if (KNOWN_CODES.includes(code)) return `${i18n.t(`auth:google.errors.${code.replace("auth/", "")}`)} (${code})`;
+  if (code?.startsWith("auth/")) return i18n.t("auth:google.errors.withCode", { code });
+  return i18n.t("auth:google.errors.generic");
 }
 
 export function logGoogleAuthError(error) {
@@ -31,6 +26,6 @@ export function logGoogleAuthError(error) {
     code: error?.code,
     message: error?.message,
     apiStatus: error?.response?.status,
-    apiMessage: error?.response?.data?.message,
+    apiCode: error?.response?.data?.code,
   });
 }

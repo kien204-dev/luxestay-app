@@ -49,10 +49,7 @@ export function getPaymentStatusLabel(t) {
   };
 }
 
-export function formatMoney(value, lang = "vi") {
-  const amount = (Number(value) || 0).toLocaleString(lang === "en" ? "en-US" : "vi-VN");
-  return lang === "en" ? `${amount} VND` : `${amount} đ`;
-}
+export { formatMoney } from "../../utils/format";
 
 export function formatDate(value, lang = "vi") {
   if (!value) return "-";

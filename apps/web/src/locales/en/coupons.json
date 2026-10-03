@@ -41,7 +41,8 @@
     "noLimit": "No limit",
     "noMinimum": "None",
     "create": "Create",
-    "saveFailed": "Could not save the coupon."
+    "saveFailed": "Could not save the coupon.",
+    "currency": "VND"
   },
   "confirm": {
     "title": "Turn coupon off",

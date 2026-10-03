@@ -11,7 +11,8 @@ function localeOf(lang) {
 
 export function formatMoney(value, lang = "vi") {
   const amount = (Number(value) || 0).toLocaleString(localeOf(lang));
-  return lang === "en" ? `${amount} VND` : `${amount} đ`;
+  // The currency sign as written in each language. i18n-ignore
+  return lang === "en" ? `${amount} VND` : `${amount} đ`; // i18n-ignore
 }
 
 function toUtcDate(dateStr) {

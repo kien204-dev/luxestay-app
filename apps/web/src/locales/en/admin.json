@@ -47,5 +47,10 @@
     "types": "PNG, JPG or WebP, up to 10 MB. Photos are turned upright, stripped of location data and compressed.",
     "badType": "The image must be PNG, JPG or WebP.",
     "tooLarge": "The image must be 10 MB or smaller."
+  },
+  "live": {
+    "newBooking": "New booking: {{booking}}",
+    "refundPending": "{{code}} needs a refund. See Bookings.",
+    "duplicatePayment": "{{code}} was paid twice ({{ref}}). The extra payment must be refunded."
   }
 }

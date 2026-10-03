@@ -13,10 +13,10 @@ import { ADMIN_HOME } from "./utils/authRedirect";
 // The public pages above ship in the first bundle. Everything behind a
 // login is loaded on demand, so a guest browsing rooms never downloads the
 // admin screens (or the charting library they use).
-const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Login = lazy(() => import("./pages/auth/Login"));
+const Register = lazy(() => import("./pages/auth/Register"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 const MyBookings = lazy(() => import("./pages/MyBookings"));
 const PaymentResult = lazy(() => import("./pages/PaymentResult"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
@@ -31,7 +31,6 @@ const Orders = lazy(() => import("./pages/admin/orders/OrdersPage"));
 const Calendar = lazy(() => import("./pages/admin/calendar/CalendarPage"));
 const Coupons = lazy(() => import("./pages/admin/coupons/CouponsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Unauthorized = lazy(() => import("./pages/Unauthorized"));
 
 const guestOnly = (page) => <PublicRoute>{page}</PublicRoute>;
 const signedIn = (page) => <PrivateRoute>{page}</PrivateRoute>;
@@ -62,17 +61,20 @@ function App() {
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/my-bookings" element={signedIn(<MyBookings />)} />
           <Route path="/credits" element={<Credits />} />
+
+          {/* Sign-in pages */}
+          <Route path="/login" element={guestOnly(<Login />)} />
+          <Route path="/register" element={guestOnly(<Register />)} />
+          <Route path="/forgot-password" element={guestOnly(<ForgotPassword />)} />
+          <Route path="/reset-password" element={guestOnly(<ResetPassword />)} />
+
+          <Route path="/payment/result" element={signedIn(<PaymentResult />)} />
+          <Route path="/unauthorized" element={<NotFound forbidden />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
         <Route path="/booking" element={<Navigate to="/rooms" replace />} />
 
-        {/* Sign-in pages */}
-        <Route path="/login" element={guestOnly(<Login />)} />
-        <Route path="/register" element={guestOnly(<Register />)} />
-        <Route path="/forgot-password" element={guestOnly(<ForgotPassword />)} />
-        <Route path="/reset-password" element={guestOnly(<ResetPassword />)} />
-
         {/* Signed-in guests and admins */}
-        <Route path="/payment/result" element={signedIn(<PaymentResult />)} />
         <Route path="/settings" element={signedIn(<AccountSettings />)} />
         <Route path="/profile" element={signedIn(<AccountSettings />)} />
 
@@ -89,8 +91,6 @@ function App() {
           <Route key={from} path={from} element={<Navigate to={to} replace />} />
         ))}
 
-        <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );

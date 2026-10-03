@@ -47,5 +47,10 @@
     "types": "PNG, JPG hoặc WebP, tối đa 10 MB. Ảnh được tự xoay đúng chiều, bỏ thông tin vị trí và nén lại.",
     "badType": "Ảnh phải là PNG, JPG hoặc WebP.",
     "tooLarge": "Ảnh không được lớn hơn 10 MB."
+  },
+  "live": {
+    "newBooking": "Đặt phòng mới: {{booking}}",
+    "refundPending": "{{code}} cần hoàn tiền. Xem trang Đặt phòng.",
+    "duplicatePayment": "{{code}} bị thanh toán hai lần ({{ref}}). Cần hoàn lại khoản thừa."
   }
 }

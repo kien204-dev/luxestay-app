@@ -13,7 +13,7 @@
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
     "build": "npm run build -w apps/web",
     "start": "npm run start -w apps/api",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/check-i18n.mjs",
     "test": "npm run test -w apps/api",
     "db:migrate": "npm run db:migrate -w apps/api",
     "db:seed": "npm run db:seed -w apps/api",

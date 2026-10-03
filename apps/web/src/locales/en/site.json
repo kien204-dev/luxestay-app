@@ -168,7 +168,37 @@
     "payMomo": "Pay with MoMo",
     "redirecting": "Taking you to the payment gateway…",
     "payLater": "Pay later",
-    "initFailed": "Payment could not be started. Please try again."
+    "initFailed": "Payment could not be started. Please try again.",
+    "result": {
+      "documentTitle": "Payment result",
+      "toMyBookings": "See my bookings",
+      "loadFailed": "Could not load the transaction.",
+      "missingRef": "No transaction details were found.",
+      "unknown": {
+        "title": "The payment could not be confirmed",
+        "text": "Check the booking's status in \"My bookings\"."
+      },
+      "checking": {
+        "title": "Confirming your payment...",
+        "text": "Please wait a moment while we confirm the transaction with the payment gateway."
+      },
+      "refund": {
+        "title": "Payment received, but the room is no longer free",
+        "text": "Booking {{code}} ran out of its hold before the payment completed and the room was booked by someone else. Your payment will be refunded; {{brand}} will be in touch."
+      },
+      "success": {
+        "title": "Payment successful",
+        "text": "Booking {{code}} is confirmed. Thank you for booking with {{brand}}."
+      },
+      "slow": {
+        "title": "Still waiting for confirmation",
+        "text": "The payment may take a little longer. You can check its status in \"My bookings\"."
+      },
+      "failed": {
+        "title": "Payment not completed",
+        "text": "The payment was cancelled or did not go through. You can pay again from \"My bookings\"."
+      }
+    }
   },
   "credits": {
     "documentTitle": "Photo credits",
@@ -183,5 +213,29 @@
     "changes": "Changes",
     "empty": "There are no photos to credit yet.",
     "loadFailed": "Could not load the photo list."
+  },
+  "errorPage": {
+    "toHome": "Go to the home page",
+    "toAdmin": "Go to the admin area",
+    "notFound": {
+      "title": "Page not found",
+      "text": "This address may have changed, been removed or never existed."
+    },
+    "forbidden": {
+      "title": "No access",
+      "text": "Your account cannot open this page. If you think this is a mistake, contact an administrator."
+    }
+  },
+  "reviews": {
+    "none": "No reviews yet",
+    "count": "{{count}} reviews",
+    "count_one": "{{count}} review",
+    "loading": "Loading reviews...",
+    "loadFailed": "Could not load the reviews.",
+    "retry": "Try again",
+    "empty": "This room has no reviews yet.",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}} of {{total}}"
   }
 }
