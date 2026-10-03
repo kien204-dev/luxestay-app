@@ -29,7 +29,7 @@ const Users = lazy(() => import("./pages/admin/users/UsersPage"));
 const Rooms = lazy(() => import("./pages/admin/rooms/RoomsPage"));
 const Orders = lazy(() => import("./pages/admin/orders/OrdersPage"));
 const Calendar = lazy(() => import("./pages/Calendar"));
-const Coupons = lazy(() => import("./pages/Coupons"));
+const Coupons = lazy(() => import("./pages/admin/coupons/CouponsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Unauthorized = lazy(() => import("./pages/Unauthorized"));
 
