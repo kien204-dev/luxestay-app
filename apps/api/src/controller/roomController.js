@@ -4,6 +4,7 @@ const { removeUpload } = require("../services/storage.js");
 const { DESTINATION_NAME_SQL, creditOf } = require("./destinationController.js");
 const { findTextLimitError } = require("../utils/textLimits");
 const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
+const { apiMessage } = require("../utils/apiMessages");
 
 const ROOM_SORT_COLUMNS = {
   name: "room_name",
@@ -179,7 +180,7 @@ exports.getRooms = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -199,7 +200,7 @@ exports.getRoomLocations = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -249,7 +250,7 @@ exports.getRoomDestinations = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -272,7 +273,7 @@ function addDays(dateStr, days) {
 exports.getRoomAvailability = async (req, res) => {
   try {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ message: "Room id must be a positive integer" });
+    if (!id) return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
 
     const today = todayInAppTimezone();
     const from = req.query.from === undefined ? today : parseDateOnly(req.query.from);
@@ -282,17 +283,17 @@ exports.getRoomAvailability = async (req, res) => {
         : parseDateOnly(req.query.to);
 
     if (!from || !to || to <= from) {
-      return res.status(400).json({ message: "from/to phải là ngày hợp lệ (YYYY-MM-DD) và to sau from" });
+      return res.status(400).json({ ...apiMessage("INVALID_DATE_RANGE") });
     }
     if (daysBetween(from, to) > AVAILABILITY_MAX_DAYS) {
       return res.status(400).json({
-        message: `Khoảng ngày tối đa là ${AVAILABILITY_MAX_DAYS} ngày`,
+        ...apiMessage("DATE_RANGE_TOO_LONG", { max: AVAILABILITY_MAX_DAYS }),
       });
     }
 
     const room = await pool.query("SELECT status FROM rooms WHERE id = $1", [id]);
     if (room.rows.length === 0) {
-      return res.status(404).json({ message: "Room not found" });
+      return res.status(404).json({ ...apiMessage("ROOM_NOT_FOUND") });
     }
 
     await autoExpirePendingBookings();
@@ -327,7 +328,7 @@ exports.getRoomAvailability = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -338,7 +339,7 @@ exports.getRoomAvailability = async (req, res) => {
 exports.getRoomById = async (req, res) => {
   try {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ message: "Room id must be a positive integer" });
+    if (!id) return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
 
     const result = await pool.query(
       `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at
@@ -349,7 +350,7 @@ exports.getRoomById = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "Room not found",
+        ...apiMessage("ROOM_NOT_FOUND"),
       });
     }
 
@@ -365,7 +366,7 @@ exports.getRoomById = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -388,15 +389,13 @@ exports.createRoom = async (req, res) => {
 
     if (!room_name || !room_type || price === undefined || price === null) {
       return res.status(400).json({
-        message: "room_name, room_type và price là bắt buộc",
+        ...apiMessage("ROOM_FIELDS_REQUIRED"),
       });
     }
 
     const lengthError = findTextLimitError({ room_name, room_type, location });
     if (lengthError) {
-      return res.status(400).json({
-        message: lengthError,
-      });
+      return res.status(400).json(lengthError);
     }
 
     const parsedPrice = parseRoomPrice(price);
@@ -404,19 +403,19 @@ exports.createRoom = async (req, res) => {
 
     if (parsedPrice === null) {
       return res.status(400).json({
-        message: "Price must be a valid number greater than 0",
+        ...apiMessage("INVALID_PRICE"),
       });
     }
 
     if (parsedCapacity === null) {
       return res.status(400).json({
-        message: "Capacity must be a positive integer",
+        ...apiMessage("INVALID_CAPACITY"),
       });
     }
 
     const roomStatus = status || "available";
     if (!ROOM_STATUSES.has(roomStatus)) {
-      return res.status(400).json({ message: "Room status is invalid" });
+      return res.status(400).json({ ...apiMessage("INVALID_ROOM_STATUS") });
     }
 
     const result = await pool.query(
@@ -436,13 +435,13 @@ exports.createRoom = async (req, res) => {
     );
 
     res.status(201).json({
-      message: "Tạo phòng thành công",
+      ...apiMessage("ROOM_CREATED"),
       room: result.rows[0],
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -453,7 +452,7 @@ exports.createRoom = async (req, res) => {
 exports.updateRoom = async (req, res) => {
   try {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ message: "Room id must be a positive integer" });
+    if (!id) return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
 
     const {
       room_name,
@@ -468,15 +467,13 @@ exports.updateRoom = async (req, res) => {
 
     if (!room_name || !room_type) {
       return res.status(400).json({
-        message: "room_name and room_type are required",
+        ...apiMessage("ROOM_FIELDS_REQUIRED"),
       });
     }
 
     const lengthError = findTextLimitError({ room_name, room_type, location });
     if (lengthError) {
-      return res.status(400).json({
-        message: lengthError,
-      });
+      return res.status(400).json(lengthError);
     }
 
     const parsedPrice = parseRoomPrice(price);
@@ -484,24 +481,24 @@ exports.updateRoom = async (req, res) => {
 
     if (parsedPrice === null) {
       return res.status(400).json({
-        message: "Price must be a valid number greater than 0",
+        ...apiMessage("INVALID_PRICE"),
       });
     }
 
     if (parsedCapacity === null) {
       return res.status(400).json({
-        message: "Capacity must be a positive integer",
+        ...apiMessage("INVALID_CAPACITY"),
       });
     }
 
     if (status && !ROOM_STATUSES.has(status)) {
-      return res.status(400).json({ message: "Room status is invalid" });
+      return res.status(400).json({ ...apiMessage("INVALID_ROOM_STATUS") });
     }
 
     const existing = await pool.query("SELECT image, status FROM rooms WHERE id = $1", [id]);
     if (existing.rows.length === 0) {
       return res.status(404).json({
-        message: "Room not found",
+        ...apiMessage("ROOM_NOT_FOUND"),
       });
     }
     // Leaving status out keeps whatever the room had.
@@ -536,7 +533,7 @@ exports.updateRoom = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "Room not found",
+        ...apiMessage("ROOM_NOT_FOUND"),
       });
     }
 
@@ -555,13 +552,13 @@ exports.updateRoom = async (req, res) => {
     }
 
     res.json({
-      message: "Cập nhật phòng thành công",
+      ...apiMessage("ROOM_UPDATED"),
       room: result.rows[0],
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -572,7 +569,7 @@ exports.updateRoom = async (req, res) => {
 exports.deleteRoom = async (req, res) => {
   try {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ message: "Room id must be a positive integer" });
+    if (!id) return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
 
     // Chặn xóa phòng nếu đang có booking tham chiếu tới nó
     const bookingCheck = await pool.query(
@@ -582,8 +579,7 @@ exports.deleteRoom = async (req, res) => {
 
     if (bookingCheck.rows.length > 0) {
       return res.status(400).json({
-        message:
-          "Không thể xóa phòng này vì đã có booking liên quan. Hãy đổi trạng thái phòng thay vì xóa.",
+        ...apiMessage("ROOM_HAS_BOOKINGS"),
       });
     }
 
@@ -600,7 +596,7 @@ exports.deleteRoom = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "Room not found",
+        ...apiMessage("ROOM_NOT_FOUND"),
       });
     }
 
@@ -610,12 +606,12 @@ exports.deleteRoom = async (req, res) => {
     );
 
     res.json({
-      message: "Xóa phòng thành công",
+      ...apiMessage("ROOM_DELETED"),
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -627,17 +623,17 @@ exports.addRoomImage = async (req, res) => {
   try {
     const roomId = parseId(req.params.id);
     if (!roomId) {
-      return res.status(400).json({ message: "Room id must be a positive integer" });
+      return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
     }
 
     if (!req.file) {
-      return res.status(400).json({ message: "No image file uploaded" });
+      return res.status(400).json({ ...apiMessage("NO_IMAGE_UPLOADED") });
     }
 
     const roomCheck = await pool.query("SELECT id FROM rooms WHERE id = $1", [roomId]);
     if (roomCheck.rows.length === 0) {
       deleteLocalRoomImageFile(req.file.storedPath, { roomId });
-      return res.status(404).json({ message: "Room not found" });
+      return res.status(404).json({ ...apiMessage("ROOM_NOT_FOUND") });
     }
 
     const imagePath = req.file.storedPath;
@@ -649,13 +645,13 @@ exports.addRoomImage = async (req, res) => {
     );
 
     res.status(201).json({
-      message: "Thêm ảnh phòng thành công",
+      ...apiMessage("ROOM_IMAGE_ADDED"),
       image: result.rows[0],
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -669,7 +665,7 @@ exports.deleteRoomImage = async (req, res) => {
     const imageId = parseId(req.params.imageId);
 
     if (!roomId || !imageId) {
-      return res.status(400).json({ message: "Id must be a positive integer" });
+      return res.status(400).json({ ...apiMessage("INVALID_ID") });
     }
 
     const result = await pool.query(
@@ -678,16 +674,16 @@ exports.deleteRoomImage = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Room image not found" });
+      return res.status(404).json({ ...apiMessage("ROOM_IMAGE_NOT_FOUND") });
     }
 
     deleteLocalRoomImageFile(result.rows[0].image_path, { roomId });
 
-    res.json({ message: "Xóa ảnh phòng thành công" });
+    res.json({ ...apiMessage("ROOM_IMAGE_DELETED") });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };

@@ -1,5 +1,7 @@
 const { createImageUploadMiddleware } = require("./imageUpload");
 
-const { handleImageUpload: handleLogoUpload } = createImageUploadMiddleware("branding");
+// The logo (also kept as PNG, for the PDF) and the home page background.
+const { handleImageUpload: handleLogoUpload } = createImageUploadMiddleware("logo");
+const { handleImageUpload: handleHeroUpload } = createImageUploadMiddleware("hero");
 
-module.exports = { handleLogoUpload };
+module.exports = { handleLogoUpload, handleHeroUpload };

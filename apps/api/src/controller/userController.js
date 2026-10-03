@@ -2,8 +2,9 @@ const pool = require("../db/db.js");
 const bcrypt = require("bcryptjs");
 const { setAuthCookie } = require("../services/authSession");
 const { removeUpload } = require("../services/storage.js");
-const { isStrongPassword, PASSWORD_RULE_MESSAGE } = require("../utils/password");
+const { isStrongPassword } = require("../utils/password");
 const { findTextLimitError } = require("../utils/textLimits");
+const { apiMessage } = require("../utils/apiMessages");
 
 const ALLOWED_ROLES = ["admin", "user"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,7 +65,7 @@ exports.getUsers = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -78,7 +79,7 @@ exports.getUserById = async (req, res) => {
 
     if (!id) {
       return res.status(400).json({
-        message: "User id is invalid",
+        ...apiMessage("INVALID_USER_ID"),
       });
     }
 
@@ -91,7 +92,7 @@ exports.getUserById = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "User not found",
+        ...apiMessage("USER_NOT_FOUND"),
       });
     }
 
@@ -99,7 +100,7 @@ exports.getUserById = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -117,39 +118,35 @@ exports.createUser = async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({
-        message: "Name, email và password là bắt buộc",
+        ...apiMessage("USER_FIELDS_REQUIRED"),
       });
     }
 
     const lengthError = findTextLimitError({ name, email });
     if (lengthError) {
-      return res.status(400).json({
-        message: lengthError,
-      });
+      return res.status(400).json(lengthError);
     }
 
     // Kiểm tra email tồn tại
     if (!validateEmail(email)) {
       return res.status(400).json({
-        message: "Email is invalid",
+        ...apiMessage("INVALID_EMAIL"),
       });
     }
 
     if (!isStrongPassword(password)) {
-      return res.status(400).json({
-        message: PASSWORD_RULE_MESSAGE,
-      });
+      return res.status(400).json(apiMessage("WEAK_PASSWORD"));
     }
 
     if (!validatePhone(phone)) {
       return res.status(400).json({
-        message: "Phone is invalid",
+        ...apiMessage("INVALID_PHONE"),
       });
     }
 
     if (!validateRole(role)) {
       return res.status(400).json({
-        message: "Role must be admin or user",
+        ...apiMessage("INVALID_ROLE"),
       });
     }
 
@@ -160,7 +157,7 @@ exports.createUser = async (req, res) => {
 
     if (checkEmail.rows.length > 0) {
       return res.status(400).json({
-        message: "Email already exists",
+        ...apiMessage("EMAIL_EXISTS"),
       });
     }
 
@@ -181,7 +178,7 @@ exports.createUser = async (req, res) => {
     );
 
     res.status(201).json({
-      message: "User created successfully",
+      ...apiMessage("USER_CREATED"),
       user: result.rows[0],
     });
 
@@ -189,7 +186,7 @@ exports.createUser = async (req, res) => {
     console.error(err);
 
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -204,7 +201,7 @@ exports.updateUser = async (req, res) => {
 
     if (!id) {
       return res.status(400).json({
-        message: "User id is invalid",
+        ...apiMessage("INVALID_USER_ID"),
       });
     }
 
@@ -216,44 +213,40 @@ exports.updateUser = async (req, res) => {
 
     if (!name || !email) {
       return res.status(400).json({
-        message: "Name and email are required",
+        ...apiMessage("NAME_EMAIL_REQUIRED"),
       });
     }
 
     const lengthError = findTextLimitError({ name, email });
     if (lengthError) {
-      return res.status(400).json({
-        message: lengthError,
-      });
+      return res.status(400).json(lengthError);
     }
 
     if (!validateEmail(email)) {
       return res.status(400).json({
-        message: "Email is invalid",
+        ...apiMessage("INVALID_EMAIL"),
       });
     }
 
     if (password && !isStrongPassword(password)) {
-      return res.status(400).json({
-        message: PASSWORD_RULE_MESSAGE,
-      });
+      return res.status(400).json(apiMessage("WEAK_PASSWORD"));
     }
 
     if (!validatePhone(phone)) {
       return res.status(400).json({
-        message: "Phone is invalid",
+        ...apiMessage("INVALID_PHONE"),
       });
     }
 
     if (!validateRole(role)) {
       return res.status(400).json({
-        message: "Role must be admin or user",
+        ...apiMessage("INVALID_ROLE"),
       });
     }
 
     if (id === req.user.id && role !== "admin") {
       return res.status(400).json({
-        message: "You cannot remove your own admin role",
+        ...apiMessage("CANNOT_REMOVE_OWN_ADMIN"),
       });
     }
 
@@ -264,7 +257,7 @@ exports.updateUser = async (req, res) => {
 
     if (duplicateEmail.rows.length > 0) {
       return res.status(400).json({
-        message: "Email already exists",
+        ...apiMessage("EMAIL_EXISTS"),
       });
     }
 
@@ -329,13 +322,13 @@ exports.updateUser = async (req, res) => {
     if (result.rows.length === 0) {
 
       return res.status(404).json({
-        message: "User not found",
+        ...apiMessage("USER_NOT_FOUND"),
       });
 
     }
 
     res.json({
-      message: "User updated successfully",
+      ...apiMessage("USER_UPDATED"),
       user: result.rows[0],
     });
 
@@ -343,7 +336,7 @@ exports.updateUser = async (req, res) => {
     console.error(err);
 
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
 
   }
@@ -360,13 +353,13 @@ exports.deleteUser = async (req, res) => {
 
     if (!id) {
       return res.status(400).json({
-        message: "User id is invalid",
+        ...apiMessage("INVALID_USER_ID"),
       });
     }
 
     if (id === req.user.id) {
       return res.status(400).json({
-        message: "You cannot delete your own account",
+        ...apiMessage("CANNOT_DELETE_SELF"),
       });
     }
 
@@ -383,26 +376,26 @@ exports.deleteUser = async (req, res) => {
     if (result.rows.length === 0) {
 
       return res.status(404).json({
-        message: "User not found",
+        ...apiMessage("USER_NOT_FOUND"),
       });
 
     }
 
     res.json({
-      message: "User deleted successfully",
+      ...apiMessage("USER_DELETED"),
     });
 
   } catch (err) {
     if (isForeignKeyError(err)) {
       return res.status(400).json({
-        message: "Cannot delete user because related records exist",
+        ...apiMessage("USER_HAS_RECORDS"),
       });
     }
 
     console.error(err);
 
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
 
   }
@@ -418,19 +411,19 @@ exports.setUserLock = async (req, res) => {
 
     if (!id) {
       return res.status(400).json({
-        message: "User id is invalid",
+        ...apiMessage("INVALID_USER_ID"),
       });
     }
 
     if (typeof req.body.locked !== "boolean") {
       return res.status(400).json({
-        message: "locked must be a boolean",
+        ...apiMessage("INVALID_LOCKED_FLAG"),
       });
     }
 
     if (id === req.user.id && req.body.locked) {
       return res.status(400).json({
-        message: "You cannot lock your own account",
+        ...apiMessage("CANNOT_LOCK_SELF"),
       });
     }
 
@@ -446,18 +439,18 @@ exports.setUserLock = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "User not found",
+        ...apiMessage("USER_NOT_FOUND"),
       });
     }
 
     res.json({
-      message: req.body.locked ? "User locked successfully" : "User unlocked successfully",
+      ...apiMessage(req.body.locked ? "USER_LOCKED" : "USER_UNLOCKED"),
       user: result.rows[0],
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -476,7 +469,7 @@ exports.getCurrentUser = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "User not found",
+        ...apiMessage("USER_NOT_FOUND"),
       });
     }
 
@@ -484,7 +477,7 @@ exports.getCurrentUser = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -503,32 +496,30 @@ exports.updateCurrentUser = async (req, res) => {
 
     if (!name || !email) {
       return res.status(400).json({
-        message: "Name and email are required",
+        ...apiMessage("NAME_EMAIL_REQUIRED"),
       });
     }
 
     const lengthError = findTextLimitError({ name, email, bio });
     if (lengthError) {
-      return res.status(400).json({
-        message: lengthError,
-      });
+      return res.status(400).json(lengthError);
     }
 
     if (!validateEmail(email)) {
       return res.status(400).json({
-        message: "Email is invalid",
+        ...apiMessage("INVALID_EMAIL"),
       });
     }
 
     if (!validatePhone(phone)) {
       return res.status(400).json({
-        message: "Phone is invalid",
+        ...apiMessage("INVALID_PHONE"),
       });
     }
 
     if (!validateAvatarUrl(avatarUrl)) {
       return res.status(400).json({
-        message: "Avatar URL is invalid",
+        ...apiMessage("INVALID_AVATAR_URL"),
       });
     }
 
@@ -539,7 +530,7 @@ exports.updateCurrentUser = async (req, res) => {
 
     if (duplicateEmail.rows.length > 0) {
       return res.status(400).json({
-        message: "Email already exists",
+        ...apiMessage("EMAIL_EXISTS"),
       });
     }
 
@@ -572,7 +563,7 @@ exports.updateCurrentUser = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "User not found",
+        ...apiMessage("USER_NOT_FOUND"),
       });
     }
 
@@ -588,13 +579,13 @@ exports.updateCurrentUser = async (req, res) => {
     }
 
     res.json({
-      message: "Profile updated successfully",
+      ...apiMessage("PROFILE_UPDATED"),
       user: result.rows[0],
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -608,14 +599,12 @@ exports.changeCurrentUserPassword = async (req, res) => {
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
-        message: "Current password and new password are required",
+        ...apiMessage("PASSWORDS_REQUIRED"),
       });
     }
 
     if (!isStrongPassword(newPassword)) {
-      return res.status(400).json({
-        message: PASSWORD_RULE_MESSAGE,
-      });
+      return res.status(400).json(apiMessage("WEAK_PASSWORD"));
     }
 
     const result = await pool.query(
@@ -625,7 +614,7 @@ exports.changeCurrentUserPassword = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "User not found",
+        ...apiMessage("USER_NOT_FOUND"),
       });
     }
 
@@ -634,7 +623,7 @@ exports.changeCurrentUserPassword = async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({
-        message: "Current password is incorrect",
+        ...apiMessage("CURRENT_PASSWORD_WRONG"),
       });
     }
 
@@ -652,18 +641,18 @@ exports.changeCurrentUserPassword = async (req, res) => {
     );
 
     if (updatedResult.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ ...apiMessage("USER_NOT_FOUND") });
     }
 
     setAuthCookie(res, updatedResult.rows[0]);
 
     res.json({
-      message: "Password changed successfully",
+      ...apiMessage("PASSWORD_CHANGED"),
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Server error",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };

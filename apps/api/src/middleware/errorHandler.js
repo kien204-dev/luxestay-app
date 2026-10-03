@@ -1,3 +1,5 @@
+const { apiMessage } = require("../utils/apiMessages");
+
 function globalErrorHandler(err, req, res, next) {
   console.error("UNHANDLED API ERROR:", {
     method: req.method,
@@ -6,7 +8,7 @@ function globalErrorHandler(err, req, res, next) {
   });
 
   if (res.headersSent) return next(err);
-  return res.status(500).json({ message: "Internal server error" });
+  return res.status(500).json(apiMessage("SERVER_ERROR"));
 }
 
 module.exports = { globalErrorHandler };

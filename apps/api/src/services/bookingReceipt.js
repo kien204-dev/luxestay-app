@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
 const { daysBetween } = require("../utils/time.js");
+const { ownFilename } = require("./storage.js");
+const { pngCopyOf } = require("../middleware/imageUpload.js");
 
 // A one-page booking confirmation the guest can keep or print: who, which
 // room, when, and what was charged. It is a confirmation of the booking, not
@@ -100,13 +102,29 @@ function bookingCode(id) {
   return `#BK-${String(id).padStart(4, "0")}`;
 }
 
-// Only a logo this app stored itself, and only in a format pdfkit can embed.
-function localLogoPath(logoUrl) {
-  if (typeof logoUrl !== "string" || !logoUrl.startsWith("/uploads/branding/")) return null;
-  if (!/\.(png|jpe?g)$/i.test(logoUrl)) return null;
+// The logo as image bytes pdfkit can embed (PNG or JPEG), or null. Uploads
+// are stored as WebP with a PNG copy next to them; older logos may be PNG or
+// JPEG themselves. Only files this app stored are read: from disk, or from
+// the bucket's public address.
+async function loadLogoForPdf(logoUrl) {
+  if (typeof logoUrl !== "string" || !logoUrl) return null;
+  const candidate = pngCopyOf(logoUrl) || logoUrl;
+  if (!/\.(png|jpe?g)$/i.test(candidate)) return null;
 
-  const file = path.join(UPLOADS_DIR, "branding", path.basename(logoUrl));
-  return fs.existsSync(file) ? file : null;
+  const own = ownFilename(candidate, "branding");
+  if (!own) return null;
+
+  try {
+    if (!own.remote) {
+      const file = path.join(UPLOADS_DIR, "branding", own.filename);
+      return fs.existsSync(file) ? await fs.promises.readFile(file) : null;
+    }
+    const response = await fetch(candidate, { signal: AbortSignal.timeout(3000) });
+    return response.ok ? Buffer.from(await response.arrayBuffer()) : null;
+  } catch (err) {
+    console.error("RECEIPT LOGO UNAVAILABLE:", err.message);
+    return null;
+  }
 }
 
 // The numbers printed on the receipt, taken from what the booking stored at
@@ -121,7 +139,8 @@ function receiptAmounts(booking) {
   return { nights, total, discount, subtotal, perNight: nights > 0 ? subtotal / nights : subtotal };
 }
 
-function buildReceiptPdf(booking, property, { language } = {}) {
+async function buildReceiptPdf(booking, property, { language } = {}) {
+  const logo = await loadLogoForPdf(property.logoUrl);
   const lang = TEXT[language] ? language : TEXT[booking.language] ? booking.language : "vi";
   const t = TEXT[lang];
   const amounts = receiptAmounts(booking);
@@ -142,7 +161,6 @@ function buildReceiptPdf(booking, property, { language } = {}) {
     const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
     // ---- property header
-    const logo = localLogoPath(property.logoUrl);
     let headerX = left;
     if (logo) {
       try {
@@ -213,4 +231,4 @@ function buildReceiptPdf(booking, property, { language } = {}) {
   });
 }
 
-module.exports = { bookingCode, buildReceiptPdf, receiptAmounts };
+module.exports = { bookingCode, buildReceiptPdf, loadLogoForPdf, receiptAmounts };

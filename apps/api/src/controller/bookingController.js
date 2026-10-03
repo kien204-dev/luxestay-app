@@ -6,6 +6,7 @@ const { daysBetween, todayInAppTimezone } = require("../utils/time.js");
 const { getPropertySettings } = require("../services/propertySettings.js");
 const { loadBookingDetails, notifyBooking, SUPPORTED_LANGUAGES } = require("../services/bookingEmails.js");
 const { buildReceiptPdf } = require("../services/bookingReceipt.js");
+const { apiMessage } = require("../utils/apiMessages");
 
 const ACTIVE_STATUSES = ["pending", "confirmed"];
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -122,11 +123,11 @@ function parseWalkInGuest(req) {
   const phone = text(req.body.guest_phone);
   const email = text(req.body.guest_email).toLowerCase();
 
-  if (!name) return { error: "Vui lòng nhập tên khách" };
-  if (name.length > 100) return { error: "Tên khách không được dài quá 100 ký tự" };
-  if (phone && !GUEST_PHONE_PATTERN.test(phone)) return { error: "Số điện thoại khách không hợp lệ" };
+  if (!name) return { error: apiMessage("WALK_IN_NAME_REQUIRED") };
+  if (name.length > 100) return { error: apiMessage("TEXT_TOO_LONG", { field: "guestName", max: 100 }) };
+  if (phone && !GUEST_PHONE_PATTERN.test(phone)) return { error: apiMessage("INVALID_PHONE") };
   if (email && (email.length > 255 || !GUEST_EMAIL_PATTERN.test(email))) {
-    return { error: "Email khách không hợp lệ" };
+    return { error: apiMessage("INVALID_EMAIL") };
   }
 
   return { guest: { name, phone: phone || null, email: email || null, paid: req.body.paid === true } };
@@ -347,7 +348,7 @@ exports.getBookings = async (req, res) => {
     });
   } catch (err) {
     console.error("GET BOOKINGS ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy danh sách booking" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -375,7 +376,7 @@ exports.getBookingSummary = async (req, res) => {
     });
   } catch (err) {
     console.error("GET BOOKING SUMMARY ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy số liệu đơn đặt phòng" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -397,7 +398,7 @@ exports.getBookingById = async (req, res) => {
   const id = parseId(req.params.id);
 
   if (!id) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
 
   try {
@@ -409,21 +410,21 @@ exports.getBookingById = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy booking" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
 
     const booking = result.rows[0];
 
     if (req.user.role !== "admin" && booking.user_id !== req.user.id) {
       return res.status(403).json({
-        message: "Bạn không có quyền xem booking này",
+        ...apiMessage("BOOKING_FORBIDDEN"),
       });
     }
 
     res.json(booking);
   } catch (err) {
     console.error("GET BOOKING BY ID ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy booking" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -431,16 +432,16 @@ exports.getBookingById = async (req, res) => {
 exports.getBookingReceipt = async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
 
   try {
     const booking = await loadBookingDetails(id);
     if (!booking) {
-      return res.status(404).json({ message: "Không tìm thấy booking" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
     if (req.user.role !== "admin" && booking.user_id !== req.user.id) {
-      return res.status(403).json({ message: "Bạn không có quyền xem booking này" });
+      return res.status(403).json({ ...apiMessage("BOOKING_FORBIDDEN") });
     }
 
     const property = await getPropertySettings();
@@ -453,7 +454,7 @@ exports.getBookingReceipt = async (req, res) => {
     return res.send(buffer);
   } catch (err) {
     console.error("BOOKING RECEIPT ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi tạo phiếu xác nhận" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -465,37 +466,37 @@ exports.createBooking = async (req, res) => {
 
   if (!room_id || !check_in || !check_out) {
     return res.status(400).json({
-      message: "Thiếu thông tin đặt phòng (room_id, check_in, check_out)",
+      ...apiMessage("BOOKING_FIELDS_REQUIRED"),
     });
   }
 
   if (!Number.isInteger(roomId) || roomId <= 0) {
     return res.status(400).json({
-      message: "Phòng không hợp lệ",
+      ...apiMessage("INVALID_ROOM"),
     });
   }
 
   if (!Number.isInteger(guestCount) || guestCount <= 0) {
     return res.status(400).json({
-      message: "Số khách phải lớn hơn 0",
+      ...apiMessage("INVALID_GUESTS"),
     });
   }
 
   const walkIn = parseWalkInGuest(req);
   if (walkIn?.error) {
-    return res.status(400).json({ message: walkIn.error });
+    return res.status(400).json(walkIn.error);
   }
   const guest = walkIn?.guest || null;
 
   if (!parseDateOnly(check_in) || !parseDateOnly(check_out)) {
-    return res.status(400).json({ message: "Ngày check-in/check-out không hợp lệ" });
+    return res.status(400).json({ ...apiMessage("INVALID_DATES") });
   }
 
   const nights = calculateNights(check_in, check_out);
 
   if (nights <= 0) {
     return res.status(400).json({
-      message: "Ngày check-out phải sau ngày check-in",
+      ...apiMessage("CHECKOUT_BEFORE_CHECKIN"),
     });
   }
 
@@ -503,7 +504,7 @@ exports.createBooking = async (req, res) => {
   // holds whatever timezone the server itself runs in.
   if (check_in < todayInAppTimezone()) {
     return res.status(400).json({
-      message: "Ngày check-in không được ở quá khứ",
+      ...apiMessage("CHECKIN_IN_PAST"),
     });
   }
 
@@ -522,7 +523,7 @@ exports.createBooking = async (req, res) => {
 
     if (roomResult.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ message: "Không tìm thấy phòng" });
+      return res.status(404).json({ ...apiMessage("ROOM_NOT_FOUND") });
     }
 
     const room = roomResult.rows[0];
@@ -532,21 +533,21 @@ exports.createBooking = async (req, res) => {
     if (capacity > 0 && guestCount > capacity) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: `Số khách vượt quá sức chứa của phòng (${capacity} khách)`,
+        ...apiMessage("GUESTS_EXCEED_CAPACITY", { capacity }),
       });
     }
 
     if (!Number.isFinite(price) || price < 0) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: "Giá phòng không hợp lệ",
+        ...apiMessage("INVALID_ROOM_PRICE"),
       });
     }
 
     if (room.status === "maintenance") {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: "Phòng đang bảo trì, không thể đặt",
+        ...apiMessage("ROOM_UNDER_MAINTENANCE"),
       });
     }
 
@@ -555,7 +556,7 @@ exports.createBooking = async (req, res) => {
     if (overlap) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: "Phòng đã có booking trùng khoảng thời gian này",
+        ...apiMessage("ROOM_NOT_AVAILABLE"),
       });
     }
 
@@ -576,9 +577,9 @@ exports.createBooking = async (req, res) => {
         discountAmount = applied.discountAmount;
       } catch (couponErr) {
         await client.query("ROLLBACK");
-        const status = couponErr?.status || 500;
-        const message = couponErr?.message || "Lỗi server khi áp dụng mã giảm giá";
-        return res.status(status).json({ message });
+        if (!couponErr?.code) console.error("APPLY COUPON ERROR:", couponErr);
+        const { status = 500, ...body } = couponErr?.code ? couponErr : { ...apiMessage("SERVER_ERROR") };
+        return res.status(status).json(body);
       }
     }
 
@@ -629,7 +630,7 @@ exports.createBooking = async (req, res) => {
     notifyBooking(status === "confirmed" ? "confirmed" : "received", result.rows[0].id);
 
     res.status(201).json({
-      message: "Đặt phòng thành công",
+      ...apiMessage("BOOKING_CREATED"),
       booking: result.rows[0],
       total_price,
       subtotal,
@@ -643,12 +644,12 @@ exports.createBooking = async (req, res) => {
     // could not see (it is the backstop, not the normal path).
     if (err.code === EXCLUSION_VIOLATION) {
       return res.status(400).json({
-        message: "Phòng đã có booking trùng khoảng thời gian này",
+        ...apiMessage("ROOM_NOT_AVAILABLE"),
       });
     }
 
     console.error("CREATE BOOKING ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi tạo booking" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   } finally {
     if (client) client.release();
   }
@@ -659,13 +660,13 @@ exports.updateBookingStatus = async (req, res) => {
   const { status } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
 
   const allowStatus = ["pending", "confirmed", "cancelled", "completed"];
 
   if (!allowStatus.includes(status)) {
-    return res.status(400).json({ message: "Trạng thái booking không hợp lệ" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_STATUS") });
   }
 
   let client;
@@ -681,7 +682,7 @@ exports.updateBookingStatus = async (req, res) => {
 
     if (existing.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ message: "Không tìm thấy booking" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
 
     const current = existing.rows[0];
@@ -690,7 +691,7 @@ exports.updateBookingStatus = async (req, res) => {
     if (currentStatus !== status && !STATUS_TRANSITIONS[currentStatus]?.includes(status)) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: `Không thể chuyển trạng thái từ "${currentStatus}" sang "${status}"`,
+        ...apiMessage("STATUS_TRANSITION_NOT_ALLOWED", { from: currentStatus, to: status }),
       });
     }
 
@@ -721,13 +722,13 @@ exports.updateBookingStatus = async (req, res) => {
     }
 
     res.json({
-      message: "Cập nhật trạng thái thành công",
+      ...apiMessage("BOOKING_STATUS_UPDATED"),
       booking,
     });
   } catch (err) {
     if (client) await client.query("ROLLBACK");
     console.error("UPDATE BOOKING ERROR:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   } finally {
     if (client) client.release();
   }
@@ -736,7 +737,7 @@ exports.updateBookingStatus = async (req, res) => {
 exports.cancelBooking = async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
   let client;
 
@@ -753,7 +754,7 @@ exports.cancelBooking = async (req, res) => {
 
     if (existing.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ message: "Không tìm thấy booking" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
 
     const booking = existing.rows[0];
@@ -762,14 +763,14 @@ exports.cancelBooking = async (req, res) => {
     if (!isAdmin && booking.user_id !== req.user.id) {
       await client.query("ROLLBACK");
       return res.status(403).json({
-        message: "Bạn không có quyền hủy booking này",
+        ...apiMessage("BOOKING_FORBIDDEN"),
       });
     }
 
     if (!["pending", "confirmed"].includes(booking.status)) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: "Chỉ có thể hủy booking đang pending hoặc confirmed",
+        ...apiMessage("BOOKING_NOT_CANCELLABLE"),
       });
     }
 
@@ -781,10 +782,7 @@ exports.cancelBooking = async (req, res) => {
     if (!isAdmin && booking.payment_status === "paid" && daysUntilCheckIn < freeDays) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        code: "CANCELLATION_WINDOW_PASSED",
-        message:
-          `Booking đã thanh toán chỉ được hủy miễn phí trước ngày nhận phòng ít nhất ${freeDays} ngày. ` +
-          "Vui lòng liên hệ cơ sở lưu trú để được hỗ trợ.",
+        ...apiMessage("CANCELLATION_WINDOW_PASSED", { days: freeDays }),
       });
     }
 
@@ -796,15 +794,13 @@ exports.cancelBooking = async (req, res) => {
     notifyBooking("cancelled", cancelled.booking.id);
 
     res.json({
-      message: cancelled.owesRefund
-        ? "Hủy đặt phòng thành công. Khoản thanh toán sẽ được hoàn lại sau khi cơ sở lưu trú xác nhận."
-        : "Hủy đặt phòng thành công",
+      ...apiMessage(cancelled.owesRefund ? "BOOKING_CANCELLED_REFUND" : "BOOKING_CANCELLED"),
       booking: cancelled.booking,
     });
   } catch (err) {
     if (client) await client.query("ROLLBACK");
     console.error("CANCEL BOOKING ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi hủy booking" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   } finally {
     if (client) client.release();
   }
@@ -816,7 +812,7 @@ exports.cancelBooking = async (req, res) => {
 exports.markBookingPaid = async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
   let client;
 
@@ -831,19 +827,19 @@ exports.markBookingPaid = async (req, res) => {
 
     if (existing.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ message: "Không tìm thấy booking" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
 
     const booking = existing.rows[0];
 
     if (booking.status === "cancelled") {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Không thể ghi nhận thanh toán cho booking đã hủy" });
+      return res.status(400).json({ ...apiMessage("CANNOT_PAY_CANCELLED") });
     }
 
     if (!["unpaid", "pending", "failed"].includes(booking.payment_status)) {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Booking này đã được ghi nhận thanh toán" });
+      return res.status(400).json({ ...apiMessage("BOOKING_ALREADY_PAID") });
     }
 
     const result = await client.query(
@@ -869,11 +865,11 @@ exports.markBookingPaid = async (req, res) => {
 
     notifyBooking("confirmed", id);
 
-    res.json({ message: "Đã ghi nhận thanh toán", booking: result.rows[0] });
+    res.json({ ...apiMessage("PAYMENT_RECORDED"), booking: result.rows[0] });
   } catch (err) {
     if (client) await client.query("ROLLBACK");
     console.error("MARK BOOKING PAID ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi ghi nhận thanh toán" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   } finally {
     if (client) client.release();
   }
@@ -884,7 +880,7 @@ exports.markBookingPaid = async (req, res) => {
 exports.confirmRefund = async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
 
   try {
@@ -901,15 +897,15 @@ exports.confirmRefund = async (req, res) => {
     if (result.rows.length === 0) {
       const existing = await pool.query("SELECT id FROM bookings WHERE id = $1", [id]);
       if (existing.rows.length === 0) {
-        return res.status(404).json({ message: "Không tìm thấy booking" });
+        return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
       }
-      return res.status(400).json({ message: "Booking này không ở trạng thái chờ hoàn tiền" });
+      return res.status(400).json({ ...apiMessage("NOT_REFUND_PENDING") });
     }
 
-    res.json({ message: "Đã xác nhận hoàn tiền", booking: result.rows[0] });
+    res.json({ ...apiMessage("REFUND_CONFIRMED"), booking: result.rows[0] });
   } catch (err) {
     console.error("CONFIRM REFUND ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi xác nhận hoàn tiền" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -951,12 +947,12 @@ exports.getBookingCalendar = async (req, res) => {
   try {
     const roomId = parseId(req.query.roomId);
     if (!roomId) {
-      return res.status(400).json({ message: "roomId là bắt buộc và phải là số nguyên dương" });
+      return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
     }
 
     const parsed = parseYearMonth(req.query.year, req.query.month);
     if (!parsed) {
-      return res.status(400).json({ message: "year/month không hợp lệ" });
+      return res.status(400).json({ ...apiMessage("INVALID_MONTH") });
     }
     const { year, month } = parsed;
 
@@ -972,7 +968,7 @@ exports.getBookingCalendar = async (req, res) => {
       [roomId]
     );
     if (roomResult.rows.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy phòng" });
+      return res.status(404).json({ ...apiMessage("ROOM_NOT_FOUND") });
     }
 
     const bookingsResult = await pool.query(
@@ -1018,14 +1014,14 @@ exports.getBookingCalendar = async (req, res) => {
     });
   } catch (err) {
     console.error("GET BOOKING CALENDAR ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy dữ liệu lịch" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
 exports.deleteBooking = async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
   let client;
 
@@ -1040,7 +1036,7 @@ exports.deleteBooking = async (req, res) => {
 
     if (bookingCheck.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ message: "Không tìm thấy booking để xóa" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
 
     const booking = bookingCheck.rows[0];
@@ -1057,7 +1053,7 @@ exports.deleteBooking = async (req, res) => {
     ) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: "Không thể xóa booking đã có thanh toán. Hãy hủy booking thay vì xóa.",
+        ...apiMessage("BOOKING_HAS_PAYMENTS"),
       });
     }
 
@@ -1076,13 +1072,13 @@ exports.deleteBooking = async (req, res) => {
     await client.query("COMMIT");
 
     res.json({
-      message: "Xóa booking thành công",
+      ...apiMessage("BOOKING_DELETED"),
       booking: result.rows[0],
     });
   } catch (err) {
     if (client) await client.query("ROLLBACK");
     console.error("DELETE BOOKING ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi xóa booking" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   } finally {
     if (client) client.release();
   }

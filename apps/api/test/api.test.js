@@ -1764,7 +1764,7 @@ describe("hotel booking API", () => {
       });
 
       assert.equal(result.response.status, 400);
-      assert.match(result.body.message, /letters and numbers/);
+      assert.equal(result.body.code, "WEAK_PASSWORD");
     }
   });
 
@@ -1774,14 +1774,16 @@ describe("hotel booking API", () => {
       body: JSON.stringify({ name: "n".repeat(101), email: "long@example.com", password: "guest123" }),
     });
     assert.equal(longName.response.status, 400);
-    assert.match(longName.body.message, /Name must be at most 100 characters/);
+    assert.equal(longName.body.code, "TEXT_TOO_LONG");
+    assert.deepEqual(longName.body.params, { field: "name", max: 100 });
 
     const longEmail = await request(baseUrl, "/api/register", {
       method: "POST",
       body: JSON.stringify({ name: "Ok", email: `${"e".repeat(250)}@example.com`, password: "guest123" }),
     });
     assert.equal(longEmail.response.status, 400);
-    assert.match(longEmail.body.message, /Email must be at most 255 characters/);
+    assert.equal(longEmail.body.code, "TEXT_TOO_LONG");
+    assert.deepEqual(longEmail.body.params, { field: "email", max: 255 });
 
     const profile = await request(baseUrl, "/api/users/me", {
       method: "PUT",
@@ -1805,7 +1807,8 @@ describe("hotel booking API", () => {
         body: JSON.stringify({ ...room, [field]: "x".repeat(max + 1) }),
       });
       assert.equal(created.response.status, 400, field);
-      assert.match(created.body.message, new RegExp(`at most ${max} characters`));
+      assert.equal(created.body.code, "TEXT_TOO_LONG");
+      assert.deepEqual(created.body.params, { field, max });
 
       const updated = await request(baseUrl, "/api/rooms/1", {
         method: "PUT",
@@ -2037,7 +2040,7 @@ describe("hotel booking API", () => {
     const roomId = state.rooms.find((room) => room.room_name === "Garden Room").id;
 
     const pngBytes = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z5uEAAAAASUVORK5CYII=",
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
       "base64"
     );
     const form = new FormData();
@@ -2050,7 +2053,7 @@ describe("hotel booking API", () => {
     });
     assert.equal(uploaded.status, 201);
     const uploadedBody = await uploaded.json();
-    assert.match(uploadedBody.image.image_path, /\/uploads\/rooms\/[0-9a-f-]+\.png$/i);
+    assert.match(uploadedBody.image.image_path, /\/uploads\/rooms\/[0-9a-f-]+\.webp$/i);
 
     const afterUpload = await request(baseUrl, `/api/rooms/${roomId}`);
     assert.equal(afterUpload.body.images.length, 1);
@@ -2085,7 +2088,7 @@ describe("hotel booking API", () => {
     const roomId = created.body.room.id;
 
     const pngBytes = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z5uEAAAAASUVORK5CYII=",
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
       "base64"
     );
     const form = new FormData();
@@ -2118,6 +2121,50 @@ describe("hotel booking API", () => {
     await fs.unlink(path.join(__dirname, "../uploads/rooms", filename)).catch(() => {});
   });
 
+  it("turns uploaded photos upright, strips EXIF and GPS, shrinks them and stores WebP", async () => {
+    const sharp = require("sharp");
+    // A "phone photo": stored sideways with an EXIF orientation of 6 (rotate
+    // 90°), camera make and a GPS position, larger than rooms are shown.
+    const photo = await sharp({ create: { width: 3000, height: 1500, channels: 3, background: "#b04030" } })
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .withExif({
+        IFD0: { Make: "TestPhone" },
+        IFD3: { GPSLatitudeRef: "N", GPSLatitude: "10/1 45/1 0/1", GPSLongitudeRef: "E", GPSLongitude: "106/1 40/1 0/1" },
+      })
+      .toBuffer();
+    const before = await sharp(photo).metadata();
+    assert.equal(before.orientation, 6);
+    assert.ok(before.exif.includes(Buffer.from([0x25, 0x88])) || before.exif.includes(Buffer.from([0x88, 0x25])), "fixture carries a GPS pointer");
+
+    const form = new FormData();
+    form.append("image", new Blob([photo], { type: "image/jpeg" }), "IMG_0001.JPG");
+    const response = await fetch(`${baseUrl}/api/rooms/upload-image`, { method: "POST", headers: authHeader(adminToken), body: form });
+    const body = await response.json();
+    assert.equal(response.status, 201);
+    assert.match(body.image, /.webp$/);
+
+    const stored = path.join(__dirname, "../uploads/rooms", new URL(body.image).pathname.split("/").pop());
+    const after = await sharp(await fs.readFile(stored)).metadata();
+    assert.equal(after.format, "webp");
+    // Upright (portrait), and no bigger than the 2000px box.
+    assert.equal(after.width, 1000);
+    assert.equal(after.height, 2000);
+    assert.equal(after.orientation, undefined);
+    assert.equal(after.exif, undefined);
+    assert.equal(after.xmp, undefined);
+    await fs.unlink(stored);
+  });
+
+  it("rejects images over 10 MB", async () => {
+    const form = new FormData();
+    form.append("image", new Blob([Buffer.alloc(10 * 1024 * 1024 + 1)], { type: "image/jpeg" }), "huge.jpg");
+    const response = await fetch(`${baseUrl}/api/rooms/upload-image`, { method: "POST", headers: authHeader(adminToken), body: form });
+    const body = await response.json();
+    assert.equal(response.status, 400);
+    assert.equal(body.code, "IMAGE_TOO_LARGE");
+  });
+
   it("validates room upload content by magic bytes and chooses the extension", async () => {
     const fakeForm = new FormData();
     fakeForm.append(
@@ -2133,7 +2180,7 @@ describe("hotel booking API", () => {
     assert.equal(fakeResponse.status, 400);
 
     const pngBytes = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z5uEAAAAASUVORK5CYII=",
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
       "base64"
     );
     const validForm = new FormData();
@@ -2145,7 +2192,7 @@ describe("hotel booking API", () => {
     });
     const validBody = await validResponse.json();
     assert.equal(validResponse.status, 201);
-    assert.match(validBody.image, /\/uploads\/rooms\/[0-9a-f-]+\.png$/i);
+    assert.match(validBody.image, /\/uploads\/rooms\/[0-9a-f-]+\.webp$/i);
 
     const filename = new URL(validBody.image).pathname.split("/").pop();
     await fs.unlink(path.join(__dirname, "../uploads/rooms", filename));
@@ -2350,7 +2397,7 @@ describe("hotel booking API", () => {
       console.error = originalConsoleError;
     }
     assert.equal(status, 500);
-    assert.deepEqual(body, { message: "Internal server error" });
+    assert.equal(body.code, "SERVER_ERROR");
     assert.equal(JSON.stringify(body).includes("database password"), false);
     assert.equal(JSON.stringify(body).includes("stack"), false);
   });
@@ -2424,7 +2471,7 @@ describe("hotel booking API", () => {
       }),
     });
     assert.equal(weakPassword.response.status, 400);
-    assert.match(weakPassword.body.message, /letters and numbers/);
+    assert.equal(weakPassword.body.code, "WEAK_PASSWORD");
 
     const wrongPassword = await request(baseUrl, "/api/users/me/password", {
       method: "PUT",
@@ -2478,7 +2525,7 @@ describe("hotel booking API", () => {
 
   it("lets any authenticated user upload and replace their own avatar", async () => {
     const pngBytes = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z5uEAAAAASUVORK5CYII=",
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
       "base64"
     );
 
@@ -2504,7 +2551,7 @@ describe("hotel booking API", () => {
     });
     assert.equal(uploaded.status, 201);
     const uploadedBody = await uploaded.json();
-    assert.match(uploadedBody.avatarUrl, /\/uploads\/avatars\/[0-9a-f-]+\.png$/i);
+    assert.match(uploadedBody.avatarUrl, /\/uploads\/avatars\/[0-9a-f-]+\.webp$/i);
 
     const firstFilename = new URL(uploadedBody.avatarUrl).pathname.split("/").pop();
 
@@ -2754,7 +2801,7 @@ describe("hotel booking API", () => {
       }),
     });
     assert.equal(overlapping.response.status, 400);
-    assert.match(overlapping.body.message, /trùng/);
+    assert.equal(overlapping.body.code, "ROOM_NOT_AVAILABLE");
   });
 
   it("returns 400 for invalid room and booking ids", async () => {
@@ -2791,7 +2838,8 @@ describe("hotel booking API", () => {
       body: JSON.stringify({ status: "pending" }),
     });
     assert.equal(invalidTransition.response.status, 400);
-    assert.match(invalidTransition.body.message, /completed/);
+    assert.equal(invalidTransition.body.code, "STATUS_TRANSITION_NOT_ALLOWED");
+    assert.equal(invalidTransition.body.params.from, "completed");
 
     const stillCompleted = await request(baseUrl, "/api/bookings/1", {
       headers: authHeader(adminToken),
@@ -3169,9 +3217,14 @@ describe("hotel booking API", () => {
 
       const first = await upload(adminToken);
       assert.equal(first.status, 201);
-      assert.match(first.body.stored.logoUrl, /^\/uploads\/branding\/[0-9a-f-]+\.png$/);
+      assert.match(first.body.stored.logoUrl, /^\/uploads\/branding\/[0-9a-f-]+\.webp$/);
       const firstFile = path.join(brandingDir, path.basename(first.body.stored.logoUrl));
       await fs.access(firstFile);
+      // A PNG copy for the PDF confirmation, which cannot embed WebP.
+      const firstPng = firstFile.replace(/.webp$/, ".png");
+      assert.equal((await fs.readFile(firstPng)).subarray(1, 4).toString(), "PNG");
+      const { loadLogoForPdf } = require("../src/services/bookingReceipt");
+      assert.equal((await loadLogoForPdf(first.body.stored.logoUrl)).subarray(1, 4).toString(), "PNG");
 
       assert.equal((await request(baseUrl, "/api/settings/public")).body.logoUrl, first.body.stored.logoUrl);
 
@@ -3180,6 +3233,7 @@ describe("hotel booking API", () => {
       // Give the best-effort cleanup a moment.
       await new Promise((resolve) => setTimeout(resolve, 100));
       await assert.rejects(fs.access(firstFile));
+      await assert.rejects(fs.access(firstPng));
 
       const removed = await request(baseUrl, "/api/settings/logo", {
         method: "DELETE",
@@ -3439,7 +3493,7 @@ describe("hotel booking API", () => {
 
       const first = await upload(adminToken, "Hà Nội", { author: "Jane Doe", license: "CC BY 4.0", licenseUrl: "https://creativecommons.org/licenses/by/4.0/" });
       assert.equal(first.status, 201);
-      assert.match(first.body.image, /^\/uploads\/destinations\/[0-9a-f-]+\.png$/);
+      assert.match(first.body.image, /^\/uploads\/destinations\/[0-9a-f-]+\.webp$/);
       await fs.access(path.join(folder, path.basename(first.body.image)));
 
       let shown = await card("Hà Nội");
@@ -3504,7 +3558,7 @@ describe("hotel booking API", () => {
       const response = await fetch(`${baseUrl}/api/settings/hero`, { method: "POST", headers: { Cookie: adminToken }, body: form });
       const body = await response.json();
       assert.equal(response.status, 201);
-      assert.match(body.stored.heroImageUrl, /^\/uploads\/branding\/[0-9a-f-]+\.png$/);
+      assert.match(body.stored.heroImageUrl, /^\/uploads\/branding\/[0-9a-f-]+\.webp$/);
       assert.equal((await request(baseUrl, "/api/settings/public")).body.heroImageUrl, body.stored.heroImageUrl);
 
       const removed = await request(baseUrl, "/api/settings/hero", { method: "DELETE", headers: authHeader(adminToken) });
@@ -3754,7 +3808,7 @@ describe("hotel booking API", () => {
       body: JSON.stringify({ booking_id: bookingId, rating: 5 }),
     });
     assert.equal(tooEarly.response.status, 400);
-    assert.match(tooEarly.body.message, /hoàn tất/);
+    assert.equal(tooEarly.body.code, "REVIEW_TOO_EARLY");
 
     await request(baseUrl, `/api/bookings/${bookingId}`, {
       method: "PUT",
@@ -4056,7 +4110,7 @@ describe("hotel booking API", () => {
       body: JSON.stringify({ code: "EXPIRED1", amount: 500 }),
     });
     assert.equal(expiredCheck.response.status, 400);
-    assert.match(expiredCheck.body.message, /hết hạn/);
+    assert.equal(expiredCheck.body.code, "COUPON_EXPIRED");
 
     const deactivateCoupon = await request(baseUrl, "/api/coupons", {
       method: "POST",
@@ -4091,7 +4145,7 @@ describe("hotel booking API", () => {
       body: JSON.stringify({ code: "OFFSWITCH", amount: 500 }),
     });
     assert.equal(inactiveCheck.response.status, 400);
-    assert.match(inactiveCheck.body.message, /vô hiệu hóa/);
+    assert.equal(inactiveCheck.body.code, "COUPON_DISABLED");
   });
 
   it("applies a coupon when creating a booking, recalculating the discount server-side (never trusting the client)", async () => {
@@ -4180,7 +4234,7 @@ describe("hotel booking API", () => {
       }),
     });
     assert.equal(second.response.status, 400);
-    assert.match(second.body.message, /hết lượt/);
+    assert.equal(second.body.code, "COUPON_USED_UP");
 
     const list = await request(baseUrl, "/api/coupons", { headers: authHeader(adminToken) });
     const found = list.body.find((c) => c.code === "LASTUSE");

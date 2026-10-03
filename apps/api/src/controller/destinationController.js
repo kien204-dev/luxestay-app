@@ -1,5 +1,6 @@
 const pool = require("../db/db.js");
 const { removeUpload } = require("../services/storage.js");
+const { apiMessage } = require("../utils/apiMessages");
 
 // A destination is the part of a room's location after the last comma
 // ("Hoàn Kiếm, Hà Nội" -> "Hà Nội"). Its photo lives in destination_images,
@@ -34,11 +35,11 @@ function parseCredit(body) {
   const values = {};
   for (const [field, rule] of Object.entries(CREDIT_FIELDS)) {
     if (body[field] === undefined) continue;
-    if (body[field] !== null && typeof body[field] !== "string") return { error: `${field} phải là chữ` };
+    if (body[field] !== null && typeof body[field] !== "string") return { error: apiMessage("TEXT_REQUIRED_STRING", { field }) };
 
     const value = (body[field] || "").trim();
-    if (value.length > rule.max) return { error: `${field} không được dài quá ${rule.max} ký tự` };
-    if (value && rule.url && !/^https?:\/\/\S+$/i.test(value)) return { error: `${field} phải là địa chỉ http(s)` };
+    if (value.length > rule.max) return { error: apiMessage("TEXT_TOO_LONG", { field, max: rule.max }) };
+    if (value && rule.url && !/^https?:\/\/\S+$/i.test(value)) return { error: apiMessage("INVALID_URL", { field }) };
     values[rule.column] = value || null;
   }
   return { values };
@@ -79,7 +80,7 @@ exports.getDestinationCredits = async (req, res) => {
     );
   } catch (err) {
     console.error("DESTINATION CREDITS ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -118,7 +119,7 @@ exports.getDestinationsForAdmin = async (req, res) => {
     );
   } catch (err) {
     console.error("ADMIN DESTINATIONS ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -128,19 +129,19 @@ exports.getDestinationsForAdmin = async (req, res) => {
 exports.uploadDestinationImage = async (req, res) => {
   try {
     const name = readName(req);
-    if (!name) return res.status(400).json({ message: "Tên điểm đến không hợp lệ" });
-    if (!req.file) return res.status(400).json({ message: "No image file uploaded" });
+    if (!name) return res.status(400).json({ ...apiMessage("INVALID_DESTINATION") });
+    if (!req.file) return res.status(400).json({ ...apiMessage("NO_IMAGE_UPLOADED") });
 
     const stored = req.file.storedPath;
     if (!(await destinationExists(name))) {
       removeUpload(stored, "destinations", { destination: name });
-      return res.status(404).json({ message: "Không có phòng nào ở điểm đến này" });
+      return res.status(404).json({ ...apiMessage("DESTINATION_HAS_NO_ROOMS") });
     }
 
     const { error, values } = parseCredit(req.body || {});
     if (error) {
       removeUpload(stored, "destinations", { destination: name });
-      return res.status(400).json({ message: error });
+      return res.status(400).json(error);
     }
 
     const credit = Object.fromEntries(Object.values(CREDIT_FIELDS).map((rule) => [rule.column, values[rule.column] ?? null]));
@@ -158,10 +159,10 @@ exports.uploadDestinationImage = async (req, res) => {
     const old = previous.rows[0]?.image_url;
     if (old && old !== stored) removeUpload(old, "destinations", { destination: name });
 
-    return res.status(201).json({ message: "Đã cập nhật ảnh điểm đến", name, image: stored });
+    return res.status(201).json({ ...apiMessage("DESTINATION_IMAGE_SAVED"), name, image: stored });
   } catch (err) {
     console.error("UPLOAD DESTINATION IMAGE ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi lưu ảnh điểm đến" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -169,13 +170,13 @@ exports.uploadDestinationImage = async (req, res) => {
 exports.updateDestinationCredit = async (req, res) => {
   try {
     const name = readName(req);
-    if (!name) return res.status(400).json({ message: "Tên điểm đến không hợp lệ" });
+    if (!name) return res.status(400).json({ ...apiMessage("INVALID_DESTINATION") });
 
     const { error, values } = parseCredit(req.body || {});
-    if (error) return res.status(400).json({ message: error });
+    if (error) return res.status(400).json(error);
 
     const columns = Object.keys(values);
-    if (columns.length === 0) return res.status(400).json({ message: "Không có gì để lưu" });
+    if (columns.length === 0) return res.status(400).json({ ...apiMessage("NOTHING_TO_SAVE") });
 
     const result = await pool.query(
       `UPDATE destination_images
@@ -184,12 +185,12 @@ exports.updateDestinationCredit = async (req, res) => {
        RETURNING name`,
       [name, ...Object.values(values)]
     );
-    if (result.rows.length === 0) return res.status(404).json({ message: "Điểm đến này chưa có ảnh" });
+    if (result.rows.length === 0) return res.status(404).json({ ...apiMessage("DESTINATION_HAS_NO_IMAGE") });
 
-    return res.json({ message: "Đã lưu ghi công ảnh" });
+    return res.json({ ...apiMessage("DESTINATION_CREDIT_SAVED") });
   } catch (err) {
     console.error("UPDATE DESTINATION CREDIT ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi lưu ghi công ảnh" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -198,16 +199,16 @@ exports.updateDestinationCredit = async (req, res) => {
 exports.deleteDestinationImage = async (req, res) => {
   try {
     const name = readName(req);
-    if (!name) return res.status(400).json({ message: "Tên điểm đến không hợp lệ" });
+    if (!name) return res.status(400).json({ ...apiMessage("INVALID_DESTINATION") });
 
     const result = await pool.query("DELETE FROM destination_images WHERE name = $1 RETURNING image_url", [name]);
-    if (result.rows.length === 0) return res.status(404).json({ message: "Điểm đến này chưa có ảnh" });
+    if (result.rows.length === 0) return res.status(404).json({ ...apiMessage("DESTINATION_HAS_NO_IMAGE") });
 
     removeUpload(result.rows[0].image_url, "destinations", { destination: name });
-    return res.json({ message: "Đã xóa ảnh điểm đến" });
+    return res.json({ ...apiMessage("DESTINATION_IMAGE_REMOVED") });
   } catch (err) {
     console.error("DELETE DESTINATION IMAGE ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi xóa ảnh điểm đến" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 

@@ -11,16 +11,15 @@ const {
   registerRateLimit,
   resetPasswordRateLimit,
 } = require("../middleware/rateLimit");
-const { isStrongPassword, PASSWORD_RULE_MESSAGE } = require("../utils/password");
+const { isStrongPassword } = require("../utils/password");
 const { TEXT_LIMITS, findTextLimitError } = require("../utils/textLimits");
 const {
   assertEmailConfigured,
   sendPasswordResetEmail,
 } = require("../services/emailService");
+const { apiMessage } = require("../utils/apiMessages");
 
 const router = express.Router();
-const RESET_RESPONSE_MESSAGE =
-  "If this email exists, a password reset link has been sent.";
 const PUBLIC_USER_FIELDS =
   "id,name,email,role,phone,bio,avatar_url,created_at,updated_at,must_change_password";
 const AUTH_USER_FIELDS = `${PUBLIC_USER_FIELDS},token_version,deleted_at,is_locked`;
@@ -53,7 +52,7 @@ router.post("/login", loginRateLimit, async (req, res) => {
     const password = req.body.password;
 
     if (!email || typeof password !== "string" || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({ ...apiMessage("CREDENTIALS_REQUIRED") });
     }
 
     const result = await pool.query(
@@ -64,29 +63,29 @@ router.post("/login", loginRateLimit, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ message: "Email or password is incorrect" });
+      return res.status(401).json({ ...apiMessage("INVALID_CREDENTIALS") });
     }
 
     const user = result.rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Email or password is incorrect" });
+      return res.status(401).json({ ...apiMessage("INVALID_CREDENTIALS") });
     }
 
     if (user.is_locked) {
       return res.status(403).json({
-        message: "This account has been locked. Please contact an administrator.",
+        ...apiMessage("ACCOUNT_LOCKED"),
       });
     }
 
     setAuthCookie(res, user);
     return res.json({
-      message: "Login successful",
+      ...apiMessage("LOGIN_SUCCESS"),
       user: publicUser(user),
     });
   } catch (err) {
     console.error("LOGIN ERROR:", err);
-    return res.status(500).json({ message: "Unable to log in" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 });
 
@@ -97,17 +96,17 @@ router.post("/register", registerRateLimit, async (req, res) => {
     const password = req.body.password;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Name, email and password are required" });
+      return res.status(400).json({ ...apiMessage("REGISTRATION_FIELDS_REQUIRED") });
     }
     const lengthError = findTextLimitError({ name, email });
     if (lengthError) {
-      return res.status(400).json({ message: lengthError });
+      return res.status(400).json(lengthError);
     }
     if (!EMAIL_PATTERN.test(email)) {
-      return res.status(400).json({ message: "Email is invalid" });
+      return res.status(400).json({ ...apiMessage("INVALID_EMAIL") });
     }
     if (!isStrongPassword(password)) {
-      return res.status(400).json({ message: PASSWORD_RULE_MESSAGE });
+      return res.status(400).json(apiMessage("WEAK_PASSWORD"));
     }
 
     const check = await pool.query(
@@ -115,7 +114,7 @@ router.post("/register", registerRateLimit, async (req, res) => {
       [email]
     );
     if (check.rows.length > 0) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({ ...apiMessage("EMAIL_EXISTS") });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -127,25 +126,25 @@ router.post("/register", registerRateLimit, async (req, res) => {
     );
 
     return res.status(201).json({
-      message: "Registration successful",
+      ...apiMessage("REGISTERED"),
       user: result.rows[0],
     });
   } catch (err) {
     console.error("REGISTER ERROR:", err);
-    return res.status(500).json({ message: "Unable to register" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 });
 
 router.post("/forgot-password", forgotPasswordRateLimit, async (req, res) => {
   try {
     const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
-    if (!email) return res.status(400).json({ message: "Email is required" });
+    if (!email) return res.status(400).json({ ...apiMessage("EMAIL_REQUIRED") });
 
     try {
       assertEmailConfigured();
     } catch (configError) {
       console.error("EMAIL CONFIGURATION ERROR:", configError);
-      return res.status(500).json({ message: "Password reset email is unavailable" });
+      return res.status(500).json({ ...apiMessage("PASSWORD_RESET_UNAVAILABLE") });
     }
 
     const userResult = await pool.query(
@@ -153,7 +152,7 @@ router.post("/forgot-password", forgotPasswordRateLimit, async (req, res) => {
       [email]
     );
     if (userResult.rows.length === 0) {
-      return res.json({ message: RESET_RESPONSE_MESSAGE });
+      return res.json(apiMessage("RESET_EMAIL_SENT"));
     }
 
     const user = userResult.rows[0];
@@ -170,20 +169,20 @@ router.post("/forgot-password", forgotPasswordRateLimit, async (req, res) => {
     const resetUrl = `${getPublicWebUrl()}/reset-password?token=${rawToken}`;
     await sendPasswordResetEmail({ to: user.email, name: user.name, resetUrl });
 
-    return res.json({ message: RESET_RESPONSE_MESSAGE });
+    return res.json(apiMessage("RESET_EMAIL_SENT"));
   } catch (err) {
     console.error("FORGOT PASSWORD ERROR:", err);
-    return res.status(500).json({ message: "Unable to send password reset email" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 });
 
 router.post("/reset-password", resetPasswordRateLimit, async (req, res) => {
   const { token, password } = req.body;
   if (!token || !password) {
-    return res.status(400).json({ message: "Token and password are required" });
+    return res.status(400).json({ ...apiMessage("RESET_FIELDS_REQUIRED") });
   }
   if (!isStrongPassword(password)) {
-    return res.status(400).json({ message: PASSWORD_RULE_MESSAGE });
+    return res.status(400).json(apiMessage("WEAK_PASSWORD"));
   }
 
   let client;
@@ -206,7 +205,7 @@ router.post("/reset-password", resetPasswordRateLimit, async (req, res) => {
 
     if (tokenResult.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Reset token is invalid or expired" });
+      return res.status(400).json({ ...apiMessage("RESET_TOKEN_INVALID") });
     }
 
     const resetToken = tokenResult.rows[0];
@@ -225,11 +224,11 @@ router.post("/reset-password", resetPasswordRateLimit, async (req, res) => {
       [resetToken.id]
     );
     await client.query("COMMIT");
-    return res.json({ message: "Password reset successfully" });
+    return res.json({ ...apiMessage("PASSWORD_RESET_DONE") });
   } catch (err) {
     if (client) await client.query("ROLLBACK");
     console.error("RESET PASSWORD ERROR:", err);
-    return res.status(500).json({ message: "Unable to reset password" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   } finally {
     if (client) client.release();
   }
@@ -237,13 +236,13 @@ router.post("/reset-password", resetPasswordRateLimit, async (req, res) => {
 
 router.post("/google-login", loginRateLimit, async (req, res) => {
   if (!isGoogleLoginConfigured()) {
-    return res.status(503).json({ message: "Google sign-in is not enabled on this server" });
+    return res.status(503).json({ ...apiMessage("GOOGLE_DISABLED") });
   }
 
   try {
     const { idToken } = req.body;
     if (typeof idToken !== "string" || !idToken.trim()) {
-      return res.status(400).json({ message: "Firebase ID token is required" });
+      return res.status(400).json({ ...apiMessage("GOOGLE_TOKEN_REQUIRED") });
     }
 
     let decoded;
@@ -251,7 +250,7 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
       decoded = await verifyFirebaseIdToken(idToken);
     } catch {
       return res.status(401).json({
-        message: "Google authentication token is invalid or expired",
+        ...apiMessage("GOOGLE_TOKEN_INVALID"),
       });
     }
 
@@ -260,7 +259,7 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
       decoded.email_verified !== true ||
       typeof decoded.email !== "string"
     ) {
-      return res.status(401).json({ message: "A verified Google account is required" });
+      return res.status(401).json({ ...apiMessage("GOOGLE_EMAIL_UNVERIFIED") });
     }
 
     const email = decoded.email.trim().toLowerCase();
@@ -290,12 +289,12 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
     } else {
       user = result.rows[0];
       if (user.deleted_at) {
-        return res.status(401).json({ message: "This account is disabled" });
+        return res.status(401).json({ ...apiMessage("ACCOUNT_DISABLED") });
       }
 
       if (user.is_locked) {
         return res.status(403).json({
-          message: "This account has been locked. Please contact an administrator.",
+          ...apiMessage("ACCOUNT_LOCKED"),
         });
       }
 
@@ -314,15 +313,13 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
 
     setAuthCookie(res, user);
     return res.json({
-      message: justLinked
-        ? "Tài khoản hiện có của bạn đã được liên kết với Google"
-        : "Google login successful",
+      ...apiMessage(justLinked ? "GOOGLE_LINKED" : "GOOGLE_LOGIN_SUCCESS"),
       linked: justLinked,
       user: publicUser(user),
     });
   } catch (err) {
     console.error("GOOGLE LOGIN ERROR:", err);
-    return res.status(500).json({ message: "Unable to log in with Google" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 });
 

@@ -1,5 +1,6 @@
 const pool = require("../db/db.js");
 const { getPropertySettings } = require("../services/propertySettings");
+const { apiMessage } = require("../utils/apiMessages");
 
 const MAX_COMMENT_LENGTH = 2000;
 
@@ -35,23 +36,23 @@ exports.createReview = async (req, res) => {
   try {
     const roomId = parseId(req.params.id);
     if (!roomId) {
-      return res.status(400).json({ message: "Room id must be a positive integer" });
+      return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
     }
 
     const bookingId = parseId(req.body.booking_id);
     if (!bookingId) {
-      return res.status(400).json({ message: "booking_id là bắt buộc và phải là số nguyên dương" });
+      return res.status(400).json({ ...apiMessage("INVALID_REVIEW_BOOKING") });
     }
 
     const rating = parseRating(req.body.rating);
     if (!rating) {
-      return res.status(400).json({ message: "rating là bắt buộc và phải là số nguyên từ 1 đến 5" });
+      return res.status(400).json({ ...apiMessage("INVALID_RATING") });
     }
 
     const commentRaw = typeof req.body.comment === "string" ? req.body.comment.trim() : "";
     if (commentRaw.length > MAX_COMMENT_LENGTH) {
       return res.status(400).json({
-        message: `Bình luận không được vượt quá ${MAX_COMMENT_LENGTH} ký tự`,
+        ...apiMessage("COMMENT_TOO_LONG", { max: MAX_COMMENT_LENGTH }),
       });
     }
     const comment = commentRaw || null;
@@ -66,16 +67,16 @@ exports.createReview = async (req, res) => {
     const booking = bookingResult.rows[0];
 
     if (!booking) {
-      return res.status(404).json({ message: "Không tìm thấy đặt phòng" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
     if (booking.user_id !== req.user.id) {
-      return res.status(403).json({ message: "Đặt phòng này không thuộc về bạn" });
+      return res.status(403).json({ ...apiMessage("BOOKING_FORBIDDEN") });
     }
     if (booking.room_id !== roomId) {
-      return res.status(400).json({ message: "Đặt phòng này không thuộc phòng đang đánh giá" });
+      return res.status(400).json({ ...apiMessage("REVIEW_WRONG_ROOM") });
     }
     if (booking.status !== "completed") {
-      return res.status(400).json({ message: "Chỉ có thể đánh giá sau khi đã hoàn tất kỳ lưu trú" });
+      return res.status(400).json({ ...apiMessage("REVIEW_TOO_EARLY") });
     }
 
     const existingReview = await pool.query(
@@ -83,7 +84,7 @@ exports.createReview = async (req, res) => {
       [bookingId]
     );
     if (existingReview.rows.length > 0) {
-      return res.status(409).json({ message: "Đặt phòng này đã được đánh giá rồi" });
+      return res.status(409).json({ ...apiMessage("ALREADY_REVIEWED") });
     }
 
     let result;
@@ -98,18 +99,18 @@ exports.createReview = async (req, res) => {
       // Defensive fallback against the UNIQUE(booking_id) constraint for a
       // racing duplicate submit — surface a clean message, not a raw SQL error.
       if (err.code === "23505") {
-        return res.status(409).json({ message: "Đặt phòng này đã được đánh giá rồi" });
+        return res.status(409).json({ ...apiMessage("ALREADY_REVIEWED") });
       }
       throw err;
     }
 
     res.status(201).json({
-      message: "Cảm ơn bạn đã đánh giá!",
+      ...apiMessage("REVIEW_THANKS"),
       review: result.rows[0],
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -120,7 +121,7 @@ exports.getRoomReviews = async (req, res) => {
   try {
     const roomId = parseId(req.params.id);
     if (!roomId) {
-      return res.status(400).json({ message: "Room id must be a positive integer" });
+      return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
     }
 
     const page = parsePositiveInteger(req.query.page, 1);
@@ -167,7 +168,7 @@ exports.getRoomReviews = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -219,7 +220,7 @@ exports.listReviews = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -230,11 +231,11 @@ exports.hideReview = async (req, res) => {
   try {
     const id = parseId(req.params.id);
     if (!id) {
-      return res.status(400).json({ message: "Review id must be a positive integer" });
+      return res.status(400).json({ ...apiMessage("INVALID_REVIEW_ID") });
     }
 
     if (typeof req.body.hidden !== "boolean") {
-      return res.status(400).json({ message: "hidden phải là true hoặc false" });
+      return res.status(400).json({ ...apiMessage("INVALID_HIDDEN_FLAG") });
     }
 
     const result = await pool.query(
@@ -244,15 +245,15 @@ exports.hideReview = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy đánh giá" });
+      return res.status(404).json({ ...apiMessage("REVIEW_NOT_FOUND") });
     }
 
     res.json({
-      message: req.body.hidden ? "Đã ẩn đánh giá" : "Đã hiện lại đánh giá",
+      ...apiMessage(req.body.hidden ? "REVIEW_HIDDEN" : "REVIEW_SHOWN"),
       review: result.rows[0],
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };

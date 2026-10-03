@@ -4,6 +4,7 @@ const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 const { getPropertySettings } = require("../services/propertySettings");
 const { todayInAppTimezone } = require("../utils/time");
+const { apiMessage } = require("../utils/apiMessages");
 
 // pdfkit's built-in standard fonts (Helvetica etc.) have no Vietnamese
 // glyph coverage, so PDF text needs an embedded Unicode font — Noto Sans
@@ -218,7 +219,7 @@ exports.getDashboardStats = async (req, res) => {
   } catch (err) {
     console.error("GET DASHBOARD STATS ERROR:", err);
     res.status(500).json({
-      message: "Server error when loading dashboard stats",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -343,7 +344,7 @@ exports.getDashboardAnalytics = async (req, res) => {
   } catch (err) {
     console.error("GET DASHBOARD ANALYTICS ERROR:", err);
     res.status(500).json({
-      message: "Server error when loading dashboard analytics",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -525,7 +526,7 @@ exports.exportDashboardReport = async (req, res) => {
   try {
     const format = String(req.query.format || "").toLowerCase();
     if (!EXPORT_FORMATS.has(format)) {
-      return res.status(400).json({ message: "format phải là 'xlsx' hoặc 'pdf'" });
+      return res.status(400).json({ ...apiMessage("INVALID_EXPORT_FORMAT") });
     }
 
     const stats = await computeDashboardStats(req.query.range);
@@ -551,6 +552,6 @@ exports.exportDashboardReport = async (req, res) => {
     return res.send(buffer);
   } catch (err) {
     console.error("EXPORT DASHBOARD REPORT ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi xuất báo cáo" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };

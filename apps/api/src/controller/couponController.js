@@ -1,4 +1,5 @@
 const pool = require("../db/db.js");
+const { apiMessage } = require("../utils/apiMessages");
 
 const DISCOUNT_TYPES = new Set(["percent", "fixed"]);
 const CODE_PATTERN = /^[A-Z0-9_-]{3,50}$/;
@@ -42,19 +43,16 @@ function parseOptionalPositiveInt(value) {
 // change in between).
 function evaluateCoupon(coupon, amount) {
   if (!coupon.is_active) {
-    return { valid: false, message: "Mã giảm giá đã bị vô hiệu hóa" };
+    return { valid: false, error: apiMessage("COUPON_DISABLED") };
   }
   if (new Date(coupon.expires_at) < new Date()) {
-    return { valid: false, message: "Mã giảm giá đã hết hạn" };
+    return { valid: false, error: apiMessage("COUPON_EXPIRED") };
   }
   if (coupon.usage_limit !== null && coupon.used_count >= coupon.usage_limit) {
-    return { valid: false, message: "Mã giảm giá đã hết lượt sử dụng" };
+    return { valid: false, error: apiMessage("COUPON_USED_UP") };
   }
   if (coupon.min_booking_amount !== null && amount < Number(coupon.min_booking_amount)) {
-    return {
-      valid: false,
-      message: `Đơn đặt phòng cần tối thiểu ${Number(coupon.min_booking_amount).toLocaleString("vi-VN")} đ để dùng mã này`,
-    };
+    return { valid: false, error: apiMessage("COUPON_MIN_AMOUNT", { amount: Number(coupon.min_booking_amount) }) };
   }
 
   let discountAmount =
@@ -85,22 +83,22 @@ exports.validateCoupon = async (req, res) => {
     const amount = parseNonNegativeNumber(req.body.amount);
 
     if (!code) {
-      return res.status(400).json({ valid: false, message: "Vui lòng nhập mã giảm giá" });
+      return res.status(400).json({ valid: false, ...apiMessage("COUPON_CODE_REQUIRED") });
     }
     if (amount === undefined || amount === null) {
-      return res.status(400).json({ valid: false, message: "Số tiền booking không hợp lệ" });
+      return res.status(400).json({ valid: false, ...apiMessage("INVALID_BOOKING_AMOUNT") });
     }
 
     const result = await pool.query("SELECT * FROM coupons WHERE code = $1", [code]);
     const coupon = result.rows[0];
 
     if (!coupon) {
-      return res.status(404).json({ valid: false, message: "Mã giảm giá không tồn tại" });
+      return res.status(404).json({ valid: false, ...apiMessage("COUPON_NOT_FOUND") });
     }
 
     const evaluation = evaluateCoupon(coupon, amount);
     if (!evaluation.valid) {
-      return res.status(400).json({ valid: false, message: evaluation.message });
+      return res.status(400).json({ valid: false, ...evaluation.error });
     }
 
     res.json({
@@ -115,7 +113,7 @@ exports.validateCoupon = async (req, res) => {
     });
   } catch (err) {
     console.error("VALIDATE COUPON ERROR:", err);
-    res.status(500).json({ valid: false, message: "Lỗi server khi kiểm tra mã giảm giá" });
+    res.status(500).json({ valid: false, ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -126,7 +124,7 @@ exports.validateCoupon = async (req, res) => {
 exports.applyCouponForBooking = async function applyCouponForBooking(client, rawCode, amount) {
   const code = normalizeCode(rawCode);
   if (!code) {
-    throw { status: 400, message: "Mã giảm giá không hợp lệ" };
+    throw { status: 400, ...apiMessage("COUPON_INVALID") };
   }
 
   // FOR UPDATE locks the coupon row for the rest of this transaction — a
@@ -138,12 +136,12 @@ exports.applyCouponForBooking = async function applyCouponForBooking(client, raw
   const coupon = result.rows[0];
 
   if (!coupon) {
-    throw { status: 404, message: "Mã giảm giá không tồn tại" };
+    throw { status: 404, ...apiMessage("COUPON_NOT_FOUND") };
   }
 
   const evaluation = evaluateCoupon(coupon, amount);
   if (!evaluation.valid) {
-    throw { status: 400, message: evaluation.message };
+    throw { status: 400, ...evaluation.error };
   }
 
   await client.query("UPDATE coupons SET used_count = used_count + 1 WHERE id = $1", [coupon.id]);
@@ -178,46 +176,46 @@ exports.listCoupons = async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("LIST COUPONS ERROR:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
 function validateCouponPayload(body) {
   const code = normalizeCode(body.code);
   if (!CODE_PATTERN.test(code)) {
-    return { error: "Mã giảm giá phải dài 3-50 ký tự, chỉ gồm chữ, số, gạch ngang hoặc gạch dưới" };
+    return { error: apiMessage("COUPON_CODE_FORMAT") };
   }
 
   if (!DISCOUNT_TYPES.has(body.discount_type)) {
-    return { error: "discount_type phải là 'percent' hoặc 'fixed'" };
+    return { error: apiMessage("COUPON_TYPE_INVALID") };
   }
 
   const discountValue = parsePositiveNumber(body.discount_value);
   if (discountValue === null) {
-    return { error: "discount_value phải là số dương" };
+    return { error: apiMessage("COUPON_VALUE_INVALID") };
   }
   if (body.discount_type === "percent" && discountValue > 100) {
-    return { error: "Giảm theo % không được vượt quá 100" };
+    return { error: apiMessage("COUPON_PERCENT_RANGE") };
   }
 
   const maxDiscountAmount = parseOptionalPositiveNumber(body.max_discount_amount);
   if (maxDiscountAmount === undefined) {
-    return { error: "max_discount_amount phải là số dương hoặc để trống" };
+    return { error: apiMessage("COUPON_MAX_DISCOUNT_INVALID") };
   }
 
   const minBookingAmount = parseNonNegativeNumber(body.min_booking_amount);
   if (minBookingAmount === undefined) {
-    return { error: "min_booking_amount phải là số không âm hoặc để trống" };
+    return { error: apiMessage("COUPON_MIN_AMOUNT_INVALID") };
   }
 
   const expiresAt = body.expires_at ? new Date(body.expires_at) : null;
   if (!expiresAt || Number.isNaN(expiresAt.getTime())) {
-    return { error: "expires_at không hợp lệ" };
+    return { error: apiMessage("COUPON_EXPIRY_INVALID") };
   }
 
   const usageLimit = parseOptionalPositiveInt(body.usage_limit);
   if (usageLimit === undefined) {
-    return { error: "usage_limit phải là số nguyên dương hoặc để trống" };
+    return { error: apiMessage("COUPON_USAGE_LIMIT_INVALID") };
   }
 
   return {
@@ -240,7 +238,7 @@ exports.createCoupon = async (req, res) => {
   try {
     const { error, value } = validateCouponPayload(req.body);
     if (error) {
-      return res.status(400).json({ message: error });
+      return res.status(400).json(error);
     }
 
     const result = await pool.query(
@@ -259,13 +257,13 @@ exports.createCoupon = async (req, res) => {
       ]
     );
 
-    res.status(201).json({ message: "Tạo mã giảm giá thành công", coupon: result.rows[0] });
+    res.status(201).json({ ...apiMessage("COUPON_CREATED"), coupon: result.rows[0] });
   } catch (err) {
     if (err.code === "23505") {
-      return res.status(409).json({ message: "Mã giảm giá này đã tồn tại" });
+      return res.status(409).json({ ...apiMessage("COUPON_EXISTS") });
     }
     console.error("CREATE COUPON ERROR:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -275,11 +273,11 @@ exports.createCoupon = async (req, res) => {
 exports.updateCoupon = async (req, res) => {
   try {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ message: "Coupon id must be a positive integer" });
+    if (!id) return res.status(400).json({ ...apiMessage("INVALID_COUPON_ID") });
 
     const { error, value } = validateCouponPayload(req.body);
     if (error) {
-      return res.status(400).json({ message: error });
+      return res.status(400).json(error);
     }
 
     const result = await pool.query(
@@ -301,16 +299,16 @@ exports.updateCoupon = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy mã giảm giá" });
+      return res.status(404).json({ ...apiMessage("COUPON_NOT_FOUND") });
     }
 
-    res.json({ message: "Cập nhật mã giảm giá thành công", coupon: result.rows[0] });
+    res.json({ ...apiMessage("COUPON_UPDATED"), coupon: result.rows[0] });
   } catch (err) {
     if (err.code === "23505") {
-      return res.status(409).json({ message: "Mã giảm giá này đã tồn tại" });
+      return res.status(409).json({ ...apiMessage("COUPON_EXISTS") });
     }
     console.error("UPDATE COUPON ERROR:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -321,10 +319,10 @@ exports.updateCoupon = async (req, res) => {
 exports.setCouponActive = async (req, res) => {
   try {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ message: "Coupon id must be a positive integer" });
+    if (!id) return res.status(400).json({ ...apiMessage("INVALID_COUPON_ID") });
 
     if (typeof req.body.active !== "boolean") {
-      return res.status(400).json({ message: "active phải là true hoặc false" });
+      return res.status(400).json({ ...apiMessage("INVALID_ACTIVE_FLAG") });
     }
 
     const result = await pool.query(
@@ -333,15 +331,15 @@ exports.setCouponActive = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy mã giảm giá" });
+      return res.status(404).json({ ...apiMessage("COUPON_NOT_FOUND") });
     }
 
     res.json({
-      message: req.body.active ? "Đã kích hoạt mã giảm giá" : "Đã tắt mã giảm giá",
+      ...apiMessage(req.body.active ? "COUPON_ACTIVATED" : "COUPON_DEACTIVATED"),
       coupon: result.rows[0],
     });
   } catch (err) {
     console.error("SET COUPON ACTIVE ERROR:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };

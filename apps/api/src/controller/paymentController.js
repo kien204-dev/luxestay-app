@@ -12,6 +12,7 @@ const momoService = require("../services/momoService.js");
 const { notifyRefundPending, notifyDuplicatePayment } = require("../services/adminAlerts.js");
 const { notifyBooking } = require("../services/bookingEmails.js");
 const { todayInAppTimezone } = require("../utils/time.js");
+const { apiMessage } = require("../utils/apiMessages");
 
 // Read per request, not at load time, so the list follows the environment.
 function getEnabledProviders() {
@@ -50,11 +51,11 @@ exports.createPayment = async (req, res) => {
   const { provider } = req.body;
 
   if (!bookingId) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
 
   if (!getEnabledProviders().includes(provider)) {
-    return res.status(400).json({ message: "Cổng thanh toán không hợp lệ" });
+    return res.status(400).json({ ...apiMessage("INVALID_PAYMENT_PROVIDER") });
   }
 
   let client;
@@ -75,32 +76,32 @@ exports.createPayment = async (req, res) => {
 
     if (bookingResult.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ message: "Không tìm thấy booking" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
 
     booking = bookingResult.rows[0];
 
     if (req.user.role !== "admin" && booking.user_id !== req.user.id) {
       await client.query("ROLLBACK");
-      return res.status(403).json({ message: "Bạn không có quyền thanh toán booking này" });
+      return res.status(403).json({ ...apiMessage("BOOKING_FORBIDDEN") });
     }
 
     if (!["pending", "confirmed"].includes(booking.status)) {
       await client.query("ROLLBACK");
       return res.status(400).json({
-        message: `Không thể thanh toán booking đang ở trạng thái "${booking.status}"`,
+        ...apiMessage("PAYMENT_STATUS_NOT_PAYABLE", { status: booking.status }),
       });
     }
 
     if (!["unpaid", "pending", "failed"].includes(booking.payment_status)) {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Booking này đã được thanh toán" });
+      return res.status(400).json({ ...apiMessage("BOOKING_ALREADY_PAID") });
     }
 
     amount = Number(booking.total_price);
     if (!Number.isFinite(amount) || amount <= 0) {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Booking này không có khoản nào cần thanh toán" });
+      return res.status(400).json({ ...apiMessage("NOTHING_TO_PAY") });
     }
 
     // Only one payment attempt should be "live" per booking at a time.
@@ -126,7 +127,7 @@ exports.createPayment = async (req, res) => {
   } catch (err) {
     if (client) await client.query("ROLLBACK");
     console.error("CREATE PAYMENT ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi tạo yêu cầu thanh toán" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   } finally {
     if (client) client.release();
   }
@@ -149,7 +150,7 @@ exports.createPayment = async (req, res) => {
     }
 
     return res.status(201).json({
-      message: "Đã tạo yêu cầu thanh toán",
+      ...apiMessage("PAYMENT_CREATED"),
       payUrl,
       transactionRef,
     });
@@ -171,7 +172,7 @@ exports.createPayment = async (req, res) => {
       console.error("CREATE PAYMENT CLEANUP ERROR:", cleanupErr);
     }
 
-    return res.status(502).json({ message: "Không kết nối được cổng thanh toán. Vui lòng thử lại." });
+    return res.status(502).json({ ...apiMessage("PAYMENT_GATEWAY_UNREACHABLE") });
   }
 };
 
@@ -181,18 +182,18 @@ exports.getPaymentForBooking = async (req, res) => {
   const bookingId = parseId(req.params.id);
 
   if (!bookingId) {
-    return res.status(400).json({ message: "Booking id must be a positive integer" });
+    return res.status(400).json({ ...apiMessage("INVALID_BOOKING_ID") });
   }
 
   try {
     const bookingResult = await pool.query("SELECT * FROM bookings WHERE id = $1", [bookingId]);
 
     if (bookingResult.rows.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy booking" });
+      return res.status(404).json({ ...apiMessage("BOOKING_NOT_FOUND") });
     }
 
     if (req.user.role !== "admin" && bookingResult.rows[0].user_id !== req.user.id) {
-      return res.status(403).json({ message: "Bạn không có quyền xem thanh toán của booking này" });
+      return res.status(403).json({ ...apiMessage("BOOKING_FORBIDDEN") });
     }
 
     const result = await pool.query(
@@ -204,7 +205,7 @@ exports.getPaymentForBooking = async (req, res) => {
     res.json({ payment: result.rows[0] || null });
   } catch (err) {
     console.error("GET PAYMENT ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy trạng thái thanh toán" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -217,7 +218,7 @@ exports.getPaymentByTransactionRef = async (req, res) => {
   const { ref } = req.params;
 
   if (!ref) {
-    return res.status(400).json({ message: "Thiếu mã giao dịch" });
+    return res.status(400).json({ ...apiMessage("TRANSACTION_REF_REQUIRED") });
   }
 
   try {
@@ -233,13 +234,13 @@ exports.getPaymentByTransactionRef = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy giao dịch" });
+      return res.status(404).json({ ...apiMessage("TRANSACTION_NOT_FOUND") });
     }
 
     const row = result.rows[0];
 
     if (req.user.role !== "admin" && row.booking_user_id !== req.user.id) {
-      return res.status(403).json({ message: "Bạn không có quyền xem giao dịch này" });
+      return res.status(403).json({ ...apiMessage("BOOKING_FORBIDDEN") });
     }
 
     res.json({
@@ -259,7 +260,7 @@ exports.getPaymentByTransactionRef = async (req, res) => {
     });
   } catch (err) {
     console.error("GET PAYMENT BY REF ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy trạng thái thanh toán" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 

@@ -5,7 +5,10 @@
 //   2. Every literal key the code asks for — t("key"), t("ns:key"),
 //      i18nKey="key" — exists, in the namespace(s) the file's
 //      useTranslation(...) names.
-//   3. No Vietnamese text is written straight into the code: string literals,
+//   3. Every message code the API can send (apiMessage("CODE")) has a
+//      translation in the web app's "errors" namespace, as does every code in
+//      the API catalogue.
+//   4. No Vietnamese text is written straight into the code: string literals,
 //      template literals and JSX text containing Vietnamese letters must come
 //      from the locale files instead. Comments are not checked.
 //
@@ -38,7 +41,8 @@ const report = (file, line, message) =>
 function flatten(object, prefix = "", out = new Map()) {
   for (const [key, value] of Object.entries(object)) {
     const full = prefix ? `${prefix}.${key}` : key;
-    if (value && typeof value === "object") flatten(value, full, out);
+    // Arrays (weekday names...) are one value, read with returnObjects.
+    if (value && typeof value === "object" && !Array.isArray(value)) flatten(value, full, out);
     else out.set(full, value);
   }
   return out;
@@ -64,6 +68,7 @@ for (const language of languages) {
     const flat = flatten(data);
     keys[language][namespace] = new Set([...flat.keys()].map((key) => key.replace(PLURAL_SUFFIX, "")));
     for (const [key, value] of flat) {
+      if (Array.isArray(value)) continue;
       if (typeof value !== "string") report(full, 0, `${key}: value must be text`);
       else if (!value.trim()) report(full, 0, `${key}: empty translation`);
     }
@@ -180,6 +185,35 @@ for (const file of sourceFiles(WEB_SRC)) {
       if (!isImport) report(file, line, `hard-coded Vietnamese text: "${text.trim().slice(0, 60)}"`);
     }
   });
+}
+
+// ------------------------------------------------------------- API codes
+{
+  const apiSrc = path.join(ROOT, "apps/api/src");
+  const catalogueFile = path.join(apiSrc, "utils/apiMessages.js");
+  const { MESSAGES } = require(catalogueFile);
+  const used = new Map();
+  const walkDir = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walkDir(full);
+      else if (entry.name.endsWith(".js") && full !== catalogueFile) {
+        const text = fs.readFileSync(full, "utf8");
+        for (const match of text.matchAll(/apiMessage(s*"([A-Z0-9_]+)"/g)) used.set(match[1], full);
+        // Codes chosen at run time: apiMessage(x ? "A" : "B") and preset tables.
+        for (const match of text.matchAll(/(?:?|:)s*"([A-Z][A-Z0-9_]{3,})"/g)) if (MESSAGES[match[1]]) used.set(match[1], full);
+        for (const match of text.matchAll(/(?:saved|removed): "([A-Z0-9_]+)"/g)) used.set(match[1], full);
+      }
+    }
+  };
+  walkDir(apiSrc);
+  for (const [code, file] of used) {
+    if (!MESSAGES[code]) report(file, 0, `API message code "${code}" is not in apiMessages.js`);
+    if (!hasKey("errors", code)) report(file, 0, `API message code "${code}" has no translation in errors.json`);
+  }
+  for (const code of Object.keys(MESSAGES)) {
+    if (!hasKey("errors", code)) report(catalogueFile, 0, `code "${code}" has no translation in errors.json`);
+  }
 }
 
 if (problems.length) {
