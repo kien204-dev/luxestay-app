@@ -165,3 +165,19 @@ label.adm-btn input[type="file"] { display: none; }
   .adm-title { font-size: 26px; }
   .adm-two-col, .adm-split { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* --------------------------------------------------------------- calendar */
+.adm-cal-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; font-size: 13px; color: var(--color-text-muted); }
+.adm-cal-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.adm-cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.adm-cal-weekday { text-align: center; font-size: 12px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 0; }
+.adm-cal-day { aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--color-border-soft); background: var(--color-navy-900); color: var(--color-text-secondary); font-size: 14px; font-weight: 500; font-family: inherit; display: flex; align-items: center; justify-content: center; cursor: default; }
+.adm-cal-day.is-today { border-color: var(--color-gold-500); }
+.adm-cal-day.has-booking { cursor: pointer; font-weight: 700; }
+.adm-cal-day.is-confirmed { background: color-mix(in srgb, var(--color-success) 18%, transparent); color: var(--color-success); }
+.adm-cal-day.is-pending { background: color-mix(in srgb, var(--color-warning) 18%, transparent); color: var(--color-warning); }
+.adm-cal-day.is-completed { background: color-mix(in srgb, var(--color-info) 18%, transparent); color: var(--color-info); }
+.adm-cal-day.is-cancelled { background: color-mix(in srgb, var(--color-danger) 18%, transparent); color: var(--color-danger); }
+.adm-detail-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.adm-detail-row span:first-child { color: var(--color-text-muted); }
+.adm-detail-row span:last-child { color: var(--color-text-primary); font-weight: 600; text-align: right; }
