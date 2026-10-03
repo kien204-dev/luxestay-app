@@ -15,8 +15,8 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
         gap: 12,
         alignItems: "flex-end",
         marginBottom: 24,
-        background: "#fff",
-        border: "1px solid #e2e8f0",
+        background: "var(--color-surface-light)",
+        border: "1px solid var(--color-line-light)",
         borderRadius: 10,
         padding: 16,
       }}
@@ -28,7 +28,7 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
-            color: "#64748b",
+            color: "var(--color-ink-muted)",
             marginBottom: 6,
           }}
         >
@@ -40,7 +40,7 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
           style={{
             padding: "8px 10px",
             borderRadius: 6,
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--color-line-light)",
             fontSize: 13,
             minWidth: 160,
           }}
@@ -59,7 +59,7 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
-            color: "#64748b",
+            color: "var(--color-ink-muted)",
             marginBottom: 6,
           }}
         >
@@ -72,7 +72,7 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
           style={{
             padding: "8px 10px",
             borderRadius: 6,
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--color-line-light)",
             fontSize: 13,
           }}
         />
@@ -84,7 +84,7 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
-            color: "#64748b",
+            color: "var(--color-ink-muted)",
             marginBottom: 6,
           }}
         >
@@ -97,7 +97,7 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
           style={{
             padding: "8px 10px",
             borderRadius: 6,
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--color-line-light)",
             fontSize: 13,
           }}
         />
@@ -108,9 +108,9 @@ export default function BookingFilters({ statusFilter, fromDate, toDate, onChang
           style={{
             padding: "8px 14px",
             background: "transparent",
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--color-line-light)",
             borderRadius: 6,
-            color: "#64748b",
+            color: "var(--color-ink-muted)",
             cursor: "pointer",
             fontSize: 13,
           }}

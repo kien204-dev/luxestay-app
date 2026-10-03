@@ -1,44 +1,34 @@
-// Shown wherever a room has no photo (or its photo fails to load). Drawn
-// here as an inline SVG, so nothing is fetched from another site: a navy
-// panel with a gold line drawing of a bed under a window.
-const PLACEHOLDER_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0b2a66"/>
-      <stop offset="1" stop-color="#001640"/>
-    </linearGradient>
-  </defs>
-  <rect width="800" height="600" fill="url(#bg)"/>
-  <g fill="none" stroke="#C5A059" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
-    <rect x="300" y="150" width="200" height="130" rx="6"/>
-    <path d="M400 150v130M300 215h200"/>
-    <path d="M230 430v-70a24 24 0 0 1 24-24h292a24 24 0 0 1 24 24v70"/>
-    <path d="M200 470v-40h400v40M200 430h400"/>
-    <rect x="270" y="296" width="110" height="40" rx="12"/>
-    <rect x="420" y="296" width="110" height="40" rx="12"/>
-  </g>
-</svg>`;
+import { readThemeColors } from "./themeColors";
 
-export const ROOM_PLACEHOLDER = `data:image/svg+xml,${encodeURIComponent(
-  PLACEHOLDER_SVG.replace(/\s+/g, " ").trim()
-)}`;
+// Shown wherever there is no photo (or it fails to load). Drawn here as an
+// inline SVG, so nothing is fetched from another site. The colours come from
+// the theme, and a grid of cards that all lack a photo should not show the
+// same picture eight times: each name picks a shade of the brand colour, a
+// texture and a motif, so a card looks the same on every visit while its
+// neighbours differ.
 
-// Kept under its old name for the admin pages that already import it.
-export const FALLBACK_ROOM_IMAGE = ROOM_PLACEHOLDER;
+function parseRgb(color) {
+  const [r = 0, g = 35, b = 102] = (String(color).match(/[\d.]+/g) || []).map(Number);
+  return [r, g, b];
+}
 
-// A grid of cards that all lack a photo should not show the same picture
-// eight times. These variants pick a background colour and a motif from the
-// card's name, so each card keeps the same look on every visit while
-// neighbours differ. Still drawn here: nothing is fetched.
-const PALETTES = [
-  ["#0b2a66", "#001640", "#C5A059"],
-  ["#0f4c5c", "#062a33", "#e9c46a"],
-  ["#2d4a3e", "#14261f", "#d4b483"],
-  ["#4a2c5a", "#24142e", "#e0b1cb"],
-  ["#5a3a24", "#2b1a0f", "#f0c27b"],
-  ["#1f3b73", "#0d1b3a", "#9ad1d4"],
-];
+const toHex = (rgb) => `#${rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("")}`;
+const mix = (a, b, weight) => a.map((v, i) => v * (1 - weight) + b[i] * weight);
+
+// Six shades built from the theme: the primary colour, deepened, and nudged
+// towards five neighbouring tones.
+function themePalettes() {
+  const { primary, accent } = readThemeColors();
+  const base = parseRgb(primary);
+  const line = toHex(parseRgb(accent));
+  const tints = [base, [20, 90, 110], [40, 85, 60], [90, 45, 110], [110, 70, 40], [40, 70, 140]];
+  return tints.map((tint, i) => {
+    const from = i === 0 ? base : mix(base, tint, 0.45);
+    return [toHex(from), toHex(mix(from, [0, 0, 0], 0.45)), line];
+  });
+}
+
+let palettes = null;
 
 const MOTIFS = {
   // Bed under a window, as in the default placeholder.
@@ -59,6 +49,11 @@ function hashOf(text) {
 
 const placeholderCache = new Map();
 
+// The plain room placeholder (bed under a window) in the theme's colours.
+export function roomPlaceholder() {
+  return placeholderFor("", "room");
+}
+
 // kind: "room" draws the bed; "place" draws one of the landscape motifs.
 export function placeholderFor(name, kind = "room") {
   const key = `${kind}:${name}`;
@@ -68,7 +63,8 @@ export function placeholderFor(name, kind = "room") {
   // textures x 4 angles (x 3 motifs for places), so two cards rarely match.
   const hash = hashOf(name);
   const pick = (count, shift) => (hash >>> shift) % count;
-  const [from, to, line] = PALETTES[pick(PALETTES.length, 0)];
+  palettes = palettes || themePalettes();
+  const [from, to, line] = palettes[pick(palettes.length, 0)];
   const landscapes = ["mountains", "sea", "city"];
   const motif = kind === "room" ? MOTIFS.bed : MOTIFS[landscapes[pick(landscapes.length, 8)]];
   const angle = [20, 60, 110, 150][pick(4, 12)];
@@ -88,7 +84,7 @@ export function placeholderFor(name, kind = "room") {
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "").replace(/\/$/, "");
 
-export function normalizeImageUrl(image, fallback = ROOM_PLACEHOLDER) {
+export function normalizeImageUrl(image, fallback = roomPlaceholder()) {
   if (!image || typeof image !== "string") return fallback;
 
   const value = image.trim();
@@ -104,7 +100,7 @@ export function normalizeImageUrl(image, fallback = ROOM_PLACEHOLDER) {
 }
 
 // onError handler for <img>: swap a broken photo for the placeholder, once.
-export function useFallbackImage(event, fallback = ROOM_PLACEHOLDER) {
+export function useFallbackImage(event, fallback = roomPlaceholder()) {
   if (event.currentTarget.src !== fallback) {
     event.currentTarget.src = fallback;
   }

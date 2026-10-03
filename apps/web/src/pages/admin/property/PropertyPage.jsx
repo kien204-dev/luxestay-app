@@ -43,7 +43,7 @@ export default function PropertyPage() {
             remove={deleteLogo}
             onSaved={saved}
             onError={setActionError}
-            previewStyle={{ width: 88, height: 88, background: "#ffffff", objectFit: "contain" }}
+            previewStyle={{ width: 88, height: 88, background: "var(--color-surface-light)", objectFit: "contain" }}
             testId="logo"
           />
           <ImageSetting

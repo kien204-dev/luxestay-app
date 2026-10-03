@@ -34,10 +34,10 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
     <div
       className="my-booking-card"
       style={{
-        background: "#fff",
+        background: "var(--color-surface-light)",
         borderRadius: 12,
         overflow: "hidden",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+        boxShadow: "0 2px 12px color-mix(in srgb, var(--color-ink) 6%, transparent)",
         display: "grid",
         gridTemplateColumns: "140px 1fr auto",
         gap: 0,
@@ -85,7 +85,7 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
           >
             {statusLabel[b.status] || b.status}
           </span>
-          <span style={{ color: "#94a3b8", fontSize: 12 }}>
+          <span style={{ color: "var(--color-ink-muted)", fontSize: 12 }}>
             #{String(b.id).padStart(4, "0")}
           </span>
           {b.payment_status && b.payment_status !== "unpaid" && (
@@ -106,17 +106,17 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
         <h3
           style={{
             margin: "0 0 6px",
-            color: "#002366",
+            color: "var(--brand-primary)",
             fontSize: 18,
           }}
         >
           {b.room_name}
         </h3>
-        <p style={{ margin: "0 0 8px", color: "#64748b", fontSize: 13 }}>
+        <p style={{ margin: "0 0 8px", color: "var(--color-ink-muted)", fontSize: 13 }}>
           {b.room_type}
           {b.room_capacity ? ` · ${t("myBookings:card.maxGuests", { count: b.room_capacity })}` : ""}
         </p>
-        <p style={{ margin: 0, color: "#475569", fontSize: 14 }}>
+        <p style={{ margin: 0, color: "var(--color-ink-muted)", fontSize: 14 }}>
           {formatDate(b.check_in, lang)} → {formatDate(b.check_out, lang)}
         </p>
       </div>
@@ -131,18 +131,18 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
           gap: 10,
         }}
       >
-        <strong style={{ color: "#C5A059", fontSize: 18 }}>
+        <strong style={{ color: "var(--brand-accent)", fontSize: 18 }}>
           {formatMoney(b.total_price, lang)}
         </strong>
-        <span style={{ color: "#94a3b8", fontSize: 11, textAlign: "right" }}>
+        <span style={{ color: "var(--color-ink-muted)", fontSize: 11, textAlign: "right" }}>
           {t("myBookings:card.totalLocked")}
         </span>
         <button
           onClick={() => onDetails(b)}
           style={{
             padding: "8px 14px",
-            background: "#002366",
-            color: "#fff",
+            background: "var(--brand-primary)",
+            color: "var(--color-surface-light)",
             border: "none",
             borderRadius: 6,
             cursor: "pointer",
@@ -159,8 +159,8 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
           style={{
             padding: "8px 14px",
             background: "transparent",
-            color: "#002366",
-            border: "1px solid #002366",
+            color: "var(--brand-primary)",
+            border: "1px solid var(--brand-primary)",
             borderRadius: 6,
             cursor: downloading ? "not-allowed" : "pointer",
             fontSize: 12,
@@ -176,8 +176,8 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
             }}
             style={{
               padding: "8px 14px",
-              background: "#C5A059",
-              color: "#000",
+              background: "var(--brand-accent)",
+              color: "var(--color-ink)",
               border: "none",
               borderRadius: 6,
               cursor: "pointer",
@@ -195,8 +195,8 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
             style={{
               padding: "8px 14px",
               background: "transparent",
-              color: "#dc2626",
-              border: "1px solid #fecaca",
+              color: "var(--color-danger-strong)",
+              border: "1px solid color-mix(in srgb, var(--color-danger-strong) 30%, transparent)",
               borderRadius: 6,
               cursor:
                 cancelling ? "not-allowed" : "pointer",
@@ -211,20 +211,20 @@ export default function BookingCard({ booking: b, cancelling, submittedReview, o
           submittedReview ? (
             <div style={{ textAlign: "right" }}>
               <StarRating value={submittedReview.rating} size={13} />
-              <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: 11 }}>
+              <p style={{ margin: "4px 0 0", color: "var(--color-ink-muted)", fontSize: 11 }}>
                 {t("myBookings:card.reviewed")}
               </p>
             </div>
           ) : b.has_review ? (
-            <span style={{ color: "#94a3b8", fontSize: 11 }}>{t("myBookings:card.reviewed")}</span>
+            <span style={{ color: "var(--color-ink-muted)", fontSize: 11 }}>{t("myBookings:card.reviewed")}</span>
           ) : (
             <button
               onClick={() => onReview(b)}
               style={{
                 padding: "8px 14px",
                 background: "transparent",
-                color: "#C5A059",
-                border: "1px solid #C5A059",
+                color: "var(--brand-accent)",
+                border: "1px solid var(--brand-accent)",
                 borderRadius: 6,
                 cursor: "pointer",
                 fontSize: 12,

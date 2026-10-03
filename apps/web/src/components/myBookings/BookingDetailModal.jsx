@@ -16,7 +16,7 @@ export default function BookingDetailModal({ booking, onClose }) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(15,23,42,0.65)",
+        background: "color-mix(in srgb, var(--color-ink) 65%, transparent)",
         zIndex: 3000,
         display: "flex",
         alignItems: "center",
@@ -30,16 +30,16 @@ export default function BookingDetailModal({ booking, onClose }) {
         style={{
           width: "100%",
           maxWidth: 920,
-          background: "#fff",
+          background: "var(--color-surface-light)",
           borderRadius: 16,
           overflow: "hidden",
-          boxShadow: "0 24px 80px rgba(15,23,42,0.35)",
+          boxShadow: "0 24px 80px color-mix(in srgb, var(--color-ink) 35%, transparent)",
         }}
       >
         <div
           style={{
             padding: "18px 24px",
-            borderBottom: "1px solid #e2e8f0",
+            borderBottom: "1px solid var(--color-line-light)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -47,10 +47,10 @@ export default function BookingDetailModal({ booking, onClose }) {
           }}
         >
           <div>
-            <p style={{ margin: "0 0 4px", color: "#64748b", fontSize: 12 }}>
+            <p style={{ margin: "0 0 4px", color: "var(--color-ink-muted)", fontSize: 12 }}>
               {t("myBookings:detailModal.bookingId", { id: String(booking.id).padStart(4, "0") })}
             </p>
-            <h2 style={{ margin: 0, color: "#002366", fontSize: 22 }}>
+            <h2 style={{ margin: 0, color: "var(--brand-primary)", fontSize: 22 }}>
               {t("myBookings:detailModal.title")}
             </h2>
           </div>
@@ -60,11 +60,11 @@ export default function BookingDetailModal({ booking, onClose }) {
               width: 36,
               height: 36,
               borderRadius: "50%",
-              border: "1px solid #e2e8f0",
-              background: "#fff",
+              border: "1px solid var(--color-line-light)",
+              background: "var(--color-surface-light)",
               cursor: "pointer",
               fontSize: 20,
-              color: "#334155",
+              color: "var(--color-ink)",
             }}
           >
             ×
@@ -102,10 +102,10 @@ export default function BookingDetailModal({ booking, onClose }) {
           <div style={{ padding: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 18 }}>
               <div>
-                <h3 style={{ margin: "0 0 6px", color: "#002366", fontSize: 20 }}>
+                <h3 style={{ margin: "0 0 6px", color: "var(--brand-primary)", fontSize: 20 }}>
                   {booking.room_name || "-"}
                 </h3>
-                <p style={{ margin: 0, color: "#64748b", fontSize: 14 }}>
+                <p style={{ margin: 0, color: "var(--color-ink-muted)", fontSize: 14 }}>
                   {booking.room_type || "-"}
                   {booking.room_capacity ? ` · ${t("myBookings:card.maxGuests", { count: booking.room_capacity })}` : ""}
                 </p>
@@ -151,17 +151,17 @@ export default function BookingDetailModal({ booking, onClose }) {
 
             <div
               style={{
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
+                background: "var(--color-surface-muted)",
+                border: "1px solid var(--color-line-light)",
                 borderRadius: 12,
                 padding: 16,
               }}
             >
               <div style={{ marginBottom: 14 }}>
-                <h3 style={{ margin: "0 0 4px", color: "#002366", fontSize: 16 }}>
+                <h3 style={{ margin: "0 0 4px", color: "var(--brand-primary)", fontSize: 16 }}>
                   {t("myBookings:detailModal.timelineTitle")}
                 </h3>
-                <p style={{ margin: 0, color: "#64748b", fontSize: 12, lineHeight: 1.5 }}>
+                <p style={{ margin: 0, color: "var(--color-ink-muted)", fontSize: 12, lineHeight: 1.5 }}>
                   {t("myBookings:detailModal.timelineNote")}
                 </p>
               </div>
@@ -174,20 +174,20 @@ export default function BookingDetailModal({ booking, onClose }) {
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        background: item.active ? "#002366" : "#cbd5e1",
+                        background: item.active ? "var(--brand-primary)" : "var(--color-line-light)",
                         marginTop: 4,
                         flexShrink: 0,
                       }}
                     />
                     <div>
-                      <p style={{ margin: 0, color: item.active ? "#1e293b" : "#94a3b8", fontWeight: 700, fontSize: 13 }}>
+                      <p style={{ margin: 0, color: item.active ? "var(--color-ink)" : "var(--color-ink-muted)", fontWeight: 700, fontSize: 13 }}>
                         {item.label}
                       </p>
-                      <p style={{ margin: "3px 0 0", color: "#64748b", fontSize: 12 }}>
+                      <p style={{ margin: "3px 0 0", color: "var(--color-ink-muted)", fontSize: 12 }}>
                         {item.date ? formatDate(item.date, lang) : t("myBookings:detailModal.asOfCurrentStatus")}
                       </p>
                       {item.note && (
-                        <p style={{ margin: "3px 0 0", color: "#94a3b8", fontSize: 12 }}>
+                        <p style={{ margin: "3px 0 0", color: "var(--color-ink-muted)", fontSize: 12 }}>
                           {item.note}
                         </p>
                       )}
@@ -207,16 +207,16 @@ function DetailItem({ label, value, highlight = false }) {
   return (
     <div
       style={{
-        background: highlight ? "#fffbeb" : "#f8fafc",
-        border: "1px solid #e2e8f0",
+        background: highlight ? "var(--color-warning-soft)" : "var(--color-surface-muted)",
+        border: "1px solid var(--color-line-light)",
         borderRadius: 10,
         padding: "12px 14px",
       }}
     >
-      <p style={{ margin: "0 0 5px", color: "#64748b", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+      <p style={{ margin: "0 0 5px", color: "var(--color-ink-muted)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>
         {label}
       </p>
-      <p style={{ margin: 0, color: highlight ? "#C5A059" : "#1e293b", fontWeight: 800, fontSize: 14 }}>
+      <p style={{ margin: 0, color: highlight ? "var(--brand-accent)" : "var(--color-ink)", fontWeight: 800, fontSize: 14 }}>
         {value}
       </p>
     </div>

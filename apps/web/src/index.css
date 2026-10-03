@@ -28,6 +28,9 @@
   --color-ink: #1a1c1e;
   --color-ink-muted: #4f5d70;
   --color-line-light: color-mix(in srgb, var(--brand-primary) 14%, transparent);
+  --color-surface-muted: color-mix(in srgb, var(--brand-primary) 4%, #ffffff);
+  --color-danger-soft: color-mix(in srgb, var(--color-danger-strong) 8%, #ffffff);
+  --color-warning-soft: color-mix(in srgb, var(--color-warning-strong) 8%, #ffffff);
 
   --color-text-primary: #ede7da;
   --color-text-secondary: #a3aac4;
