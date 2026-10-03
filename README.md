@@ -5,6 +5,19 @@ Hệ thống đặt phòng cho khách sạn nhỏ và homestay: trang đặt ph�
 - **Web**: React 19, Vite, React Router, Tailwind CSS, i18next (vi/en)
 - **API**: Node.js 22, Express 5, PostgreSQL, JWT trong cookie HttpOnly, Socket.IO
 - **Cấu trúc**: npm workspaces — `apps/web` và `apps/api`
+- **Phiên bản**: xem [CHANGELOG.md](CHANGELOG.md)
+
+## Tài liệu
+
+| Tài liệu | Nội dung |
+|---|---|
+| [docs/installation.md](docs/installation.md) | Cài đặt bằng Docker hoặc thủ công, xử lý lỗi thường gặp |
+| [docs/configuration.md](docs/configuration.md) | Mọi biến cấu hình, email, lưu ảnh (local/S3 beta) |
+| [docs/customization.md](docs/customization.md) | Tên, logo, màu (theme), ngôn ngữ và thêm ngôn ngữ mới, ảnh |
+| [docs/payments.md](docs/payments.md) | VNPay (chờ kích hoạt merchant sandbox), MoMo (beta), hoàn tiền |
+| [DEPLOY.md](DEPLOY.md) | Triển khai production và danh sách kiểm tra trước khi mở cho khách |
+| [docs/demo.md](docs/demo.md) | Chế độ demo công khai và đặt lại dữ liệu demo theo lịch |
+| [docs/known-issues.md](docs/known-issues.md) | Giới hạn hiện tại |
 
 ## Chạy nhanh bằng Docker
 
@@ -36,12 +49,13 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 | `/rooms` | Danh sách phòng, lọc theo địa điểm, ngày, số khách; phân trang | Mọi người |
 | `/rooms/:id` | Chi tiết phòng, lịch phòng trống, đặt phòng và thanh toán | Mọi người (đặt phòng cần đăng nhập) |
 | `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá, tải PDF xác nhận | Đã đăng nhập |
+| `/login`, `/register`, `/forgot-password`, `/reset-password` | Đăng nhập, đăng ký (email/mật khẩu, Google nếu bật), quên và đặt lại mật khẩu | Mọi người |
 | `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |
 | `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị. Orders có đặt phòng tại quầy, ghi nhận thu tiền tại quầy và PDF xác nhận | Quản trị |
 | `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, ảnh nền trang chủ, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
 | `/admin/destinations` | Ảnh và ghi công ảnh của từng điểm đến | Quản trị |
 
-Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
+Mọi trang có tiếng Việt và tiếng Anh (nút VI/EN ở đầu trang khách và trang quản trị). Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
 
 ## Chạy thủ công để phát triển
 
@@ -72,13 +86,14 @@ API sẽ dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt
 | `npm run dev` | Chạy API và web cùng lúc, tự nạp lại khi sửa code |
 | `npm run build` | Build web ra `apps/web/dist` |
 | `npm start` | Chạy API ở chế độ thường |
-| `npm run lint` | ESLint cho cả hai app |
+| `npm run lint` | ESLint cho cả hai app, kiểm tra bản dịch (khoá thiếu, chữ viết thẳng trong code, mã thông báo API chưa dịch) và kiểm tra màu theme |
 | `npm test` | Test đơn vị của API (không cần cơ sở dữ liệu) |
 | `npm run test:integration` | Test tích hợp trên PostgreSQL thật và một máy chủ S3 giả lập; tự dựng và xoá các container tạm (cần Docker) |
 | `npm run db:migrate` | Chạy các migration chưa áp dụng |
 | `npm run db:seed` | Nạp dữ liệu mẫu (chạy lại không tạo trùng). Thêm `-- --all-rooms` để nạp khoảng 390 phòng |
 | `npm run db:reset` | Xoá toàn bộ dữ liệu rồi migrate + seed lại. Chỉ chạy với cơ sở dữ liệu cục bộ, trừ khi đặt `ALLOW_DB_RESET=true` |
 | `npm run uploads:prune` | Liệt kê ảnh tải lên không còn được dùng; thêm `-- --delete` để xoá |
+| `npm run demo:reset` | Chỉ với `DEMO_MODE=true`: đặt lại toàn bộ dữ liệu demo ([docs/demo.md](docs/demo.md)) |
 
 ## Cấu hình
 
@@ -119,9 +134,9 @@ Các tính năng dưới đây tắt cho tới khi bạn cấu hình; phần cò
 | Thanh toán MoMo (**beta**) | `MOMO_ENABLED=true` và `MOMO_*` | Chưa được kiểm chứng với tài khoản MoMo thật. Nút MoMo chỉ hiện khi bật |
 | Đăng nhập Google | `FIREBASE_*` ở API và `VITE_FIREBASE_*` ở web | Cần một dự án Firebase riêng |
 
-### Đổi tên thương hiệu
+### Đổi tên thương hiệu, màu, ngôn ngữ
 
-Vào **Cơ sở lưu trú** (`/admin/property`) trong phần quản trị: tên, logo, điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí. Lưu xong là trang khách, email và PDF xác nhận dùng ngay, không cần build lại. Biến môi trường (`APP_NAME`, `CONTACT_*`, `CHECK_IN_TIME`, `CHECK_OUT_TIME`, `FREE_CANCELLATION_DAYS`) chỉ là giá trị khởi đầu cho những mục chưa lưu; xem [docs/configuration.md](docs/configuration.md#thông-tin-cơ-sở-lưu-trú). Ngôn ngữ mặc định: `DEFAULT_LANGUAGE`. Màu của trang khách nằm ở đầu file `apps/web/src/styles/guest.css`.
+Tên, logo, ảnh nền, liên hệ và quy định: trang quản trị **Cơ sở lưu trú** (`/admin/property`), có hiệu lực ngay. Màu của cả trang khách lẫn trang quản trị: hai biến `--brand-primary` và `--brand-accent` ở đầu `apps/web/src/index.css`. Bản dịch và cách thêm ngôn ngữ: [docs/customization.md](docs/customization.md).
 
 ### Ảnh phòng mẫu
 
@@ -147,28 +162,33 @@ apps/
   api/
     server.js
     src/
-      config/        tên thương hiệu, kiểm tra cấu hình khi khởi động
+      config/        kiểm tra cấu hình khi khởi động, chế độ demo
       controller/    xử lý nghiệp vụ theo từng nhóm API
       db/            kết nối, migrate, seed, reset, migrations/*.sql
-      middleware/    xác thực, giới hạn tần suất, tải ảnh
+      middleware/    xác thực, giới hạn tần suất, tải và xử lý ảnh (sharp)
       routes/        khai báo đường dẫn và phân quyền
-      services/      phiên đăng nhập, email, VNPay, MoMo, Socket.IO
+      services/      phiên đăng nhập, email, PDF, lưu ảnh, VNPay, MoMo, Socket.IO
+      utils/apiMessages.js  mã + nội dung mọi thông báo API gửi cho web
     seed-assets/     ảnh mẫu cho db:seed
     test/
   web/
     src/
-      pages/         mỗi trang một file (pages/guest: trang khách)
-      components/    thành phần dùng chung (guest/, myBookings/)
+      index.css      biến theme (2 màu thương hiệu) và màu dẫn xuất
+      pages/         guest/ (trang khách), auth/ (đăng nhập), account/, admin/<trang>/
+      components/    admin/ui.jsx (bộ giao diện quản trị), guest/, auth/, myBookings/
       layout/        khung trang khách và khung quản trị
-      styles/        CSS của trang khách (đổi màu thương hiệu ở guest.css)
-      context/       đăng nhập, thông báo
+      styles/        guest.css, admin.css — chỉ dùng biến theme
+      context/       đăng nhập, thông tin cơ sở lưu trú, thông báo
       services/      gọi API
-      locales/       bản dịch vi/en
-      config/        tên thương hiệu
+      locales/       vi/, en/ — mỗi file một nhóm bản dịch
+scripts/             kiểm tra bản dịch, kiểm tra màu, chạy test tích hợp
+docs/                tài liệu cho người mua
 docker-compose.yml
 ```
 
 ## API chính
+
+Mọi phản hồi lỗi (và phần lớn phản hồi thành công) có dạng `{ code, message, params? }`: `code` cố định để web dịch (`apps/web/src/locales/*/errors.json`), `message` là câu tiếng Việt cho client khác và log.
 
 Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `apps/api/src/routes/`.
 
@@ -176,7 +196,7 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 |---|---|---|
 | Tài khoản | `POST /login`, `/register`, `/logout`, `/forgot-password`, `/reset-password`, `/google-login` | Công khai |
 | Hồ sơ | `GET/PUT /users/me`, `PUT /users/me/password`, `POST /users/me/avatar` | Đã đăng nhập |
-| Người dùng | `GET/POST /users`, `GET/PUT/DELETE /users/:id`, `PATCH /users/:id/lock` | Quản trị |
+| Người dùng | `GET /users?page&limit&search&role&status`, `POST /users`, `GET/PUT/DELETE /users/:id`, `PATCH /users/:id/lock` | Quản trị |
 | Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/destinations`, `/rooms/:id`, `/rooms/:id/availability`, `/rooms/:id/reviews` | Công khai |
 | Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, ảnh phòng | Quản trị |
 | Đặt phòng | `GET/POST /bookings`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel` | Chủ booking hoặc quản trị |
@@ -203,7 +223,7 @@ npm run lint
 npm test
 ```
 
-`npm test` chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên nhanh và không cần PostgreSQL. `npm run test:integration` chạy ứng dụng thật trên PostgreSQL thật (trong Docker) để kiểm chứng những gì bản giả lập không thấy được: khoá dòng khi đặt phòng đồng thời, ràng buộc chống trùng lịch, luồng hoàn tiền và múi giờ, cùng driver lưu ảnh S3 (với máy chủ giả lập S3Mock).
+`npm test` chạy trên một cơ sở dữ liệu giả lập trong bộ nhớ nên nhanh và không cần PostgreSQL. `npm run test:integration` chạy ứng dụng thật trên PostgreSQL thật (trong Docker) để kiểm chứng những gì bản giả lập không thấy được: khoá dòng khi đặt phòng đồng thời, ràng buộc chống trùng lịch, luồng hoàn tiền và múi giờ, biểu đồ theo `APP_TIMEZONE`, phân trang/tìm kiếm người dùng, `demo:reset`, cùng driver lưu ảnh S3 (với máy chủ giả lập S3Mock).
 
 ## Triển khai
 
