@@ -80,6 +80,8 @@ Tuỳ chọn:
 | `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | `admin@example.com`, mật khẩu mẫu | Tài khoản quản trị do `db:seed` tạo |
 | `ALLOW_DB_RESET` | tắt | Cho phép `db:reset` trên cơ sở dữ liệu không nằm trên máy này |
 | `SEED_ON_START` | Docker: `true` | Chỉ Docker: nạp dữ liệu mẫu khi khởi động |
+| `DEMO_MODE` | tắt | `true` = bản demo công khai: hiện tài khoản mẫu, chặn thay đổi quan trọng (xem [demo.md](demo.md)) |
+| `DEMO_RESET_INTERVAL_HOURS` | tắt | Với `DEMO_MODE`: API tự đặt lại dữ liệu mẫu sau mỗi số giờ này |
 
 ## Bảng biến của web
 
@@ -117,9 +119,11 @@ docker compose --profile mail up -d --build
 
 ## Lưu ảnh
 
+Ảnh tải lên tối đa 10 MB (JPG, PNG, WebP). API xử lý mọi ảnh trước khi lưu: xoay đúng chiều theo EXIF, xoá toàn bộ metadata (EXIF, GPS, thông tin máy ảnh), thu nhỏ (ảnh phòng và ảnh điểm đến tối đa 2000 px, ảnh nền 2400 px, ảnh đại diện 512 px vuông, logo 512 px) rồi lưu WebP. Logo được lưu thêm một bản PNG cùng tên cho phiếu PDF. Nếu đặt một reverse proxy trước nginx của Docker, nhớ cho phép request tới 11 MB (nginx: `client_max_body_size 11m`).
+
 Mặc định (`STORAGE_DRIVER=local`) ảnh phòng, ảnh đại diện, logo, ảnh nền và ảnh điểm đến nằm trong `apps/api/uploads` (Docker: volume `uploads`).
 
-`STORAGE_DRIVER=s3` đưa ảnh mới lên một bucket tương thích S3 (AWS S3, Cloudflare R2, MinIO...). Cần `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` và `S3_PUBLIC_URL` (địa chỉ công khai của bucket, không có dấu `/` cuối); thêm `S3_ENDPOINT` với dịch vụ không phải AWS và `S3_FORCE_PATH_STYLE=true` với MinIO. Thiếu biến nào API dừng ngay khi khởi động và nêu tên biến đó. Bucket phải cho phép đọc công khai, vì trình duyệt tải ảnh thẳng từ `S3_PUBLIC_URL`.
+`STORAGE_DRIVER=s3` (**beta**: đã kiểm thử với máy chủ giả lập S3Mock, chưa chạy với AWS S3 hay Cloudflare R2 thật) đưa ảnh mới lên một bucket tương thích S3 (AWS S3, Cloudflare R2, MinIO...). Cần `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` và `S3_PUBLIC_URL` (địa chỉ công khai của bucket, không có dấu `/` cuối); thêm `S3_ENDPOINT` với dịch vụ không phải AWS và `S3_FORCE_PATH_STYLE=true` với MinIO. Thiếu biến nào API dừng ngay khi khởi động và nêu tên biến đó. Bucket phải cho phép đọc công khai, vì trình duyệt tải ảnh thẳng từ `S3_PUBLIC_URL`.
 
 Đổi driver không tự chuyển ảnh cũ: ảnh đã lưu trên đĩa vẫn được phục vụ từ `/uploads` như trước.
 
