@@ -53,12 +53,20 @@
   --shadow-card-hover: 0 14px 40px rgba(0, 0, 0, 0.34);
 }
 
-html, body, #root {
+/* The document itself scrolls (no fixed-height html/body): window.scrollTo,
+   anchor links, sticky headers and full-page screenshots all behave as
+   browsers expect. overflow-x: clip hides sideways overflow without turning
+   body into a scroll container. */
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow-x: hidden;
+}
+body {
+  overflow-x: clip;
+}
+#root {
+  min-height: 100vh;
 }
 
 /*
