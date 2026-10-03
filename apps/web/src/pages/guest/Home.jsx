@@ -7,11 +7,28 @@ import { useAsyncData } from "../../utils/useAsyncData";
 import { useBookingPolicy } from "../../utils/useBookingPolicy";
 import { useDocumentTitle } from "../../utils/useDocumentTitle";
 import { formatMoney } from "../../utils/format";
+import { placeholderFor } from "../../utils/imageUrl";
 import { searchToQuery } from "../../utils/stayQuery";
 import { useProperty } from "../../context/PropertyContext";
 
 const FEATURED_COUNT = 6;
 const DESTINATION_COUNT = 8;
+
+// CC BY and CC BY-SA photos must name their author and licence where they
+// are shown. The full credit, with links, is on the /credits page.
+function PhotoCredit({ credit }) {
+  const { t } = useTranslation("site");
+  if (!credit) return null;
+
+  const full = [credit.title, credit.author, credit.license].filter(Boolean).join(" · ");
+  if (!/^CC BY/i.test(credit.license || "")) return <span className="sr-only">{full}</span>;
+
+  return (
+    <span className="dest-card-credit" title={full}>
+      {t("home.photoCredit", { author: credit.author, license: credit.license })}
+    </span>
+  );
+}
 
 function Destinations() {
   const { t, i18n } = useTranslation("site");
@@ -34,7 +51,12 @@ function Destinations() {
               to={`/rooms?location=${encodeURIComponent(destination.name)}`}
               className="dest-card"
             >
-              <RoomImage src={destination.image} alt={destination.name} />
+              <RoomImage
+                src={destination.image}
+                alt={destination.place ? `${destination.place} – ${destination.name}` : destination.name}
+                fallback={placeholderFor(destination.name, "place")}
+              />
+              <PhotoCredit credit={destination.credit} />
               <div className="dest-card-body">
                 <strong>{destination.name}</strong>
                 <span>
@@ -145,7 +167,11 @@ export default function Home() {
 
   return (
     <>
-      <section className="guest-hero">
+      <section
+        className={`guest-hero${property.heroImageUrl ? " guest-hero--photo" : ""}`}
+        style={property.heroImageUrl ? { "--hero-image": `url("${property.heroImageUrl}")` } : undefined}
+        data-testid="home-hero"
+      >
         <div className="guest-container">
           <h1>{t("home.heroTitle")}</h1>
           <p>{t("home.heroSubtitle", { brand: property.name })}</p>

@@ -5,7 +5,7 @@ import { normalizeImageUrl } from "../utils/imageUrl";
 import { useAsyncData } from "../utils/useAsyncData";
 import i18n from "../i18n";
 
-// Who the property is: name, logo, contact details, check-in/out times and
+// Who the property is: name, logo, home page photo, contact details, check-in/out times and
 // the cancellation window. An admin edits these under /admin/property and
 // the API serves them, so the site reflects a change on the next page load
 // with no rebuild. Until the API has answered (or if it cannot be reached)
@@ -13,6 +13,7 @@ import i18n from "../i18n";
 const BUILD_TIME_DEFAULTS = {
   name: APP_NAME,
   logoUrl: "",
+  heroImageUrl: "",
   phone: CONTACT.phone,
   email: CONTACT.email,
   address: CONTACT.address,
@@ -39,6 +40,7 @@ export function PropertyProvider({ children }) {
     return {
       ...settings,
       logoUrl: settings.logoUrl ? normalizeImageUrl(settings.logoUrl, "") : "",
+      heroImageUrl: settings.heroImageUrl ? normalizeImageUrl(settings.heroImageUrl, "") : "",
       // First letter of the name: the logo mark when there is no logo image.
       initial: (Array.from(settings.name)[0] || "L").toUpperCase(),
       reload,

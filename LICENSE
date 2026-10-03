@@ -35,6 +35,12 @@ hai loại giấy phép dưới đây, tuỳ theo gói đã mua.
    SIL Open Font License, xem apps/api/assets/fonts/OFL.txt) thuộc về chủ sở hữu
    tương ứng và tuân theo giấy phép riêng của chúng.
 
+   Ảnh trong thư mục apps/api/seed-assets/ (ví dụ ảnh điểm đến trong
+   apps/api/seed-assets/destinations/) KHÔNG thuộc phạm vi giấy phép này và không
+   nằm trong quyền được cấp ở mục 1–3. Mỗi ảnh theo giấy phép riêng (CC0, Public
+   domain, CC BY hoặc CC BY-SA) ghi trong apps/api/seed-assets/destinations/CREDITS.md;
+   người dùng phải tuân theo giấy phép đó, kể cả việc ghi tên tác giả và giấy phép.
+
 6. MIỄN TRỪ TRÁCH NHIỆM
    Mã nguồn được cung cấp "nguyên trạng", không kèm bảo đảm dưới bất kỳ hình thức
    nào. [Điền: giới hạn trách nhiệm, luật áp dụng, cách liên hệ]

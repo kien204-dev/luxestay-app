@@ -21,6 +21,8 @@ const MyBookings = lazy(() => import("./pages/MyBookings"));
 const PaymentResult = lazy(() => import("./pages/PaymentResult"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const PropertySettings = lazy(() => import("./pages/PropertySettings"));
+const Destinations = lazy(() => import("./pages/Destinations"));
+const Credits = lazy(() => import("./pages/guest/Credits"));
 const MainLayout = lazy(() => import("./layout/MainLayout"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Users = lazy(() => import("./pages/Users"));
@@ -59,6 +61,7 @@ function App() {
           <Route path="/rooms" element={<RoomList />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/my-bookings" element={signedIn(<MyBookings />)} />
+          <Route path="/credits" element={<Credits />} />
         </Route>
         <Route path="/booking" element={<Navigate to="/rooms" replace />} />
 
@@ -81,6 +84,7 @@ function App() {
         <Route path={`${ADMIN_HOME}/calendar`} element={admin(<Calendar />)} />
         <Route path={`${ADMIN_HOME}/coupons`} element={admin(<Coupons />)} />
         <Route path={`${ADMIN_HOME}/property`} element={admin(<PropertySettings />)} />
+        <Route path={`${ADMIN_HOME}/destinations`} element={admin(<Destinations />)} />
         {Object.entries(LEGACY_ADMIN_PATHS).map(([from, to]) => (
           <Route key={from} path={from} element={<Navigate to={to} replace />} />
         ))}

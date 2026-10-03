@@ -18,7 +18,11 @@ const MIN_AGE_MS = 24 * 60 * 60 * 1000;
 const REFERENCES = {
   rooms: ["SELECT image AS ref FROM rooms WHERE image IS NOT NULL", "SELECT image_path AS ref FROM room_images"],
   avatars: ["SELECT avatar_url AS ref FROM users WHERE avatar_url IS NOT NULL"],
-  branding: ["SELECT logo_url AS ref FROM property_settings WHERE logo_url IS NOT NULL"],
+  branding: [
+    "SELECT logo_url AS ref FROM property_settings WHERE logo_url IS NOT NULL",
+    "SELECT hero_image_url AS ref FROM property_settings WHERE hero_image_url IS NOT NULL",
+  ],
+  destinations: ["SELECT image_url AS ref FROM destination_images"],
 };
 
 // File names in `folder` that the database still points at.

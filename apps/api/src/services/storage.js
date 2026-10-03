@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-// Where uploaded images (room photos, avatars, the logo) are kept.
+// Where uploaded images (room photos, avatars, the logo, the home page
+// background, destination photos) are kept.
 //
 //   STORAGE_DRIVER=local (default)  files under apps/api/uploads, served by
 //                                   this API at /uploads/...
@@ -15,7 +16,7 @@ const path = require("path");
 // first kind with the API's address).
 
 const UPLOADS_ROOT = path.join(__dirname, "../../uploads");
-const FOLDERS = ["rooms", "avatars", "branding"];
+const FOLDERS = ["rooms", "avatars", "branding", "destinations"];
 
 function getDriver() {
   return (process.env.STORAGE_DRIVER || "local").trim().toLowerCase() === "s3" ? "s3" : "local";

@@ -1,17 +1,18 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { RoomRatingSummary } from "../RoomReviews";
-import { normalizeImageUrl, useFallbackImage } from "../../utils/imageUrl";
+import { normalizeImageUrl, placeholderFor, ROOM_PLACEHOLDER, showFallback } from "../../utils/imageUrl";
 import { formatMoney } from "../../utils/format";
 import { stayQuery } from "../../utils/stayQuery";
 
-export function RoomImage({ src, alt, ...rest }) {
+// `fallback` is what to draw when there is no photo (or it fails to load).
+export function RoomImage({ src, alt, fallback = ROOM_PLACEHOLDER, ...rest }) {
   return (
     <img
-      src={normalizeImageUrl(src)}
+      src={normalizeImageUrl(src, fallback)}
       alt={alt}
       loading="lazy"
-      onError={useFallbackImage}
+      onError={(event) => showFallback(event, fallback)}
       {...rest}
     />
   );
@@ -25,7 +26,7 @@ export default function RoomCard({ room, stay }) {
   return (
     <Link to={`/rooms/${room.id}${stayQuery(stay)}`} className="room-card">
       <div className="room-card-media">
-        <RoomImage src={room.image} alt={room.room_name} />
+        <RoomImage src={room.image} alt={room.room_name} fallback={placeholderFor(room.room_name || room.id)} />
         <span className="room-card-badge">{room.room_type}</span>
       </div>
 

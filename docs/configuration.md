@@ -93,15 +93,15 @@ Tuỳ chọn:
 
 ## Thông tin cơ sở lưu trú
 
-Tên, logo, số điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí được sửa ở trang quản trị **Cơ sở lưu trú** (`/admin/property`) và lưu trong cơ sở dữ liệu. Thứ tự ưu tiên cho từng mục:
+Tên, logo, ảnh nền trang chủ, số điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí được sửa ở trang quản trị **Cơ sở lưu trú** (`/admin/property`) và lưu trong cơ sở dữ liệu. Thứ tự ưu tiên cho từng mục:
 
 1. giá trị đã lưu ở trang quản trị;
 2. biến môi trường (`APP_NAME`, `CONTACT_*`, `CHECK_IN_TIME`, `CHECK_OUT_TIME`, `FREE_CANCELLATION_DAYS`);
 3. giá trị mặc định.
 
-Xoá trắng một ô ở trang quản trị thì mục đó quay về bước 2. Trang khách, email và file PDF xác nhận đều đọc từ đây, nên đổi xong là có hiệu lực, không cần build lại (API giữ bản đã đọc tối đa 30 giây; lưu từ trang quản trị thì cập nhật ngay). Logo chỉ đặt được ở trang quản trị.
+Xoá trắng một ô ở trang quản trị thì mục đó quay về bước 2. Trang khách, email và file PDF xác nhận đều đọc từ đây, nên đổi xong là có hiệu lực, không cần build lại (API giữ bản đã đọc tối đa 30 giây; lưu từ trang quản trị thì cập nhật ngay). Logo và ảnh nền trang chủ chỉ đặt được ở trang quản trị (hoặc ảnh nền qua `apps/api/seed-assets/hero/` khi chạy `db:seed`). Ảnh điểm đến đặt ở `/admin/destinations`, xem [README](../README.md#ảnh-mẫu--giấy-phép).
 
-`GET /api/settings/public` chỉ trả về tám mục trên. Cấu hình SMTP, khoá thanh toán và mọi biến khác không đi qua đường này.
+`GET /api/settings/public` chỉ trả về chín mục trên. Cấu hình SMTP, khoá thanh toán và mọi biến khác không đi qua đường này.
 
 ## Email
 
@@ -117,7 +117,7 @@ docker compose --profile mail up -d --build
 
 ## Lưu ảnh
 
-Mặc định (`STORAGE_DRIVER=local`) ảnh phòng, ảnh đại diện và logo nằm trong `apps/api/uploads` (Docker: volume `uploads`).
+Mặc định (`STORAGE_DRIVER=local`) ảnh phòng, ảnh đại diện, logo, ảnh nền và ảnh điểm đến nằm trong `apps/api/uploads` (Docker: volume `uploads`).
 
 `STORAGE_DRIVER=s3` đưa ảnh mới lên một bucket tương thích S3 (AWS S3, Cloudflare R2, MinIO...). Cần `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` và `S3_PUBLIC_URL` (địa chỉ công khai của bucket, không có dấu `/` cuối); thêm `S3_ENDPOINT` với dịch vụ không phải AWS và `S3_FORCE_PATH_STYLE=true` với MinIO. Thiếu biến nào API dừng ngay khi khởi động và nêu tên biến đó. Bucket phải cho phép đọc công khai, vì trình duyệt tải ảnh thẳng từ `S3_PUBLIC_URL`.
 

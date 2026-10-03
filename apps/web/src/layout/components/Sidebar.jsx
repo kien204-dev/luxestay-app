@@ -20,6 +20,7 @@ export default function Sidebar({ compact = false }) {
     { path: "/admin/calendar", label: "Calendar", icon: "Calendar", adminOnly: true },
     { path: "/admin/coupons", label: "Coupons", icon: "Tag", adminOnly: true },
     { path: "/admin/property", label: "Property", icon: "Hotel", adminOnly: true },
+    { path: "/admin/destinations", label: "Destinations", icon: "Star", adminOnly: true },
     { path: "/settings", label: "Settings", icon: "Settings" },
   ].filter((item) => !item.adminOnly || user?.role === "admin");
 

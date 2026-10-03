@@ -144,7 +144,8 @@ function Footer() {
         </div>
 
         <div className="guest-footer-bottom">
-          © {new Date().getFullYear()} {property.name}
+          <span>© {new Date().getFullYear()} {property.name}</span>
+          <Link to="/credits">{t("footer.credits")}</Link>
         </div>
       </div>
     </footer>

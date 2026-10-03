@@ -10,6 +10,7 @@ const pool = require("../db/db.js");
 const DEFAULTS = {
   name: "LuxeStay",
   logoUrl: "",
+  heroImageUrl: "",
   phone: "",
   email: "",
   address: "",
@@ -22,6 +23,7 @@ const DEFAULTS = {
 const SOURCES = {
   name: ["name", "APP_NAME"],
   logoUrl: ["logo_url", null],
+  heroImageUrl: ["hero_image_url", null],
   phone: ["phone", "CONTACT_PHONE"],
   email: ["email", "CONTACT_EMAIL"],
   address: ["address", "CONTACT_ADDRESS"],

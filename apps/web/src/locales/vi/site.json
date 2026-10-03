@@ -13,7 +13,8 @@
     "explore": "Khám phá",
     "contact": "Liên hệ",
     "phone": "Điện thoại",
-    "email": "Email"
+    "email": "Email",
+    "credits": "Ghi công ảnh"
   },
   "search": {
     "location": "Địa điểm",
@@ -49,7 +50,8 @@
       "cancelTextGeneric": "Quy định hủy và hoàn tiền được hiển thị trước khi bạn xác nhận đặt phòng.",
       "paymentTitle": "Thanh toán trực tuyến",
       "paymentText": "Thanh toán qua cổng thanh toán ngay sau khi đặt, hoặc để sau trong thời gian giữ chỗ."
-    }
+    },
+    "photoCredit": "Ảnh: {{author}} · {{license}}"
   },
   "room": {
     "perNight": "/ đêm",
@@ -156,5 +158,19 @@
     "redirecting": "Đang chuyển tới cổng thanh toán…",
     "payLater": "Thanh toán sau",
     "initFailed": "Không khởi tạo được thanh toán. Vui lòng thử lại."
+  },
+  "credits": {
+    "documentTitle": "Ghi công ảnh",
+    "title": "Ghi công ảnh",
+    "intro": "Ảnh các điểm đến trên trang này lấy từ Wikimedia Commons và được dùng theo giấy phép của tác giả. Dưới đây là tác giả, giấy phép và trang gốc của từng ảnh.",
+    "place": "Địa danh",
+    "originalTitle": "Tiêu đề gốc",
+    "author": "Tác giả",
+    "license": "Giấy phép",
+    "source": "Nguồn",
+    "sourceLink": "Trang ảnh trên Wikimedia Commons",
+    "changes": "Thay đổi",
+    "empty": "Hiện chưa có ảnh nào cần ghi công.",
+    "loadFailed": "Không tải được danh sách ảnh."
   }
 }

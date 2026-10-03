@@ -13,7 +13,8 @@
     "explore": "Explore",
     "contact": "Contact",
     "phone": "Phone",
-    "email": "Email"
+    "email": "Email",
+    "credits": "Photo credits"
   },
   "search": {
     "location": "Location",
@@ -52,7 +53,8 @@
       "cancelTextGeneric": "Cancellation and refund rules are shown before you confirm a booking.",
       "paymentTitle": "Online payment",
       "paymentText": "Pay through the payment gateway right after booking, or later while your room is held."
-    }
+    },
+    "photoCredit": "Photo: {{author}} · {{license}}"
   },
   "room": {
     "perNight": "/ night",
@@ -167,5 +169,19 @@
     "redirecting": "Taking you to the payment gateway…",
     "payLater": "Pay later",
     "initFailed": "Payment could not be started. Please try again."
+  },
+  "credits": {
+    "documentTitle": "Photo credits",
+    "title": "Photo credits",
+    "intro": "The destination photos on this site come from Wikimedia Commons and are used under their authors' licences. Each photo's author, licence and original page are listed below.",
+    "place": "Place",
+    "originalTitle": "Original title",
+    "author": "Author",
+    "license": "Licence",
+    "source": "Source",
+    "sourceLink": "Photo page on Wikimedia Commons",
+    "changes": "Changes",
+    "empty": "There are no photos to credit yet.",
+    "loadFailed": "Could not load the photo list."
   }
 }
