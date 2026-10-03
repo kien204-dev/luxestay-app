@@ -13,7 +13,9 @@ const EMPTY = { room_name: "", room_type: "", location: "", price: "", capacity:
 // Create a room, or edit one (`room` set). Calls onSaved(name, created).
 export default function RoomFormModal({ room, onClose, onSaved }) {
   const { t } = useTranslation("rooms");
-  const [form, setForm] = useState(() => (room ? { ...EMPTY, ...Object.fromEntries(Object.keys(EMPTY).map((k) => [k, room[k] ?? EMPTY[k]])) } : EMPTY));
+  const [form, setForm] = useState(() =>
+    room ? { ...Object.fromEntries(Object.keys(EMPTY).map((k) => [k, room[k] ?? EMPTY[k]])), price: Number(room.price) || "" } : EMPTY
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");

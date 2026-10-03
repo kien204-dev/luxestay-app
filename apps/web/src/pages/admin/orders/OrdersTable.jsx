@@ -119,7 +119,7 @@ export default function OrdersTable({ orders, loading, busy, onStatus, onPayment
           ) : (
             orders.map((order) => (
               <tr key={order.id}>
-                <td className="is-strong">{bookingCode(order.id)}</td>
+                <td className="is-strong" style={{ whiteSpace: "nowrap" }}>{bookingCode(order.id)}</td>
                 <td><Guest order={order} /></td>
                 <td>
                   <div style={{ color: "var(--color-text-primary)" }}>{order.room_name}</div>
