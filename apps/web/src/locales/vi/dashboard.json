@@ -1,8 +1,9 @@
 {
   "header": {
-    "title": "Bảng Điều Khiển Quản Trị",
-    "subtitle": "Tổng quan vận hành khách sạn theo thời gian thực"
+    "title": "Tổng quan",
+    "subtitle": "Số liệu vận hành theo giờ của cơ sở lưu trú."
   },
+  "rangeLabel": "Khoảng thời gian",
   "rangeOptions": {
     "today": "Hôm nay",
     "week": "7 ngày qua",
@@ -17,9 +18,10 @@
     "year": "Năm nay",
     "all": "Toàn bộ thời gian"
   },
+  "chartsAllNote": "Biểu đồ bên dưới hiển thị năm nay; các thẻ số liệu tính trên toàn bộ thời gian.",
   "status": {
     "confirmed": "Đã xác nhận",
-    "pending": "Chờ xác nhận",
+    "pending": "Chờ thanh toán",
     "completed": "Hoàn tất",
     "cancelled": "Đã hủy"
   },
@@ -33,27 +35,53 @@
     "pdf": "Xuất PDF"
   },
   "errors": {
-    "loadFailed": "Không thể tải dữ liệu dashboard",
-    "exportFailed": "Xuất báo cáo thất bại, vui lòng thử lại",
-    "refreshed": "Đã làm mới dữ liệu dashboard"
+    "loadFailed": "Không tải được số liệu.",
+    "exportFailed": "Xuất báo cáo không thành công.",
+    "refreshed": "Đã làm mới số liệu"
   },
   "statCards": {
-    "totalRooms": { "label": "Tổng số phòng", "note": "Tất cả phòng trong PostgreSQL" },
-    "availableRooms": { "label": "Phòng còn trống", "note": "Phòng có trạng thái còn trống" },
-    "bookedRooms": { "label": "Phòng đã đặt", "note": "Phòng có trạng thái đã đặt" },
-    "totalUsers": { "label": "Tổng người dùng", "note": "Tài khoản đã đăng ký" },
-    "totalBookings": { "label": "Tổng đặt phòng", "noteSuffix": "· mọi trạng thái" },
-    "revenue": { "label": "Doanh thu", "noteSuffix": "· đã xác nhận & hoàn tất" }
+    "totalRooms": {
+      "label": "Tổng số phòng",
+      "note": "Tất cả phòng, kể cả đang bảo trì"
+    },
+    "occupiedTonight": {
+      "label": "Có khách đêm nay",
+      "note": "Phòng có đặt phòng đã xác nhận phủ hôm nay"
+    },
+    "availableRooms": {
+      "label": "Còn trống đêm nay",
+      "note": "Không có khách và không bảo trì"
+    },
+    "totalBookings": {
+      "label": "Số đặt phòng",
+      "noteSuffix": "mọi trạng thái, theo ngày đặt"
+    },
+    "revenue": {
+      "label": "Doanh thu",
+      "noteSuffix": "tiền đã thu"
+    },
+    "outstanding": {
+      "label": "Chưa thu",
+      "noteSuffix": "đơn đã xác nhận chưa thanh toán"
+    }
   },
-  "occupancy": {
-    "title": "Tỷ Lệ Lấp Đầy Phòng",
-    "subtitle": "Tỷ lệ phòng đã đặt hiện tại"
+  "revenueOverview": "Doanh thu",
+  "revenueLabel": "Doanh thu",
+  "bookingsLabel": "Đặt phòng",
+  "bookingsByMonth": "Số đặt phòng",
+  "topBookedRooms": {
+    "title": "Phòng được đặt nhiều nhất",
+    "empty": "Chưa có dữ liệu."
+  },
+  "bookingStatus": {
+    "title": "Trạng thái đặt phòng",
+    "empty": "Chưa có dữ liệu."
   },
   "recentBookings": {
-    "title": "Đặt Phòng Gần Đây",
-    "empty": "Chưa có đặt phòng nào trong khoảng thời gian này.",
+    "title": "Đặt phòng gần đây",
+    "empty": "Chưa có đặt phòng nào.",
     "columns": {
-      "bookingId": "Mã đặt phòng",
+      "bookingId": "Mã",
       "guest": "Khách",
       "room": "Phòng",
       "checkIn": "Nhận phòng",
@@ -61,15 +89,5 @@
       "status": "Trạng thái",
       "amount": "Số tiền"
     }
-  },
-  "revenueOverview": "Tổng Quan Doanh Thu",
-  "bookingsByMonth": "Đặt Phòng Theo Tháng",
-  "topBookedRooms": {
-    "title": "Phòng Được Đặt Nhiều Nhất",
-    "empty": "Chưa có dữ liệu đặt phòng."
-  },
-  "bookingStatus": {
-    "title": "Trạng Thái Đặt Phòng",
-    "empty": "Chưa có dữ liệu trạng thái đặt phòng."
   }
 }

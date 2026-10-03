@@ -1,8 +1,9 @@
 {
   "header": {
-    "title": "Admin Dashboard",
-    "subtitle": "Live hotel operations overview"
+    "title": "Dashboard",
+    "subtitle": "How the property is doing, in the property's local time."
   },
+  "rangeLabel": "Period",
   "rangeOptions": {
     "today": "Today",
     "week": "Last 7 days",
@@ -17,6 +18,7 @@
     "year": "This year",
     "all": "All time"
   },
+  "chartsAllNote": "The charts below show this year; the figures above cover all time.",
   "status": {
     "confirmed": "Confirmed",
     "pending": "Pending",
@@ -33,27 +35,53 @@
     "pdf": "Export PDF"
   },
   "errors": {
-    "loadFailed": "Cannot load dashboard data",
-    "exportFailed": "Export failed, please try again",
-    "refreshed": "Dashboard data refreshed"
+    "loadFailed": "Could not load the figures.",
+    "exportFailed": "The export failed.",
+    "refreshed": "Figures refreshed"
   },
   "statCards": {
-    "totalRooms": { "label": "Total Rooms", "note": "All rooms in PostgreSQL" },
-    "availableRooms": { "label": "Available Rooms", "note": "Rooms with available status" },
-    "bookedRooms": { "label": "Booked Rooms", "note": "Rooms with booked status" },
-    "totalUsers": { "label": "Total Users", "note": "Registered accounts" },
-    "totalBookings": { "label": "Total Bookings", "noteSuffix": "· all statuses" },
-    "revenue": { "label": "Revenue", "noteSuffix": "· confirmed & completed" }
+    "totalRooms": {
+      "label": "Rooms",
+      "note": "All rooms, including under maintenance"
+    },
+    "occupiedTonight": {
+      "label": "Occupied tonight",
+      "note": "Rooms with a confirmed booking covering today"
+    },
+    "availableRooms": {
+      "label": "Free tonight",
+      "note": "No guest and not under maintenance"
+    },
+    "totalBookings": {
+      "label": "Bookings",
+      "noteSuffix": "any status, by booking date"
+    },
+    "revenue": {
+      "label": "Revenue",
+      "noteSuffix": "money received"
+    },
+    "outstanding": {
+      "label": "Outstanding",
+      "noteSuffix": "confirmed but not yet paid"
+    }
   },
-  "occupancy": {
-    "title": "Room Occupancy",
-    "subtitle": "Current booked room ratio"
+  "revenueOverview": "Revenue",
+  "revenueLabel": "Revenue",
+  "bookingsLabel": "Bookings",
+  "bookingsByMonth": "Bookings",
+  "topBookedRooms": {
+    "title": "Most booked rooms",
+    "empty": "No data yet."
+  },
+  "bookingStatus": {
+    "title": "Booking status",
+    "empty": "No data yet."
   },
   "recentBookings": {
-    "title": "Recent Bookings",
-    "empty": "No bookings in this period yet.",
+    "title": "Recent bookings",
+    "empty": "No bookings yet.",
     "columns": {
-      "bookingId": "Booking ID",
+      "bookingId": "Code",
       "guest": "Guest",
       "room": "Room",
       "checkIn": "Check-in",
@@ -61,15 +89,5 @@
       "status": "Status",
       "amount": "Amount"
     }
-  },
-  "revenueOverview": "Revenue Overview",
-  "bookingsByMonth": "Bookings By Month",
-  "topBookedRooms": {
-    "title": "Top Booked Rooms",
-    "empty": "No room booking data."
-  },
-  "bookingStatus": {
-    "title": "Booking Status",
-    "empty": "No booking status data."
   }
 }

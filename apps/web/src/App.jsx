@@ -24,7 +24,7 @@ const PropertySettings = lazy(() => import("./pages/PropertySettings"));
 const Destinations = lazy(() => import("./pages/Destinations"));
 const Credits = lazy(() => import("./pages/guest/Credits"));
 const MainLayout = lazy(() => import("./layout/MainLayout"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Dashboard = lazy(() => import("./pages/admin/dashboard/DashboardPage"));
 const Users = lazy(() => import("./pages/admin/users/UsersPage"));
 const Rooms = lazy(() => import("./pages/admin/rooms/RoomsPage"));
 const Orders = lazy(() => import("./pages/admin/orders/OrdersPage"));
