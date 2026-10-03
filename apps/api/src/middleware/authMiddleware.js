@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const pool = require("../db/db");
 const { readAuthToken } = require("../services/authSession");
 const { apiMessage } = require("../utils/apiMessages");
+const { isBlockedForDemo, isDemoAccount } = require("../config/demo");
 
 const SECRET = process.env.JWT_SECRET;
 
@@ -64,6 +65,12 @@ async function verifyToken(req, res, next) {
         code: "PASSWORD_CHANGE_REQUIRED",
         ...apiMessage("PASSWORD_CHANGE_REQUIRED"),
       });
+    }
+
+    // Demo mode: the shared sample accounts cannot change what would spoil
+    // the demo for the next visitor (see config/demo.js).
+    if (isDemoAccount(req.user.email) && isBlockedForDemo(req.method, req.originalUrl)) {
+      return res.status(403).json(apiMessage("DEMO_READ_ONLY"));
     }
 
     return next();

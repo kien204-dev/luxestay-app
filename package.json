@@ -19,6 +19,7 @@
     "db:seed": "npm run db:seed -w apps/api",
     "db:reset": "npm run db:reset -w apps/api",
     "uploads:prune": "npm run uploads:prune -w apps/api --",
+    "demo:reset": "npm run demo:reset -w apps/api",
     "test:integration": "node scripts/test-integration.mjs"
   },
   "devDependencies": {

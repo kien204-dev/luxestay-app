@@ -2666,6 +2666,43 @@ describe("hotel booking API", () => {
     await fs.unlink(path.join(__dirname, "../uploads/avatars", secondFilename)).catch(() => {});
   });
 
+  it("keeps the shared demo accounts from spoiling a public demo", async () => {
+    const saved = process.env.DEMO_MODE;
+    process.env.DEMO_MODE = "true";
+    try {
+      // What a demo admin cannot do.
+      for (const [method, url, body] of [
+        ["PUT", "/api/settings", { name: "Hijacked" }],
+        ["DELETE", "/api/rooms/1"],
+        ["POST", "/api/users", { name: "X", email: "x@example.com", password: "Passw0rd!" }],
+        ["PATCH", "/api/users/2/lock", { locked: true }],
+        ["PUT", "/api/rooms/1", { room_name: "Renamed", room_type: "Deluxe", price: 1 }],
+      ]) {
+        const result = await request(baseUrl, url, { method, headers: authHeader(adminToken), body: body ? JSON.stringify(body) : undefined });
+        assert.equal(result.response.status, 403, `${method} ${url}`);
+        assert.equal(result.body.code, "DEMO_READ_ONLY");
+      }
+      // ...nor change its own password (the guest sample account is covered
+      // by the same rule; its email is changed by an earlier test here).
+      const password = await request(baseUrl, "/api/users/me/password", {
+        method: "PUT",
+        headers: authHeader(adminToken),
+        body: JSON.stringify({ currentPassword: "guest123", newPassword: "Another1pass" }),
+      });
+      assert.equal(password.body.code, "DEMO_READ_ONLY");
+
+      // Reading and booking still work.
+      assert.equal((await request(baseUrl, "/api/users", { headers: authHeader(adminToken) })).response.status, 200);
+      const publicSettings = await request(baseUrl, "/api/settings/public");
+      assert.deepEqual(publicSettings.body.demo.accounts.map((account) => account.role), ["admin", "user"]);
+    } finally {
+      if (saved === undefined) delete process.env.DEMO_MODE;
+      else process.env.DEMO_MODE = saved;
+    }
+    // Outside demo mode nothing is published.
+    assert.equal((await request(baseUrl, "/api/settings/public")).body.demo, undefined);
+  });
+
   it("puts dashboard buckets in the property's timezone, not the server's", () => {
     const { getRangeWindow } = require("../src/controller/dashboardController.js");
     // 03:00 on 3 October in Vietnam is still 2 October in UTC.
