@@ -1,0 +1,28 @@
+{
+  "title": "Room calendar",
+  "subtitle": "Pick a location, then a room, to see its bookings month by month.",
+  "location": "Location",
+  "locationPlaceholder": "Type or choose a location, then press Enter",
+  "room": "Room",
+  "pickLocationFirst": "Choose a location first",
+  "loadingRooms": "Loading rooms...",
+  "noRooms": "No rooms at this location",
+  "pickRoom": "Choose a room above to see its calendar.",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "dayWithBooking": "Day {{day}}: {{status}}",
+  "status": {
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "detail": {
+    "title": "Booking details",
+    "guest": "Guest",
+    "email": "Email",
+    "dates": "Dates",
+    "guests": "Guests",
+    "total": "Total"
+  }
+}

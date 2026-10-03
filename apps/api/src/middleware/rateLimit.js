@@ -1,10 +1,11 @@
 const { rateLimit } = require("express-rate-limit");
+const { apiMessage } = require("../utils/apiMessages");
 
 const commonOptions = {
   standardHeaders: "draft-8",
   legacyHeaders: false,
   skip: () => process.env.NODE_ENV === "test",
-  message: { message: "Too many requests. Please try again later." },
+  message: apiMessage("TOO_MANY_REQUESTS"),
 };
 
 // Payment gateways call the IPN endpoints from their own servers; throttling

@@ -1,6 +1,6 @@
 # Triển khai LuxeStay
 
-Có hai cách. Cách 1 đơn giản hơn và giữ được ảnh tải lên.
+Có hai cách. Cách 1 đơn giản hơn và giữ được ảnh tải lên. Cài trên máy cá nhân để thử: [docs/installation.md](docs/installation.md).
 
 ## Cách 1 — Một máy chủ với Docker Compose
 
@@ -120,7 +120,9 @@ VITE_APP_NAME=LuxeStay
 
 ## Thanh toán
 
-- **VNPay**: khai báo IPN URL trong trang quản trị merchant của VNPay là `https://<địa-chỉ-API>/api/payments/vnpay/ipn`, và đặt `VNPAY_RETURN_URL=https://<địa-chỉ-web>/payment/result`.
+Chi tiết và trạng thái từng cổng: [docs/payments.md](docs/payments.md).
+
+- **VNPay** (chờ VNPay kích hoạt merchant sandbox): khai báo IPN URL trong trang quản trị merchant của VNPay là `https://<địa-chỉ-API>/api/payments/vnpay/ipn`, và đặt `VNPAY_RETURN_URL=https://<địa-chỉ-web>/payment/result`.
 - **MoMo (beta)**: đặt `MOMO_ENABLED=true`, `MOMO_IPN_URL=https://<địa-chỉ-API>/api/payments/momo/ipn`, `MOMO_RETURN_URL=https://<địa-chỉ-web>/payment/result`. Chưa được kiểm chứng với tài khoản MoMo thật.
 
 Cả hai cổng gọi IPN từ máy chủ của họ, nên địa chỉ API phải truy cập được từ Internet.
@@ -129,7 +131,7 @@ Cả hai cổng gọi IPN từ máy chủ của họ, nên địa chỉ API ph�
 
 - [ ] `JWT_SECRET` là chuỗi ngẫu nhiên riêng của bạn; không file `.env` nào nằm trong git.
 - [ ] Đã đổi mật khẩu quản trị mặc định; tài khoản `user@example.com` đã bị khoá hoặc đổi mật khẩu.
-- [ ] `SEED_ON_START=false`.
+- [ ] `SEED_ON_START=false` và `DEMO_MODE` để trống (chế độ demo chỉ dành cho trang trình diễn).
 - [ ] `DB_PASSWORD` là mật khẩu mạnh, và cổng 5432 không truy cập được từ Internet.
 - [ ] Trang web chạy qua HTTPS và `AUTH_COOKIE_SECURE=true`.
 - [ ] `CLIENT_URL` / `PUBLIC_URL` khớp chính xác địa chỉ web.
@@ -139,3 +141,6 @@ Cả hai cổng gọi IPN từ máy chủ của họ, nên địa chỉ API ph�
 - [ ] Nếu dùng email: thư xác nhận đặt phòng và thư quên mật khẩu tới được hộp thư thật.
 - [ ] Nếu dùng VNPay: một giao dịch thử đi trọn vòng và booking chuyển sang "đã xác nhận".
 - [ ] Có lịch sao lưu cơ sở dữ liệu và thư mục ảnh.
+- [ ] Nếu có reverse proxy riêng phía trước: cho phép request tới 11 MB (ảnh tải lên tối đa 10 MB).
+- [ ] Nếu dùng `STORAGE_DRIVER=s3` (beta): đã thử tải ảnh lên và thấy ảnh hiện trên trang khách.
+- [ ] Đã đổi tên, logo, màu (nếu cần — [docs/customization.md](docs/customization.md)) và ngôn ngữ mặc định.

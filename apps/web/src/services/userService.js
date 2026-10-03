@@ -3,8 +3,10 @@ import api from "./api";
 // =========================
 // GET ALL USERS
 // =========================
-export const getUsers = async () => {
-  const response = await api.get("/users");
+// With { page, limit, search, role, status }: one page plus totals
+// ({ data, total, totalPages, summary }). Without: every user.
+export const getUsers = async (params) => {
+  const response = await api.get("/users", params ? { params } : undefined);
   return response.data;
 };
 

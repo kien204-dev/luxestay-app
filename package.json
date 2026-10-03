@@ -1,7 +1,7 @@
 {
   "name": "luxestay",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.0-beta.3",
   "engines": {
     "node": ">=22"
   },
@@ -13,12 +13,13 @@
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
     "build": "npm run build -w apps/web",
     "start": "npm run start -w apps/api",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/check-i18n.mjs && node scripts/check-theme.mjs",
     "test": "npm run test -w apps/api",
     "db:migrate": "npm run db:migrate -w apps/api",
     "db:seed": "npm run db:seed -w apps/api",
     "db:reset": "npm run db:reset -w apps/api",
     "uploads:prune": "npm run uploads:prune -w apps/api --",
+    "demo:reset": "npm run demo:reset -w apps/api",
     "test:integration": "node scripts/test-integration.mjs"
   },
   "devDependencies": {

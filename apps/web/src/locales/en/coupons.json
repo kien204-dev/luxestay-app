@@ -1,0 +1,57 @@
+{
+  "title": "Coupons",
+  "subtitle": "Codes guests enter when booking. Turn one off to stop accepting it while keeping its history.",
+  "add": "New coupon",
+  "empty": "No coupons yet.",
+  "actionFailed": "That did not work.",
+  "mobileLine": "{{value}} off · used {{usage}}",
+  "expiresOn": "Expires: {{date}}",
+  "status": {
+    "active": "Active",
+    "inactive": "Off"
+  },
+  "type": {
+    "percent": "Percentage",
+    "fixed": "Fixed amount"
+  },
+  "columns": {
+    "code": "Code",
+    "type": "Type",
+    "value": "Value",
+    "usage": "Used / limit",
+    "expires": "Expires",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "actions": {
+    "activate": "Turn on",
+    "deactivate": "Turn off"
+  },
+  "form": {
+    "addTitle": "New coupon",
+    "editTitle": "Edit coupon",
+    "code": "Code",
+    "codeHint": "3–50 characters: letters, digits, dashes or underscores.",
+    "type": "Discount type",
+    "value": "Value ({{unit}})",
+    "maxDiscount": "Maximum discount (VND, optional)",
+    "minAmount": "Minimum booking (VND, optional)",
+    "expires": "Expires",
+    "usageLimit": "Usage limit (optional)",
+    "noLimit": "No limit",
+    "noMinimum": "None",
+    "create": "Create",
+    "saveFailed": "Could not save the coupon.",
+    "currency": "VND"
+  },
+  "confirm": {
+    "title": "Turn coupon off",
+    "message": "Turn off \"{{code}}\"? Guests about to use it will no longer be able to."
+  },
+  "toast": {
+    "created": "Coupon created",
+    "updated": "Coupon updated",
+    "activated": "Coupon turned on",
+    "deactivated": "Coupon turned off"
+  }
+}

@@ -8,10 +8,10 @@ import { ADMIN_HOME, loginPathFor } from "../utils/authRedirect";
 import "../styles/guest.css";
 
 function LanguageSwitch() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation("common");
 
   return (
-    <div className="guest-lang" role="group" aria-label="Language">
+    <div className="guest-lang" role="group" aria-label={t("language.label")}>
       {SUPPORTED_LANGUAGES.map((lng) => (
         <button
           key={lng}

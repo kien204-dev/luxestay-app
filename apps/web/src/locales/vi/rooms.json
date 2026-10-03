@@ -1,0 +1,84 @@
+{
+  "title": "Phòng",
+  "subtitle": "Danh sách phòng, giá, sức chứa và trạng thái. Một dòng là một phòng thật.",
+  "add": "Thêm phòng",
+  "addFirst": "Thêm phòng đầu tiên",
+  "empty": "Không có phòng nào khớp bộ lọc.",
+  "deleteFailed": "Không xóa được phòng.",
+  "perNight": "{{price}} / đêm",
+  "guests": "{{count}} khách",
+  "guests_one": "{{count}} khách",
+  "status": {
+    "available": "Còn trống",
+    "booked": "Có đặt",
+    "maintenance": "Bảo trì"
+  },
+  "columns": {
+    "room": "Phòng",
+    "type": "Loại",
+    "location": "Địa điểm",
+    "price": "Giá / đêm",
+    "capacity": "Sức chứa",
+    "status": "Trạng thái",
+    "actions": "Thao tác"
+  },
+  "filters": {
+    "search": "Tìm",
+    "searchPlaceholder": "Tên hoặc loại phòng",
+    "status": "Trạng thái",
+    "anyStatus": "Mọi trạng thái",
+    "minPrice": "Giá từ",
+    "maxPrice": "Giá đến",
+    "minGuests": "Số khách tối thiểu",
+    "sortBy": "Sắp xếp",
+    "sortNewest": "Mới nhất",
+    "sortName": "Tên phòng",
+    "sortPrice": "Giá",
+    "order": "Thứ tự",
+    "desc": "Giảm dần",
+    "asc": "Tăng dần",
+    "perPage": "Mỗi trang"
+  },
+  "form": {
+    "addTitle": "Thêm phòng",
+    "editTitle": "Sửa phòng",
+    "name": "Tên phòng",
+    "type": "Loại phòng",
+    "typePlaceholder": "Deluxe, Standard, Suite...",
+    "status": "Trạng thái",
+    "location": "Địa điểm",
+    "locationPlaceholder": "Hoàn Kiếm, Hà Nội",
+    "locationHint": "Khu vực, rồi tỉnh/thành sau dấu phẩy cuối. Phần sau dấu phẩy cuối là \"điểm đến\" trên trang chủ.",
+    "price": "Giá / đêm (VND)",
+    "capacity": "Sức chứa (khách)",
+    "description": "Mô tả",
+    "cover": "Ảnh đại diện",
+    "uploadCover": "Tải ảnh lên",
+    "changeCover": "Đổi ảnh",
+    "uploading": "Đang tải ảnh...",
+    "uploadFailed": "Không tải được ảnh lên.",
+    "nameTypeRequired": "Vui lòng nhập tên phòng và loại phòng.",
+    "priceInvalid": "Giá phòng phải lớn hơn 0.",
+    "capacityInvalid": "Sức chứa phải là số nguyên lớn hơn 0.",
+    "saveFailed": "Không lưu được phòng."
+  },
+  "gallery": {
+    "title": "Ảnh phụ",
+    "add": "Thêm ảnh",
+    "uploading": "Đang tải ảnh...",
+    "remove": "Xóa ảnh này",
+    "afterSave": "Lưu phòng trước, rồi mở lại để thêm ảnh phụ.",
+    "uploadFailed": "Không tải được ảnh lên.",
+    "deleteFailed": "Không xóa được ảnh.",
+    "loadFailed": "Không tải được ảnh phụ."
+  },
+  "confirm": {
+    "deleteTitle": "Xóa phòng",
+    "deleteMessage": "Xóa phòng \"{{name}}\"? Không thể hoàn tác. Phòng đã có đặt phòng thì không xóa được; hãy chuyển sang \"Bảo trì\"."
+  },
+  "toast": {
+    "created": "Đã thêm phòng \"{{name}}\"",
+    "updated": "Đã cập nhật phòng \"{{name}}\"",
+    "deleted": "Đã xóa phòng \"{{name}}\""
+  }
+}

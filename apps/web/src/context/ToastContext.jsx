@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import Icon from "../utils/icon";
+import i18n from "../i18n";
 
 const ToastContext = createContext();
 
@@ -85,7 +86,7 @@ export function ToastProvider({ children }) {
               <button
                 type="button"
                 onClick={() => dismiss(item.id)}
-                aria-label="Dismiss notification"
+                aria-label={i18n.t("common:dialog.dismiss")}
                 style={{
                   background: "none",
                   border: "none",

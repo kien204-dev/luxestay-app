@@ -42,7 +42,7 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(15,23,42,0.65)",
+        background: "color-mix(in srgb, var(--color-ink) 65%, transparent)",
         zIndex: 3300,
         display: "flex",
         alignItems: "center",
@@ -56,16 +56,16 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
         style={{
           width: "100%",
           maxWidth: 420,
-          background: "#fff",
+          background: "var(--color-surface-light)",
           borderRadius: 16,
           padding: 28,
-          boxShadow: "0 24px 80px rgba(15,23,42,0.25)",
+          boxShadow: "0 24px 80px color-mix(in srgb, var(--color-ink) 25%, transparent)",
         }}
       >
-        <h3 className="font-headline" style={{ margin: "0 0 6px", color: "#002366", fontSize: 20 }}>
+        <h3 className="font-headline" style={{ margin: "0 0 6px", color: "var(--brand-primary)", fontSize: 20 }}>
           {t("myBookings:reviewModal.title", { roomName: booking.room_name })}
         </h3>
-        <p style={{ margin: "0 0 20px", color: "#64748b", fontSize: 13 }}>
+        <p style={{ margin: "0 0 20px", color: "var(--color-ink-muted)", fontSize: 13 }}>
           {formatDate(booking.check_in, lang)} → {formatDate(booking.check_out, lang)}
         </p>
 
@@ -75,7 +75,7 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
-            color: "#64748b",
+            color: "var(--color-ink-muted)",
             marginBottom: 8,
             fontWeight: 700,
           }}
@@ -92,7 +92,7 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
-            color: "#64748b",
+            color: "var(--color-ink-muted)",
             marginBottom: 8,
             fontWeight: 700,
           }}
@@ -108,7 +108,7 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
           style={{
             width: "100%",
             padding: "10px 12px",
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--color-line-light)",
             borderRadius: 8,
             outline: "none",
             fontSize: 13,
@@ -122,10 +122,10 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
         {error && (
           <div
             style={{
-              background: "#fef2f2",
-              border: "1px solid #fecaca",
+              background: "var(--color-danger-soft)",
+              border: "1px solid color-mix(in srgb, var(--color-danger-strong) 30%, transparent)",
               borderRadius: 8,
-              color: "#b91c1c",
+              color: "var(--color-danger-strong)",
               fontSize: 12,
               marginBottom: 16,
               padding: "8px 10px",
@@ -144,9 +144,9 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
               flex: 1,
               padding: "12px",
               borderRadius: 8,
-              border: "1px solid #d1d5db",
+              border: "1px solid var(--color-line-light)",
               background: "transparent",
-              color: "#475569",
+              color: "var(--color-ink-muted)",
               fontWeight: 600,
               cursor: submitting ? "not-allowed" : "pointer",
             }}
@@ -161,8 +161,8 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
               padding: "12px",
               borderRadius: 8,
               border: "none",
-              background: "#002366",
-              color: "#fff",
+              background: "var(--brand-primary)",
+              color: "var(--color-surface-light)",
               fontWeight: 700,
               cursor: submitting ? "not-allowed" : "pointer",
               opacity: submitting ? 0.7 : 1,

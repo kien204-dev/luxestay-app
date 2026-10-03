@@ -1,0 +1,28 @@
+{
+  "title": "Lịch phòng",
+  "subtitle": "Chọn địa điểm rồi một phòng để xem lịch đặt theo tháng.",
+  "location": "Địa điểm",
+  "locationPlaceholder": "Gõ hoặc chọn địa điểm, rồi nhấn Enter",
+  "room": "Phòng",
+  "pickLocationFirst": "Chọn địa điểm trước",
+  "loadingRooms": "Đang tải phòng...",
+  "noRooms": "Không có phòng nào ở địa điểm này",
+  "pickRoom": "Chọn một phòng ở trên để xem lịch.",
+  "previousMonth": "Tháng trước",
+  "nextMonth": "Tháng sau",
+  "dayWithBooking": "Ngày {{day}}: {{status}}",
+  "status": {
+    "confirmed": "Đã xác nhận",
+    "pending": "Chờ thanh toán",
+    "completed": "Hoàn tất",
+    "cancelled": "Đã hủy"
+  },
+  "detail": {
+    "title": "Chi tiết đặt phòng",
+    "guest": "Khách",
+    "email": "Email",
+    "dates": "Ngày",
+    "guests": "Số khách",
+    "total": "Tổng tiền"
+  }
+}

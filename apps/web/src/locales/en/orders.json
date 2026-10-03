@@ -1,0 +1,127 @@
+{
+  "title": "Bookings",
+  "subtitle": "Every booking with its status and payment. Record desk payments, confirm refunds and download PDF confirmations.",
+  "listTitle": "Booking list",
+  "matching": "{{count}} bookings",
+  "matching_one": "{{count}} booking",
+  "empty": "No bookings match.",
+  "walkIn": "+ Desk booking",
+  "atDesk": "at the desk",
+  "actionFailed": "That did not work.",
+  "receiptFailed": "Could not download the confirmation.",
+  "kpi": {
+    "revenue": "Received",
+    "pending": "Awaiting payment",
+    "refundPending": "Refunds to make",
+    "total": "All bookings"
+  },
+  "filters": {
+    "status": "Filter by status",
+    "payment": "Filter by payment",
+    "anyStatus": "Any status",
+    "anyPayment": "Any payment"
+  },
+  "columns": {
+    "code": "Code",
+    "guest": "Guest",
+    "room": "Room",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "status": "Status",
+    "amount": "Amount",
+    "actions": "Actions"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "payment": {
+    "unpaid": "Unpaid",
+    "pending": "Processing",
+    "paid": "Paid",
+    "failed": "Payment failed",
+    "refund_pending": "Refund pending",
+    "refunded": "Refunded"
+  },
+  "refundReason": {
+    "cancelled_by_guest": "Cancelled by the guest after paying",
+    "cancelled_by_admin": "Cancelled by an admin after payment",
+    "paid_after_cancellation": "Paid after the booking was cancelled or expired; the room was no longer free"
+  },
+  "paymentAction": {
+    "markPaid": "Mark as paid",
+    "refund": "Confirm refund"
+  },
+  "actions": {
+    "pdf": "PDF"
+  },
+  "confirm": {
+    "deleteTitle": "Delete booking",
+    "deleteMessage": "Delete {{code}}? This cannot be undone. A booking with a payment cannot be deleted; cancel it instead.",
+    "deleteAction": "Delete",
+    "refundTitle": "Confirm refund",
+    "refundMessage": "Confirm you HAVE sent the refund for {{code}}? The app does not move money itself.",
+    "refundAction": "Refund sent",
+    "markPaidTitle": "Record payment",
+    "markPaidMessage": "Confirm the full amount for {{code}} was received (cash or transfer)? A pending booking becomes confirmed.",
+    "markPaidAction": "Payment received"
+  },
+  "toast": {
+    "statusUpdated": "Status updated",
+    "cancelledRefund": "Booking cancelled. It was paid, so the guest is owed a refund.",
+    "deleted": "Deleted {{code}}",
+    "refunded": "Refund confirmed",
+    "paid": "Payment recorded",
+    "walkInCreated": "Booking {{code}} created"
+  },
+  "reviews": {
+    "title": "Guest reviews",
+    "filter": "Filter by room name",
+    "empty": "No reviews yet.",
+    "noMatch": "No reviews match.",
+    "visible": "Visible",
+    "hidden": "Hidden",
+    "hide": "Hide",
+    "show": "Show",
+    "hideTitle": "Hide review",
+    "hideMessage": "Hide this review? It will not be shown publicly until you show it again.",
+    "showTitle": "Show review",
+    "showMessage": "Show this review publicly again?",
+    "hiddenToast": "Review hidden",
+    "shownToast": "Review shown",
+    "columns": {
+      "room": "Room",
+      "author": "Reviewer",
+      "rating": "Rating",
+      "comment": "Comment",
+      "date": "Date",
+      "status": "Status"
+    }
+  },
+  "walkInForm": {
+    "title": "Desk booking",
+    "intro": "Book for a guest in person or by phone. The booking is confirmed straight away.",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "room": "Room",
+    "roomSearch": "Search by room name or type",
+    "chooseRoom": "Choose a room",
+    "chooseRoomCount": "Choose a room ({{count}} available)",
+    "loadingRooms": "Loading rooms...",
+    "roomOption": "{{name}} · up to {{capacity}} guests · {{price}}/night",
+    "guests": "Guests",
+    "name": "Guest name",
+    "phone": "Phone (optional)",
+    "email": "Email (optional)",
+    "paid": "The guest has paid (cash or transfer)",
+    "emailNote": "With an email address, the guest receives a confirmation.",
+    "roomRequired": "Please choose a room.",
+    "datesRequired": "Please choose valid check-in and check-out dates.",
+    "nameRequired": "Please enter the guest's name.",
+    "failed": "Could not create the booking.",
+    "create": "Create booking",
+    "creating": "Creating..."
+  }
+}

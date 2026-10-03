@@ -9,8 +9,8 @@ export default function PageLoader() {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        background: "#fafafa",
-        color: "#64748b",
+        background: "var(--color-surface-muted)",
+        color: "var(--color-ink-muted)",
         fontFamily: "var(--font-sans)",
         fontSize: 14,
       }}

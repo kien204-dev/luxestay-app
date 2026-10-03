@@ -6,12 +6,14 @@ const {
   savePropertySettings,
 } = require("../services/propertySettings");
 const { removeUpload } = require("../services/storage");
+const { demoAccounts, demoResetIntervalHours, isDemoMode } = require("../config/demo");
+const { pngCopyOf } = require("../middleware/imageUpload");
+const { apiMessage } = require("../utils/apiMessages");
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+\-\s().]{6,30}$/;
 
 const TEXT_LIMITS = { name: 100, phone: 30, email: 255, address: 255 };
-const FIELD_LABELS = { name: "Tên", phone: "Số điện thoại", email: "Email", address: "Địa chỉ" };
 
 // Public: what any visitor's browser needs to draw the site. Everything in
 // here is information the property publishes anyway; the response is built
@@ -29,6 +31,8 @@ exports.getPublicSettings = async (req, res) => {
     checkInTime: settings.checkInTime,
     checkOutTime: settings.checkOutTime,
     freeCancellationDays: settings.freeCancellationDays,
+    // Only on a public demo: the sample sign-ins to show on the login page.
+    ...(isDemoMode() ? { demo: { resetIntervalHours: demoResetIntervalHours(), accounts: demoAccounts() } } : {}),
   });
 };
 
@@ -37,7 +41,7 @@ exports.getAdminSettings = async (req, res) => {
     res.json(await getPropertySettingsForAdmin());
   } catch (err) {
     console.error("GET SETTINGS ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi tải cấu hình" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -49,27 +53,27 @@ function validateSettings(body) {
   for (const field of ["name", "phone", "email", "address"]) {
     if (body[field] === undefined) continue;
     if (body[field] !== null && typeof body[field] !== "string") {
-      return { error: `${FIELD_LABELS[field]} phải là chữ` };
+      return { error: apiMessage("TEXT_REQUIRED_STRING", { field }) };
     }
     const value = (body[field] || "").trim();
     if (value.length > TEXT_LIMITS[field]) {
-      return { error: `${FIELD_LABELS[field]} không được dài quá ${TEXT_LIMITS[field]} ký tự` };
+      return { error: apiMessage("TEXT_TOO_LONG", { field, max: TEXT_LIMITS[field] }) };
     }
     values[field] = value || null;
   }
 
   if (values.email && !EMAIL_PATTERN.test(values.email)) {
-    return { error: "Email không hợp lệ" };
+    return { error: apiMessage("INVALID_EMAIL") };
   }
   if (values.phone && !PHONE_PATTERN.test(values.phone)) {
-    return { error: "Số điện thoại không hợp lệ" };
+    return { error: apiMessage("INVALID_PHONE") };
   }
 
   for (const field of ["checkInTime", "checkOutTime"]) {
     if (body[field] === undefined) continue;
     const value = typeof body[field] === "string" ? body[field].trim() : "";
     if (value && !TIME_PATTERN.test(value)) {
-      return { error: "Giờ nhận/trả phòng phải có dạng HH:MM (ví dụ 14:00)" };
+      return { error: apiMessage("INVALID_TIME") };
     }
     values[field] = value || null;
   }
@@ -81,7 +85,7 @@ function validateSettings(body) {
     } else {
       const days = parseDays(raw);
       if (days === null) {
-        return { error: "Số ngày hủy miễn phí phải là số nguyên từ 0 đến 365" };
+        return { error: apiMessage("INVALID_CANCELLATION_DAYS") };
       }
       values.freeCancellationDays = days;
     }
@@ -93,13 +97,13 @@ function validateSettings(body) {
 exports.updateSettings = async (req, res) => {
   try {
     const { error, values } = validateSettings(req.body || {});
-    if (error) return res.status(400).json({ message: error });
+    if (error) return res.status(400).json(error);
 
     const saved = await savePropertySettings(values);
-    return res.json({ message: "Đã lưu cấu hình", ...saved });
+    return res.json({ ...apiMessage("SETTINGS_SAVED"), ...saved });
   } catch (err) {
     console.error("UPDATE SETTINGS ERROR:", err);
-    return res.status(500).json({ message: "Lỗi server khi lưu cấu hình" });
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -107,20 +111,27 @@ exports.updateSettings = async (req, res) => {
 // property_settings. The upload middleware has already checked the file
 // really is an image and stored it; these record it and drop the previous
 // file.
+// Removes a stored branding image and, for a logo, its PNG copy.
+function removeBrandingImage(reference, purpose) {
+  removeUpload(reference, "branding", { purpose });
+  const png = pngCopyOf(reference);
+  if (png) removeUpload(png, "branding", { purpose: `${purpose} png` });
+}
+
 function imageSetting(setting, purpose, messages) {
   const upload = async (req, res) => {
     try {
-      if (!req.file) return res.status(400).json({ message: "No image file uploaded" });
+      if (!req.file) return res.status(400).json({ ...apiMessage("NO_IMAGE_UPLOADED") });
 
       const previous = (await getPropertySettingsForAdmin()).stored[setting];
       const stored = req.file.storedPath;
       const saved = await savePropertySettings({ [setting]: stored });
-      if (previous && previous !== stored) removeUpload(previous, "branding", { purpose });
+      if (previous && previous !== stored) removeBrandingImage(previous, purpose);
 
-      return res.status(201).json({ message: messages.saved, ...saved });
+      return res.status(201).json({ ...apiMessage(messages.saved), ...saved });
     } catch (err) {
       console.error(`UPLOAD ${purpose.toUpperCase()} ERROR:`, err);
-      return res.status(500).json({ message: messages.failed });
+      return res.status(500).json(apiMessage("SERVER_ERROR"));
     }
   };
 
@@ -128,28 +139,20 @@ function imageSetting(setting, purpose, messages) {
     try {
       const previous = (await getPropertySettingsForAdmin()).stored[setting];
       const saved = await savePropertySettings({ [setting]: null });
-      if (previous) removeUpload(previous, "branding", { purpose });
+      if (previous) removeBrandingImage(previous, purpose);
 
-      return res.json({ message: messages.removed, ...saved });
+      return res.json({ ...apiMessage(messages.removed), ...saved });
     } catch (err) {
       console.error(`DELETE ${purpose.toUpperCase()} ERROR:`, err);
-      return res.status(500).json({ message: messages.failed });
+      return res.status(500).json(apiMessage("SERVER_ERROR"));
     }
   };
 
   return { upload, remove };
 }
 
-const logo = imageSetting("logoUrl", "logo", {
-  saved: "Đã cập nhật logo",
-  removed: "Đã xóa logo",
-  failed: "Lỗi server khi lưu logo",
-});
-const hero = imageSetting("heroImageUrl", "hero", {
-  saved: "Đã cập nhật ảnh nền trang chủ",
-  removed: "Đã xóa ảnh nền trang chủ",
-  failed: "Lỗi server khi lưu ảnh nền",
-});
+const logo = imageSetting("logoUrl", "logo", { saved: "LOGO_SAVED", removed: "LOGO_REMOVED" });
+const hero = imageSetting("heroImageUrl", "hero", { saved: "HERO_SAVED", removed: "HERO_REMOVED" });
 
 exports.uploadLogo = logo.upload;
 exports.deleteLogo = logo.remove;

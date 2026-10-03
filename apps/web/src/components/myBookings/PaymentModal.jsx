@@ -12,7 +12,7 @@ export default function PaymentModal({ booking, providers, payingProvider, error
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.6)",
+        background: "color-mix(in srgb, var(--color-ink) 60%, transparent)",
         zIndex: 3200,
         display: "flex",
         alignItems: "center",
@@ -25,16 +25,16 @@ export default function PaymentModal({ booking, providers, payingProvider, error
         style={{
           width: "100%",
           maxWidth: 380,
-          background: "#fff",
+          background: "var(--color-surface-light)",
           borderRadius: 16,
           padding: 24,
-          boxShadow: "0 24px 80px rgba(15,23,42,0.25)",
+          boxShadow: "0 24px 80px color-mix(in srgb, var(--color-ink) 25%, transparent)",
         }}
       >
-        <h3 className="font-headline" style={{ margin: "0 0 6px", color: "#002366", fontSize: 20 }}>
+        <h3 className="font-headline" style={{ margin: "0 0 6px", color: "var(--brand-primary)", fontSize: 20 }}>
           {t("myBookings:paymentModal.title")}
         </h3>
-        <p style={{ margin: "0 0 20px", color: "#64748b", fontSize: 13 }}>
+        <p style={{ margin: "0 0 20px", color: "var(--color-ink-muted)", fontSize: 13 }}>
           {t("myBookings:paymentModal.summary", {
             id: String(booking.id).padStart(4, "0"),
             amount: formatMoney(booking.total_price, lang),
@@ -44,10 +44,10 @@ export default function PaymentModal({ booking, providers, payingProvider, error
         {error && (
           <div
             style={{
-              background: "#fef2f2",
-              border: "1px solid #fecaca",
+              background: "var(--color-danger-soft)",
+              border: "1px solid color-mix(in srgb, var(--color-danger-strong) 30%, transparent)",
               borderRadius: 8,
-              color: "#b91c1c",
+              color: "var(--color-danger-strong)",
               fontSize: 12,
               marginBottom: 16,
               padding: "8px 10px",
@@ -66,8 +66,8 @@ export default function PaymentModal({ booking, providers, payingProvider, error
               width: "100%",
               padding: "14px",
               border: "none",
-              background: "#002366",
-              color: "#fff",
+              background: "var(--brand-primary)",
+              color: "var(--color-surface-light)",
               fontSize: 13,
               fontWeight: 700,
               cursor: payingProvider !== null ? "not-allowed" : "pointer",
@@ -87,8 +87,9 @@ export default function PaymentModal({ booking, providers, payingProvider, error
                 width: "100%",
                 padding: "14px",
                 border: "none",
+                // MoMo's own brand colour, not the property's theme. theme-ignore
                 background: "#a50064",
-                color: "#fff",
+                color: "var(--color-surface-light)",
                 fontSize: 13,
                 fontWeight: 700,
                 cursor: payingProvider !== null ? "not-allowed" : "pointer",
@@ -108,9 +109,9 @@ export default function PaymentModal({ booking, providers, payingProvider, error
           style={{
             width: "100%",
             padding: "10px",
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--color-line-light)",
             background: "transparent",
-            color: "#6b7280",
+            color: "var(--color-ink-muted)",
             fontSize: 12,
             fontWeight: 600,
             cursor: payingProvider !== null ? "not-allowed" : "pointer",

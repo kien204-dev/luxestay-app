@@ -1,0 +1,73 @@
+{
+  "title": "Người dùng",
+  "subtitle": "Tài khoản quản trị và khách. Khóa một tài khoản để chặn đăng nhập mà vẫn giữ lịch sử đặt phòng.",
+  "add": "Thêm người dùng",
+  "searchPlaceholder": "Tìm theo tên, email hoặc số điện thoại",
+  "empty": "Không có người dùng nào phù hợp.",
+  "joined": "Tham gia {{date}}",
+  "actionFailed": "Không thực hiện được thao tác.",
+  "filters": {
+    "role": "Lọc theo vai trò",
+    "status": "Lọc theo trạng thái",
+    "allRoles": "Mọi vai trò",
+    "allStatuses": "Mọi trạng thái"
+  },
+  "status": {
+    "active": "Hoạt động",
+    "locked": "Đã khóa"
+  },
+  "columns": {
+    "person": "Người dùng",
+    "role": "Vai trò",
+    "contact": "Liên hệ",
+    "status": "Trạng thái",
+    "joined": "Ngày tham gia",
+    "actions": "Thao tác"
+  },
+  "kpi": {
+    "total": "Tổng tài khoản",
+    "totalSub": "Không tính tài khoản đã xóa",
+    "admins": "Quản trị",
+    "adminsSub": "Quản lý hệ thống",
+    "guests": "Khách",
+    "guestsSub": "Tài khoản đặt phòng",
+    "locked": "Đã khóa",
+    "lockedSub": "Không đăng nhập được"
+  },
+  "actions": {
+    "edit": "Sửa",
+    "lock": "Khóa",
+    "unlock": "Mở khóa",
+    "delete": "Xóa",
+    "cannotLockSelf": "Bạn không thể khóa chính tài khoản đang đăng nhập",
+    "cannotDeleteSelf": "Bạn không thể xóa chính tài khoản đang đăng nhập"
+  },
+  "form": {
+    "addTitle": "Thêm người dùng",
+    "editTitle": "Sửa người dùng",
+    "name": "Họ tên",
+    "email": "Email",
+    "password": "Mật khẩu tạm",
+    "passwordHint": "Ít nhất 8 ký tự, có cả chữ và số. Người dùng sẽ phải đổi mật khẩu khi đăng nhập lần đầu.",
+    "role": "Vai trò",
+    "ownRole": "Bạn không thể tự đổi vai trò của chính mình.",
+    "nameEmailRequired": "Vui lòng nhập họ tên và email.",
+    "passwordRule": "Mật khẩu tạm cần ít nhất 8 ký tự, có cả chữ và số.",
+    "saveFailed": "Không lưu được người dùng."
+  },
+  "confirm": {
+    "deleteTitle": "Xóa người dùng",
+    "deleteMessage": "Xóa \"{{name}}\"? Không thể hoàn tác. Tài khoản đã có đặt phòng thì chỉ khóa được, không xóa được.",
+    "lockTitle": "Khóa tài khoản",
+    "lockMessage": "Khóa \"{{name}}\"? Người dùng sẽ bị đăng xuất và không đăng nhập được nữa.",
+    "unlockTitle": "Mở khóa tài khoản",
+    "unlockMessage": "Mở khóa \"{{name}}\"?"
+  },
+  "toast": {
+    "created": "Đã thêm \"{{name}}\"",
+    "updated": "Đã cập nhật \"{{name}}\"",
+    "deleted": "Đã xóa \"{{name}}\"",
+    "locked": "Đã khóa \"{{name}}\"",
+    "unlocked": "Đã mở khóa \"{{name}}\""
+  }
+}

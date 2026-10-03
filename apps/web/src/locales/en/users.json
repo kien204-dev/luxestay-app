@@ -1,0 +1,73 @@
+{
+  "title": "Users",
+  "subtitle": "Admin and guest accounts. Lock an account to stop it signing in while keeping its booking history.",
+  "add": "Add user",
+  "searchPlaceholder": "Search by name, email or phone",
+  "empty": "No users match.",
+  "joined": "Joined {{date}}",
+  "actionFailed": "That did not work.",
+  "filters": {
+    "role": "Filter by role",
+    "status": "Filter by status",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses"
+  },
+  "status": {
+    "active": "Active",
+    "locked": "Locked"
+  },
+  "columns": {
+    "person": "User",
+    "role": "Role",
+    "contact": "Contact",
+    "status": "Status",
+    "joined": "Joined",
+    "actions": "Actions"
+  },
+  "kpi": {
+    "total": "All accounts",
+    "totalSub": "Deleted accounts not counted",
+    "admins": "Admins",
+    "adminsSub": "Run the system",
+    "guests": "Guests",
+    "guestsSub": "Booking accounts",
+    "locked": "Locked",
+    "lockedSub": "Cannot sign in"
+  },
+  "actions": {
+    "edit": "Edit",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "delete": "Delete",
+    "cannotLockSelf": "You cannot lock the account you are signed in with",
+    "cannotDeleteSelf": "You cannot delete the account you are signed in with"
+  },
+  "form": {
+    "addTitle": "Add user",
+    "editTitle": "Edit user",
+    "name": "Name",
+    "email": "Email",
+    "password": "Temporary password",
+    "passwordHint": "At least 8 characters with letters and numbers. The user must change it at first sign-in.",
+    "role": "Role",
+    "ownRole": "You cannot change your own role.",
+    "nameEmailRequired": "Please enter a name and an email.",
+    "passwordRule": "The temporary password needs at least 8 characters with letters and numbers.",
+    "saveFailed": "Could not save the user."
+  },
+  "confirm": {
+    "deleteTitle": "Delete user",
+    "deleteMessage": "Delete \"{{name}}\"? This cannot be undone. Accounts with bookings can only be locked.",
+    "lockTitle": "Lock account",
+    "lockMessage": "Lock \"{{name}}\"? They will be signed out and unable to sign in.",
+    "unlockTitle": "Unlock account",
+    "unlockMessage": "Unlock \"{{name}}\"?"
+  },
+  "toast": {
+    "created": "Added \"{{name}}\"",
+    "updated": "Updated \"{{name}}\"",
+    "deleted": "Deleted \"{{name}}\"",
+    "locked": "Locked \"{{name}}\"",
+    "unlocked": "Unlocked \"{{name}}\""
+  }
+}

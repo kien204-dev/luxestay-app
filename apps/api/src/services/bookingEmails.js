@@ -10,6 +10,7 @@ const { daysBetween } = require("../utils/time.js");
 //   confirmed  the booking is confirmed (paid online, paid at the desk, or
 //              confirmed by the property)
 //   cancelled  the booking was cancelled by the guest or the property
+//   expired    the booking cancelled itself: it was not paid in time
 //
 // They are sent after the database transaction has committed and never
 // awaited by the request: a mail server being slow or down must not delay or
@@ -24,12 +25,14 @@ const TEXT = {
       received: "Đã nhận đặt phòng {code} – chờ thanh toán",
       confirmed: "Xác nhận đặt phòng {code}",
       cancelled: "Đặt phòng {code} đã được hủy",
+      expired: "Đặt phòng {code} đã tự hủy do quá hạn thanh toán",
     },
     greeting: "Xin chào {name},",
     intro: {
       received: "Chúng tôi đã nhận đặt phòng của bạn tại {property}. Phòng được giữ {minutes} phút để bạn thanh toán; quá thời gian này đặt phòng sẽ tự hủy.",
       confirmed: "Đặt phòng của bạn tại {property} đã được xác nhận. Hẹn gặp bạn!",
       cancelled: "Đặt phòng của bạn tại {property} đã được hủy.",
+      expired: "Đặt phòng của bạn tại {property} đã tự hủy vì chưa được thanh toán trong {minutes} phút giữ chỗ. Nếu vẫn muốn ở, bạn có thể đặt lại; phòng có thể vẫn còn trống.",
     },
     refundPending: "Khoản bạn đã thanh toán sẽ được hoàn lại. Chúng tôi sẽ liên hệ khi hoàn tiền xong.",
     labels: {
@@ -62,12 +65,14 @@ const TEXT = {
       received: "Booking {code} received – awaiting payment",
       confirmed: "Booking {code} confirmed",
       cancelled: "Booking {code} cancelled",
+      expired: "Booking {code} cancelled: payment not received in time",
     },
     greeting: "Hello {name},",
     intro: {
       received: "We have received your booking at {property}. The room is held for {minutes} minutes while you pay; after that the booking cancels itself.",
       confirmed: "Your booking at {property} is confirmed. We look forward to seeing you!",
       cancelled: "Your booking at {property} has been cancelled.",
+      expired: "Your booking at {property} has been cancelled because it was not paid within the {minutes}-minute hold. If you still want to stay, you can book again; the room may still be free.",
     },
     refundPending: "Your payment will be refunded. We will be in touch once the refund has been made.",
     labels: {
@@ -154,7 +159,7 @@ function buildBookingEmail(kind, booking, property) {
     fill(t.intro[kind], { property: property.name, minutes: getPendingTtlMinutes() }),
     ...(kind === "cancelled" && booking.payment_status === "refund_pending" ? [t.refundPending] : []),
   ];
-  const policy = kind === "cancelled" ? "" : fill(t.policy, { days: property.freeCancellationDays });
+  const policy = kind === "cancelled" || kind === "expired" ? "" : fill(t.policy, { days: property.freeCancellationDays });
   const manageUrl = `${getPublicWebUrl()}/my-bookings`;
   const contactLines = [property.address, property.phone, property.email].filter(Boolean);
 

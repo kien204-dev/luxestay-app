@@ -20,18 +20,20 @@ export const CONTACT = {
   address: text(env.VITE_CONTACT_ADDRESS),
 };
 
-export const BRAND_COLORS = { navy: "#002366", gold: "#C5A059" };
+import { readThemeColors } from "../utils/themeColors";
 
 // First letter of the name, for the monogram used as logo mark and favicon.
 export const BRAND_INITIAL = (Array.from(APP_NAME)[0] || "L").toUpperCase();
 
 // A favicon drawn from the brand itself (monogram on the brand colour), so
 // rebranding does not leave another product's icon in the browser tab.
+// Colours come from the theme (--brand-primary / --brand-accent).
 export function brandFaviconDataUri(initial = BRAND_INITIAL) {
+  const { primary, accent } = readThemeColors();
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
-    `<rect width="64" height="64" rx="14" fill="${BRAND_COLORS.navy}"/>` +
+    `<rect width="64" height="64" rx="14" fill="${primary}"/>` +
     `<text x="32" y="44" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" ` +
-    `font-size="38" font-weight="700" fill="${BRAND_COLORS.gold}">${initial}</text></svg>`;
+    `font-size="38" font-weight="700" fill="${accent}">${initial}</text></svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

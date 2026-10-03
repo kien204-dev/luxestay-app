@@ -1,0 +1,57 @@
+{
+  "title": "Mã giảm giá",
+  "subtitle": "Mã khách nhập khi đặt phòng. Tắt một mã để ngừng nhận nó mà vẫn giữ lịch sử.",
+  "add": "Tạo mã mới",
+  "empty": "Chưa có mã giảm giá nào.",
+  "actionFailed": "Thao tác không thành công.",
+  "mobileLine": "Giảm {{value}} · đã dùng {{usage}}",
+  "expiresOn": "Hết hạn: {{date}}",
+  "status": {
+    "active": "Đang bật",
+    "inactive": "Đã tắt"
+  },
+  "type": {
+    "percent": "Phần trăm",
+    "fixed": "Số tiền cố định"
+  },
+  "columns": {
+    "code": "Mã",
+    "type": "Loại giảm",
+    "value": "Giá trị",
+    "usage": "Đã dùng / giới hạn",
+    "expires": "Hạn dùng",
+    "status": "Trạng thái",
+    "actions": "Thao tác"
+  },
+  "actions": {
+    "activate": "Bật",
+    "deactivate": "Tắt"
+  },
+  "form": {
+    "addTitle": "Tạo mã giảm giá",
+    "editTitle": "Sửa mã giảm giá",
+    "code": "Mã",
+    "codeHint": "3–50 ký tự: chữ, số, gạch ngang hoặc gạch dưới.",
+    "type": "Loại giảm",
+    "value": "Giá trị ({{unit}})",
+    "maxDiscount": "Giảm tối đa (đ, không bắt buộc)",
+    "minAmount": "Đơn tối thiểu (đ, không bắt buộc)",
+    "expires": "Hạn dùng",
+    "usageLimit": "Giới hạn lượt dùng (không bắt buộc)",
+    "noLimit": "Không giới hạn",
+    "noMinimum": "Không yêu cầu",
+    "create": "Tạo mã",
+    "saveFailed": "Không lưu được mã giảm giá.",
+    "currency": "đ"
+  },
+  "confirm": {
+    "title": "Tắt mã giảm giá",
+    "message": "Tắt mã \"{{code}}\"? Khách đang định dùng mã này sẽ không áp dụng được nữa."
+  },
+  "toast": {
+    "created": "Đã tạo mã giảm giá",
+    "updated": "Đã cập nhật mã giảm giá",
+    "activated": "Đã bật mã giảm giá",
+    "deactivated": "Đã tắt mã giảm giá"
+  }
+}

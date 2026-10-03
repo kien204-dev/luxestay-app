@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 import { getSocket } from "../services/socket";
+import i18n from "../i18n";
 
 const BookingNotificationsContext = createContext();
 
@@ -28,16 +29,16 @@ export function BookingNotificationsProvider({ children }) {
 
     const handleCreated = (booking) => {
       setNewBookingCount((count) => count + 1);
-      toast.info(`Có booking mới: ${formatBookingLabel(booking)}`);
+      toast.info(i18n.t("admin:live.newBooking", { booking: formatBookingLabel(booking) }));
     };
 
     // Money that has to be sent back by hand: keep these on screen longer.
     const handleRefundPending = (booking) => {
-      toast.error(`Booking #${booking.id} cần hoàn tiền. Xem trang Orders.`, 15000);
+      toast.error(i18n.t("admin:live.refundPending", { code: formatBookingLabel(booking) }), 15000);
     };
     const handleDuplicatePayment = (payment) => {
       toast.error(
-        `Booking #${payment.booking_id} bị thanh toán hai lần (${payment.transaction_ref}). Cần hoàn lại khoản thừa.`,
+        i18n.t("admin:live.duplicatePayment", { code: formatBookingLabel({ id: payment.booking_id }), ref: payment.transaction_ref }),
         15000
       );
     };

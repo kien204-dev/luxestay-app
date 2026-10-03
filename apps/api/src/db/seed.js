@@ -39,8 +39,8 @@ function getSeedAccounts() {
       password: adminPassword,
       role: "admin",
       // The default password is public (it is in the README), so the first
-      // login has to replace it.
-      mustChangePassword: adminPassword === DEFAULT_ADMIN_PASSWORD,
+      // login has to replace it, except on a public demo, where it stays.
+      mustChangePassword: adminPassword === DEFAULT_ADMIN_PASSWORD && process.env.DEMO_MODE !== "true",
     },
     {
       name: "Khách Demo",
@@ -310,7 +310,7 @@ async function seed(pool, { log = console.log, allRooms = false } = {}) {
   log("Seed complete");
 }
 
-module.exports = { seed, DEFAULT_ADMIN_PASSWORD, DEFAULT_USER_PASSWORD };
+module.exports = { seed, getSeedAccounts, DEFAULT_ADMIN_PASSWORD, DEFAULT_USER_PASSWORD };
 
 if (require.main === module) {
   const pool = require("./db");

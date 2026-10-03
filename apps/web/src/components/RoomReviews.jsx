@@ -1,43 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getRoomReviews } from "../services/reviewService";
+import { useAsyncData } from "../utils/useAsyncData";
 import StarRating from "./StarRating";
 
-function formatDate(value) {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("vi-VN");
-}
-
-// Small "★ 4.5 (12 đánh giá)" badge for room cards. Fetches with limit=1 —
-// the stats (averageRating/totalReviews) cover every non-hidden review for
-// the room regardless of page size, so this stays a cheap call.
+// Small "★ 4.5 (12 reviews)" badge for room cards. Asks for one review: the
+// stats cover every visible review whatever the page size.
 export function RoomRatingSummary({ roomId }) {
-  const [stats, setStats] = useState(null);
+  const { t } = useTranslation("site");
+  const { data } = useAsyncData(`rating:${roomId}`, () => getRoomReviews(roomId, { limit: 1 }));
 
-  useEffect(() => {
-    let cancelled = false;
-    getRoomReviews(roomId, { limit: 1 })
-      .then((result) => {
-        if (!cancelled) setStats(result);
-      })
-      .catch(() => {
-        if (!cancelled) setStats(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [roomId]);
-
-  if (!stats || stats.totalReviews === 0) {
-    return <span style={{ color: "#4f5d70", fontSize: 14 }}>Chưa có đánh giá</span>;
-  }
-
+  if (!data || data.totalReviews === 0) return <span className="review-muted">{t("reviews.none")}</span>;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-      <StarRating value={stats.averageRating} size={13} />
-      <span style={{ color: "#475569", fontSize: 14, fontWeight: 600 }}>
-        {stats.averageRating.toFixed(1)} ({stats.totalReviews} đánh giá)
+    <span className="review-summary">
+      <StarRating value={data.averageRating} size={13} />
+      <span>
+        {data.averageRating.toFixed(1)} ({t("reviews.count", { count: data.totalReviews })})
       </span>
     </span>
   );
@@ -45,135 +23,54 @@ export function RoomRatingSummary({ roomId }) {
 
 const PAGE_SIZE = 5;
 
-// Full paginated review list + rating summary, used inside the booking modal.
+// The room's reviews, a page at a time, with the rating summary.
 export default function RoomReviews({ roomId }) {
-  const [reviews, setReviews] = useState([]);
-  const [stats, setStats] = useState({ averageRating: 0, totalReviews: 0 });
+  const { t, i18n } = useTranslation("site");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  // Takes the target page explicitly rather than closing over the `page`
-  // state, so this isn't "an effect that re-fetches whenever `page`
-  // changes" (state driving an effect that sets that same state) — the
-  // mount effect below only depends on `roomId`, and the pagination
-  // buttons call this directly with the page they're switching to.
-  const loadReviews = useCallback(
-    (targetPage) => {
-      setLoading(true);
-      setError("");
-      return getRoomReviews(roomId, { page: targetPage, limit: PAGE_SIZE })
-        .then((result) => {
-          setReviews(result.data);
-          setStats({ averageRating: result.averageRating, totalReviews: result.totalReviews });
-          setTotalPages(result.pagination.totalPages);
-          setPage(targetPage);
-        })
-        .catch(() => {
-          setReviews([]);
-          setError("Không tải được đánh giá. Vui lòng thử lại.");
-        })
-        .finally(() => setLoading(false));
-    },
-    [roomId]
-  );
-
-  useEffect(() => {
-    Promise.resolve().then(() => loadReviews(1));
-  }, [roomId, loadReviews]);
+  const { data, loading, error, reload } = useAsyncData(`reviews:${roomId}:${page}`, () => getRoomReviews(roomId, { page, limit: PAGE_SIZE }));
+  const reviews = data?.data || [];
+  const totalPages = data?.pagination?.totalPages || 1;
+  const locale = i18n.language === "en" ? "en-US" : "vi-VN";
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-        <StarRating value={stats.averageRating} size={16} />
-        <span style={{ color: "#002366", fontWeight: 700, fontSize: 14 }}>
-          {stats.averageRating.toFixed(1)}
-        </span>
-        <span style={{ color: "#64748b", fontSize: 13 }}>· {stats.totalReviews} đánh giá</span>
-      </div>
-
-      {loading ? (
-        <p style={{ color: "#94a3b8", fontSize: 13 }}>Đang tải đánh giá...</p>
-      ) : error ? (
-        <p style={{ color: "#b91c1c", fontSize: 13 }}>
-          {error}{" "}
-          <button
-            type="button"
-            onClick={() => loadReviews(page)}
-            style={{ background: "none", border: "none", color: "#002366", textDecoration: "underline", cursor: "pointer", fontSize: 13, padding: 0 }}
-          >
-            Thử lại
-          </button>
-        </p>
-      ) : reviews.length === 0 ? (
-        <p style={{ color: "#94a3b8", fontSize: 13 }}>Chưa có đánh giá nào cho phòng này.</p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {reviews.map((review) => (
-            <div key={review.id} style={{ borderBottom: "1px solid #f1f5f9", paddingBottom: 14 }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 4,
-                  gap: 8,
-                }}
-              >
-                <strong style={{ color: "#002366", fontSize: 13 }}>{review.reviewer_name}</strong>
-                <span style={{ color: "#94a3b8", fontSize: 11, whiteSpace: "nowrap" }}>
-                  {formatDate(review.created_at)}
-                </span>
-              </div>
-              <StarRating value={review.rating} size={13} />
-              {review.comment && (
-                <p style={{ color: "#475569", fontSize: 13, margin: "6px 0 0", lineHeight: 1.6 }}>
-                  {review.comment}
-                </p>
-              )}
-            </div>
-          ))}
+    <div className="room-reviews">
+      {data && (
+        <div className="review-summary" style={{ marginBottom: 16 }}>
+          <StarRating value={data.averageRating} size={16} />
+          <strong>{data.averageRating.toFixed(1)}</strong>
+          <span className="review-muted">· {t("reviews.count", { count: data.totalReviews })}</span>
         </div>
       )}
 
+      {loading && !data ? (
+        <p className="review-muted">{t("reviews.loading")}</p>
+      ) : error ? (
+        <p className="g-error">
+          {t("reviews.loadFailed")}{" "}
+          <button type="button" className="review-link" onClick={reload}>{t("reviews.retry")}</button>
+        </p>
+      ) : reviews.length === 0 ? (
+        <p className="review-muted">{t("reviews.empty")}</p>
+      ) : (
+        <ul className="review-list">
+          {reviews.map((review) => (
+            <li key={review.id}>
+              <div className="review-head">
+                <strong>{review.reviewer_name}</strong>
+                <span className="review-muted">{new Date(review.created_at).toLocaleDateString(locale)}</span>
+              </div>
+              <StarRating value={review.rating} size={13} />
+              {review.comment && <p>{review.comment}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+
       {totalPages > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 16 }}>
-          <button
-            type="button"
-            onClick={() => loadReviews(Math.max(1, page - 1))}
-            disabled={page <= 1}
-            style={{
-              background: "none",
-              border: "1px solid #e2e8f0",
-              borderRadius: 6,
-              padding: "6px 12px",
-              fontSize: 12,
-              cursor: page <= 1 ? "not-allowed" : "pointer",
-              color: "#002366",
-            }}
-          >
-            ← Trước
-          </button>
-          <span style={{ fontSize: 12, color: "#64748b" }}>
-            Trang {page}/{totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => loadReviews(Math.min(totalPages, page + 1))}
-            disabled={page >= totalPages}
-            style={{
-              background: "none",
-              border: "1px solid #e2e8f0",
-              borderRadius: 6,
-              padding: "6px 12px",
-              fontSize: 12,
-              cursor: page >= totalPages ? "not-allowed" : "pointer",
-              color: "#002366",
-            }}
-          >
-            Sau →
-          </button>
+        <div className="pagination">
+          <button type="button" className="g-btn g-btn--outline g-btn--small" onClick={() => setPage(page - 1)} disabled={page <= 1}>{t("reviews.previous")}</button>
+          <span>{t("reviews.page", { page, total: totalPages })}</span>
+          <button type="button" className="g-btn g-btn--outline g-btn--small" onClick={() => setPage(page + 1)} disabled={page >= totalPages}>{t("reviews.next")}</button>
         </div>
       )}
     </div>

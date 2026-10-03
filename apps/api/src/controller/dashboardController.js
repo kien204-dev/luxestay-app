@@ -3,7 +3,8 @@ const pool = require("../db/db.js");
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 const { getPropertySettings } = require("../services/propertySettings");
-const { todayInAppTimezone } = require("../utils/time");
+const { daysBetween, getAppTimezone, todayInAppTimezone } = require("../utils/time");
+const { apiMessage } = require("../utils/apiMessages");
 
 // pdfkit's built-in standard fonts (Helvetica etc.) have no Vietnamese
 // glyph coverage, so PDF text needs an embedded Unicode font — Noto Sans
@@ -55,58 +56,67 @@ const STATUS_LABEL_VI = {
 
 const BRAND_NAVY = "FF0A1128";
 
-// Builds the [start, end) window plus empty buckets for a given range, so
-// callers never hardcode "this year" and can bucket by hour/day/month.
-function getRangeWindow(range) {
-  const now = new Date();
+// When a booking was made, as wall-clock time at the property.
+// bookings.created_at is a TIMESTAMP without zone, written by the database
+// in its own session timezone (CURRENT_TIMESTAMP); reading it in that zone
+// and converting to APP_TIMEZONE gives the property's local time whatever
+// timezone the database or the API server runs in. $1 is APP_TIMEZONE.
+function localCreatedAt(alias = "") {
+  return `((COALESCE(${alias}created_at, ${alias}check_in::timestamp) AT TIME ZONE current_setting('TimeZone')) AT TIME ZONE $1)`;
+}
+
+function shiftDate(date, days) {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+// The [start, end) window of a range in the property's local time, its
+// empty buckets, and where a local "YYYY-MM-DD HH" stamp falls in them.
+// Exported for the tests.
+function getRangeWindow(range, now = new Date()) {
+  const today = todayInAppTimezone(now);
+  const [year, month] = today.split("-").map(Number);
+  const pad = (n) => String(n).padStart(2, "0");
+  const window = (startDate, endDate, buckets, indexOf) => ({
+    start: `${startDate} 00:00:00`,
+    end: `${endDate} 00:00:00`,
+    buckets,
+    indexOf,
+  });
 
   if (range === "today") {
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
-    return {
-      start,
-      end,
-      buckets: Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`),
-      indexOf: (ts) => new Date(ts).getHours(),
-    };
+    return window(
+      today,
+      shiftDate(today, 1),
+      Array.from({ length: 24 }, (_, h) => `${pad(h)}:00`),
+      (stamp) => Number(stamp.slice(11, 13))
+    );
   }
 
   if (range === "week") {
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const end = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
-    const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
-    return {
-      start,
-      end,
-      buckets: Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
-        return WEEKDAY_LABELS[d.getDay()];
-      }),
-      indexOf: (ts) => Math.floor((new Date(ts) - start) / (24 * 60 * 60 * 1000)),
-    };
+    const startDate = shiftDate(today, -6);
+    return window(
+      startDate,
+      shiftDate(today, 1),
+      Array.from({ length: 7 }, (_, i) => WEEKDAY_LABELS[new Date(`${shiftDate(startDate, i)}T00:00:00Z`).getUTCDay()]),
+      (stamp) => daysBetween(startDate, stamp.slice(0, 10))
+    );
   }
 
   if (range === "month") {
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    const daysInMonth = Math.round((end - start) / (24 * 60 * 60 * 1000));
-    return {
-      start,
-      end,
-      buckets: Array.from({ length: daysInMonth }, (_, i) => String(i + 1)),
-      indexOf: (ts) => new Date(ts).getDate() - 1,
-    };
+    const startDate = `${year}-${pad(month)}-01`;
+    const endDate = month === 12 ? `${year + 1}-01-01` : `${year}-${pad(month + 1)}-01`;
+    return window(
+      startDate,
+      endDate,
+      Array.from({ length: daysBetween(startDate, endDate) }, (_, i) => String(i + 1)),
+      (stamp) => Number(stamp.slice(8, 10)) - 1
+    );
   }
 
-  // "year" (also used as the buckets source when stats range is "all")
-  const start = new Date(now.getFullYear(), 0, 1);
-  const end = new Date(now.getFullYear() + 1, 0, 1);
-  return {
-    start,
-    end,
-    buckets: MONTH_LABELS,
-    indexOf: (ts) => new Date(ts).getMonth(),
-  };
+  // "year"
+  return window(`${year}-01-01`, `${year + 1}-01-01`, MONTH_LABELS, (stamp) => Number(stamp.slice(5, 7)) - 1);
 }
 
 // How many rooms have a guest tonight. Counted from confirmed bookings that
@@ -152,16 +162,14 @@ async function computeDashboardStats(rangeInput) {
   const range = STATS_RANGES.includes(rangeInput) ? rangeInput : "all";
   const window = range === "all" ? null : getRangeWindow(range);
 
-  const bookingWhere = window
-    ? "WHERE COALESCE(created_at, check_in::timestamp) >= $1 AND COALESCE(created_at, check_in::timestamp) < $2"
-    : "";
+  const bookingWhere = window ? `WHERE ${localCreatedAt()} >= $2::timestamp AND ${localCreatedAt()} < $3::timestamp` : "";
   // Revenue is money actually received. A confirmed booking nobody has paid
   // for yet is reported separately as outstanding.
   const revenueWhere = window
     ? `${bookingWhere} AND payment_status = 'paid'`
     : "WHERE payment_status = 'paid'";
   const outstandingWhere = `${window ? `${bookingWhere} AND` : "WHERE"} status IN ('confirmed', 'completed') AND payment_status IN ('unpaid', 'pending', 'failed')`;
-  const params = window ? [window.start, window.end] : [];
+  const params = window ? [getAppTimezone(), window.start, window.end] : [];
 
   const occupancy = await computeRoomOccupancy();
 
@@ -218,7 +226,7 @@ exports.getDashboardStats = async (req, res) => {
   } catch (err) {
     console.error("GET DASHBOARD STATS ERROR:", err);
     res.status(500).json({
-      message: "Server error when loading dashboard stats",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -227,6 +235,7 @@ exports.getDashboardStats = async (req, res) => {
 async function computeDashboardAnalytics(rangeInput) {
   const range = ANALYTICS_RANGES.includes(rangeInput) ? rangeInput : "year";
   const { start, end, buckets, indexOf } = getRangeWindow(range);
+  const timezone = getAppTimezone();
 
   const [
     bookingsInRangeResult,
@@ -237,23 +246,23 @@ async function computeDashboardAnalytics(rangeInput) {
   ] = await Promise.all([
     pool.query(
       `
-      SELECT COALESCE(created_at, check_in::timestamp) AS ts, total_price, status, payment_status
+      SELECT to_char(${localCreatedAt()}, 'YYYY-MM-DD HH24') AS local_stamp, total_price, status, payment_status
       FROM bookings
-      WHERE COALESCE(created_at, check_in::timestamp) >= $1
-        AND COALESCE(created_at, check_in::timestamp) < $2
+      WHERE ${localCreatedAt()} >= $2::timestamp
+        AND ${localCreatedAt()} < $3::timestamp
       `,
-      [start, end]
+      [timezone, start, end]
     ),
     pool.query(
       `
       SELECT status, COUNT(*)::int AS count
       FROM bookings
-      WHERE COALESCE(created_at, check_in::timestamp) >= $1
-        AND COALESCE(created_at, check_in::timestamp) < $2
+      WHERE ${localCreatedAt()} >= $2::timestamp
+        AND ${localCreatedAt()} < $3::timestamp
       GROUP BY status
       ORDER BY status
       `,
-      [start, end]
+      [timezone, start, end]
     ),
     pool.query(
       `
@@ -265,13 +274,13 @@ async function computeDashboardAnalytics(rangeInput) {
         COALESCE(SUM(b.total_price) FILTER (WHERE b.payment_status = 'paid'), 0)::numeric AS revenue
       FROM rooms r
       JOIN bookings b ON b.room_id = r.id
-        AND COALESCE(b.created_at, b.check_in::timestamp) >= $1
-        AND COALESCE(b.created_at, b.check_in::timestamp) < $2
+        AND ${localCreatedAt("b.")} >= $2::timestamp
+        AND ${localCreatedAt("b.")} < $3::timestamp
       GROUP BY r.id, r.room_name, r.room_type
       ORDER BY booking_count DESC, revenue DESC, r.room_name ASC
       LIMIT 5
       `,
-      [start, end]
+      [timezone, start, end]
     ),
     computeRoomOccupancy().then((occupancy) => ({ rows: [occupancy] })),
     pool.query(`
@@ -296,7 +305,7 @@ async function computeDashboardAnalytics(rangeInput) {
   const bookingsByMonth = buckets.map((label) => ({ month: label, bookings: 0 }));
 
   bookingsInRangeResult.rows.forEach((row) => {
-    const idx = indexOf(row.ts);
+    const idx = indexOf(row.local_stamp);
     if (idx < 0 || idx >= buckets.length) return;
 
     bookingsByMonth[idx].bookings += 1;
@@ -343,7 +352,7 @@ exports.getDashboardAnalytics = async (req, res) => {
   } catch (err) {
     console.error("GET DASHBOARD ANALYTICS ERROR:", err);
     res.status(500).json({
-      message: "Server error when loading dashboard analytics",
+      ...apiMessage("SERVER_ERROR"),
     });
   }
 };
@@ -525,7 +534,7 @@ exports.exportDashboardReport = async (req, res) => {
   try {
     const format = String(req.query.format || "").toLowerCase();
     if (!EXPORT_FORMATS.has(format)) {
-      return res.status(400).json({ message: "format phải là 'xlsx' hoặc 'pdf'" });
+      return res.status(400).json({ ...apiMessage("INVALID_EXPORT_FORMAT") });
     }
 
     const stats = await computeDashboardStats(req.query.range);
@@ -551,6 +560,9 @@ exports.exportDashboardReport = async (req, res) => {
     return res.send(buffer);
   } catch (err) {
     console.error("EXPORT DASHBOARD REPORT ERROR:", err);
-    res.status(500).json({ message: "Lỗi server khi xuất báo cáo" });
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
+
+// For the tests.
+exports.getRangeWindow = getRangeWindow;

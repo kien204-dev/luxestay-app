@@ -131,6 +131,20 @@ async function start() {
   });
   initSocket(httpServer);
   startBookingMaintenanceJob();
+  startDemoResetJob();
+}
+
+// DEMO_MODE with DEMO_RESET_INTERVAL_HOURS: put the sample data back on a
+// timer (otherwise schedule `npm run demo:reset`).
+function startDemoResetJob() {
+  const { demoResetIntervalHours, isDemoMode } = require("./src/config/demo");
+  const hours = demoResetIntervalHours();
+  if (!isDemoMode() || !hours) return;
+
+  const { resetDemo } = require("./src/scripts/demo-reset");
+  setInterval(() => {
+    resetDemo(pool).catch((err) => console.error("DEMO RESET FAILED:", err.message));
+  }, hours * 60 * 60 * 1000).unref();
 }
 
 const BOOKING_MAINTENANCE_INTERVAL_MS = 60 * 1000;

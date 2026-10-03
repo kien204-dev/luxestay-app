@@ -14,10 +14,10 @@ export function getStatusFilterOptions(t) {
 }
 
 export const STATUS_STYLE = {
-  confirmed: { color: "#67e8b4", bg: "rgba(103,232,180,0.12)" },
-  pending: { color: "#fbbf24", bg: "rgba(251,191,36,0.12)" },
-  cancelled: { color: "#f87171", bg: "rgba(248,113,113,0.12)" },
-  completed: { color: "#9fa7ff", bg: "rgba(159,167,255,0.12)" },
+  confirmed: { color: "var(--color-success-strong)", bg: "color-mix(in srgb, var(--color-success-strong) 12%, transparent)" },
+  pending: { color: "var(--color-warning-strong)", bg: "color-mix(in srgb, var(--color-warning-strong) 12%, transparent)" },
+  cancelled: { color: "var(--color-danger-strong)", bg: "color-mix(in srgb, var(--color-danger-strong) 12%, transparent)" },
+  completed: { color: "var(--brand-primary)", bg: "color-mix(in srgb, var(--brand-primary) 12%, transparent)" },
 };
 
 export function getStatusLabel(t) {
@@ -30,12 +30,12 @@ export function getStatusLabel(t) {
 }
 
 export const PAYMENT_STATUS_STYLE = {
-  unpaid: { color: "#94a3b8", bg: "rgba(148,163,184,0.12)" },
-  pending: { color: "#fbbf24", bg: "rgba(251,191,36,0.12)" },
-  paid: { color: "#059669", bg: "rgba(5,150,105,0.12)" },
-  failed: { color: "#dc2626", bg: "rgba(220,38,38,0.12)" },
-  refund_pending: { color: "#d97706", bg: "rgba(217,119,6,0.12)" },
-  refunded: { color: "#94a3b8", bg: "rgba(148,163,184,0.12)" },
+  unpaid: { color: "var(--color-ink-muted)", bg: "color-mix(in srgb, var(--color-ink-muted) 12%, transparent)" },
+  pending: { color: "var(--color-warning-strong)", bg: "color-mix(in srgb, var(--color-warning-strong) 12%, transparent)" },
+  paid: { color: "var(--color-success-strong)", bg: "color-mix(in srgb, var(--color-success-strong) 12%, transparent)" },
+  failed: { color: "var(--color-danger-strong)", bg: "color-mix(in srgb, var(--color-danger-strong) 12%, transparent)" },
+  refund_pending: { color: "var(--color-warning-strong)", bg: "color-mix(in srgb, var(--color-warning-strong) 12%, transparent)" },
+  refunded: { color: "var(--color-ink-muted)", bg: "color-mix(in srgb, var(--color-ink-muted) 12%, transparent)" },
 };
 
 export function getPaymentStatusLabel(t) {
@@ -49,10 +49,7 @@ export function getPaymentStatusLabel(t) {
   };
 }
 
-export function formatMoney(value, lang = "vi") {
-  const amount = (Number(value) || 0).toLocaleString(lang === "en" ? "en-US" : "vi-VN");
-  return lang === "en" ? `${amount} VND` : `${amount} đ`;
-}
+export { formatMoney } from "../../utils/format";
 
 export function formatDate(value, lang = "vi") {
   if (!value) return "-";

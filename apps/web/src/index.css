@@ -1,32 +1,53 @@
 @import "tailwindcss";
 
 /*
-  Shared LuxeStay design tokens. One source of truth for both plain CSS and
-  React inline styles (which can reference these via style={{ color: "var(--color-gold-500)" }}).
-  Matches the navy/gold brand established on the public Booking page —
-  admin screens are being migrated to it one area at a time, starting with
-  the Dashboard.
+  Theme. The whole app — guest site, admin area, emails aside — takes its
+  colours from the two brand variables below; every other colour is derived
+  from them or is a neutral (text greys, success/danger). To rebrand, change
+  --brand-primary and --brand-accent (see docs/customization.md).
 */
 :root {
-  --color-navy-950: #05070f;
-  --color-navy-900: #0a1128;
-  --color-navy-800: #101a34;
-  --color-navy-700: #182545;
-  --color-gold-500: #c5a059;
-  --color-gold-400: #d8bb80;
-  --color-gold-100: rgba(197, 160, 89, 0.12);
+  --brand-primary: #002366;
+  --brand-accent: #c5a059;
+
+  /* Admin area: dark shades of the primary colour. */
+  --color-navy-950: color-mix(in oklab, var(--brand-primary) 10%, #05070f);
+  --color-navy-900: color-mix(in oklab, var(--brand-primary) 30%, #05070f);
+  --color-navy-800: color-mix(in oklab, var(--brand-primary) 42%, #070a14);
+  --color-navy-700: color-mix(in oklab, var(--brand-primary) 52%, #0b1020);
+  --color-gold-500: var(--brand-accent);
+  --color-gold-400: color-mix(in oklab, var(--brand-accent) 72%, #ffffff);
+  --color-gold-100: color-mix(in srgb, var(--brand-accent) 12%, transparent);
+  /* Light surfaces (guest site, light dialogs). */
+  --color-primary-deep: color-mix(in oklab, var(--brand-primary) 70%, #000000);
+  --color-accent-strong: color-mix(in oklab, var(--brand-accent) 55%, #000000);
+  --color-accent-ink: color-mix(in oklab, var(--brand-accent) 30%, #000000);
+  --color-primary-night: color-mix(in oklab, var(--brand-primary) 35%, #000000);
+  --color-on-accent: #1a1300;
+  --color-surface-light: #ffffff;
+  --color-ink: #1a1c1e;
+  --color-ink-muted: #4f5d70;
+  --color-line-light: color-mix(in srgb, var(--brand-primary) 14%, transparent);
+  --color-surface-muted: color-mix(in srgb, var(--brand-primary) 4%, #ffffff);
+  --color-danger-soft: color-mix(in srgb, var(--color-danger-strong) 8%, #ffffff);
+  --color-warning-soft: color-mix(in srgb, var(--color-warning-strong) 8%, #ffffff);
 
   --color-text-primary: #ede7da;
   --color-text-secondary: #a3aac4;
-  --color-text-muted: #6f7794;
+  --color-text-muted: #8f97b1;
 
-  --color-border: rgba(197, 160, 89, 0.18);
+  --color-border: color-mix(in srgb, var(--brand-accent) 18%, transparent);
   --color-border-soft: rgba(148, 163, 184, 0.14);
 
   --color-success: #67e8b4;
   --color-warning: #fbbf24;
   --color-danger: #f87171;
   --color-info: #7dd3fc;
+  /* Same meanings, dark enough for text on light backgrounds. */
+  --color-success-strong: #047857;
+  --color-warning-strong: #b45309;
+  --color-danger-strong: #b91c1c;
+  --color-info-strong: #0369a1;
 
   /*
     System font stacks only (no external @font-face/CDN import): webfonts
@@ -53,12 +74,20 @@
   --shadow-card-hover: 0 14px 40px rgba(0, 0, 0, 0.34);
 }
 
-html, body, #root {
+/* The document itself scrolls (no fixed-height html/body): window.scrollTo,
+   anchor links, sticky headers and full-page screenshots all behave as
+   browsers expect. overflow-x: clip hides sideways overflow without turning
+   body into a scroll container. */
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow-x: hidden;
+}
+body {
+  overflow-x: clip;
+}
+#root {
+  min-height: 100vh;
 }
 
 /*
@@ -78,9 +107,9 @@ html, body, #root {
 .luxe-skeleton {
   background: linear-gradient(
     90deg,
-    rgba(197, 160, 89, 0.06) 25%,
-    rgba(197, 160, 89, 0.14) 37%,
-    rgba(197, 160, 89, 0.06) 63%
+    color-mix(in srgb, var(--brand-accent) 6%, transparent) 25%,
+    color-mix(in srgb, var(--brand-accent) 14%, transparent) 37%,
+    color-mix(in srgb, var(--brand-accent) 6%, transparent) 63%
   );
   background-size: 400% 100%;
   animation: luxe-shimmer 1.6s ease-in-out infinite;
@@ -91,16 +120,33 @@ html, body, #root {
 .luxe-skeleton-light {
   background: linear-gradient(
     90deg,
-    rgba(0, 35, 102, 0.06) 25%,
-    rgba(0, 35, 102, 0.12) 37%,
-    rgba(0, 35, 102, 0.06) 63%
+    color-mix(in srgb, var(--brand-primary) 6%, transparent) 25%,
+    color-mix(in srgb, var(--brand-primary) 12%, transparent) 37%,
+    color-mix(in srgb, var(--brand-primary) 6%, transparent) 63%
   );
   background-size: 400% 100%;
   animation: luxe-shimmer 1.6s ease-in-out infinite;
   border-radius: 12px;
 }
-/* The account page lays its columns out with inline grid styles; on a phone
-   they stack instead of squeezing the form off the screen. */
-@media (max-width: 760px) {
-  .settings-grid { grid-template-columns: minmax(0, 1fr) !important; }
-}
+
+/* ConfirmModal (components/ConfirmModal.jsx), for both the guest site
+   (light) and the admin area (dark). */
+.confirm-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 3500; padding: 16px; }
+.confirm-dialog { --confirm-accent: var(--color-gold-500); --confirm-on-accent: var(--color-navy-950); width: 100%; max-width: 400px; border-radius: var(--radius-lg); padding: 24px; box-sizing: border-box; }
+.confirm-dialog h3 { margin: 0 0 10px; font-size: 18px; font-weight: 700; }
+.confirm-dialog p { margin: 0 0 22px; font-size: 14px; line-height: 1.6; }
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-actions button { flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-family: inherit; font-size: 14px; cursor: pointer; }
+.confirm-actions button:disabled { opacity: 0.7; cursor: not-allowed; }
+.confirm-ok { border: none; background: var(--confirm-accent); color: var(--confirm-on-accent); }
+.confirm-cancel { background: transparent; }
+.confirm-dialog--dark { background: var(--color-navy-700); border: 1px solid var(--color-border-soft); box-shadow: var(--shadow-card-hover); color: var(--color-text-secondary); }
+.confirm-dialog--dark h3 { font-family: var(--font-serif); color: var(--color-text-primary); }
+.confirm-dialog--dark .confirm-cancel { border: 1px solid var(--color-border-soft); color: var(--color-text-secondary); }
+.confirm-dialog--dark.confirm-dialog--danger { --confirm-accent: var(--color-danger); }
+.confirm-dialog--dark.confirm-dialog--warning { --confirm-accent: var(--color-warning); }
+.confirm-dialog--light { background: var(--color-surface-light); border: 1px solid var(--color-line-light); box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25); color: var(--color-ink-muted); --confirm-accent: var(--brand-primary); --confirm-on-accent: #ffffff; }
+.confirm-dialog--light h3 { color: var(--brand-primary); }
+.confirm-dialog--light .confirm-cancel { border: 1px solid var(--color-line-light); color: var(--color-ink-muted); }
+.confirm-dialog--light.confirm-dialog--danger { --confirm-accent: var(--color-danger-strong); }
+.confirm-dialog--light.confirm-dialog--warning { --confirm-accent: var(--color-warning-strong); }

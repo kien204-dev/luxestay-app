@@ -1,0 +1,56 @@
+{
+  "greeting": "Xin chào, {{name}}",
+  "refresh": "Làm mới",
+  "save": "Lưu",
+  "saving": "Đang lưu...",
+  "cancel": "Hủy",
+  "close": "Đóng",
+  "edit": "Sửa",
+  "delete": "Xóa",
+  "retry": "Thử lại",
+  "processing": "Đang xử lý...",
+  "confirm": "Xác nhận",
+  "all": "Tất cả",
+  "none": "(không có)",
+  "search": "Tìm kiếm",
+  "loadFailed": "Không tải được dữ liệu.",
+  "roles": {
+    "admin": "Quản trị",
+    "user": "Khách"
+  },
+  "nav": {
+    "label": "Quản trị",
+    "dashboard": "Tổng quan",
+    "guestSite": "Trang khách",
+    "rooms": "Phòng",
+    "users": "Người dùng",
+    "orders": "Đặt phòng",
+    "calendar": "Lịch phòng",
+    "coupons": "Mã giảm giá",
+    "property": "Cơ sở lưu trú",
+    "destinations": "Ảnh điểm đến",
+    "account": "Tài khoản",
+    "logout": "Đăng xuất",
+    "newBookings": "{{count}} đặt phòng mới"
+  },
+  "pagination": {
+    "showing": "Hiển thị {{from}}–{{to}} trên {{total}}",
+    "page": "Trang {{page}}/{{totalPages}}",
+    "previous": "Trang trước",
+    "next": "Trang sau"
+  },
+  "demo": {
+    "banner": "Bản demo: bạn có thể thử mọi chức năng, nhưng không xóa hay sửa được dữ liệu quan trọng. Dữ liệu được đặt lại định kỳ.",
+    "bannerTimed": "Bản demo: bạn có thể thử mọi chức năng, nhưng không xóa hay sửa được dữ liệu quan trọng. Dữ liệu được đặt lại mỗi {{hours}} giờ."
+  },
+  "image": {
+    "types": "PNG, JPG hoặc WebP, tối đa 10 MB. Ảnh được tự xoay đúng chiều, bỏ thông tin vị trí và nén lại.",
+    "badType": "Ảnh phải là PNG, JPG hoặc WebP.",
+    "tooLarge": "Ảnh không được lớn hơn 10 MB."
+  },
+  "live": {
+    "newBooking": "Đặt phòng mới: {{booking}}",
+    "refundPending": "{{code}} cần hoàn tiền. Xem trang Đặt phòng.",
+    "duplicatePayment": "{{code}} bị thanh toán hai lần ({{ref}}). Cần hoàn lại khoản thừa."
+  }
+}

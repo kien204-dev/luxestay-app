@@ -4,13 +4,13 @@
   rebrand is a matter of changing these few values.
 */
 .guest {
-  --g-navy: #002366;
-  --g-navy-deep: #001640;
-  --g-gold: #c5a059;
-  --g-gold-soft: rgba(197, 160, 89, 0.14);
+  --g-navy: var(--brand-primary);
+  --g-navy-deep: var(--color-primary-deep);
+  --g-gold: var(--brand-accent);
+  --g-gold-soft: color-mix(in srgb, var(--brand-accent) 14%, transparent);
   --g-ink: #1a1c1e;
   --g-muted: #4f5d70;
-  --g-line: rgba(0, 35, 102, 0.12);
+  --g-line: color-mix(in srgb, var(--brand-primary) 12%, transparent);
   --g-bg: #fafafa;
   --g-card: #ffffff;
   --g-danger: #b91c1c;
@@ -30,7 +30,7 @@
 .guest-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; box-sizing: border-box; }
 .guest-section { padding: 64px 0; }
 /* The gold is too light for small text on white; the eyebrow uses a darker shade of it. */
-.guest-eyebrow { color: #8a6a2f; font-size: 13px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+.guest-eyebrow { color: var(--color-accent-strong); font-size: 13px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
 .guest-section-title { font-size: 34px; margin-top: 8px; }
 .guest .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .guest-muted { color: var(--g-muted); }
@@ -54,12 +54,12 @@
 .g-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .g-btn:not(:disabled):hover { opacity: 0.92; }
 .g-btn--primary { background: var(--g-navy); color: #fff; }
-.g-btn--gold { background: var(--g-gold); color: #1a1300; }
+.g-btn--gold { background: var(--g-gold); color: var(--color-on-accent); }
 .g-btn--outline { background: transparent; color: var(--g-navy); border-color: var(--g-navy); }
 .g-btn--block { width: 100%; }
 /* Links styled as buttons: keep the button colour, not the inherited link colour. */
 .guest a.g-btn--primary { color: #fff; }
-.guest a.g-btn--gold { color: #1a1300; }
+.guest a.g-btn--gold { color: var(--color-on-accent); }
 .guest a.g-btn--outline { color: var(--g-navy); }
 .g-btn--small { padding: 8px 14px; font-size: 14px; }
 
@@ -69,14 +69,14 @@
 .g-input { width: 100%; box-sizing: border-box; border: 1px solid var(--g-line); border-radius: 10px; padding: 11px 12px; font-size: 16px; font-family: inherit; color: var(--g-ink); background: #fff; }
 .g-input:focus { outline: 2px solid var(--g-gold); outline-offset: 1px; }
 .g-error { color: var(--g-danger); font-size: 14px; margin: 0; }
-.g-note { background: var(--g-gold-soft); border: 1px solid rgba(197, 160, 89, 0.35); border-radius: 10px; padding: 12px 14px; font-size: 14px; line-height: 1.55; color: #4a3b12; }
+.g-note { background: var(--g-gold-soft); border: 1px solid color-mix(in srgb, var(--brand-accent) 35%, transparent); border-radius: 10px; padding: 12px 14px; font-size: 14px; line-height: 1.55; color: var(--color-accent-ink); }
 .g-note ul { list-style: disc; margin: 6px 0 0; padding-left: 18px; }
 .g-note li + li { margin-top: 4px; }
 .g-alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 10px 12px; color: var(--g-danger); font-size: 14px; line-height: 1.5; }
 
 /* ------------------------------------------------------------------ hero */
 .guest-hero { position: relative; color: #fff; padding: 84px 0 72px; background:
-    radial-gradient(900px 420px at 85% -10%, rgba(197, 160, 89, 0.35), transparent 60%),
+    radial-gradient(900px 420px at 85% -10%, color-mix(in srgb, var(--brand-accent) 35%, transparent), transparent 60%),
     radial-gradient(700px 380px at 0% 110%, rgba(255, 255, 255, 0.10), transparent 60%),
     linear-gradient(135deg, var(--g-navy) 0%, var(--g-navy-deep) 100%); }
 .guest-hero h1 { color: #fff; font-size: clamp(34px, 6vw, 58px); line-height: 1.1; max-width: 760px; }
@@ -84,12 +84,12 @@
 /* With a photo from /admin/property: the photo under a dark veil, so the
    white text and the search box keep their contrast whatever the photo. */
 .guest-hero--photo { padding: 112px 0 96px; background:
-    linear-gradient(180deg, rgba(0, 12, 40, 0.62) 0%, rgba(0, 12, 40, 0.72) 55%, rgba(0, 12, 40, 0.86) 100%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-primary-night) 62%, transparent) 0%, color-mix(in srgb, var(--color-primary-night) 72%, transparent) 55%, color-mix(in srgb, var(--color-primary-night) 86%, transparent) 100%),
     var(--hero-image) center / cover no-repeat,
     var(--g-navy-deep); }
 .guest-hero--photo h1, .guest-hero--photo p { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
 
-.search-bar { display: grid; grid-template-columns: 1.4fr 1fr 1fr 0.8fr auto; gap: 12px; align-items: end; background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 18px 50px rgba(0, 12, 40, 0.22); color: var(--g-ink); }
+.search-bar { display: grid; grid-template-columns: 1.4fr 1fr 1fr 0.8fr auto; gap: 12px; align-items: end; background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 18px 50px color-mix(in srgb, var(--color-primary-night) 22%, transparent); color: var(--g-ink); }
 .search-bar--flat { box-shadow: none; border: 1px solid var(--g-line); }
 .search-bar .g-btn { height: 46px; white-space: nowrap; }
 .search-bar-error { grid-column: 1 / -1; }
@@ -101,17 +101,17 @@
 .dest-card:hover img { transform: scale(1.05); }
 /* The name sits on a dark band that fades up from the bottom of the photo:
    crisp white text, no heavy shadow. */
-.dest-card-body { position: absolute; inset: auto 0 0 0; padding: 56px 16px 14px; background: linear-gradient(to top, rgba(0, 10, 32, 0.92) 0%, rgba(0, 10, 32, 0.7) 45%, rgba(0, 10, 32, 0) 100%); color: #fff; }
+.dest-card-body { position: absolute; inset: auto 0 0 0; padding: 56px 16px 14px; background: linear-gradient(to top, color-mix(in srgb, var(--color-primary-night) 92%, transparent) 0%, color-mix(in srgb, var(--color-primary-night) 70%, transparent) 45%, color-mix(in srgb, var(--color-primary-night) 0%, transparent) 100%); color: #fff; }
 .dest-card-body strong { display: block; font-family: var(--font-serif); font-size: 22px; font-weight: 700; line-height: 1.25; color: #fff; }
 .dest-card-body span { display: block; margin-top: 2px; font-size: 14px; color: rgba(255, 255, 255, 0.92); }
 .dest-card-credit { position: absolute; top: 8px; right: 8px; max-width: calc(100% - 16px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0, 0, 0, 0.6); color: #fff; font-size: 12px; line-height: 1.4; padding: 2px 8px; border-radius: 6px; }
 
 .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px; margin-top: 32px; }
 .room-card { display: flex; flex-direction: column; background: var(--g-card); border: 1px solid var(--g-line); border-radius: var(--g-radius); overflow: hidden; transition: box-shadow 0.2s ease, transform 0.2s ease; }
-.room-card:hover { box-shadow: 0 14px 34px rgba(0, 35, 102, 0.12); transform: translateY(-2px); }
+.room-card:hover { box-shadow: 0 14px 34px color-mix(in srgb, var(--brand-primary) 12%, transparent); transform: translateY(-2px); }
 .room-card-media { position: relative; aspect-ratio: 4 / 3; background: var(--g-navy); }
 .room-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.room-card-badge { position: absolute; top: 12px; left: 12px; background: rgba(0, 35, 102, 0.86); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; }
+.room-card-badge { position: absolute; top: 12px; left: 12px; background: color-mix(in srgb, var(--brand-primary) 86%, transparent); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; }
 .room-card-body { display: flex; flex-direction: column; gap: 8px; padding: 16px; flex: 1; }
 .room-card-body h3 { font-size: 20px; line-height: 1.3; }
 .room-card-meta { color: var(--g-muted); font-size: 14px; }
@@ -150,7 +150,7 @@
 .gallery-thumb.is-active { border-color: var(--g-gold); }
 .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.booking-panel { position: sticky; top: 88px; background: var(--g-card); border: 1px solid var(--g-line); border-radius: 16px; padding: 22px; box-shadow: 0 14px 40px rgba(0, 35, 102, 0.08); display: flex; flex-direction: column; gap: 14px; }
+.booking-panel { position: sticky; top: 88px; background: var(--g-card); border: 1px solid var(--g-line); border-radius: 16px; padding: 22px; box-shadow: 0 14px 40px color-mix(in srgb, var(--brand-primary) 8%, transparent); display: flex; flex-direction: column; gap: 14px; }
 .booking-panel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .booking-summary { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--g-line); padding-top: 12px; font-size: 14px; }
 .booking-summary div { display: flex; justify-content: space-between; gap: 12px; }
@@ -187,14 +187,14 @@
   --color-navy-900: #ffffff;
   --color-navy-800: #ffffff;
   --color-navy-700: #f1f5f9;
-  --color-gold-500: #002366;
-  --color-gold-400: #002366;
-  --color-gold-100: rgba(0, 35, 102, 0.08);
+  --color-gold-500: var(--brand-primary);
+  --color-gold-400: var(--brand-primary);
+  --color-gold-100: color-mix(in srgb, var(--brand-primary) 8%, transparent);
   --color-text-primary: #1a1c1e;
   --color-text-secondary: #475569;
   --color-text-muted: #64748b;
-  --color-border: rgba(0, 35, 102, 0.25);
-  --color-border-soft: rgba(0, 35, 102, 0.14);
+  --color-border: color-mix(in srgb, var(--brand-primary) 25%, transparent);
+  --color-border-soft: color-mix(in srgb, var(--brand-primary) 14%, transparent);
   --color-success: #047857;
   --color-danger: #b91c1c;
   padding: 32px 0 72px;
@@ -226,7 +226,7 @@
 @media (max-width: 960px) {
   .detail-layout { grid-template-columns: 1fr; gap: 24px; }
   .booking-panel { position: static; scroll-margin-top: 84px; }
-  .mobile-book-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #fff; border-top: 1px solid var(--g-line); padding: 10px 16px; box-shadow: 0 -6px 20px rgba(0, 35, 102, 0.08); }
+  .mobile-book-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #fff; border-top: 1px solid var(--g-line); padding: 10px 16px; box-shadow: 0 -6px 20px color-mix(in srgb, var(--brand-primary) 8%, transparent); }
   .detail-layout { padding-bottom: 96px; }
   .search-bar { grid-template-columns: 1fr 1fr; }
   .search-bar > .g-field:first-child, .search-bar > .g-btn { grid-column: 1 / -1; }
@@ -258,3 +258,41 @@
   .search-bar { grid-template-columns: 1fr; }
   .booking-panel-row { grid-template-columns: 1fr; }
 }
+
+/* ------------------------------------------------------------ sign-in pages */
+.auth-wrap { display: flex; justify-content: center; padding: 48px 16px 72px; }
+.auth-card { width: 100%; max-width: 460px; background: var(--g-card); border: 1px solid var(--g-line); border-radius: 18px; padding: 32px; box-shadow: 0 18px 50px color-mix(in srgb, var(--brand-primary) 10%, transparent); box-sizing: border-box; }
+.auth-card h1 { font-size: 30px; margin-bottom: 6px; }
+.auth-card > p.auth-sub { color: var(--g-muted); margin: 0 0 22px; line-height: 1.55; font-size: 15px; }
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.auth-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.guest .auth-link { color: var(--g-navy); font-weight: 600; text-decoration: underline; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 14px; color: var(--g-muted); font-size: 14px; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--g-line); }
+.auth-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--g-line); background: #ffffff; color: var(--g-ink); font-weight: 600; font-size: 15px; font-family: inherit; cursor: pointer; }
+.auth-google:disabled { opacity: 0.55; cursor: not-allowed; }
+.auth-foot { margin: 22px 0 0; text-align: center; color: var(--g-muted); font-size: 15px; }
+.auth-success { background: color-mix(in srgb, var(--color-success-strong) 10%, #ffffff); border: 1px solid color-mix(in srgb, var(--color-success-strong) 35%, transparent); color: var(--color-success-strong); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.5; }
+.auth-password { position: relative; }
+.auth-password .g-input { padding-right: 76px; }
+.auth-password button { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--g-navy); font-weight: 600; font-size: 13px; cursor: pointer; padding: 6px; font-family: inherit; }
+
+/* Result / error pages (payment result, 404, no access). */
+.status-card { text-align: center; }
+.status-card .auth-card { padding: 40px 32px; }
+.status-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; margin: 0 auto 18px; }
+.status-icon--success { background: color-mix(in srgb, var(--color-success-strong) 14%, transparent); color: var(--color-success-strong); }
+.status-icon--error { background: color-mix(in srgb, var(--color-danger-strong) 12%, transparent); color: var(--color-danger-strong); }
+.status-icon--pending { background: var(--g-gold-soft); color: var(--color-accent-strong); }
+.status-card p.status-text { color: var(--g-muted); font-size: 15px; line-height: 1.6; margin: 0 0 26px; }
+
+/* ----------------------------------------------------------------- reviews */
+.review-muted { color: var(--g-muted); font-size: 14px; }
+.review-summary { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--g-ink); }
+.review-summary strong { color: var(--g-navy); }
+.review-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+.review-list li { border-bottom: 1px solid var(--g-line); padding-bottom: 14px; }
+.review-list p { color: var(--g-ink); font-size: 15px; margin: 6px 0 0; line-height: 1.6; }
+.review-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.review-head strong { color: var(--g-navy); font-size: 15px; }
+.guest .review-link { background: none; border: none; color: var(--g-navy); text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0; font-family: inherit; }

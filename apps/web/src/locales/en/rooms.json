@@ -1,0 +1,84 @@
+{
+  "title": "Rooms",
+  "subtitle": "Rooms, prices, capacity and status. One row is one physical room.",
+  "add": "Add room",
+  "addFirst": "Add the first room",
+  "empty": "No rooms match these filters.",
+  "deleteFailed": "Could not delete the room.",
+  "perNight": "{{price}} / night",
+  "guests": "{{count}} guests",
+  "guests_one": "{{count}} guest",
+  "status": {
+    "available": "Available",
+    "booked": "Booked",
+    "maintenance": "Maintenance"
+  },
+  "columns": {
+    "room": "Room",
+    "type": "Type",
+    "location": "Location",
+    "price": "Price / night",
+    "capacity": "Capacity",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "filters": {
+    "search": "Search",
+    "searchPlaceholder": "Room name or type",
+    "status": "Status",
+    "anyStatus": "Any status",
+    "minPrice": "Price from",
+    "maxPrice": "Price to",
+    "minGuests": "Min. guests",
+    "sortBy": "Sort by",
+    "sortNewest": "Newest",
+    "sortName": "Name",
+    "sortPrice": "Price",
+    "order": "Order",
+    "desc": "Descending",
+    "asc": "Ascending",
+    "perPage": "Per page"
+  },
+  "form": {
+    "addTitle": "Add room",
+    "editTitle": "Edit room",
+    "name": "Room name",
+    "type": "Room type",
+    "typePlaceholder": "Deluxe, Standard, Suite...",
+    "status": "Status",
+    "location": "Location",
+    "locationPlaceholder": "Hoan Kiem, Ha Noi",
+    "locationHint": "Area, then the province or city after the last comma. The part after the last comma is the home page \"destination\".",
+    "price": "Price / night (VND)",
+    "capacity": "Capacity (guests)",
+    "description": "Description",
+    "cover": "Cover photo",
+    "uploadCover": "Upload photo",
+    "changeCover": "Change photo",
+    "uploading": "Uploading...",
+    "uploadFailed": "Could not upload the photo.",
+    "nameTypeRequired": "Please enter the room name and type.",
+    "priceInvalid": "The price must be greater than 0.",
+    "capacityInvalid": "Capacity must be a whole number greater than 0.",
+    "saveFailed": "Could not save the room."
+  },
+  "gallery": {
+    "title": "More photos",
+    "add": "Add photo",
+    "uploading": "Uploading...",
+    "remove": "Remove this photo",
+    "afterSave": "Save the room first, then open it again to add more photos.",
+    "uploadFailed": "Could not upload the photo.",
+    "deleteFailed": "Could not remove the photo.",
+    "loadFailed": "Could not load the photos."
+  },
+  "confirm": {
+    "deleteTitle": "Delete room",
+    "deleteMessage": "Delete \"{{name}}\"? This cannot be undone. A room with bookings cannot be deleted; set it to \"Maintenance\" instead."
+  },
+  "toast": {
+    "created": "Added \"{{name}}\"",
+    "updated": "Updated \"{{name}}\"",
+    "deleted": "Deleted \"{{name}}\""
+  }
+}

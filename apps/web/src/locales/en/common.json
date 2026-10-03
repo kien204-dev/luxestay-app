@@ -18,5 +18,13 @@
     "label": "Language",
     "vi": "Vietnamese",
     "en": "English"
-  }
+  },
+  "dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "working": "Working...",
+    "dismiss": "Dismiss notification"
+  },
+  "stars": "{{count}} stars",
+  "stars_one": "{{count}} star"
 }

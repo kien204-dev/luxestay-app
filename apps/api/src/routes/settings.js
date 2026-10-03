@@ -10,7 +10,7 @@ const {
   uploadHero,
   deleteHero,
 } = require("../controller/settingsController.js");
-const { handleLogoUpload } = require("../middleware/brandingUpload.js");
+const { handleLogoUpload, handleHeroUpload } = require("../middleware/brandingUpload.js");
 const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 const { uploadRateLimit } = require("../middleware/rateLimit");
 
@@ -24,7 +24,7 @@ router.get("/", verifyToken, checkRole("admin"), getAdminSettings);
 router.put("/", verifyToken, checkRole("admin"), updateSettings);
 router.post("/logo", verifyToken, checkRole("admin"), uploadRateLimit, handleLogoUpload, uploadLogo);
 router.delete("/logo", verifyToken, checkRole("admin"), deleteLogo);
-router.post("/hero", verifyToken, checkRole("admin"), uploadRateLimit, handleLogoUpload, uploadHero);
+router.post("/hero", verifyToken, checkRole("admin"), uploadRateLimit, handleHeroUpload, uploadHero);
 router.delete("/hero", verifyToken, checkRole("admin"), deleteHero);
 
 module.exports = router;

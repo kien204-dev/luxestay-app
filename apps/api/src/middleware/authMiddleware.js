@@ -2,11 +2,14 @@ require("dotenv").config({ quiet: true });
 const jwt = require("jsonwebtoken");
 const pool = require("../db/db");
 const { readAuthToken } = require("../services/authSession");
+const { apiMessage } = require("../utils/apiMessages");
+const { isBlockedForDemo, isDemoAccount } = require("../config/demo");
 
 const SECRET = process.env.JWT_SECRET;
 
-function unauthorized(res, message = "Token is invalid or expired") {
-  return res.status(401).json({ message });
+// Every 401 has the same code; the reason is kept in the message for logs.
+function unauthorized(res, reason = "Token is invalid or expired") {
+  return res.status(401).json({ ...apiMessage("UNAUTHORIZED"), reason });
 }
 
 async function verifyToken(req, res, next) {
@@ -60,8 +63,14 @@ async function verifyToken(req, res, next) {
     if (req.user.must_change_password && !passwordChangeRoute && !logoutRoute) {
       return res.status(403).json({
         code: "PASSWORD_CHANGE_REQUIRED",
-        message: "You must change your password before continuing",
+        ...apiMessage("PASSWORD_CHANGE_REQUIRED"),
       });
+    }
+
+    // Demo mode: the shared sample accounts cannot change what would spoil
+    // the demo for the next visitor (see config/demo.js).
+    if (isDemoAccount(req.user.email) && isBlockedForDemo(req.method, req.originalUrl)) {
+      return res.status(403).json(apiMessage("DEMO_READ_ONLY"));
     }
 
     return next();
@@ -81,7 +90,7 @@ function checkRole(...roles) {
 
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        message: "You do not have permission to access this resource",
+        ...apiMessage("FORBIDDEN"),
       });
     }
 

@@ -1,0 +1,56 @@
+{
+  "title": "Cơ sở lưu trú",
+  "subtitle": "Tên, logo, ảnh trang chủ, thông tin liên hệ và quy định. Có hiệu lực ngay trên trang khách, email và phiếu xác nhận, không cần cài đặt lại.",
+  "saved": "Đã lưu",
+  "image": {
+    "upload": "Tải ảnh lên",
+    "replace": "Đổi ảnh",
+    "remove": "Xóa ảnh",
+    "uploadFailed": "Không tải được ảnh lên.",
+    "removeFailed": "Không xóa được ảnh."
+  },
+  "logo": {
+    "title": "Logo",
+    "hint": "PNG, JPG hoặc WebP, tối đa 10 MB. Không có logo thì trang dùng chữ cái đầu của tên. Phiếu PDF dùng bản PNG được tạo tự động."
+  },
+  "hero": {
+    "title": "Ảnh nền trang chủ",
+    "hint": "Ảnh ngang, tối đa 10 MB; được thu về tối đa 2400 px. Trang chủ phủ lớp tối lên ảnh để chữ luôn dễ đọc. Chỉ dùng ảnh bạn có quyền sử dụng.",
+    "none": "Chưa có ảnh: trang chủ dùng nền màu"
+  },
+  "form": {
+    "title": "Thông tin và quy định",
+    "subtitle": "Để trống một ô để dùng giá trị mặc định ghi bên dưới.",
+    "default": "Mặc định: {{value}}",
+    "noDefault": "(không có)",
+    "save": "Lưu thông tin",
+    "saveFailed": "Không lưu được thông tin."
+  },
+  "fields": {
+    "name": "Tên cơ sở lưu trú",
+    "phone": "Số điện thoại",
+    "email": "Email liên hệ",
+    "address": "Địa chỉ",
+    "checkInTime": "Giờ nhận phòng",
+    "checkOutTime": "Giờ trả phòng",
+    "freeCancellationDays": "Số ngày hủy miễn phí trước ngày nhận phòng"
+  },
+  "destinations": {
+    "title": "Ảnh điểm đến",
+    "subtitle": "Ảnh trên các thẻ \"Điểm đến\" ở trang chủ. Điểm đến lấy từ địa chỉ của phòng (phần sau dấu phẩy cuối). Đổi ảnh có hiệu lực ngay.",
+    "rooms": "{{count}} phòng",
+    "rooms_one": "{{count}} phòng",
+    "noPhoto": "chưa có ảnh riêng: thẻ dùng ảnh phòng đầu tiên hoặc hình vẽ",
+    "creditHint": "Ảnh của bạn: để trống phần giấy phép. Ảnh CC BY / CC BY-SA: ghi đủ tác giả và giấy phép để thẻ điểm đến và trang Ghi công ảnh hiển thị.",
+    "saveCredit": "Lưu ghi công",
+    "creditFailed": "Không lưu được ghi công.",
+    "fields": {
+      "place": "Địa danh trong ảnh",
+      "author": "Tác giả",
+      "license": "Giấy phép (vd. CC BY 4.0)",
+      "licenseUrl": "Link giấy phép",
+      "title": "Tiêu đề gốc",
+      "sourceUrl": "Link trang gốc của ảnh"
+    }
+  }
+}

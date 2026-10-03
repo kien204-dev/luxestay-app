@@ -1,16 +1,17 @@
 const { publicUrl } = require("../services/storage");
+const { apiMessage } = require("../utils/apiMessages");
 
 // The image itself was verified and stored by the upload middleware; these
 // just tell the client where it now lives.
 exports.uploadRoomImage = (req, res) => {
   if (!req.file) {
     return res.status(400).json({
-      message: "No image file uploaded",
+      ...apiMessage("NO_IMAGE_UPLOADED"),
     });
   }
 
   res.status(201).json({
-    message: "Room image uploaded successfully",
+    ...apiMessage("ROOM_IMAGE_UPLOADED"),
     image: publicUrl(req, req.file.storedPath),
   });
 };
@@ -18,12 +19,12 @@ exports.uploadRoomImage = (req, res) => {
 exports.uploadAvatar = (req, res) => {
   if (!req.file) {
     return res.status(400).json({
-      message: "No image file uploaded",
+      ...apiMessage("NO_IMAGE_UPLOADED"),
     });
   }
 
   res.status(201).json({
-    message: "Avatar uploaded successfully",
+    ...apiMessage("AVATAR_UPLOADED"),
     avatarUrl: publicUrl(req, req.file.storedPath),
   });
 };

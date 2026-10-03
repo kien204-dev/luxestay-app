@@ -1,93 +1,36 @@
-import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Sidebar from "../layout/components/Sidebar";
 import { useAuth } from "../context/AuthContext";
+import { useProperty } from "../context/PropertyContext";
+import { LanguageSwitch } from "../components/admin/ui";
+import "../styles/admin.css";
 
 function MainLayout({ children }) {
+  const { t } = useTranslation("admin");
   const { user } = useAuth();
-  const [compact, setCompact] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => setCompact(window.innerWidth < 900);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const property = useProperty();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: compact ? "column" : "row",
-        minHeight: "100vh",
-        width: "100%",
-        background: "var(--color-navy-950)",
-        color: "var(--color-text-primary)",
-        fontFamily: "var(--font-sans)",
-      }}
-    >
-      <Sidebar compact={compact} />
+    <div className="adm-shell">
+      <Sidebar />
 
-      <main
-        style={{
-          marginLeft: compact ? 0 : 240,
-          width: compact ? "100%" : "calc(100% - 240px)",
-          minHeight: "100vh",
-          background: "var(--color-navy-950)",
-          overflowX: "hidden",
-        }}
-      >
-        <div
-          style={{
-            minHeight: 70,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-            padding: compact ? "0 18px" : "0 36px",
-            borderBottom: "1px solid var(--color-border-soft)",
-            flexWrap: "wrap",
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-serif)",
-              fontSize: compact ? 18 : 22,
-              fontWeight: 700,
-              color: "var(--color-text-primary)",
-            }}
-          >
-            Xin chào, {user?.name}
-          </h2>
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "var(--color-gold-400)",
-              background: "var(--color-gold-100)",
-              border: "1px solid var(--color-border)",
-              borderRadius: 20,
-              padding: "5px 12px",
-            }}
-          >
-            {user?.role}
-          </span>
+      <main className="adm-main">
+        {property.demo && (
+          <div className="adm-demo-banner" role="note">
+            {property.demo.resetIntervalHours
+              ? t("demo.bannerTimed", { hours: property.demo.resetIntervalHours })
+              : t("demo.banner")}
+          </div>
+        )}
+        <div className="adm-topbar">
+          <h2>{t("greeting", { name: user?.name || "" })}</h2>
+          <div className="adm-topbar-right">
+            <LanguageSwitch />
+            <span className="adm-role">{t(`roles.${user?.role}`, { defaultValue: user?.role || "" })}</span>
+          </div>
         </div>
 
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 1280,
-            margin: "0 auto",
-            padding: compact ? "22px 16px" : "32px 36px",
-            boxSizing: "border-box",
-          }}
-        >
-          {children}
-        </div>
+        <div className="adm-content">{children}</div>
       </main>
     </div>
   );

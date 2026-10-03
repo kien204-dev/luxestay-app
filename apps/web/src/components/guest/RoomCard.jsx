@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { RoomRatingSummary } from "../RoomReviews";
-import { normalizeImageUrl, placeholderFor, ROOM_PLACEHOLDER, showFallback } from "../../utils/imageUrl";
+import { normalizeImageUrl, placeholderFor, roomPlaceholder, showFallback } from "../../utils/imageUrl";
 import { formatMoney } from "../../utils/format";
 import { stayQuery } from "../../utils/stayQuery";
 
 // `fallback` is what to draw when there is no photo (or it fails to load).
-export function RoomImage({ src, alt, fallback = ROOM_PLACEHOLDER, ...rest }) {
+export function RoomImage({ src, alt, fallback = roomPlaceholder(), ...rest }) {
   return (
     <img
       src={normalizeImageUrl(src, fallback)}

@@ -1,0 +1,56 @@
+{
+  "title": "Property",
+  "subtitle": "Name, logo, home page photo, contact details and house rules. Changes apply at once to the guest site, emails and confirmations.",
+  "saved": "Saved",
+  "image": {
+    "upload": "Upload",
+    "replace": "Replace",
+    "remove": "Remove",
+    "uploadFailed": "Could not upload the image.",
+    "removeFailed": "Could not remove the image."
+  },
+  "logo": {
+    "title": "Logo",
+    "hint": "PNG, JPG or WebP, up to 10 MB. Without a logo the site shows the name's first letter. The PDF uses a PNG copy made automatically."
+  },
+  "hero": {
+    "title": "Home page photo",
+    "hint": "A landscape photo up to 10 MB; it is scaled to at most 2400 px. The home page darkens it so text stays readable. Only use photos you have the right to use.",
+    "none": "No photo: the home page uses a colour background"
+  },
+  "form": {
+    "title": "Details and house rules",
+    "subtitle": "Leave a field empty to use the default shown below it.",
+    "default": "Default: {{value}}",
+    "noDefault": "(none)",
+    "save": "Save",
+    "saveFailed": "Could not save."
+  },
+  "fields": {
+    "name": "Property name",
+    "phone": "Phone",
+    "email": "Contact email",
+    "address": "Address",
+    "checkInTime": "Check-in time",
+    "checkOutTime": "Check-out time",
+    "freeCancellationDays": "Free cancellation: days before check-in"
+  },
+  "destinations": {
+    "title": "Destination photos",
+    "subtitle": "The photos on the home page's destination cards. A destination is the part of a room's location after the last comma. Changes apply at once.",
+    "rooms": "{{count}} rooms",
+    "rooms_one": "{{count}} room",
+    "noPhoto": "no photo of its own: the card uses the first room photo or a drawing",
+    "creditHint": "Your own photo: leave the licence empty. CC BY / CC BY-SA photos: fill in author and licence so the card and the credits page show them.",
+    "saveCredit": "Save credit",
+    "creditFailed": "Could not save the credit.",
+    "fields": {
+      "place": "Place shown",
+      "author": "Author",
+      "license": "Licence (e.g. CC BY 4.0)",
+      "licenseUrl": "Licence link",
+      "title": "Original title",
+      "sourceUrl": "Link to the photo's page"
+    }
+  }
+}

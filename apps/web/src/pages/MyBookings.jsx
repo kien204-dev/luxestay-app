@@ -144,17 +144,17 @@ export default function MyBookings() {
   return (
     <div
       className="font-body"
-      style={{ background: "#fafafa", color: "#1A1C1E" }}
+      style={{ background: "var(--color-surface-muted)", color: "var(--color-ink)" }}
     >
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px" }}>
         <div className="my-bookings-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 20 }}>
-          <h1 className="font-headline" style={{ margin: 0, fontSize: 28, color: "#002366" }}>
+          <h1 className="font-headline" style={{ margin: 0, fontSize: 28, color: "var(--brand-primary)" }}>
             {t("myBookings:header.title")}
           </h1>
           <button
             onClick={reloadBookings}
             disabled={loading}
-            style={{ padding: "8px 16px", background: "#002366", color: "#fff", border: "none", borderRadius: 6, cursor: loading ? "not-allowed" : "pointer", fontSize: 13 }}
+            style={{ padding: "8px 16px", background: "var(--brand-primary)", color: "var(--color-surface-light)", border: "none", borderRadius: 6, cursor: loading ? "not-allowed" : "pointer", fontSize: 13 }}
           >
             {loading ? t("myBookings:header.refreshing") : t("myBookings:header.refresh")}
           </button>
@@ -165,8 +165,8 @@ export default function MyBookings() {
         {error && (
           <div
             style={{
-              background: "#fef2f2",
-              color: "#b91c1c",
+              background: "var(--color-danger-soft)",
+              color: "var(--color-danger-strong)",
               padding: 16,
               borderRadius: 8,
               marginBottom: 20,
@@ -182,10 +182,10 @@ export default function MyBookings() {
               <div
                 key={i}
                 style={{
-                  background: "#fff",
+                  background: "var(--color-surface-light)",
                   borderRadius: 12,
                   overflow: "hidden",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  boxShadow: "0 2px 12px color-mix(in srgb, var(--color-ink) 6%, transparent)",
                   display: "grid",
                   gridTemplateColumns: "140px 1fr auto",
                   gap: 0,
@@ -205,10 +205,10 @@ export default function MyBookings() {
           </div>
         ) : bookings.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
-            <span style={{ color: "#C5A059", display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <span style={{ color: "var(--brand-accent)", display: "flex", justifyContent: "center", marginBottom: 12 }}>
               <Icon.CalendarOff />
             </span>
-            <p style={{ color: "#64748b", marginBottom: 20 }}>
+            <p style={{ color: "var(--color-ink-muted)", marginBottom: 20 }}>
               {statusFilter || fromDate || toDate
                 ? t("myBookings:empty.filtered")
                 : t("myBookings:empty.none")}
@@ -217,8 +217,8 @@ export default function MyBookings() {
               onClick={() => navigate("/rooms")}
               style={{
                 padding: "12px 24px",
-                background: "#002366",
-                color: "#fff",
+                background: "var(--brand-primary)",
+                color: "var(--color-surface-light)",
                 border: "none",
                 borderRadius: 6,
                 cursor: "pointer",
@@ -261,9 +261,9 @@ export default function MyBookings() {
               style={{
                 padding: "8px 16px",
                 borderRadius: 6,
-                border: "1px solid #d1d5db",
-                background: "#fff",
-                color: page <= 1 ? "#cbd5e1" : "#002366",
+                border: "1px solid var(--color-line-light)",
+                background: "var(--color-surface-light)",
+                color: page <= 1 ? "var(--color-line-light)" : "var(--brand-primary)",
                 cursor: page <= 1 ? "not-allowed" : "pointer",
                 fontSize: 13,
                 fontWeight: 600,
@@ -271,7 +271,7 @@ export default function MyBookings() {
             >
               {t("myBookings:pagination.prev")}
             </button>
-            <span style={{ color: "#64748b", fontSize: 13 }}>
+            <span style={{ color: "var(--color-ink-muted)", fontSize: 13 }}>
               {t("myBookings:pagination.pageInfo", { page, totalPages: meta.totalPages, total: meta.total })}
             </span>
             <button
@@ -280,9 +280,9 @@ export default function MyBookings() {
               style={{
                 padding: "8px 16px",
                 borderRadius: 6,
-                border: "1px solid #d1d5db",
-                background: "#fff",
-                color: page >= meta.totalPages ? "#cbd5e1" : "#002366",
+                border: "1px solid var(--color-line-light)",
+                background: "var(--color-surface-light)",
+                color: page >= meta.totalPages ? "var(--color-line-light)" : "var(--brand-primary)",
                 cursor: page >= meta.totalPages ? "not-allowed" : "pointer",
                 fontSize: 13,
                 fontWeight: 600,
