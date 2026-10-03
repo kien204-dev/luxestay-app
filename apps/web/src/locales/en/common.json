@@ -18,5 +18,10 @@
     "label": "Language",
     "vi": "Vietnamese",
     "en": "English"
+  },
+  "dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "working": "Working..."
   }
 }

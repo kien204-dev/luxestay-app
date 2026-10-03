@@ -1,0 +1,51 @@
+{
+  "greeting": "Hello, {{name}}",
+  "refresh": "Refresh",
+  "save": "Save",
+  "saving": "Saving...",
+  "cancel": "Cancel",
+  "close": "Close",
+  "edit": "Edit",
+  "delete": "Delete",
+  "retry": "Try again",
+  "processing": "Working...",
+  "confirm": "Confirm",
+  "all": "All",
+  "none": "(none)",
+  "search": "Search",
+  "loadFailed": "Could not load the data.",
+  "roles": {
+    "admin": "Admin",
+    "user": "Guest"
+  },
+  "nav": {
+    "label": "Administration",
+    "dashboard": "Dashboard",
+    "guestSite": "Guest site",
+    "rooms": "Rooms",
+    "users": "Users",
+    "orders": "Bookings",
+    "calendar": "Calendar",
+    "coupons": "Coupons",
+    "property": "Property",
+    "destinations": "Destinations",
+    "account": "Account",
+    "logout": "Sign out",
+    "newBookings": "{{count}} new bookings"
+  },
+  "pagination": {
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "page": "Page {{page}} of {{totalPages}}",
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "demo": {
+    "banner": "Demo: try anything you like; deleting or changing important data is switched off. The data is reset regularly.",
+    "bannerTimed": "Demo: try anything you like; deleting or changing important data is switched off. The data is reset every {{hours}} hours."
+  },
+  "image": {
+    "types": "PNG, JPG or WebP, up to 10 MB. Photos are turned upright, stripped of location data and compressed.",
+    "badType": "The image must be PNG, JPG or WebP.",
+    "tooLarge": "The image must be 10 MB or smaller."
+  }
+}
