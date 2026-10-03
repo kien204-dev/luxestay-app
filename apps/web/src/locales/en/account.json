@@ -1,0 +1,37 @@
+{
+  "title": "Account",
+  "subtitle": "Your details and password.",
+  "loadFailed": "Could not load your account.",
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Used for your bookings and the emails you receive.",
+    "photo": "Profile photo",
+    "changePhoto": "Change photo",
+    "uploading": "Uploading...",
+    "photoReady": "Photo uploaded. Press \"Save\" to use it.",
+    "photoFailed": "Could not upload the photo.",
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "bio": "About you",
+    "reset": "Undo changes",
+    "save": "Save",
+    "saved": "Profile saved.",
+    "saveFailed": "Could not save your profile.",
+    "nameEmailRequired": "Please enter your name and email."
+  },
+  "password": {
+    "title": "Password",
+    "mustChange": "Your account uses a temporary password. Set a new one to continue.",
+    "current": "Current password",
+    "new": "New password",
+    "confirm": "Repeat new password",
+    "rule": "At least 8 characters with both letters and numbers.",
+    "required": "Please enter your current and new password.",
+    "mismatch": "The new passwords do not match.",
+    "submit": "Change password",
+    "updating": "Changing...",
+    "changed": "Password changed.",
+    "failed": "Could not change the password."
+  }
+}

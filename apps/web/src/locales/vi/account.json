@@ -1,0 +1,37 @@
+{
+  "title": "Tài khoản",
+  "subtitle": "Thông tin cá nhân và mật khẩu của bạn.",
+  "loadFailed": "Không tải được thông tin tài khoản.",
+  "profile": {
+    "title": "Thông tin cá nhân",
+    "subtitle": "Dùng cho các đặt phòng và thư liên lạc của bạn.",
+    "photo": "Ảnh đại diện",
+    "changePhoto": "Đổi ảnh",
+    "uploading": "Đang tải ảnh...",
+    "photoReady": "Đã tải ảnh lên. Nhấn \"Lưu\" để dùng ảnh này.",
+    "photoFailed": "Không tải được ảnh lên.",
+    "name": "Họ tên",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "bio": "Giới thiệu",
+    "reset": "Hoàn tác",
+    "save": "Lưu",
+    "saved": "Đã lưu thông tin.",
+    "saveFailed": "Không lưu được thông tin.",
+    "nameEmailRequired": "Vui lòng nhập họ tên và email."
+  },
+  "password": {
+    "title": "Mật khẩu",
+    "mustChange": "Tài khoản của bạn đang dùng mật khẩu tạm. Hãy đặt mật khẩu mới để tiếp tục.",
+    "current": "Mật khẩu hiện tại",
+    "new": "Mật khẩu mới",
+    "confirm": "Nhập lại mật khẩu mới",
+    "rule": "Ít nhất 8 ký tự, gồm cả chữ và số.",
+    "required": "Vui lòng nhập mật khẩu hiện tại và mật khẩu mới.",
+    "mismatch": "Hai lần nhập mật khẩu mới không khớp.",
+    "submit": "Đổi mật khẩu",
+    "updating": "Đang đổi...",
+    "changed": "Đã đổi mật khẩu.",
+    "failed": "Không đổi được mật khẩu."
+  }
+}
