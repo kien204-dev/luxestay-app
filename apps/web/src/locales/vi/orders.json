@@ -1,0 +1,127 @@
+{
+  "title": "Đặt phòng",
+  "subtitle": "Mọi đặt phòng, trạng thái và thanh toán. Ghi nhận tiền thu tại quầy, xác nhận hoàn tiền và tải phiếu PDF.",
+  "listTitle": "Danh sách đặt phòng",
+  "matching": "{{count}} đơn",
+  "matching_one": "{{count}} đơn",
+  "empty": "Không có đặt phòng nào phù hợp.",
+  "walkIn": "+ Đặt phòng tại quầy",
+  "atDesk": "tại quầy",
+  "actionFailed": "Thao tác không thành công.",
+  "receiptFailed": "Không tải được phiếu xác nhận.",
+  "kpi": {
+    "revenue": "Đã thu",
+    "pending": "Chờ thanh toán",
+    "refundPending": "Chờ hoàn tiền",
+    "total": "Tổng số đơn"
+  },
+  "filters": {
+    "status": "Lọc theo trạng thái",
+    "payment": "Lọc theo thanh toán",
+    "anyStatus": "Mọi trạng thái",
+    "anyPayment": "Mọi thanh toán"
+  },
+  "columns": {
+    "code": "Mã",
+    "guest": "Khách",
+    "room": "Phòng",
+    "checkIn": "Nhận phòng",
+    "checkOut": "Trả phòng",
+    "status": "Trạng thái",
+    "amount": "Số tiền",
+    "actions": "Thao tác"
+  },
+  "status": {
+    "pending": "Chờ thanh toán",
+    "confirmed": "Đã xác nhận",
+    "completed": "Hoàn tất",
+    "cancelled": "Đã hủy"
+  },
+  "payment": {
+    "unpaid": "Chưa thanh toán",
+    "pending": "Đang thanh toán",
+    "paid": "Đã thanh toán",
+    "failed": "Thanh toán lỗi",
+    "refund_pending": "Chờ hoàn tiền",
+    "refunded": "Đã hoàn tiền"
+  },
+  "refundReason": {
+    "cancelled_by_guest": "Khách hủy sau khi đã thanh toán",
+    "cancelled_by_admin": "Quản trị hủy sau khi đã thanh toán",
+    "paid_after_cancellation": "Tiền về sau khi đơn đã hủy/hết hạn, phòng không còn trống"
+  },
+  "paymentAction": {
+    "markPaid": "Đã thu tiền",
+    "refund": "Xác nhận hoàn tiền"
+  },
+  "actions": {
+    "pdf": "PDF"
+  },
+  "confirm": {
+    "deleteTitle": "Xóa đặt phòng",
+    "deleteMessage": "Xóa đơn {{code}}? Không thể hoàn tác. Đơn đã có thanh toán thì không xóa được; hãy hủy đơn.",
+    "deleteAction": "Xóa đơn",
+    "refundTitle": "Xác nhận hoàn tiền",
+    "refundMessage": "Xác nhận bạn ĐÃ chuyển tiền hoàn lại cho khách của đơn {{code}}? Ứng dụng không tự chuyển tiền.",
+    "refundAction": "Đã hoàn tiền",
+    "markPaidTitle": "Ghi nhận đã thu tiền",
+    "markPaidMessage": "Xác nhận đã thu đủ tiền (tiền mặt/chuyển khoản) cho đơn {{code}}? Đơn đang chờ sẽ được xác nhận.",
+    "markPaidAction": "Đã thu tiền"
+  },
+  "toast": {
+    "statusUpdated": "Đã cập nhật trạng thái",
+    "cancelledRefund": "Đã hủy đơn. Đơn này đã thanh toán nên cần hoàn tiền cho khách.",
+    "deleted": "Đã xóa đơn {{code}}",
+    "refunded": "Đã xác nhận hoàn tiền",
+    "paid": "Đã ghi nhận thanh toán",
+    "walkInCreated": "Đã tạo đặt phòng {{code}}"
+  },
+  "reviews": {
+    "title": "Đánh giá của khách",
+    "filter": "Lọc theo tên phòng",
+    "empty": "Chưa có đánh giá nào.",
+    "noMatch": "Không có đánh giá nào khớp bộ lọc.",
+    "visible": "Hiển thị",
+    "hidden": "Đã ẩn",
+    "hide": "Ẩn",
+    "show": "Hiện lại",
+    "hideTitle": "Ẩn đánh giá",
+    "hideMessage": "Ẩn đánh giá này? Nó sẽ không hiện công khai cho tới khi được hiện lại.",
+    "showTitle": "Hiện lại đánh giá",
+    "showMessage": "Hiện lại đánh giá này cho khách xem công khai?",
+    "hiddenToast": "Đã ẩn đánh giá",
+    "shownToast": "Đã hiện lại đánh giá",
+    "columns": {
+      "room": "Phòng",
+      "author": "Người đánh giá",
+      "rating": "Sao",
+      "comment": "Bình luận",
+      "date": "Ngày",
+      "status": "Trạng thái"
+    }
+  },
+  "walkInForm": {
+    "title": "Đặt phòng tại quầy",
+    "intro": "Đặt hộ khách trực tiếp hoặc qua điện thoại. Đơn được xác nhận ngay, không cần chờ thanh toán.",
+    "checkIn": "Nhận phòng",
+    "checkOut": "Trả phòng",
+    "room": "Phòng",
+    "roomSearch": "Tìm theo tên hoặc loại phòng",
+    "chooseRoom": "Chọn phòng",
+    "chooseRoomCount": "Chọn phòng ({{count}} phòng phù hợp)",
+    "loadingRooms": "Đang tải phòng...",
+    "roomOption": "{{name}} · tối đa {{capacity}} khách · {{price}}/đêm",
+    "guests": "Số khách",
+    "name": "Tên khách",
+    "phone": "Số điện thoại (không bắt buộc)",
+    "email": "Email (không bắt buộc)",
+    "paid": "Khách đã thanh toán (tiền mặt/chuyển khoản)",
+    "emailNote": "Nếu có email, khách sẽ nhận được thư xác nhận.",
+    "roomRequired": "Vui lòng chọn phòng.",
+    "datesRequired": "Vui lòng chọn ngày nhận và trả phòng hợp lệ.",
+    "nameRequired": "Vui lòng nhập tên khách.",
+    "failed": "Không tạo được đặt phòng.",
+    "create": "Tạo đặt phòng",
+    "creating": "Đang tạo..."
+  }
+}

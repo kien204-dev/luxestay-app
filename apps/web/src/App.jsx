@@ -27,7 +27,7 @@ const MainLayout = lazy(() => import("./layout/MainLayout"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Users = lazy(() => import("./pages/admin/users/UsersPage"));
 const Rooms = lazy(() => import("./pages/admin/rooms/RoomsPage"));
-const Orders = lazy(() => import("./pages/Orders"));
+const Orders = lazy(() => import("./pages/admin/orders/OrdersPage"));
 const Calendar = lazy(() => import("./pages/Calendar"));
 const Coupons = lazy(() => import("./pages/Coupons"));
 const NotFound = lazy(() => import("./pages/NotFound"));
