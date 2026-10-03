@@ -52,16 +52,78 @@ function publicUserSelect() {
 // ======================
 // GET ALL USERS
 // ======================
+// Without page/limit: every user, as an array (kept for older callers).
+// With them: one page, filtered by ?search= (name, email or phone), ?role=
+// and ?status=active|locked, plus the totals the page's cards show.
 exports.getUsers = async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT ${publicUserSelect()}
-       FROM users
-       WHERE deleted_at IS NULL
-       ORDER BY id ASC`
-    );
+    const { page, limit, search, role, status } = req.query;
 
-    res.json(result.rows);
+    if (page === undefined && limit === undefined) {
+      const result = await pool.query(
+        `SELECT ${publicUserSelect()}
+         FROM users
+         WHERE deleted_at IS NULL
+         ORDER BY id ASC`
+      );
+      return res.json(result.rows);
+    }
+
+    const pageNum = Number(page ?? 1);
+    const limitNum = Number(limit ?? 10);
+    if (!Number.isInteger(pageNum) || pageNum < 1 || !Number.isInteger(limitNum) || limitNum < 1 || limitNum > 100) {
+      return res.status(400).json(apiMessage("INVALID_PAGE"));
+    }
+
+    const conditions = ["deleted_at IS NULL"];
+    const params = [];
+    const keyword = typeof search === "string" ? search.trim().slice(0, 100) : "";
+    if (keyword) {
+      params.push(`%${keyword.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+      conditions.push(`(name ILIKE $${params.length} OR email ILIKE $${params.length} OR COALESCE(phone, '') ILIKE $${params.length})`);
+    }
+    if (role === "admin" || role === "user") {
+      params.push(role);
+      conditions.push(`role = $${params.length}`);
+    }
+    if (status === "locked" || status === "active") {
+      conditions.push(status === "locked" ? "is_locked = TRUE" : "is_locked = FALSE");
+    }
+
+    const where = conditions.join(" AND ");
+    const [rows, summary] = await Promise.all([
+      pool.query(
+        `SELECT ${publicUserSelect()}, COUNT(*) OVER()::int AS total_count
+         FROM users
+         WHERE ${where}
+         ORDER BY id ASC
+         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limitNum, (pageNum - 1) * limitNum]
+      ),
+      pool.query(
+        `SELECT COUNT(*)::int AS total,
+                COUNT(*) FILTER (WHERE role = 'admin')::int AS admins,
+                COUNT(*) FILTER (WHERE role = 'user')::int AS users,
+                COUNT(*) FILTER (WHERE is_locked)::int AS locked
+         FROM users
+         WHERE deleted_at IS NULL`
+      ),
+    ]);
+
+    // An empty page past the end still needs the count.
+    let total = rows.rows[0]?.total_count;
+    if (total === undefined) {
+      total = (await pool.query(`SELECT COUNT(*)::int AS total FROM users WHERE ${where}`, params)).rows[0].total;
+    }
+
+    return res.json({
+      data: rows.rows.map(({ total_count: _total, ...user }) => user),
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.max(1, Math.ceil(total / limitNum)),
+      summary: summary.rows[0],
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({

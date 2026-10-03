@@ -648,6 +648,47 @@ function makeFakePool(state) {
       return { rows: user ? [{ id: user.id }] : [] };
     }
 
+    if (text.includes("count(*) over()::int as total_count") && text.includes("from users")) {
+      let rows = state.users.filter((user) => !user.deleted_at);
+      let index = 0;
+      if (text.includes("ilike")) {
+        const keyword = String(params[index++]).replace(/^%|%$/g, "").replace(/\\(.)/g, "$1").toLowerCase();
+        rows = rows.filter((user) => [user.name, user.email, user.phone || ""].some((value) => String(value).toLowerCase().includes(keyword)));
+      }
+      if (text.includes("and role = $")) {
+        const role = params[index++];
+        rows = rows.filter((user) => user.role === role);
+      }
+      if (text.includes("is_locked = true")) rows = rows.filter((user) => user.is_locked);
+      if (text.includes("is_locked = false")) rows = rows.filter((user) => !user.is_locked);
+      const [limit, offset] = params.slice(index);
+      const total_count = rows.length;
+      return {
+        rows: rows
+          .sort((a, b) => a.id - b.id)
+          .slice(offset, offset + limit)
+          .map((user) => ({ ...publicUser(user), total_count })),
+      };
+    }
+
+    if (text.includes("count(*) filter (where role = 'admin')") && text.includes("from users")) {
+      const live = state.users.filter((user) => !user.deleted_at);
+      return {
+        rows: [
+          {
+            total: live.length,
+            admins: live.filter((user) => user.role === "admin").length,
+            users: live.filter((user) => user.role === "user").length,
+            locked: live.filter((user) => user.is_locked).length,
+          },
+        ],
+      };
+    }
+
+    if (text.startsWith("select count(*)::int as total from users where")) {
+      return { rows: [{ total: 0 }] };
+    }
+
     if (text.includes("from users") && text.includes("order by id asc")) {
       return {
         rows: state.users
@@ -2219,6 +2260,25 @@ describe("hotel booking API", () => {
     });
     assert.equal(users.response.status, 200);
     assert.ok(users.body.length >= 3);
+
+    // One page at a time, filtered on the server.
+    const paged = await request(baseUrl, "/api/users?page=1&limit=2", { headers: authHeader(adminToken) });
+    assert.equal(paged.response.status, 200);
+    assert.equal(paged.body.data.length, 2);
+    assert.equal(paged.body.total, users.body.length);
+    assert.equal(paged.body.totalPages, Math.ceil(users.body.length / 2));
+    assert.equal(paged.body.summary.total, users.body.length);
+    assert.ok(paged.body.data.every((user) => user.password === undefined && user.total_count === undefined));
+
+    const admins = await request(baseUrl, "/api/users?page=1&limit=10&role=admin", { headers: authHeader(adminToken) });
+    assert.ok(admins.body.data.length >= 1 && admins.body.data.every((user) => user.role === "admin"));
+
+    const searched = await request(baseUrl, "/api/users?page=1&limit=10&search=ADMIN%40example", { headers: authHeader(adminToken) });
+    assert.deepEqual(searched.body.data.map((user) => user.email), ["admin@example.com"]);
+
+    const badPage = await request(baseUrl, "/api/users?page=0&limit=10", { headers: authHeader(adminToken) });
+    assert.equal(badPage.response.status, 400);
+    assert.equal(badPage.body.code, "INVALID_PAGE");
 
     const invalid = await request(baseUrl, "/api/users", {
       method: "POST",
