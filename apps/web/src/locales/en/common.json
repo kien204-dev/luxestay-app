@@ -22,7 +22,8 @@
   "dialog": {
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "working": "Working..."
+    "working": "Working...",
+    "dismiss": "Dismiss notification"
   },
   "stars": "{{count}} stars",
   "stars_one": "{{count}} star"

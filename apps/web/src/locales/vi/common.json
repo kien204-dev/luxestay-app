@@ -22,7 +22,8 @@
   "dialog": {
     "cancel": "Hủy",
     "confirm": "Xác nhận",
-    "working": "Đang xử lý..."
+    "working": "Đang xử lý...",
+    "dismiss": "Đóng thông báo"
   },
   "stars": "{{count}} sao",
   "stars_one": "{{count}} sao"
