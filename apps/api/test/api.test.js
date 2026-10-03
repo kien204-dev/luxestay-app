@@ -131,6 +131,26 @@ function makeState() {
   };
 }
 
+// A stored instant as wall-clock "YYYY-MM-DD HH:MM:SS" in a timezone, like
+// the dashboard's (created_at AT TIME ZONE db) AT TIME ZONE app conversion.
+function localStamp(value, timezone) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(new Date(value))
+      .map((part) => [part.type, part.value])
+  );
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
+}
+
 function normalizeSql(sql) {
   return sql.replace(/\s+/g, " ").trim().toLowerCase();
 }
@@ -783,13 +803,11 @@ function makeFakePool(state) {
     }
 
     if (text.includes('as "totalrooms"') && text.includes('as "totalusers"')) {
-      const hasRange = params.length >= 2;
-      const start = hasRange ? new Date(params[0]) : null;
-      const end = hasRange ? new Date(params[1]) : null;
+      const hasRange = params.length >= 3;
       const inRange = (booking) => {
         if (!hasRange) return true;
-        const ts = new Date(booking.created_at || booking.check_in);
-        return ts >= start && ts < end;
+        const stamp = localStamp(booking.created_at || booking.check_in, params[0]);
+        return stamp >= params[1] && stamp < params[2];
       };
       const bookingsInRange = state.bookings.filter(inRange);
       const revenueEligible = bookingsInRange.filter((item) => item.payment_status === "paid");
@@ -820,18 +838,14 @@ function makeFakePool(state) {
     }
 
     if (
-      text.includes("select coalesce(created_at, check_in::timestamp) as ts") &&
+      text.includes("as local_stamp") &&
       text.includes("from bookings")
     ) {
-      const start = new Date(params[0]);
-      const end = new Date(params[1]);
+      const stampOf = (b) => localStamp(b.created_at || b.check_in, params[0]);
       const rows = state.bookings
-        .filter((b) => {
-          const ts = new Date(b.created_at || b.check_in);
-          return ts >= start && ts < end;
-        })
+        .filter((b) => stampOf(b) >= params[1] && stampOf(b) < params[2])
         .map((b) => ({
-          ts: b.created_at || b.check_in,
+          local_stamp: stampOf(b).slice(0, 13),
           total_price: b.total_price,
           status: b.status,
           payment_status: b.payment_status,
@@ -840,12 +854,10 @@ function makeFakePool(state) {
     }
 
     if (text.includes("from bookings") && text.includes("group by status")) {
-      const start = new Date(params[0]);
-      const end = new Date(params[1]);
       const counts = state.bookings
         .filter((b) => {
-          const ts = new Date(b.created_at || b.check_in);
-          return ts >= start && ts < end;
+          const stamp = localStamp(b.created_at || b.check_in, params[0]);
+          return stamp >= params[1] && stamp < params[2];
         })
         .reduce((acc, booking) => {
           acc[booking.status] = (acc[booking.status] || 0) + 1;
@@ -861,14 +873,12 @@ function makeFakePool(state) {
     }
 
     if (text.includes("from rooms r") && text.includes("join bookings b")) {
-      const start = new Date(params[0]);
-      const end = new Date(params[1]);
       const rows = state.rooms
         .map((room) => {
           const bookings = state.bookings.filter((booking) => {
             if (booking.room_id !== room.id) return false;
-            const ts = new Date(booking.created_at || booking.check_in);
-            return ts >= start && ts < end;
+            const stamp = localStamp(booking.created_at || booking.check_in, params[0]);
+            return stamp >= params[1] && stamp < params[2];
           });
           const revenue = bookings
             .filter((booking) => booking.payment_status === "paid")
@@ -2594,6 +2604,34 @@ describe("hotel booking API", () => {
 
     const secondFilename = new URL(secondBody.avatarUrl).pathname.split("/").pop();
     await fs.unlink(path.join(__dirname, "../uploads/avatars", secondFilename)).catch(() => {});
+  });
+
+  it("puts dashboard buckets in the property's timezone, not the server's", () => {
+    const { getRangeWindow } = require("../src/controller/dashboardController.js");
+    // 03:00 on 3 October in Vietnam is still 2 October in UTC.
+    const now = new Date("2026-10-02T20:00:00Z");
+
+    const today = getRangeWindow("today", now);
+    assert.equal(today.start, "2026-10-03 00:00:00");
+    assert.equal(today.end, "2026-10-04 00:00:00");
+    assert.equal(today.indexOf("2026-10-03 01"), 1);
+
+    const week = getRangeWindow("week", now);
+    assert.equal(week.start, "2026-09-27 00:00:00");
+    assert.equal(week.buckets.length, 7);
+    assert.equal(week.buckets[6], "Sat");
+    assert.equal(week.indexOf("2026-10-03 23"), 6);
+
+    const month = getRangeWindow("month", now);
+    assert.equal(month.start, "2026-10-01 00:00:00");
+    assert.equal(month.end, "2026-11-01 00:00:00");
+    assert.equal(month.buckets.length, 31);
+
+    const december = getRangeWindow("month", new Date("2026-12-15T05:00:00Z"));
+    assert.equal(december.end, "2027-01-01 00:00:00");
+
+    const year = getRangeWindow("year", new Date("2026-12-31T18:00:00Z"));
+    assert.equal(year.start, "2027-01-01 00:00:00", "already New Year in Vietnam");
   });
 
   it("returns dashboard stats for admin only", async () => {
