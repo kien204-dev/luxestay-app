@@ -199,9 +199,9 @@ for (const file of sourceFiles(WEB_SRC)) {
       if (entry.isDirectory()) walkDir(full);
       else if (entry.name.endsWith(".js") && full !== catalogueFile) {
         const text = fs.readFileSync(full, "utf8");
-        for (const match of text.matchAll(/apiMessage(s*"([A-Z0-9_]+)"/g)) used.set(match[1], full);
+        for (const match of text.matchAll(/apiMessage\(\s*"([A-Z0-9_]+)"/g)) used.set(match[1], full);
         // Codes chosen at run time: apiMessage(x ? "A" : "B") and preset tables.
-        for (const match of text.matchAll(/(?:?|:)s*"([A-Z][A-Z0-9_]{3,})"/g)) if (MESSAGES[match[1]]) used.set(match[1], full);
+        for (const match of text.matchAll(/(?:\?|:)\s*"([A-Z][A-Z0-9_]{3,})"/g)) if (MESSAGES[match[1]]) used.set(match[1], full);
         for (const match of text.matchAll(/(?:saved|removed): "([A-Z0-9_]+)"/g)) used.set(match[1], full);
       }
     }
