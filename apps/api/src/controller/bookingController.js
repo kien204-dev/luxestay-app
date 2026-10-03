@@ -56,7 +56,7 @@ async function autoExpirePendingBookings() {
     `WITH expired AS (
        UPDATE bookings SET status = 'cancelled', cancelled_at = NOW()
        WHERE status = 'pending' AND expires_at IS NOT NULL AND expires_at < NOW()
-       RETURNING room_id, coupon_id
+       RETURNING id, room_id, coupon_id
      ),
      released AS (
        UPDATE coupons c SET used_count = GREATEST(c.used_count - n.uses, 0)
@@ -66,12 +66,14 @@ async function autoExpirePendingBookings() {
        ) n
        WHERE c.id = n.coupon_id
      )
-     SELECT DISTINCT room_id FROM expired`
+     SELECT id, room_id FROM expired`
   );
 
-  for (const row of expired.rows) {
-    await syncRoomStatus(pool, row.room_id);
+  for (const roomId of new Set(expired.rows.map((row) => row.room_id))) {
+    await syncRoomStatus(pool, roomId);
   }
+  // Already committed (one statement): tell each guest their hold ran out.
+  for (const row of expired.rows) notifyBooking("expired", row.id);
 }
 
 const MAINTENANCE_INTERVAL_MS = 30 * 1000;

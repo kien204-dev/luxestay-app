@@ -281,17 +281,17 @@ function makeFakePool(state) {
 
     if (text.startsWith("with expired as")) {
       const nowIso = new Date().toISOString();
-      const roomIds = new Set();
+      const expired = [];
       state.bookings.forEach((booking) => {
         if (booking.status === "pending" && booking.expires_at && booking.expires_at < nowIso) {
           booking.status = "cancelled";
           booking.cancelled_at = nowIso;
-          roomIds.add(booking.room_id);
+          expired.push({ id: booking.id, room_id: booking.room_id });
           const coupon = state.coupons.find((item) => item.id === booking.coupon_id);
           if (coupon) coupon.used_count = Math.max(coupon.used_count - 1, 0);
         }
       });
-      return { rows: [...roomIds].map((room_id) => ({ room_id })) };
+      return { rows: expired };
     }
 
     if (text.startsWith("update coupons set used_count = greatest(used_count - 1, 0)")) {
@@ -2949,6 +2949,22 @@ describe("hotel booking API", () => {
     state.bookings.push(booking);
     return booking;
   }
+
+  it("emails the guest when an unpaid booking cancels itself", async () => {
+    state.sentEmails.length = 0;
+    pushPendingBooking(1990, { expires_at: new Date(Date.now() - 60 * 1000).toISOString(), language: "en" });
+
+    const { runBookingMaintenance } = require("../src/controller/bookingController.js");
+    await runBookingMaintenance({ force: true });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    assert.equal(state.bookings.find((item) => item.id === 1990).status, "cancelled");
+    const mail = state.sentEmails.find((item) => item.subject.includes("#BK-1990"));
+    assert.ok(mail, "an email about the expired booking");
+    assert.match(mail.subject, /payment not received in time/);
+    assert.match(mail.text, /not paid within the 30-minute hold/);
+    assert.equal(mail.to, state.users.find((user) => user.id === 2).email);
+  });
 
   it("creates a VNPay payment request for the booking owner", async () => {
     pushPendingBooking(1002, { total_price: 200 });
