@@ -71,7 +71,7 @@ describe("seeded destination photos", () => {
 
   it("does not overwrite a photo an admin chose when seeding again", async () => {
     await pool.query("UPDATE destination_images SET image_url = '/uploads/destinations/chosen.png' WHERE name = 'Hà Nội'");
-    await seed(pool, { log: () => {} });
+    await seed(pool, { log: () => {}, sampleData: "always" });
 
     const row = await pool.query("SELECT image_url FROM destination_images WHERE name = 'Hà Nội'");
     assert.equal(row.rows[0].image_url, "/uploads/destinations/chosen.png");

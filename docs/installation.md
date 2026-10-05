@@ -17,8 +17,16 @@ Mở <http://localhost:8080>. Lần chạy đầu, API tự tạo bảng (migrat
 
 | Tài khoản mẫu | Email | Mật khẩu |
 |---|---|---|
-| Quản trị | `admin@example.com` | `Admin@12345` — phải đổi ở lần đăng nhập đầu |
-| Khách | `user@example.com` | `User@12345` |
+| Quản trị | `admin@example.com` | Sinh ngẫu nhiên, in một lần trong log — phải đổi ở lần đăng nhập đầu |
+| Khách | `user@example.com` | Như trên |
+
+Lấy hai mật khẩu (chỉ có trong log của lần chạy đầu tiên):
+
+```bash
+docker compose logs api | grep "generated"
+```
+
+Muốn tự chọn mật khẩu quản trị: đặt `SEED_ADMIN_PASSWORD` trong `.env` trước lần chạy đầu. Lỡ mất mật khẩu: xem [Quên mật khẩu admin / bị khoá ngoài](#quên-mật-khẩu-admin--bị-khoá-ngoài). Từ lần khởi động thứ hai, API không tạo lại tài khoản hay dữ liệu mẫu nào: tài khoản quản trị chỉ được tạo khi chưa có quản trị viên nào, dữ liệu mẫu chỉ được nạp vào cơ sở dữ liệu trống.
 
 Kiểm tra API đã nhận cấu hình nào:
 
@@ -63,7 +71,7 @@ npm run db:seed
 npm run dev
 ```
 
-Mở <http://localhost:5173>. API dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt buộc hoặc không kết nối được cơ sở dữ liệu.
+Mở <http://localhost:5173> và đăng nhập `admin@example.com` / `Admin@12345` hoặc `user@example.com` / `User@12345` (mật khẩu mẫu chỉ dùng khi `NODE_ENV` không phải `production`). API dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt buộc hoặc không kết nối được cơ sở dữ liệu.
 
 Tạo `JWT_SECRET` ngẫu nhiên:
 
@@ -71,12 +79,36 @@ Tạo `JWT_SECRET` ngẫu nhiên:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
+## Quên mật khẩu admin / bị khoá ngoài
+
+Khi mất mật khẩu quản trị (ví dụ không kịp ghi lại mật khẩu trong log lần chạy đầu), tài khoản quản trị bị khoá, hoặc không còn tài khoản nào có quyền quản trị, dùng lệnh `admin:reset` ngay trên máy chủ. Lệnh không hỏi mật khẩu cũ: ai chạy được lệnh trong container thì đã có toàn quyền với cơ sở dữ liệu.
+
+```bash
+# Docker
+docker compose exec api npm run admin:reset                          # liệt kê các quản trị viên
+docker compose exec api npm run admin:reset -- --email <email>       # khôi phục tài khoản đó
+
+# Chạy thủ công
+npm run admin:reset
+npm run admin:reset -- --email <email>
+```
+
+Với `--email`, lệnh:
+
+- đặt một **mật khẩu tạm ngẫu nhiên** và in ra đúng một lần (không lưu ở đâu khác: ghi lại ngay);
+- mở khoá tài khoản và bảo đảm tài khoản có quyền quản trị (kể cả khi trước đó là tài khoản khách);
+- bắt buộc đổi mật khẩu ở lần đăng nhập kế tiếp;
+- đăng xuất mọi phiên đang đăng nhập của tài khoản và huỷ các liên kết "quên mật khẩu" còn hạn.
+
+Đăng nhập bằng mật khẩu tạm, rồi đặt mật khẩu mới ở trang được chuyển tới. Tài khoản đã bị xoá không khôi phục được bằng lệnh này; nếu không còn quản trị viên nào, tạo mới bằng `docker compose exec api node src/db/seed.js --admin-only`.
+
 ## Kiểm tra sau khi cài
 
 ```bash
 npm run lint              # ESLint + kiểm tra bản dịch + kiểm tra màu theme
 npm test                  # test API, không cần cơ sở dữ liệu
 npm run test:integration  # cần Docker: PostgreSQL thật + máy chủ S3 giả lập, tự dựng và tự xoá
+npm run test:e2e          # cần Docker và Chrome/Edge: mở trang thật trong trình duyệt, chụp ảnh vào test-results/
 ```
 
 ## Gặp lỗi?

@@ -6,6 +6,7 @@ import { getBookings, cancelBooking, getBookingPolicy } from "../services/bookin
 import { createPayment } from "../services/paymentService";
 import { useToast } from "../context/ToastContext";
 import { usePaymentProviders } from "../utils/usePaymentProviders";
+import Icon from "../utils/icon";
 import ConfirmModal from "../components/ConfirmModal";
 import BookingCard from "../components/myBookings/BookingCard";
 import BookingDetailModal from "../components/myBookings/BookingDetailModal";

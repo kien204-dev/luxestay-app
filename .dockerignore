@@ -13,4 +13,6 @@ scripts
 docker-compose.test.yml
 apps/api/test
 apps/api/test-integration
+apps/web/test-e2e
+test-results
 !apps/api/seed-assets/**/*.md

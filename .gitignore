@@ -32,3 +32,6 @@ apps/api/uploads/
 *.sw?
 desktop.ini
 Thumbs.db
+
+# Screenshots and other output of the browser tests
+test-results/

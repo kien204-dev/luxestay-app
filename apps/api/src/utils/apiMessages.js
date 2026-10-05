@@ -42,6 +42,8 @@ const MESSAGES = {
   "GOOGLE_TOKEN_REQUIRED": "Thiếu mã xác thực Google.",
   "GOOGLE_TOKEN_INVALID": "Mã xác thực Google không hợp lệ hoặc đã hết hạn.",
   "GOOGLE_EMAIL_UNVERIFIED": "Cần tài khoản Google đã xác minh email.",
+  "GOOGLE_ADMIN_PASSWORD_REQUIRED": "Tài khoản quản trị hãy đăng nhập bằng mật khẩu.",
+  "GOOGLE_ACCOUNT_MISMATCH": "Email này đã được liên kết với một tài khoản Google khác. Hãy đăng nhập bằng mật khẩu.",
   "GOOGLE_LINKED": "Tài khoản hiện có của bạn đã được liên kết với Google.",
   "GOOGLE_LOGIN_SUCCESS": "Đăng nhập bằng Google thành công.",
   "INVALID_USER_ID": "Mã người dùng không hợp lệ.",

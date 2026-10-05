@@ -31,14 +31,20 @@ Mở <http://localhost:8080>. Lần chạy đầu sẽ tự tạo cơ sở dữ 
 
 | Vai trò | Email | Mật khẩu |
 |---|---|---|
-| Quản trị | `admin@example.com` | `Admin@12345` (bắt buộc đổi ở lần đăng nhập đầu) |
-| Khách | `user@example.com` | `User@12345` |
+| Quản trị | `admin@example.com` | Sinh ngẫu nhiên, in **một lần** trong log lần chạy đầu. Bắt buộc đổi ở lần đăng nhập đầu |
+| Khách | `user@example.com` | Như trên |
 
-Dữ liệu mẫu gồm 50 phòng, mã giảm giá `WELCOME10` và 3 booking của tài khoản khách.
+```bash
+docker compose logs api | grep "generated"    # hai mật khẩu, chỉ có ở log của lần chạy đầu
+```
+
+Muốn tự chọn mật khẩu quản trị: đặt `SEED_ADMIN_PASSWORD` (và `SEED_ADMIN_EMAIL`) trong `.env` **trước lần chạy đầu**. Quên mật khẩu hoặc bị khoá: `docker compose exec api npm run admin:reset -- --email <email>` ([chi tiết](docs/installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)). Chạy thủ công bằng `npm run db:seed` khi phát triển (không phải production) thì mật khẩu là `Admin@12345` và `User@12345`.
+
+Dữ liệu mẫu gồm 50 phòng, mã giảm giá `WELCOME10` và 3 booking của tài khoản khách. Tài khoản quản trị chỉ được tạo khi chưa có quản trị viên nào, dữ liệu mẫu chỉ được nạp khi cơ sở dữ liệu còn trống: các lần khởi động sau không tạo lại gì.
 
 Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu: chép `.env.example` thành `.env` ở thư mục gốc rồi sửa. Xoá sạch để làm lại từ đầu: `docker compose down -v`.
 
-> Trước khi đưa lên mạng thật: đổi mật khẩu tài khoản khách mẫu (hoặc khoá tài khoản đó trong trang Users), đặt `SEED_ON_START=false`, và đọc [DEPLOY.md](DEPLOY.md).
+> Trước khi đưa lên mạng thật: khoá hoặc xoá tài khoản khách mẫu trong trang Users, nên đặt `SEED_ON_START=false`, và đọc [DEPLOY.md](DEPLOY.md).
 
 ## Các trang
 
@@ -86,13 +92,15 @@ API sẽ dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt
 | `npm run dev` | Chạy API và web cùng lúc, tự nạp lại khi sửa code |
 | `npm run build` | Build web ra `apps/web/dist` |
 | `npm start` | Chạy API ở chế độ thường |
-| `npm run lint` | ESLint cho cả hai app, kiểm tra bản dịch (khoá thiếu, chữ viết thẳng trong code, mã thông báo API chưa dịch) và kiểm tra màu theme |
+| `npm run lint` | ESLint cho cả hai app (gồm lỗi dùng component chưa import trong JSX), kiểm tra bản dịch (khoá thiếu, chữ viết thẳng trong code, mã thông báo API chưa dịch) và kiểm tra màu theme |
 | `npm test` | Test đơn vị của API (không cần cơ sở dữ liệu) |
 | `npm run test:integration` | Test tích hợp trên PostgreSQL thật và một máy chủ S3 giả lập; tự dựng và xoá các container tạm (cần Docker) |
+| `npm run test:e2e` | Test trình duyệt (trang Đặt phòng của tôi ở mọi trạng thái booking, tài khoản mật khẩu và tài khoản Google) trên bản build thật của web và API thật; cần Docker và Chrome hoặc Edge đã cài. Ảnh chụp màn hình lưu ở `test-results/` |
 | `npm run db:migrate` | Chạy các migration chưa áp dụng |
-| `npm run db:seed` | Nạp dữ liệu mẫu (chạy lại không tạo trùng). Thêm `-- --all-rooms` để nạp khoảng 390 phòng |
+| `npm run db:seed` | Tạo quản trị viên đầu tiên (nếu chưa có ai) và nạp dữ liệu mẫu vào cơ sở dữ liệu trống. Thêm `-- --all-rooms` để nạp khoảng 390 phòng, `-- --force` để bổ sung dữ liệu mẫu còn thiếu vào cơ sở dữ liệu đã có dữ liệu (không tạo trùng), `-- --admin-only` để chỉ tạo quản trị viên |
 | `npm run db:reset` | Xoá toàn bộ dữ liệu rồi migrate + seed lại. Chỉ chạy với cơ sở dữ liệu cục bộ, trừ khi đặt `ALLOW_DB_RESET=true` |
 | `npm run uploads:prune` | Liệt kê ảnh tải lên không còn được dùng; thêm `-- --delete` để xoá |
+| `npm run admin:reset` | Liệt kê quản trị viên; thêm `-- --email <email>` để cấp mật khẩu tạm, mở khoá và trả quyền quản trị cho tài khoản đó ([docs/installation.md](docs/installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)) |
 | `npm run demo:reset` | Chỉ với `DEMO_MODE=true`: đặt lại toàn bộ dữ liệu demo ([docs/demo.md](docs/demo.md)) |
 
 ## Cấu hình
@@ -140,7 +148,7 @@ Tên, logo, ảnh nền, liên hệ và quy định: trang quản trị **Cơ s�
 
 ### Ảnh phòng mẫu
 
-Đặt ảnh vào [`apps/api/seed-assets/rooms/`](apps/api/seed-assets/rooms/README.md); `db:seed` sẽ gán cho các phòng mẫu. Không có ảnh thì phòng vẫn được tạo và trang web hiện hình vẽ thay thế (màu và hoạ tiết khác nhau theo tên phòng).
+Đặt ảnh vào [`apps/api/seed-assets/rooms/`](apps/api/seed-assets/rooms/README.md); `db:seed` sẽ gán cho các phòng mẫu (đã seed rồi thì chạy `npm run db:seed -- --force`). Không có ảnh thì phòng vẫn được tạo và trang web hiện hình vẽ thay thế (màu và hoạ tiết khác nhau theo tên phòng).
 
 ## Ảnh mẫu & giấy phép
 
