@@ -30,13 +30,16 @@ Phù hợp với VPS chạy Linux có Docker.
 
    Khi có thêm proxy này phía trước, API đứng sau hai lớp proxy (proxy của bạn và nginx trong container `web`): thêm `TRUST_PROXY_HOPS=2` vào `.env` để giới hạn tần suất tính đúng địa chỉ IP của khách. Nếu trang còn được mở qua địa chỉ khác (một tunnel, tên miền phụ), liệt kê chúng trong `ALLOWED_ORIGINS`, phân cách bằng dấu phẩy.
 
-5. Tạo tài khoản quản trị. Nếu muốn dùng dữ liệu mẫu, chạy một lần:
+5. Tạo tài khoản quản trị, chạy một lần:
 
    ```bash
-   docker compose exec api node src/db/seed.js
+   docker compose exec api node src/db/seed.js --admin-only   # chỉ tài khoản quản trị
+   docker compose exec api node src/db/seed.js                # kèm dữ liệu mẫu (chỉ nạp khi cơ sở dữ liệu còn trống)
    ```
 
-   Sau đó đăng nhập `admin@example.com` / `Admin@12345`, đổi mật khẩu, rồi khoá hoặc đổi mật khẩu tài khoản `user@example.com`. Để đặt sẵn email và mật khẩu quản trị, thêm `SEED_ADMIN_EMAIL` và `SEED_ADMIN_PASSWORD` vào `.env` trước khi chạy lệnh trên.
+   Lệnh in ra email `admin@example.com` và một mật khẩu ngẫu nhiên, **chỉ một lần**: ghi lại, đăng nhập rồi đổi mật khẩu (hệ thống bắt buộc đổi ở lần đăng nhập đầu). Lỡ mất: `docker compose exec api npm run admin:reset -- --email <email>` ([chi tiết](docs/installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)). Để tự đặt email và mật khẩu quản trị, thêm `SEED_ADMIN_EMAIL` và `SEED_ADMIN_PASSWORD` vào `.env` trước khi chạy lệnh trên; khi đó mật khẩu không được in ra log. Nếu đã nạp dữ liệu mẫu, tài khoản khách mẫu `user@example.com` cũng nhận một mật khẩu ngẫu nhiên in cùng lúc; khoá hoặc xoá tài khoản này trước khi mở cho khách.
+
+   Tài khoản quản trị chỉ được tạo khi cơ sở dữ liệu chưa có quản trị viên nào, nên chạy lại lệnh (hoặc để `SEED_ON_START=true`) không tạo thêm tài khoản và không nạp lại dữ liệu mẫu trên hệ thống đang dùng.
 
 ### Bảo vệ cơ sở dữ liệu
 
@@ -89,7 +92,7 @@ TRUST_PROXY_HOPS=1
 
 `AUTH_COOKIE_SAME_SITE=none` là bắt buộc ở cách này vì web và API nằm trên hai tên miền khác nhau. Thêm `SMTP_*`, `VNPAY_*`… nếu dùng.
 
-Nạp dữ liệu mẫu (tuỳ chọn): mở Shell của dịch vụ trên Render và chạy `npm run db:seed`.
+Tạo tài khoản quản trị: mở Shell của dịch vụ trên Render và chạy `npm run db:seed -- --admin-only` (hoặc `npm run db:seed` để kèm dữ liệu mẫu). Đặt `SEED_ADMIN_PASSWORD` trước đó, hoặc ghi lại mật khẩu ngẫu nhiên lệnh in ra một lần.
 
 Kiểm tra: `https://<dịch-vụ>.onrender.com/api/rooms` trả về JSON.
 
@@ -130,8 +133,8 @@ Cả hai cổng gọi IPN từ máy chủ của họ, nên địa chỉ API ph�
 ## Danh sách kiểm tra trước khi mở cho khách
 
 - [ ] `JWT_SECRET` là chuỗi ngẫu nhiên riêng của bạn; không file `.env` nào nằm trong git.
-- [ ] Đã đổi mật khẩu quản trị mặc định; tài khoản `user@example.com` đã bị khoá hoặc đổi mật khẩu.
-- [ ] `SEED_ON_START=false` và `DEMO_MODE` để trống (chế độ demo chỉ dành cho trang trình diễn).
+- [ ] Đã đăng nhập quản trị và đổi mật khẩu; nếu có nạp dữ liệu mẫu, tài khoản `user@example.com` đã bị khoá hoặc xoá.
+- [ ] `DEMO_MODE` để trống (chế độ demo chỉ dành cho trang trình diễn, và là trường hợp duy nhất dữ liệu mẫu được nạp lại khi khởi động). Nên đặt `SEED_ON_START=false`.
 - [ ] `DB_PASSWORD` là mật khẩu mạnh, và cổng 5432 không truy cập được từ Internet.
 - [ ] Trang web chạy qua HTTPS và `AUTH_COOKIE_SECURE=true`.
 - [ ] `CLIENT_URL` / `PUBLIC_URL` khớp chính xác địa chỉ web.

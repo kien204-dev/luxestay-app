@@ -77,9 +77,9 @@ Tuỳ chọn:
 | `MOMO_PARTNER_CODE`, `MOMO_ACCESS_KEY`, `MOMO_SECRET_KEY`, `MOMO_IPN_URL` | trống | Cần đủ khi bật MoMo |
 | `MOMO_API_URL`, `MOMO_RETURN_URL` | môi trường test của MoMo, `<địa chỉ web>/payment/result` | |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_JSON` | trống | Đăng nhập Google (kèm `VITE_FIREBASE_*` ở web). `GOOGLE_APPLICATION_CREDENTIALS` cũng dùng được |
-| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | `admin@example.com`, mật khẩu mẫu | Tài khoản quản trị do `db:seed` tạo |
+| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | `admin@example.com`; mật khẩu: xem bên phải | Tài khoản quản trị đầu tiên, chỉ được tạo khi cơ sở dữ liệu **chưa có quản trị viên nào**. Không đặt mật khẩu: Docker/production sinh mật khẩu ngẫu nhiên và in **một lần** trong log (tài khoản khách mẫu cũng vậy); khi phát triển (và ở chế độ demo) dùng `Admin@12345`. Mất mật khẩu: `npm run admin:reset` |
 | `ALLOW_DB_RESET` | tắt | Cho phép `db:reset` trên cơ sở dữ liệu không nằm trên máy này |
-| `SEED_ON_START` | Docker: `true` | Chỉ Docker: nạp dữ liệu mẫu khi khởi động |
+| `SEED_ON_START` | Docker: `true` | Chỉ Docker: mỗi lần khởi động, tạo quản trị viên đầu tiên nếu chưa có ai, và nạp dữ liệu mẫu nếu cơ sở dữ liệu còn trống. Cơ sở dữ liệu đã có dữ liệu thì không bị đụng tới (trừ khi bật `DEMO_MODE`) |
 | `DEMO_MODE` | tắt | `true` = bản demo công khai: hiện tài khoản mẫu, chặn thay đổi quan trọng (xem [demo.md](demo.md)) |
 | `DEMO_RESET_INTERVAL_HOURS` | tắt | Với `DEMO_MODE`: API tự đặt lại dữ liệu mẫu sau mỗi số giờ này |
 

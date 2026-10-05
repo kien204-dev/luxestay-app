@@ -2,6 +2,23 @@
 
 Đánh số theo [Semantic Versioning](https://semver.org/lang/vi/): `MAJOR.MINOR.PATCH`, kèm `-beta.N` cho tới bản phát hành chính thức. Số phiên bản nằm trong `package.json` ở thư mục gốc, `apps/api` và `apps/web` (ba số luôn giống nhau).
 
+## [Chưa phát hành]
+
+### Bảo mật
+
+- **Seed lúc khởi động (`SEED_ON_START`) không còn tạo lại tài khoản quản trị mặc định.** Trước đây, sau khi đổi email quản trị, lần khởi động kế tiếp tạo thêm `admin@example.com` / `Admin@12345`. Nay tài khoản quản trị chỉ được tạo khi cơ sở dữ liệu chưa có quản trị viên nào (chưa bị xoá), không phụ thuộc email. **Nếu bạn từng đổi email quản trị trên bản beta.3 trở về trước: kiểm tra trang Người dùng và xoá tài khoản `admin@example.com` thừa.**
+- Production (`NODE_ENV=production`, gồm cả Docker) không còn dùng mật khẩu mặc định: tài khoản quản trị dùng `SEED_ADMIN_PASSWORD`, hoặc nhận mật khẩu ngẫu nhiên, in một lần duy nhất trong log lúc tạo và bắt buộc đổi ở lần đăng nhập đầu. Tài khoản khách mẫu `user@example.com` cũng nhận mật khẩu ngẫu nhiên theo cách đó (trước là `User@12345` công khai). Ngoài các mật khẩu sinh ngẫu nhiên này, không mật khẩu nào được in ra log production. (Chế độ demo vẫn dùng mật khẩu mẫu công khai.)
+
+### Thêm
+
+- `npm run admin:reset` (trong Docker: `docker compose exec api npm run admin:reset -- --email <email>`): khôi phục quyền quản trị khi quên mật khẩu hoặc bị khoá. Đặt mật khẩu tạm ngẫu nhiên (in một lần), mở khoá, bảo đảm quyền quản trị, bắt buộc đổi mật khẩu và đăng xuất mọi phiên cũ. Không có `--email` thì liệt kê các quản trị viên. Xem [docs/installation.md](docs/installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài).
+
+### Thay đổi
+
+- Dữ liệu mẫu (khách mẫu, phòng, ảnh điểm đến, ảnh nền, mã `WELCOME10`, booking mẫu) chỉ được nạp vào cơ sở dữ liệu trống, hoặc khi bật `DEMO_MODE`. Phòng, mã giảm giá hay tài khoản mẫu đã xoá không quay lại sau khi khởi động lại.
+- `npm run db:seed` có thêm `-- --force` (bổ sung dữ liệu mẫu vào cơ sở dữ liệu đã có dữ liệu, như hành vi cũ) và `-- --admin-only` (chỉ tạo quản trị viên đầu tiên).
+- Cài bằng Docker: mật khẩu quản trị và khách mẫu lần đầu lấy từ `docker compose logs api` thay cho `Admin@12345` / `User@12345`.
+
 ## [1.0.0-beta.3] — 2026-10-03
 
 ### Thêm
