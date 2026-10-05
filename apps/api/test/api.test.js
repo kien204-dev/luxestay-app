@@ -1754,25 +1754,19 @@ describe("hotel booking API", () => {
     authCookie(accepted);
   });
 
-  it("links Google sign-in to an existing password account instead of merging silently", async () => {
-    const firstGoogleLogin = await request(baseUrl, "/api/google-login", {
-      method: "POST",
-      body: JSON.stringify({ idToken: "valid-google-token-existing-admin" }),
-    });
-    assert.equal(firstGoogleLogin.response.status, 200);
-    assert.equal(firstGoogleLogin.body.linked, true);
-    assert.equal(firstGoogleLogin.body.user.email, "admin@example.com");
-    assert.equal(firstGoogleLogin.body.user.role, "admin");
-    assert.equal(firstGoogleLogin.body.user.google_uid, undefined);
-    authCookie(firstGoogleLogin);
-
-    const secondGoogleLogin = await request(baseUrl, "/api/google-login", {
-      method: "POST",
-      body: JSON.stringify({ idToken: "valid-google-token-existing-admin" }),
-    });
-    assert.equal(secondGoogleLogin.response.status, 200);
-    assert.equal(secondGoogleLogin.body.linked, false);
-    assert.equal(secondGoogleLogin.body.user.email, "admin@example.com");
+  // Linking a guest's password account, and the uid check, run against real
+  // PostgreSQL in test-integration/google-login.test.js.
+  it("does not let a Google account with the admin's email into the admin account", async () => {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const refused = await request(baseUrl, "/api/google-login", {
+        method: "POST",
+        body: JSON.stringify({ idToken: "valid-google-token-existing-admin" }),
+      });
+      assert.equal(refused.response.status, 403);
+      assert.equal(refused.body.code, "GOOGLE_ADMIN_PASSWORD_REQUIRED");
+      assert.equal(refused.body.user, undefined);
+      assert.equal(refused.response.headers.get("set-cookie"), null);
+    }
   });
 
   it("rate limits login, forgot-password and reset-password endpoints", async () => {

@@ -33,6 +33,8 @@
   "GOOGLE_TOKEN_REQUIRED": "The Google sign-in token is missing.",
   "GOOGLE_TOKEN_INVALID": "The Google sign-in token is invalid or has expired.",
   "GOOGLE_EMAIL_UNVERIFIED": "A Google account with a verified email is required.",
+  "GOOGLE_ADMIN_PASSWORD_REQUIRED": "Admin accounts sign in with their password.",
+  "GOOGLE_ACCOUNT_MISMATCH": "This email is already linked to a different Google account. Sign in with your password.",
   "GOOGLE_LINKED": "Your existing account is now linked to Google.",
   "GOOGLE_LOGIN_SUCCESS": "Signed in with Google.",
   "INVALID_USER_ID": "Invalid user id.",
