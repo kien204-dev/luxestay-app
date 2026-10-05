@@ -108,6 +108,7 @@ Với `--email`, lệnh:
 npm run lint              # ESLint + kiểm tra bản dịch + kiểm tra màu theme
 npm test                  # test API, không cần cơ sở dữ liệu
 npm run test:integration  # cần Docker: PostgreSQL thật + máy chủ S3 giả lập, tự dựng và tự xoá
+npm run test:e2e          # cần Docker và Chrome/Edge: mở trang thật trong trình duyệt, chụp ảnh vào test-results/
 ```
 
 ## Gặp lỗi?

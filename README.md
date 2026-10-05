@@ -92,9 +92,10 @@ API sẽ dừng ngay với thông báo rõ ràng nếu thiếu cấu hình bắt
 | `npm run dev` | Chạy API và web cùng lúc, tự nạp lại khi sửa code |
 | `npm run build` | Build web ra `apps/web/dist` |
 | `npm start` | Chạy API ở chế độ thường |
-| `npm run lint` | ESLint cho cả hai app, kiểm tra bản dịch (khoá thiếu, chữ viết thẳng trong code, mã thông báo API chưa dịch) và kiểm tra màu theme |
+| `npm run lint` | ESLint cho cả hai app (gồm lỗi dùng component chưa import trong JSX), kiểm tra bản dịch (khoá thiếu, chữ viết thẳng trong code, mã thông báo API chưa dịch) và kiểm tra màu theme |
 | `npm test` | Test đơn vị của API (không cần cơ sở dữ liệu) |
 | `npm run test:integration` | Test tích hợp trên PostgreSQL thật và một máy chủ S3 giả lập; tự dựng và xoá các container tạm (cần Docker) |
+| `npm run test:e2e` | Test trình duyệt (trang Đặt phòng của tôi ở mọi trạng thái booking, tài khoản mật khẩu và tài khoản Google) trên bản build thật của web và API thật; cần Docker và Chrome hoặc Edge đã cài. Ảnh chụp màn hình lưu ở `test-results/` |
 | `npm run db:migrate` | Chạy các migration chưa áp dụng |
 | `npm run db:seed` | Tạo quản trị viên đầu tiên (nếu chưa có ai) và nạp dữ liệu mẫu vào cơ sở dữ liệu trống. Thêm `-- --all-rooms` để nạp khoảng 390 phòng, `-- --force` để bổ sung dữ liệu mẫu còn thiếu vào cơ sở dữ liệu đã có dữ liệu (không tạo trùng), `-- --admin-only` để chỉ tạo quản trị viên |
 | `npm run db:reset` | Xoá toàn bộ dữ liệu rồi migrate + seed lại. Chỉ chạy với cơ sở dữ liệu cục bộ, trừ khi đặt `ALLOW_DB_RESET=true` |

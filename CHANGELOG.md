@@ -11,7 +11,14 @@
 
 ### Thêm
 
+- `npm run test:e2e`: test trình duyệt cho trang **Đặt phòng của tôi** trên bản build thật của web và API thật (PostgreSQL tạm trong Docker, dùng Chrome/Edge đã cài). Kiểm tra booking ở mọi trạng thái (chờ xác nhận, thanh toán thất bại, đã xác nhận trả online / trả tại quầy / đã thu tại quầy, hoàn tất chưa và đã đánh giá, đã hủy, chờ hoàn tiền, đã hoàn tiền) cho tài khoản mật khẩu và tài khoản Google, danh sách trống của tài khoản mới, các bộ lọc và hộp thoại; lưu ảnh chụp màn hình vào `test-results/`.
+- ESLint bật `react/jsx-no-undef` và `react/jsx-uses-vars`: dùng component hay biến chưa import trong JSX làm `npm run lint` thất bại.
 - `npm run admin:reset` (trong Docker: `docker compose exec api npm run admin:reset -- --email <email>`): khôi phục quyền quản trị khi quên mật khẩu hoặc bị khoá. Đặt mật khẩu tạm ngẫu nhiên (in một lần), mở khoá, bảo đảm quyền quản trị, bắt buộc đổi mật khẩu và đăng xuất mọi phiên cũ. Không có `--email` thì liệt kê các quản trị viên. Xem [docs/installation.md](docs/installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài).
+
+### Sửa
+
+- **Trang Đặt phòng của tôi sập với lỗi `Icon is not defined`** khi tài khoản chưa có booking nào (mọi tài khoản mới, nên gặp ngay sau lần đăng nhập Google đầu tiên), hoặc khi bộ lọc không khớp booking nào: thiếu `import Icon`. Đã rà toàn bộ web bằng luật ESLint mới, không còn chỗ nào tương tự.
+- Header `Cross-Origin-Opener-Policy`: mọi phản hồi (trang web, `/assets`, `/api`, `/uploads`) nay mang đúng một giá trị `same-origin-allow-popups`. Trước đây phản hồi của API đi qua nginx mang hai header trái nhau (`same-origin` của helmet và `same-origin-allow-popups` của nginx), và `/assets` không có header.
 
 ### Thay đổi
 
