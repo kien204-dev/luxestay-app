@@ -30,6 +30,7 @@ firebase.verifyFirebaseIdToken = async (token) => ({
 
 const pool = require("../src/db/db");
 const { reset } = require("../src/db/reset");
+const { run } = require("../src/scripts/admin-reset");
 const app = require("../server");
 
 let server;
@@ -89,7 +90,7 @@ describe("Google sign-in and existing accounts", () => {
     assert.equal((await whoAmI(again.cookie)).email, "new.guest@example.com");
   });
 
-  it("never links a Google account to an admin account, even with the admin's verified email", async () => {
+  it("refuses Google for an admin that was never linked, even with the admin's verified email", async () => {
     const before = await userByEmail("admin@example.com");
 
     for (const email of ["admin@example.com", "Admin@Example.com"]) {
@@ -133,17 +134,48 @@ describe("Google sign-in and existing accounts", () => {
     assert.equal(owner.body.linked, false);
   });
 
-  it("checks the uid for a linked admin too, and still lets the linked Google account in", async () => {
-    // A guest who signs in with Google and is made an admin later keeps that
-    // sign-in; nobody else's Google account can take it over.
+  it("refuses Google for an admin whose Google account is already linked; the password still works", async () => {
+    // A guest who signed in with Google and was made an admin afterwards.
     await pool.query("UPDATE users SET role = 'admin' WHERE email = 'guest@hotel.test'");
+    const before = await userByEmail("guest@hotel.test");
 
-    const refused = await googleLogin({ uid: "uid-someone-else", email: "guest@hotel.test", name: "Someone Else" });
+    for (const uid of ["uid-guest", "uid-someone-else"]) {
+      const refused = await googleLogin({ uid, email: "guest@hotel.test", name: "Guest" });
+
+      assert.equal(refused.status, 403, uid);
+      assert.equal(refused.body.code, "GOOGLE_ADMIN_PASSWORD_REQUIRED", uid);
+      assert.equal(refused.body.user, undefined);
+      assert.equal(refused.cookie, undefined, "no session is started");
+    }
+    assert.deepEqual(await userByEmail("guest@hotel.test"), before, "the account is untouched");
+
+    const withPassword = await post("/api/login", { email: "guest@hotel.test", password: "Guest-Passw0rd" });
+    assert.equal(withPassword.status, 200);
+    assert.equal(withPassword.body.user.role, "admin");
+  });
+
+  it("gives an admin who only ever had Google a password through admin:reset", async () => {
+    // Created by Google sign-in (random password nobody knows), then promoted.
+    await pool.query("UPDATE users SET role = 'admin' WHERE email = 'new.guest@example.com'");
+    const refused = await googleLogin({ uid: "uid-new", email: "new.guest@example.com", name: "New Guest" });
     assert.equal(refused.status, 403);
-    assert.equal(refused.body.code, "GOOGLE_ACCOUNT_MISMATCH");
+    assert.equal(refused.body.code, "GOOGLE_ADMIN_PASSWORD_REQUIRED");
+
+    const lines = [];
+    assert.equal(await run(pool, ["--email", "new.guest@example.com"], (line) => lines.push(line)), true);
+    const temporary = lines.join("\n").match(/Temporary password.*: (\S+)$/m)[1];
+
+    const withPassword = await post("/api/login", { email: "new.guest@example.com", password: temporary });
+    assert.equal(withPassword.status, 200);
+    assert.equal(withPassword.body.user.role, "admin");
+    assert.equal(withPassword.body.user.must_change_password, true);
+  });
+
+  it("lets the same person use Google again once they are no longer an admin", async () => {
+    await pool.query("UPDATE users SET role = 'user' WHERE email = 'guest@hotel.test'");
 
     const owner = await googleLogin({ uid: "uid-guest", email: "guest@hotel.test", name: "Guest" });
     assert.equal(owner.status, 200);
-    assert.equal(owner.body.user.role, "admin");
+    assert.equal(owner.body.user.role, "user");
   });
 });

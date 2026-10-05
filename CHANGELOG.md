@@ -2,12 +2,18 @@
 
 Đánh số theo [Semantic Versioning](https://semver.org/lang/vi/): `MAJOR.MINOR.PATCH`, kèm `-beta.N` cho tới bản phát hành chính thức. Số phiên bản nằm trong `package.json` ở thư mục gốc, `apps/api` và `apps/web` (ba số luôn giống nhau).
 
+## [Chưa phát hành]
+
+### Dự kiến
+
+- Thay `nodemon` bằng `node --watch` (có sẵn trong Node 22) cho `npm run dev` của API, để bỏ 3 cảnh báo `npm audit` mức high của chuỗi `nodemon` → `chokidar` → `braces` (chỉ ảnh hưởng môi trường phát triển; xem [docs/known-issues.md](docs/known-issues.md)).
+
 ## [1.0.0-rc.1] — 2026-10-05
 
 ### Bảo mật
 
 - **Seed lúc khởi động (`SEED_ON_START`) không còn tạo lại tài khoản quản trị mặc định.** Trước đây, sau khi đổi email quản trị, lần khởi động kế tiếp tạo thêm `admin@example.com` / `Admin@12345`. Nay tài khoản quản trị chỉ được tạo khi cơ sở dữ liệu chưa có quản trị viên nào (chưa bị xoá), không phụ thuộc email. **Nếu bạn từng đổi email quản trị trên bản beta.3 trở về trước: kiểm tra trang Người dùng và xoá tài khoản `admin@example.com` thừa.**
-- **Đăng nhập Google không còn tự gắn vào tài khoản quản trị.** Trước đây, tài khoản Google có email trùng với một quản trị viên được liên kết ngay ở lần đăng nhập đầu và vào thẳng với quyền quản trị mà không cần mật khẩu. Nay trường hợp đó bị từ chối với thông báo "Tài khoản quản trị hãy đăng nhập bằng mật khẩu" (mã `GOOGLE_ADMIN_PASSWORD_REQUIRED`). Tài khoản khách vẫn được liên kết như trước.
+- **Tài khoản quản trị không còn đăng nhập được bằng Google, chỉ bằng mật khẩu.** Trước đây, tài khoản Google có email trùng với một quản trị viên được liên kết ngay ở lần đăng nhập đầu và vào thẳng với quyền quản trị mà không cần mật khẩu. Nay mọi lần đăng nhập Google vào tài khoản quản trị, đã liên kết hay chưa, đều bị từ chối với thông báo "Tài khoản quản trị hãy đăng nhập bằng mật khẩu" (mã `GOOGLE_ADMIN_PASSWORD_REQUIRED`), không tạo phiên. **Quản trị viên trước giờ chỉ dùng Google: chạy `npm run admin:reset -- --email <email>` để nhận mật khẩu tạm** ([docs/installation.md](docs/installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)). Tài khoản khách vẫn đăng nhập và liên kết Google như trước.
 - Tài khoản đã liên kết Google chỉ nhận đúng tài khoản Google đó: tài khoản Google khác mang cùng email bị từ chối (mã `GOOGLE_ACCOUNT_MISMATCH`). Trước đây chỉ so email.
 - Production (`NODE_ENV=production`, gồm cả Docker) không còn dùng mật khẩu mặc định: tài khoản quản trị dùng `SEED_ADMIN_PASSWORD`, hoặc nhận mật khẩu ngẫu nhiên, in một lần duy nhất trong log lúc tạo và bắt buộc đổi ở lần đăng nhập đầu. Tài khoản khách mẫu `user@example.com` cũng nhận mật khẩu ngẫu nhiên theo cách đó (trước là `User@12345` công khai). Ngoài các mật khẩu sinh ngẫu nhiên này, không mật khẩu nào được in ra log production. (Chế độ demo vẫn dùng mật khẩu mẫu công khai.)
 
