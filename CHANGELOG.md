@@ -18,7 +18,7 @@
 ### Sửa
 
 - **Trang Đặt phòng của tôi sập với lỗi `Icon is not defined`** khi tài khoản chưa có booking nào (mọi tài khoản mới, nên gặp ngay sau lần đăng nhập Google đầu tiên), hoặc khi bộ lọc không khớp booking nào: thiếu `import Icon`. Đã rà toàn bộ web bằng luật ESLint mới, không còn chỗ nào tương tự.
-- Header `Cross-Origin-Opener-Policy`: mọi phản hồi (trang web, `/assets`, `/api`, `/uploads`) nay mang đúng một giá trị `same-origin-allow-popups`. Trước đây phản hồi của API đi qua nginx mang hai header trái nhau (`same-origin` của helmet và `same-origin-allow-popups` của nginx), và `/assets` không có header.
+- Header `Cross-Origin-Opener-Policy`: mọi phản hồi (trang web, `/assets`, `/api`, `/uploads`) nay mang đúng một giá trị `same-origin-allow-popups`. Trước đây phản hồi của API đi qua nginx mang hai header trái nhau (`same-origin` của helmet và `same-origin-allow-popups` của nginx), và `/assets` không có header. Lưu ý: dòng `Cross-Origin-Opener-Policy policy would block the window.closed call` trong console khi mở cửa sổ đăng nhập Google **vẫn còn**, vì nó do header của chính trang Google gây ra; đăng nhập không bị ảnh hưởng (xem [docs/known-issues.md](docs/known-issues.md)).
 
 ### Thay đổi
 

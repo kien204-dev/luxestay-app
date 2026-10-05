@@ -19,6 +19,7 @@ Cập nhật: 2026-10-03 (phiên bản 1.0.0-beta.3).
 - **Ảnh đã lưu trước bản này** (trước khi có xử lý ảnh phía máy chủ) không được xử lý lại: chúng giữ định dạng và metadata cũ cho tới khi được tải lên lại.
 - **`demo:reset` xoá và tạo lại toàn bộ bảng** trong khoảng 1 giây; người đang dùng trang lúc đó có thể gặp lỗi tạm thời.
 - **Đánh giá trên thẻ phòng** được tải riêng cho từng phòng (mỗi thẻ một yêu cầu). Với 12 phòng mỗi trang thì không đáng kể.
+- **Đăng nhập Google: console của trình duyệt vẫn ghi `Cross-Origin-Opener-Policy policy would block the window.closed call`** trong lúc cửa sổ Google đang mở. Dòng này do chính trang đăng nhập của Google gây ra (`accounts.google.com` gửi `Cross-Origin-Opener-Policy: same-origin`, nên Firebase không hỏi được cửa sổ đó đã đóng chưa); header của trang web (`same-origin-allow-popups`) đã đúng và không thể tắt cảnh báo từ phía mình. Đăng nhập vẫn hoàn tất bình thường. Muốn hết hẳn phải bỏ cách đăng nhập bằng popup (chuyển sang chuyển hướng cả trang hoặc Google Identity Services).
 - **Mã nguồn chưa dùng TypeScript** (dự kiến Giai đoạn 6).
 
 ## Cơ sở dữ liệu
