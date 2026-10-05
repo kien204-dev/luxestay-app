@@ -2666,6 +2666,11 @@ describe("hotel booking API", () => {
     await fs.unlink(path.join(__dirname, "../uploads/avatars", secondFilename)).catch(() => {});
   });
 
+  it("does not send an opener policy that would block the Google sign-in popup", async () => {
+    const response = await fetch(`${baseUrl}/api/settings/public`);
+    assert.equal(response.headers.get("cross-origin-opener-policy"), "same-origin-allow-popups");
+  });
+
   it("keeps the shared demo accounts from spoiling a public demo", async () => {
     const saved = process.env.DEMO_MODE;
     process.env.DEMO_MODE = "true";

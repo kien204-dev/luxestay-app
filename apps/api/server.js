@@ -63,6 +63,10 @@ app.use(
     // Uploaded room photos and avatars are loaded by the web app from another
     // origin in development and split deployments.
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    // helmet's default (same-origin) would cut the page off from the Google
+    // sign-in popup wherever an API response ends up as the page's policy;
+    // this is the value the web server sends (nginx.conf, vercel.json).
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   })
 );
 app.use(cors(corsOptions));
