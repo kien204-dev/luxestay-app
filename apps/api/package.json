@@ -14,6 +14,7 @@
     "db:reset": "node src/db/reset.js",
     "uploads:prune": "node src/scripts/prune-uploads.js",
     "demo:reset": "node src/scripts/demo-reset.js",
+    "admin:reset": "node src/scripts/admin-reset.js",
     "test:integration": "node --test --test-concurrency=1 \"test-integration/*.test.js\""
   },
   "dependencies": {
