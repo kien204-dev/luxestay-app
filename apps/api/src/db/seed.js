@@ -4,16 +4,20 @@
 // Works offline. Room photos come from seed-assets/rooms/ (see the README
 // there); with no photos bundled, rooms are simply created without images.
 //
-// Safe to re-run: users are matched by email, rooms by name, the coupon by
-// code, and sample bookings are only added while the bookings table is empty.
+// Safe to run on every start, including on a site in real use:
+//   - an admin is created only while the database has no admin at all;
+//   - sample data goes into an empty database only (always with DEMO_MODE).
 //
 // Usage:
-//   npm run db:seed                 50 featured rooms
+//   npm run db:seed                 admin + 50 featured rooms, on an empty database
 //   npm run db:seed -- --all-rooms  featured rooms + one pair per destination (~390)
+//   npm run db:seed -- --force      add missing sample data to a database already in use
+//   npm run db:seed -- --admin-only only the first admin, no sample data
 
 require("dotenv").config({ quiet: true });
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const { FEATURED_ROOMS, buildGeneratedRooms } = require("./seed-data/rooms");
 
@@ -29,55 +33,124 @@ const GALLERY_SIZE = 3;
 const DEFAULT_ADMIN_PASSWORD = "Admin@12345";
 const DEFAULT_USER_PASSWORD = "User@12345";
 
-function getSeedAccounts() {
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+const isProduction = () => process.env.NODE_ENV === "production";
+const isDemoMode = () => process.env.DEMO_MODE === "true";
 
-  return [
-    {
-      name: "Admin",
-      email: (process.env.SEED_ADMIN_EMAIL || "admin@example.com").toLowerCase(),
-      password: adminPassword,
-      role: "admin",
-      // The default password is public (it is in the README), so the first
-      // login has to replace it, except on a public demo, where it stays.
-      mustChangePassword: adminPassword === DEFAULT_ADMIN_PASSWORD && process.env.DEMO_MODE !== "true",
-    },
-    {
-      name: "Khách Demo",
-      email: "user@example.com",
-      password: DEFAULT_USER_PASSWORD,
-      role: "user",
-      mustChangePassword: false,
-    },
-  ];
+// The sample passwords are public (they are in the README), so they are only
+// used where that is harmless: in development, and on a public demo, where
+// they are shown on the login page anyway. A production install takes the
+// configured password, if any, or gets a random one of its own, which has to
+// be replaced at the first login.
+function seedPassword(defaultPassword, configured) {
+  if (configured) return { password: configured, passwordSource: "configured", mustChangePassword: false };
+  if (!isDemoMode() && isProduction()) {
+    return { password: generatePassword(), passwordSource: "generated", mustChangePassword: true };
+  }
+  return { password: defaultPassword, passwordSource: "default", mustChangePassword: false };
 }
 
-async function seedUsers(pool, log) {
-  const ids = {};
+function generatePassword() {
+  return crypto.randomBytes(18).toString("base64url");
+}
 
-  for (const account of getSeedAccounts()) {
-    const existing = await pool.query(
-      "SELECT id FROM users WHERE LOWER(email) = LOWER($1)",
-      [account.email]
+// The admin created on first start.
+function getSeedAdmin() {
+  const account = {
+    name: "Admin",
+    email: (process.env.SEED_ADMIN_EMAIL || "admin@example.com").toLowerCase(),
+    role: "admin",
+    ...seedPassword(DEFAULT_ADMIN_PASSWORD, process.env.SEED_ADMIN_PASSWORD),
+  };
+  // Outside a demo the public default never stays: the first login replaces it.
+  if (account.passwordSource === "default" && !isDemoMode()) account.mustChangePassword = true;
+  return account;
+}
+
+function getSeedGuest() {
+  return {
+    name: "Khách Demo",
+    email: "user@example.com",
+    role: "user",
+    ...seedPassword(DEFAULT_USER_PASSWORD),
+  };
+}
+
+// The sample sign-ins of a public demo (see config/demo.js).
+function getSeedAccounts() {
+  return [getSeedAdmin(), getSeedGuest()];
+}
+
+async function insertUser(pool, account) {
+  const hashed = await bcrypt.hash(account.password, 10);
+  const inserted = await pool.query(
+    `INSERT INTO users (name, email, password, role, must_change_password)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id`,
+    [account.name, account.email, hashed, account.role, account.mustChangePassword]
+  );
+  return inserted.rows[0].id;
+}
+
+// A password never reaches a production log, except a generated one, which
+// is shown this once because nobody could know it otherwise.
+function logCreated(log, label, account) {
+  if (account.passwordSource === "generated") {
+    log(`  created ${label}: ${account.email}`);
+    log(`  generated ${label} password, shown only this once (change it at first login): ${account.password}`);
+  } else if (account.passwordSource === "configured") {
+    log(`  created ${label}: ${account.email} (password from SEED_ADMIN_PASSWORD)`);
+  } else if (isProduction()) {
+    log(`  created ${label}: ${account.email} (sample password, see docs/demo.md)`);
+  } else {
+    log(`  created ${label}: ${account.email} / ${account.password}`);
+  }
+}
+
+// Creates the first admin, and only the first: once any admin exists (whatever
+// its email, locked or not) nothing is created, so renaming the admin account
+// does not bring the default one back on the next start.
+async function ensureAdmin(pool, log) {
+  const admins = await pool.query(
+    "SELECT 1 FROM users WHERE role = 'admin' AND deleted_at IS NULL LIMIT 1"
+  );
+  if (admins.rows.length > 0) return;
+
+  const account = getSeedAdmin();
+  const taken = await pool.query("SELECT 1 FROM users WHERE LOWER(email) = $1", [account.email]);
+  if (taken.rows.length > 0) {
+    log(
+      `  WARNING: there is no admin, and ${account.email} belongs to another (or a deleted) account. ` +
+        "Set SEED_ADMIN_EMAIL to a free address and run the seed again, or make an existing " +
+        "account the admin with: npm run admin:reset -- --email <email>"
     );
-
-    if (existing.rows.length > 0) {
-      ids[account.role] = existing.rows[0].id;
-      continue;
-    }
-
-    const hashed = await bcrypt.hash(account.password, 10);
-    const inserted = await pool.query(
-      `INSERT INTO users (name, email, password, role, must_change_password)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id`,
-      [account.name, account.email, hashed, account.role, account.mustChangePassword]
-    );
-    ids[account.role] = inserted.rows[0].id;
-    log(`  created ${account.role}: ${account.email} / ${account.password}`);
+    return;
   }
 
-  return ids;
+  await insertUser(pool, account);
+  logCreated(log, "admin", account);
+}
+
+async function seedGuest(pool, log) {
+  const account = getSeedGuest();
+  const existing = await pool.query("SELECT id FROM users WHERE LOWER(email) = $1", [account.email]);
+  if (existing.rows.length > 0) return existing.rows[0].id;
+
+  const id = await insertUser(pool, account);
+  logCreated(log, "sample guest", account);
+  return id;
+}
+
+// Has anything ever been stored here? Checked before the admin is created,
+// so a database that only holds its admin already counts as in use: sample
+// rooms an owner deleted do not come back on the next start.
+async function isEmptyDatabase(pool) {
+  const result = await pool.query(
+    `SELECT NOT (
+       EXISTS (SELECT 1 FROM users) OR EXISTS (SELECT 1 FROM rooms)
+       OR EXISTS (SELECT 1 FROM bookings) OR EXISTS (SELECT 1 FROM coupons)
+     ) AS empty`
+  );
+  return result.rows[0].empty;
 }
 
 // Copies the bundled sample photos into uploads/rooms/ (skipping ones already
@@ -299,22 +372,37 @@ async function seedBookings(pool, log, { guestId, roomIds }) {
   log(`  bookings: ${samples.length} sample bookings for the demo guest`);
 }
 
-async function seed(pool, { log = console.log, allRooms = false } = {}) {
+// sampleData: "if-empty" (default) adds the sample guest, rooms, photos,
+// coupon and bookings to an empty database only, or always with DEMO_MODE;
+// "always" also tops up a database in use; "never" creates the admin only.
+async function seed(pool, { log = console.log, allRooms = false, sampleData = "if-empty" } = {}) {
   log("Seeding database...");
-  const userIds = await seedUsers(pool, log);
-  const roomIds = await seedRooms(pool, log, { allRooms });
-  await seedDestinationImages(pool, log);
-  await seedHeroImage(pool, log);
-  await seedCoupon(pool, log);
-  await seedBookings(pool, log, { guestId: userIds.user, roomIds });
+  const withSampleData =
+    sampleData === "always" ||
+    (sampleData === "if-empty" && (isDemoMode() || (await isEmptyDatabase(pool))));
+
+  await ensureAdmin(pool, log);
+
+  if (withSampleData) {
+    const guestId = await seedGuest(pool, log);
+    const roomIds = await seedRooms(pool, log, { allRooms });
+    await seedDestinationImages(pool, log);
+    await seedHeroImage(pool, log);
+    await seedCoupon(pool, log);
+    await seedBookings(pool, log, { guestId, roomIds });
+  } else if (sampleData === "if-empty") {
+    log("  sample data: skipped, the database is already in use (--force adds it anyway)");
+  }
   log("Seed complete");
 }
 
-module.exports = { seed, getSeedAccounts, DEFAULT_ADMIN_PASSWORD, DEFAULT_USER_PASSWORD };
+module.exports = { seed, generatePassword, getSeedAccounts, DEFAULT_ADMIN_PASSWORD, DEFAULT_USER_PASSWORD };
 
 if (require.main === module) {
   const pool = require("./db");
-  seed(pool, { allRooms: process.argv.includes("--all-rooms") })
+  const flag = (name) => process.argv.includes(name);
+  const sampleData = flag("--admin-only") ? "never" : flag("--force") ? "always" : "if-empty";
+  seed(pool, { allRooms: flag("--all-rooms"), sampleData })
     .then(() => pool.end())
     .catch((err) => {
       console.error("SEED FAILED:", err.message);

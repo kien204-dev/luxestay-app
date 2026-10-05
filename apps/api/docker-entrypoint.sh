@@ -16,6 +16,8 @@ fi
 
 node src/db/migrate.js
 
+# Runs on every start, so it only ever fills gaps: the first admin while there
+# is none, sample data into an empty database (see src/db/seed.js).
 if [ "$SEED_ON_START" = "true" ]; then
   node src/db/seed.js
 fi
