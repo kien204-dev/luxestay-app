@@ -1,6 +1,6 @@
 # Vấn đề đã biết
 
-Cập nhật: 2026-10-05 (phiên bản 1.0.0-rc.1).
+Cập nhật: 2026-10-06 (phiên bản 1.0.0-rc.2).
 
 ## Chưa kiểm chứng với dịch vụ thật
 
@@ -43,7 +43,7 @@ Kiểm tra lại ngày 2026-10-05: `npm audit` báo 7 mục mức **high** từ 
 
 `@firebase/firestore` ghim `@grpc/grpc-js` ở `~1.9.0`, nên chỉ hết cảnh báo khi Firebase phát hành bản mới; `npm audit fix --force` sẽ hạ `firebase` xuống 9.14, không nên làm.
 
-**Gốc 2 (3 mục, chỉ khi phát triển):** `braces` (lỗi làm treo khi gặp mẫu lồng nhau rất sâu, chưa có bản vá) qua `chokidar` của `nodemon`, công cụ tự khởi động lại API cho `npm run dev`. Không được cài trong image Docker (`npm ci --omit=dev`) và không chạy ở production. `npm audit fix --force` sẽ hạ `nodemon` xuống 1.14, không nên làm; cách dứt điểm là thay `nodemon` bằng `node --watch` có sẵn trong Node 22, dự kiến làm sau bản 1.0.0-rc.1.
+**Gốc 2 (3 mục, chỉ khi phát triển):** `braces` (lỗi làm treo khi gặp mẫu lồng nhau rất sâu, chưa có bản vá) qua `chokidar` của `nodemon`, công cụ tự khởi động lại API cho `npm run dev`. Không được cài trong image Docker (`npm ci --omit=dev`) và không chạy ở production. `npm audit fix --force` sẽ hạ `nodemon` xuống 1.14, không nên làm; cách dứt điểm là thay `nodemon` bằng `node --watch` có sẵn trong Node 22, dự kiến làm sau các bản rc.
 
 API dùng `firebase-admin`, gói này kéo theo `@grpc/grpc-js` 1.14.5, không thuộc dải bị báo.
 
