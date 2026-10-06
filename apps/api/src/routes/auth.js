@@ -298,6 +298,14 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
         });
       }
 
+      // An admin signs in with the password, never with Google, linked or
+      // not: admin rights must not depend on who controls a mailbox or a
+      // Google account. (An admin who only ever had Google gets a password
+      // from `npm run admin:reset`.)
+      if (user.role === "admin") {
+        return res.status(403).json({ ...apiMessage("GOOGLE_ADMIN_PASSWORD_REQUIRED") });
+      }
+
       // Linked already: only the Google account it was linked to gets in. The
       // email alone is not enough (an address can pass to another Google
       // account, or be an alias on one).
@@ -306,13 +314,8 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
       }
 
       // First Google sign-in for an email that already had a password account:
-      // link it explicitly instead of merging silently. An admin account is
-      // never linked this way: whoever controls the mailbox would get the
-      // admin rights without ever knowing the password.
+      // link it explicitly instead of merging silently.
       if (!user.google_uid) {
-        if (user.role === "admin") {
-          return res.status(403).json({ ...apiMessage("GOOGLE_ADMIN_PASSWORD_REQUIRED") });
-        }
         justLinked = true;
         const linkResult = await pool.query(
           `UPDATE users SET google_uid = $1 WHERE id = $2

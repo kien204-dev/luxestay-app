@@ -81,7 +81,9 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 ## Quên mật khẩu admin / bị khoá ngoài
 
-Khi mất mật khẩu quản trị (ví dụ không kịp ghi lại mật khẩu trong log lần chạy đầu), tài khoản quản trị bị khoá, hoặc không còn tài khoản nào có quyền quản trị, dùng lệnh `admin:reset` ngay trên máy chủ. Lệnh không hỏi mật khẩu cũ: ai chạy được lệnh trong container thì đã có toàn quyền với cơ sở dữ liệu.
+**Tài khoản quản trị chỉ đăng nhập bằng mật khẩu.** Đăng nhập Google bị từ chối với mọi tài khoản quản trị ("Tài khoản quản trị hãy đăng nhập bằng mật khẩu"), kể cả tài khoản trước đó đã liên kết Google. Một tài khoản chỉ có Google (tạo bằng đăng nhập Google rồi được cấp quyền quản trị) chưa có mật khẩu nào dùng được: chạy lệnh dưới đây để nhận mật khẩu tạm.
+
+Khi mất mật khẩu quản trị (ví dụ không kịp ghi lại mật khẩu trong log lần chạy đầu), tài khoản quản trị bị khoá, quản trị viên trước giờ chỉ dùng Google, hoặc không còn tài khoản nào có quyền quản trị, dùng lệnh `admin:reset` ngay trên máy chủ. Lệnh không hỏi mật khẩu cũ: ai chạy được lệnh trong container thì đã có toàn quyền với cơ sở dữ liệu.
 
 ```bash
 # Docker

@@ -1,6 +1,6 @@
 # Vấn đề đã biết
 
-Cập nhật: 2026-10-05 (phiên bản 1.0.0-rc.1).
+Cập nhật: 2026-10-06 (phiên bản 1.0.0-rc.2).
 
 ## Chưa kiểm chứng với dịch vụ thật
 
@@ -20,7 +20,8 @@ Cập nhật: 2026-10-05 (phiên bản 1.0.0-rc.1).
 - **`demo:reset` xoá và tạo lại toàn bộ bảng** trong khoảng 1 giây; người đang dùng trang lúc đó có thể gặp lỗi tạm thời.
 - **Đánh giá trên thẻ phòng** được tải riêng cho từng phòng (mỗi thẻ một yêu cầu). Với 12 phòng mỗi trang thì không đáng kể.
 - **Đăng nhập Google: console của trình duyệt vẫn ghi `Cross-Origin-Opener-Policy policy would block the window.closed call`** trong lúc cửa sổ Google đang mở. Dòng này do chính trang đăng nhập của Google gây ra (`accounts.google.com` gửi `Cross-Origin-Opener-Policy: same-origin`, nên Firebase không hỏi được cửa sổ đó đã đóng chưa); header của trang web (`same-origin-allow-popups`) đã đúng và không thể tắt cảnh báo từ phía mình. Đăng nhập vẫn hoàn tất bình thường. Muốn hết hẳn phải bỏ cách đăng nhập bằng popup (chuyển sang chuyển hướng cả trang hoặc Google Identity Services).
-- **Liên kết Google với tài khoản có mật khẩu chưa có bước xác nhận bằng mật khẩu.** Lần đăng nhập Google đầu tiên bằng email trùng với một tài khoản khách có sẵn sẽ tự liên kết hai tài khoản (Google đã xác minh email đó). Tài khoản quản trị thì không bao giờ được tự liên kết: phải đăng nhập bằng mật khẩu. Sau khi đã liên kết, chỉ đúng tài khoản Google đó vào được. Dự kiến sau v1: việc liên kết chỉ làm từ trang Tài khoản, khi đang đăng nhập và nhập lại mật khẩu; khi đó quản trị viên cũng tự liên kết Google được.
+- **Liên kết Google với tài khoản có mật khẩu chưa có bước xác nhận bằng mật khẩu.** Lần đăng nhập Google đầu tiên bằng email trùng với một tài khoản khách có sẵn sẽ tự liên kết hai tài khoản (Google đã xác minh email đó). Sau khi đã liên kết, chỉ đúng tài khoản Google đó vào được. Dự kiến sau v1: việc liên kết chỉ làm từ trang Tài khoản, khi đang đăng nhập và nhập lại mật khẩu.
+- **Tài khoản quản trị không đăng nhập được bằng Google**, kể cả khi đã liên kết: chỉ dùng mật khẩu. Quản trị viên trước giờ chỉ dùng Google lấy mật khẩu tạm bằng `npm run admin:reset -- --email <email>` ([installation.md](installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)). Trang đăng nhập vẫn hiện nút Google cho mọi người; quản trị viên bấm vào sẽ nhận thông báo hướng dẫn dùng mật khẩu.
 - **Mã nguồn chưa dùng TypeScript** (dự kiến Giai đoạn 6).
 
 ## Cơ sở dữ liệu
@@ -42,7 +43,7 @@ Kiểm tra lại ngày 2026-10-05: `npm audit` báo 7 mục mức **high** từ 
 
 `@firebase/firestore` ghim `@grpc/grpc-js` ở `~1.9.0`, nên chỉ hết cảnh báo khi Firebase phát hành bản mới; `npm audit fix --force` sẽ hạ `firebase` xuống 9.14, không nên làm.
 
-**Gốc 2 (3 mục, chỉ khi phát triển):** `braces` (lỗi làm treo khi gặp mẫu lồng nhau rất sâu, chưa có bản vá) qua `chokidar` của `nodemon`, công cụ tự khởi động lại API cho `npm run dev`. Không được cài trong image Docker (`npm ci --omit=dev`) và không chạy ở production. `npm audit fix --force` sẽ hạ `nodemon` xuống 1.14, không nên làm; cách dứt điểm là thay `nodemon` bằng `node --watch` có sẵn trong Node 22.
+**Gốc 2 (3 mục, chỉ khi phát triển):** `braces` (lỗi làm treo khi gặp mẫu lồng nhau rất sâu, chưa có bản vá) qua `chokidar` của `nodemon`, công cụ tự khởi động lại API cho `npm run dev`. Không được cài trong image Docker (`npm ci --omit=dev`) và không chạy ở production. `npm audit fix --force` sẽ hạ `nodemon` xuống 1.14, không nên làm; cách dứt điểm là thay `nodemon` bằng `node --watch` có sẵn trong Node 22, dự kiến làm sau các bản rc.
 
 API dùng `firebase-admin`, gói này kéo theo `@grpc/grpc-js` 1.14.5, không thuộc dải bị báo.
 

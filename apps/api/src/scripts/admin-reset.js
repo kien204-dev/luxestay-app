@@ -1,5 +1,7 @@
 // Gets an owner back in when the admin password is lost or every admin is
-// locked out. Needs a shell on the server, so it asks for no password.
+// locked out, and gives a password to an admin who only ever signed in with
+// Google (admins cannot use Google sign-in). Needs a shell on the server, so
+// it asks for no password.
 //
 //   npm run admin:reset                        list the admins
 //   npm run admin:reset -- --email <email>     reset that account

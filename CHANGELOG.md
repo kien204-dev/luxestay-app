@@ -2,6 +2,23 @@
 
 Đánh số theo [Semantic Versioning](https://semver.org/lang/vi/): `MAJOR.MINOR.PATCH`, kèm `-beta.N` cho tới bản phát hành chính thức. Số phiên bản nằm trong `package.json` ở thư mục gốc, `apps/api` và `apps/web` (ba số luôn giống nhau).
 
+## [Chưa phát hành]
+
+### Dự kiến
+
+- Thay `nodemon` bằng `node --watch` (có sẵn trong Node 22) cho `npm run dev` của API, để bỏ 3 cảnh báo `npm audit` mức high của chuỗi `nodemon` → `chokidar` → `braces` (chỉ ảnh hưởng môi trường phát triển; xem [docs/known-issues.md](docs/known-issues.md)).
+
+## [1.0.0-rc.2] — 2026-10-06
+
+### Bảo mật
+
+- **Tài khoản quản trị không còn đăng nhập được bằng Google, chỉ bằng mật khẩu.** Bản rc.1 chỉ chặn việc tự liên kết lần đầu; quản trị viên đã liên kết Google từ trước (hoặc tài khoản Google được cấp quyền quản trị sau) vẫn vào được bằng Google. Nay mọi lần đăng nhập Google vào tài khoản quản trị, đã liên kết hay chưa, đều bị từ chối với thông báo "Tài khoản quản trị hãy đăng nhập bằng mật khẩu" (mã `GOOGLE_ADMIN_PASSWORD_REQUIRED`), không tạo phiên. **Quản trị viên trước giờ chỉ dùng Google: chạy `npm run admin:reset -- --email <email>` để nhận mật khẩu tạm.** Tài khoản khách vẫn đăng nhập và liên kết Google như trước.
+
+### Tài liệu
+
+- [docs/installation.md](docs/installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài): quản trị viên chỉ dùng mật khẩu; cách lấy mật khẩu cho quản trị viên chỉ có Google.
+- [docs/known-issues.md](docs/known-issues.md): quản trị viên không dùng được Google; việc thay `nodemon` bằng `node --watch` để sau.
+
 ## [1.0.0-rc.1] — 2026-10-05
 
 ### Bảo mật
