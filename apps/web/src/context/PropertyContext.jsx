@@ -5,8 +5,8 @@ import { normalizeImageUrl } from "../utils/imageUrl";
 import { useAsyncData } from "../utils/useAsyncData";
 import i18n from "../i18n";
 
-// Who the property is: name, logo, home page photo, contact details, check-in/out times and
-// the cancellation window. An admin edits these under /admin/property and
+// Who the property is: name, logo, home page photo and texts, contact details,
+// check-in/out times and the cancellation window. An admin edits these under /admin/property and
 // the API serves them, so the site reflects a change on the next page load
 // with no rebuild. Until the API has answered (or if it cannot be reached)
 // the values baked in at build time are used.
@@ -14,6 +14,12 @@ const BUILD_TIME_DEFAULTS = {
   name: APP_NAME,
   logoUrl: "",
   heroImageUrl: "",
+  // Home page content: empty until an admin writes it (the page then uses
+  // its neutral headline and leaves the amenities and location sections out).
+  heroTitle: "",
+  heroSubtitle: "",
+  amenities: [],
+  nearbyPlaces: [],
   phone: CONTACT.phone,
   email: CONTACT.email,
   address: CONTACT.address,

@@ -52,5 +52,24 @@
       "title": "Original title",
       "sourceUrl": "Link to the photo's page"
     }
+  },
+  "home": {
+    "title": "Home page content",
+    "subtitle": "The headline at the top of the home page and its Amenities and Location sections. The text is shown as written in every language. An empty field falls back to the default wording; an empty list hides its section.",
+    "heroTitle": "Headline",
+    "heroSubtitle": "Text under the headline",
+    "amenities": "Amenities",
+    "amenitiesHint": "Up to 12 rows. Shown in the home page's Amenities section.",
+    "amenityName": "Amenity",
+    "amenityDescription": "Short description",
+    "nearbyPlaces": "Nearby places",
+    "nearbyPlacesHint": "Up to 8 rows. Shown in the home page's Location section, with the address from Details and rules.",
+    "placeName": "Place",
+    "placeNote": "Note",
+    "placeDistance": "Distance",
+    "addRow": "Add row",
+    "removeRow": "Remove row {{index}}",
+    "rowField": "{{label}}, row {{index}}",
+    "save": "Save home page content"
   }
 }

@@ -6,11 +6,12 @@ import { useToast } from "../../../context/ToastContext";
 import { deleteHeroImage, deleteLogo, getAdminSettings, uploadHeroImage, uploadLogo } from "../../../services/settingsService";
 import { apiErrorText, apiSuccessText } from "../../../utils/apiError";
 import { useAsyncData } from "../../../utils/useAsyncData";
+import HomeContentForm from "./HomeContentForm";
 import ImageSetting from "./ImageSetting";
 import PropertyForm from "./PropertyForm";
 
-// Admin: the property's name, logo, home page photo, contact details and
-// house rules. Changes show on the guest site, in emails and on PDFs at once.
+// Admin: the property's name, logo, home page photo and texts, contact
+// details and house rules. Changes show on the guest site, in emails and on PDFs at once.
 export default function PropertyPage() {
   const { t } = useTranslation("property");
   const toast = useToast();
@@ -58,6 +59,7 @@ export default function PropertyPage() {
             previewStyle={{ width: "100%", aspectRatio: "16 / 6" }}
             testId="hero"
           />
+          <HomeContentForm key={`home:${JSON.stringify(data.stored)}`} settings={data} onSaved={saved} onError={setActionError} />
           <PropertyForm key={JSON.stringify(data.stored)} settings={data} onSaved={saved} onError={setActionError} />
         </div>
       ) : loading ? (
