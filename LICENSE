@@ -31,8 +31,9 @@ hai loại giấy phép dưới đây, tuỳ theo gói đã mua.
    - Gỡ bỏ thông báo bản quyền này khỏi mã nguồn.
 
 5. THÀNH PHẦN CỦA BÊN THỨ BA
-   Các thư viện mã nguồn mở và tài nguyên đi kèm (ví dụ phông Noto Sans theo
-   SIL Open Font License, xem apps/api/assets/fonts/OFL.txt) thuộc về chủ sở hữu
+   Các thư viện mã nguồn mở và tài nguyên đi kèm (ví dụ phông Noto Sans, Cormorant
+   Garamond và Be Vietnam Pro theo SIL Open Font License, xem
+   apps/api/assets/fonts/OFL.txt và apps/web/src/assets/fonts/OFL.txt) thuộc về chủ sở hữu
    tương ứng và tuân theo giấy phép riêng của chúng.
 
    Ảnh trong thư mục apps/api/seed-assets/ (ví dụ ảnh điểm đến trong
