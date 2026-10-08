@@ -9,6 +9,14 @@ export const getRoomReviews = async (roomId, params) => {
 };
 
 // =========================
+// GET THE OVERALL SCORE AND THE BEST REVIEWS (public, home page)
+// =========================
+export const getFeaturedReviews = async () => {
+  const response = await api.get("/reviews/featured");
+  return response.data;
+};
+
+// =========================
 // CREATE A REVIEW
 // =========================
 export const createReview = async (roomId, data) => {

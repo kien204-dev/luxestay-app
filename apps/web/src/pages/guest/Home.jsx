@@ -1,127 +1,22 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import SearchBar from "../../components/guest/SearchBar";
-import RoomCard, { RoomImage } from "../../components/guest/RoomCard";
-import { getRoomDestinations, getRooms } from "../../services/roomService";
+import { formatRating } from "../../components/RoomReviews";
+import { StarIcon } from "../../components/guest/icons";
+import { getFeaturedReviews } from "../../services/reviewService";
 import { useAsyncData } from "../../utils/useAsyncData";
 import { useBookingPolicy } from "../../utils/useBookingPolicy";
 import { useDocumentTitle } from "../../utils/useDocumentTitle";
-import { formatMoney } from "../../utils/format";
-import { placeholderFor } from "../../utils/imageUrl";
 import { searchToQuery } from "../../utils/stayQuery";
 import { useProperty } from "../../context/PropertyContext";
+import Destinations from "./home/Destinations";
+import FeaturedRooms from "./home/FeaturedRooms";
+import GuestVoices from "./home/GuestVoices";
+import "../../styles/home.css";
 
-const FEATURED_COUNT = 6;
-const DESTINATION_COUNT = 8;
-
-// CC BY and CC BY-SA photos must name their author and licence where they
-// are shown. The full credit, with links, is on the /credits page.
-function PhotoCredit({ credit }) {
-  const { t } = useTranslation("site");
-  if (!credit) return null;
-
-  const full = [credit.title, credit.author, credit.license].filter(Boolean).join(" · ");
-  if (!/^CC BY/i.test(credit.license || "")) return <span className="sr-only">{full}</span>;
-
-  return (
-    <span className="dest-card-credit" title={full}>
-      {t("home.photoCredit", { author: credit.author, license: credit.license })}
-    </span>
-  );
-}
-
-function Destinations() {
-  const { t, i18n } = useTranslation("site");
-  const { data } = useAsyncData("destinations", getRoomDestinations);
-  const destinations = Array.isArray(data) ? data.slice(0, DESTINATION_COUNT) : [];
-
-  // Real places only: with nothing in the database the section is left out.
-  if (destinations.length === 0) return null;
-
-  return (
-    <section className="guest-section" style={{ paddingBottom: 0 }}>
-      <div className="guest-container">
-        <span className="guest-eyebrow">{t("home.destinationsEyebrow")}</span>
-        <h2 className="guest-section-title">{t("home.destinationsTitle")}</h2>
-
-        <div className="dest-grid">
-          {destinations.map((destination) => (
-            <Link
-              key={destination.name}
-              to={`/rooms?location=${encodeURIComponent(destination.name)}`}
-              className="dest-card"
-            >
-              <RoomImage
-                src={destination.image}
-                alt={destination.place ? `${destination.place} – ${destination.name}` : destination.name}
-                fallback={placeholderFor(destination.name, "place")}
-              />
-              <PhotoCredit credit={destination.credit} />
-              <div className="dest-card-body">
-                <strong>{destination.name}</strong>
-                <span>
-                  {t("home.destinationMeta", {
-                    count: destination.room_count,
-                    price: formatMoney(destination.min_price, i18n.language),
-                  })}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FeaturedRooms() {
-  const { t } = useTranslation("site");
-  const { data, loading, error, reload } = useAsyncData("featured-rooms", () =>
-    getRooms({ bookable: true, limit: FEATURED_COUNT, sortBy: "created_at", sortOrder: "desc" })
-  );
-  const rooms = data?.data || [];
-
-  return (
-    <section className="guest-section">
-      <div className="guest-container">
-        <span className="guest-eyebrow">{t("home.roomsEyebrow")}</span>
-        <h2 className="guest-section-title">{t("home.roomsTitle")}</h2>
-
-        {loading && !data ? (
-          <div className="room-grid" aria-busy="true">
-            {Array.from({ length: 3 }, (_, i) => (
-              <div key={i} className="luxe-skeleton-light skeleton-card" />
-            ))}
-          </div>
-        ) : error ? (
-          <div className="guest-state">
-            <p>{t("list.loadFailed")}</p>
-            <button type="button" className="g-btn g-btn--outline" onClick={reload}>
-              {t("list.retry")}
-            </button>
-          </div>
-        ) : rooms.length === 0 ? (
-          <div className="guest-state">
-            <p>{t("list.noRoomsYet")}</p>
-          </div>
-        ) : (
-          <>
-            <div className="room-grid">
-              {rooms.map((room) => (
-                <RoomCard key={room.id} room={room} />
-              ))}
-            </div>
-            <div style={{ textAlign: "center", marginTop: 32 }}>
-              <Link to="/rooms" className="g-btn g-btn--primary">
-                {t("home.viewAllRooms")}
-              </Link>
-            </div>
-          </>
-        )}
-      </div>
-    </section>
-  );
-}
+// Everything on this page comes from data: the property's settings
+// (/admin/property), its rooms, destinations and reviews. A section with
+// nothing real to show is left out rather than filled with sample text.
 
 // Three statements about how booking here works. Each one is true of the
 // software itself (live availability, the configured cancellation window,
@@ -142,13 +37,17 @@ function WhyBookDirect() {
   ];
 
   return (
-    <section className="guest-section" style={{ paddingTop: 0 }}>
+    <section className="guest-section">
       <div className="guest-container">
-        <span className="guest-eyebrow">{t("home.whyEyebrow")}</span>
-        <h2 className="guest-section-title">{t("home.whyTitle")}</h2>
-        <div className="why-grid">
+        <div className="home-sechead">
+          <div>
+            <p className="guest-eyebrow">{t("home.whyEyebrow")}</p>
+            <h2 className="guest-section-title">{t("home.whyTitle")}</h2>
+          </div>
+        </div>
+        <div className="home-facts">
           {items.map((item) => (
-            <div key={item.title} className="why-item">
+            <div key={item.title} className="home-fact">
               <h3>{item.title}</h3>
               <p>{item.text}</p>
             </div>
@@ -159,29 +58,142 @@ function WhyBookDirect() {
   );
 }
 
-export default function Home() {
+// What the property offers, as its admin listed it. The band reuses the home
+// page photo when there is one.
+function Amenities() {
   const { t } = useTranslation("site");
+  const property = useProperty();
+  if (property.amenities.length === 0) return null;
+
+  return (
+    <section className="guest-section home-dark" data-testid="amenities">
+      <div className="guest-container home-amenities">
+        {property.heroImageUrl && (
+          <div className="home-amenities-photo guest-photo">
+            <img src={property.heroImageUrl} alt="" width={1200} height={1500} loading="lazy" decoding="async" />
+          </div>
+        )}
+        <div className="home-amenities-body">
+          <div>
+            <p className="guest-eyebrow">{t("home.amenitiesEyebrow")}</p>
+            <h2 className="guest-section-title">{t("home.amenitiesTitle")}</h2>
+          </div>
+          <ul className="home-amenities-list">
+            {property.amenities.map((amenity, index) => (
+              <li key={index}>
+                <b>{amenity.name}</b>
+                {amenity.description && <span>{amenity.description}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// The address and how far the places around it are, as the admin listed
+// them. Shown once there is at least one nearby place.
+function Location() {
+  const { t } = useTranslation("site");
+  const property = useProperty();
+  if (property.nearbyPlaces.length === 0) return null;
+
+  return (
+    <section className="guest-section" data-testid="location">
+      <div className="guest-container home-location">
+        <div className="home-location-info">
+          <div>
+            <p className="guest-eyebrow">{t("home.locationEyebrow")}</p>
+            <h2 className="guest-section-title">{t("home.locationTitle")}</h2>
+          </div>
+          {property.address && (
+            <>
+              <address>{property.address}</address>
+              <a
+                className="g-btn g-btn--primary"
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("home.directions")}
+              </a>
+            </>
+          )}
+        </div>
+        <ul className="home-distances">
+          {property.nearbyPlaces.map((place, index) => (
+            <li key={index}>
+              <div>
+                <b>{place.name}</b>
+                {place.note && <small>{place.note}</small>}
+              </div>
+              {place.distance && <span>{place.distance}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+export default function Home() {
+  const { t, i18n } = useTranslation("site");
   const navigate = useNavigate();
   const property = useProperty();
+  // One request serves both the score in the hero and the quotes below.
+  const { data: reviews } = useAsyncData("featured-reviews", getFeaturedReviews);
   useDocumentTitle(t("home.documentTitle"));
 
   return (
     <>
-      <section
-        className={`guest-hero${property.heroImageUrl ? " guest-hero--photo" : ""}`}
-        style={property.heroImageUrl ? { "--hero-image": `url("${property.heroImageUrl}")` } : undefined}
-        data-testid="home-hero"
-      >
-        <div className="guest-container">
-          <h1>{t("home.heroTitle")}</h1>
-          <p>{t("home.heroSubtitle", { brand: property.name })}</p>
+      <section className="home-hero" data-testid="home-hero">
+        {property.heroImageUrl && (
+          <>
+            <img
+              className="home-hero-photo"
+              src={property.heroImageUrl}
+              alt=""
+              width={2400}
+              height={1350}
+              fetchPriority="high"
+              decoding="async"
+            />
+            <div className="home-hero-veil" />
+          </>
+        )}
+
+        <div className="guest-container home-hero-inner">
+          <div className="home-hero-copy">
+            <div>
+              {property.address && <p className="home-hero-kicker">{property.address}</p>}
+              <h1>{property.heroTitle || t("home.heroTitle")}</h1>
+            </div>
+            <div className="home-hero-side">
+              <p>{property.heroSubtitle || t("home.heroSubtitle", { brand: property.name })}</p>
+              {/* Only when guests have actually left reviews. */}
+              <p className="home-hero-rating" data-testid="hero-rating">
+                {reviews?.totalReviews > 0 && (
+                  <>
+                    <StarIcon />
+                    {t("home.ratingOutOfFive", { score: formatRating(reviews.averageRating, i18n.language) })}
+                    <span>· {t("reviews.count", { count: reviews.totalReviews })}</span>
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+
           <SearchBar onSearch={(search) => navigate(`/rooms${searchToQuery(search)}`)} />
         </div>
       </section>
 
-      <Destinations />
-      <FeaturedRooms />
       <WhyBookDirect />
+      <FeaturedRooms />
+      <Destinations />
+      <Amenities />
+      <GuestVoices reviews={reviews} />
+      <Location />
     </>
   );
 }
