@@ -26,5 +26,9 @@
     "dismiss": "Dismiss notification"
   },
   "stars": "{{count}} stars",
-  "stars_one": "{{count}} star"
+  "stars_one": "{{count}} star",
+  "theme": {
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme"
+  }
 }

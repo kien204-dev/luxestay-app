@@ -43,7 +43,7 @@ export default function GoogleSignIn({ busy, setBusy, onSignedIn, onError }) {
         </svg>
         {t("google.button")}
       </button>
-      {!isFirebaseConfigured && <p className="adm-hint" style={{ textAlign: "center", color: "var(--g-muted)" }}>{t("google.notConfigured")}</p>}
+      {!isFirebaseConfigured && <p className="adm-hint" style={{ textAlign: "center", color: "var(--ink-muted)" }}>{t("google.notConfigured")}</p>}
     </>
   );
 }

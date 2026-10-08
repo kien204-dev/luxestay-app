@@ -119,7 +119,7 @@ export default function RoomDetail() {
         <h1>{current.room_name}</h1>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
           {current.location && <span className="guest-muted">{current.location}</span>}
-          <RoomRatingSummary roomId={current.id} />
+          <RoomRatingSummary roomId={current.id} showEmpty />
         </div>
       </div>
 

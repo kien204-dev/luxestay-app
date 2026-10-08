@@ -1,7 +1,10 @@
 {
   "nav": {
     "menu": "Menu",
+    "closeMenu": "Close menu",
+    "label": "Main",
     "rooms": "Rooms",
+    "destinations": "Destinations",
     "myBookings": "My bookings",
     "admin": "Admin",
     "account": "Account",
@@ -12,8 +15,6 @@
     "tagline": "Book direct: live availability, online payment and clear cancellation rules.",
     "explore": "Explore",
     "contact": "Contact",
-    "phone": "Phone",
-    "email": "Email",
     "credits": "Photo credits"
   },
   "search": {
@@ -25,16 +26,29 @@
     "anyGuests": "Any",
     "guestsOption_one": "{{count}} guest",
     "guestsOption_other": "{{count}} guests",
+    "adults": "{{count}} adults",
+    "adults_one": "{{count}} adult",
+    "children": "{{count}} children",
+    "children_one": "{{count}} child",
+    "adultsTitle": "Adults",
+    "childrenTitle": "Children",
+    "fewerAdults": "Fewer adults",
+    "moreAdults": "More adults",
+    "fewerChildren": "Fewer children",
+    "moreChildren": "More children",
+    "done": "Done",
     "submit": "Search availability",
     "errors": {
       "bothDates": "Please choose both a check-in and a check-out date.",
       "checkOutAfterCheckIn": "Check-out must be after check-in."
-    }
+    },
+    "label": "Find available rooms"
   },
   "home": {
     "documentTitle": "Book online",
     "heroTitle": "Find a room for your stay",
     "heroSubtitle": "Pick your dates, see what is free and book in minutes at {{brand}}.",
+    "ratingOutOfFive": "{{score}} / 5",
     "destinationsEyebrow": "Where we have rooms",
     "destinationsTitle": "Destinations",
     "destinationMeta_one": "{{count}} room · from {{price}}",
@@ -54,13 +68,32 @@
       "paymentTitle": "Online payment",
       "paymentText": "Pay through the payment gateway right after booking, or later while your room is held."
     },
-    "photoCredit": "Photo: {{author}} · {{license}}"
+    "photoCredit": "Photo: {{author}} · {{license}}",
+    "rooms": {
+      "loading": "Loading featured rooms…",
+      "emptyTitle": "No rooms to book yet",
+      "emptyText": "The room list is being updated. Please check back soon.",
+      "errorTitle": "The rooms could not be loaded",
+      "errorText": "The connection to the server was interrupted. Please try again.",
+      "call": "Call {{phone}}"
+    },
+    "amenitiesEyebrow": "Amenities",
+    "amenitiesTitle": "Ready for your stay",
+    "voices": {
+      "eyebrow": "What guests say",
+      "title": "Guest reviews",
+      "previous": "Previous review",
+      "next": "Next review",
+      "position": "Review {{current}} of {{total}}"
+    },
+    "locationEyebrow": "Location",
+    "locationTitle": "What is nearby",
+    "directions": "Get directions"
   },
   "room": {
     "perNight": "/ night",
     "maxGuests_one": "Up to {{count}} guest",
-    "maxGuests_other": "Up to {{count}} guests",
-    "view": "View room"
+    "maxGuests_other": "Up to {{count}} guests"
   },
   "list": {
     "documentTitle": "Rooms",

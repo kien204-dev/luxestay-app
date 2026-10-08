@@ -3,20 +3,27 @@ import { useTranslation } from "react-i18next";
 import { getRoomReviews } from "../services/reviewService";
 import { useAsyncData } from "../utils/useAsyncData";
 import StarRating from "./StarRating";
+import { StarIcon } from "./guest/icons";
 
-// Small "★ 4.5 (12 reviews)" badge for room cards. Asks for one review: the
-// stats cover every visible review whatever the page size.
-export function RoomRatingSummary({ roomId }) {
-  const { t } = useTranslation("site");
+// "4.5 out of 5", written the way the language writes decimals.
+export function formatRating(value, language) {
+  return Number(value).toLocaleString(language === "en" ? "en-US" : "vi-VN", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+// Small "★ 4.5 · 12 reviews" line for room cards. Asks for one review: the
+// stats cover every visible review whatever the page size. A room nobody has
+// reviewed shows nothing, or "no reviews yet" where `showEmpty` asks for it.
+export function RoomRatingSummary({ roomId, showEmpty = false }) {
+  const { t, i18n } = useTranslation("site");
   const { data } = useAsyncData(`rating:${roomId}`, () => getRoomReviews(roomId, { limit: 1 }));
 
-  if (!data || data.totalReviews === 0) return <span className="review-muted">{t("reviews.none")}</span>;
+  if (!data || data.totalReviews === 0) {
+    return showEmpty && data ? <span className="review-muted">{t("reviews.none")}</span> : null;
+  }
   return (
     <span className="review-summary">
-      <StarRating value={data.averageRating} size={13} />
-      <span>
-        {data.averageRating.toFixed(1)} ({t("reviews.count", { count: data.totalReviews })})
-      </span>
+      <StarIcon />
+      {formatRating(data.averageRating, i18n.language)} · {t("reviews.count", { count: data.totalReviews })}
     </span>
   );
 }
