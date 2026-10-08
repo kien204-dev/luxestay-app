@@ -3248,15 +3248,23 @@ describe("hotel booking API", () => {
       assert.equal(result.response.status, 200);
       assert.deepEqual(Object.keys(result.body).sort(), [
         "address",
+        "amenities",
         "checkInTime",
         "checkOutTime",
         "email",
         "freeCancellationDays",
         "heroImageUrl",
+        "heroSubtitle",
+        "heroTitle",
         "logoUrl",
         "name",
+        "nearbyPlaces",
         "phone",
       ]);
+      // Home page content is empty until an admin writes it.
+      assert.equal(result.body.heroTitle, "");
+      assert.deepEqual(result.body.amenities, []);
+      assert.deepEqual(result.body.nearbyPlaces, []);
       assert.equal(result.body.name, "LuxeStay");
       assert.equal(result.body.checkInTime, "14:00");
       assert.equal(result.body.freeCancellationDays, 3);
@@ -3329,6 +3337,14 @@ describe("hotel booking API", () => {
         { email: "not-an-email" },
         { name: "x".repeat(101) },
         { phone: { nested: true } },
+        { heroTitle: "x".repeat(121) },
+        { heroSubtitle: 42 },
+        { amenities: "a pool" },
+        { amenities: ["a pool"] },
+        { amenities: [{ name: "", description: "A row with no name" }] },
+        { amenities: [{ name: "x".repeat(81) }] },
+        { amenities: Array.from({ length: 13 }, (_, i) => ({ name: `Amenity ${i}` })) },
+        { nearbyPlaces: [{ name: "Airport", distance: 15 }] },
       ]) {
         const invalid = await request(baseUrl, "/api/settings", {
           method: "PUT",

@@ -13,7 +13,14 @@ const { apiMessage } = require("../utils/apiMessages");
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+\-\s().]{6,30}$/;
 
-const TEXT_LIMITS = { name: 100, phone: 30, email: 255, address: 255 };
+const TEXT_LIMITS = { name: 100, phone: 30, email: 255, address: 255, heroTitle: 120, heroSubtitle: 300 };
+
+// Lists for the home page. Each row is a few short texts; the first field
+// named is the one a row cannot do without.
+const LISTS = {
+  amenities: { maxRows: 12, fields: { name: 80, description: 160 } },
+  nearbyPlaces: { maxRows: 8, fields: { name: 80, note: 120, distance: 30 } },
+};
 
 // Public: what any visitor's browser needs to draw the site. Everything in
 // here is information the property publishes anyway; the response is built
@@ -25,6 +32,10 @@ exports.getPublicSettings = async (req, res) => {
     name: settings.name,
     logoUrl: settings.logoUrl,
     heroImageUrl: settings.heroImageUrl,
+    heroTitle: settings.heroTitle,
+    heroSubtitle: settings.heroSubtitle,
+    amenities: settings.amenities,
+    nearbyPlaces: settings.nearbyPlaces,
     phone: settings.phone,
     email: settings.email,
     address: settings.address,
@@ -45,12 +56,48 @@ exports.getAdminSettings = async (req, res) => {
   }
 };
 
+// One list from the form: { rows } trimmed and with blank rows dropped, or
+// { error }.
+function validateList(field, input) {
+  const { maxRows, fields } = LISTS[field];
+  if (input === null) return { rows: [] };
+  if (!Array.isArray(input)) return { error: apiMessage("INVALID_LIST", { field }) };
+
+  const [required] = Object.keys(fields);
+  const rows = [];
+  for (const item of input) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return { error: apiMessage("INVALID_LIST", { field }) };
+
+    const row = {};
+    for (const [key, max] of Object.entries(fields)) {
+      const value = item[key] ?? "";
+      if (typeof value !== "string") return { error: apiMessage("TEXT_REQUIRED_STRING", { field: key }) };
+      if (value.trim().length > max) return { error: apiMessage("TEXT_TOO_LONG", { field: key, max }) };
+      row[key] = value.trim();
+    }
+
+    if (Object.values(row).every((value) => value === "")) continue;
+    if (!row[required]) return { error: apiMessage("LIST_ROW_NEEDS_NAME", { field }) };
+    rows.push(row);
+  }
+
+  if (rows.length > maxRows) return { error: apiMessage("LIST_TOO_LONG", { field, max: maxRows }) };
+  return { rows };
+}
+
 // Returns { values } to save, or { error }. A field that is absent is left
 // alone; an empty one is cleared (the environment/default applies again).
 function validateSettings(body) {
   const values = {};
 
-  for (const field of ["name", "phone", "email", "address"]) {
+  for (const field of Object.keys(LISTS)) {
+    if (body[field] === undefined) continue;
+    const { error, rows } = validateList(field, body[field]);
+    if (error) return { error };
+    values[field] = rows;
+  }
+
+  for (const field of ["name", "phone", "email", "address", "heroTitle", "heroSubtitle"]) {
     if (body[field] === undefined) continue;
     if (body[field] !== null && typeof body[field] !== "string") {
       return { error: apiMessage("TEXT_REQUIRED_STRING", { field }) };

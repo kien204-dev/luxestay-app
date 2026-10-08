@@ -154,6 +154,9 @@
   "SETTINGS_SAVED": "Đã lưu cấu hình.",
   "INVALID_TIME": "Giờ nhận/trả phòng phải có dạng HH:MM (ví dụ 14:00).",
   "INVALID_CANCELLATION_DAYS": "Số ngày hủy miễn phí phải là số nguyên từ 0 đến 365.",
+  "INVALID_LIST": "{{fieldLabel}} không hợp lệ.",
+  "LIST_TOO_LONG": "{{fieldLabel}} chỉ được tối đa {{max}} dòng.",
+  "LIST_ROW_NEEDS_NAME": "{{fieldLabel}}: dòng nào cũng cần có tên.",
   "LOGO_SAVED": "Đã cập nhật logo.",
   "LOGO_REMOVED": "Đã xóa logo.",
   "HERO_SAVED": "Đã cập nhật ảnh nền trang chủ.",
@@ -181,7 +184,14 @@
     "license": "Giấy phép",
     "licenseUrl": "Link giấy phép",
     "sourceUrl": "Link nguồn",
-    "changes": "Thay đổi"
+    "changes": "Thay đổi",
+    "heroTitle": "Tiêu đề trang chủ",
+    "heroSubtitle": "Mô tả trang chủ",
+    "amenities": "Tiện ích",
+    "nearbyPlaces": "Điểm lân cận",
+    "description": "Mô tả",
+    "note": "Ghi chú",
+    "distance": "Khoảng cách"
   },
   "network": "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.",
   "unknown": "Đã có lỗi xảy ra. Vui lòng thử lại."

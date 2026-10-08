@@ -173,6 +173,56 @@ exports.getRoomReviews = async (req, res) => {
 };
 
 // ======================
+// GET FEATURED REVIEWS (public, for the home page)
+// ======================
+// The score across every visible review, and a few of the best ones that
+// have something to say: four stars or more, with a comment short enough to
+// quote. Nothing here is written by the property.
+const FEATURED_LIMIT = 5;
+const FEATURED_MAX_COMMENT_LENGTH = 400;
+
+exports.getFeaturedReviews = async (req, res) => {
+  try {
+    const statsResult = await pool.query(
+      `SELECT COUNT(*)::int AS total, COALESCE(AVG(rating), 0) AS average
+       FROM room_reviews
+       WHERE is_hidden = false`
+    );
+
+    const result = await pool.query(
+      `SELECT rv.id, rv.rating, rv.comment, rv.created_at, u.name AS user_name, r.room_name
+       FROM room_reviews rv
+       JOIN users u ON rv.user_id = u.id
+       JOIN rooms r ON rv.room_id = r.id
+       WHERE rv.is_hidden = false
+         AND rv.rating >= 4
+         AND char_length(btrim(COALESCE(rv.comment, ''))) BETWEEN 1 AND $1
+       ORDER BY rv.rating DESC, rv.created_at DESC
+       LIMIT $2`,
+      [FEATURED_MAX_COMMENT_LENGTH, FEATURED_LIMIT]
+    );
+
+    const propertyName = (await getPropertySettings()).name;
+
+    res.json({
+      data: result.rows.map((row) => ({
+        id: row.id,
+        rating: row.rating,
+        comment: row.comment.trim(),
+        created_at: row.created_at,
+        reviewer_name: maskReviewerName(row.user_name, propertyName),
+        room_name: row.room_name,
+      })),
+      averageRating: Math.round(Number(statsResult.rows[0].average) * 10) / 10,
+      totalReviews: statsResult.rows[0].total,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+};
+
+// ======================
 // ADMIN: LIST ALL REVIEWS (optionally filtered by room)
 // ======================
 exports.listReviews = async (req, res) => {

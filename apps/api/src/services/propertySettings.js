@@ -11,6 +11,12 @@ const DEFAULTS = {
   name: "LuxeStay",
   logoUrl: "",
   heroImageUrl: "",
+  // Home page headline: empty means the site's own neutral wording.
+  heroTitle: "",
+  heroSubtitle: "",
+  // Home page sections that stay hidden until an admin fills them in.
+  amenities: [],
+  nearbyPlaces: [],
   phone: "",
   email: "",
   address: "",
@@ -24,6 +30,10 @@ const SOURCES = {
   name: ["name", "APP_NAME"],
   logoUrl: ["logo_url", null],
   heroImageUrl: ["hero_image_url", null],
+  heroTitle: ["hero_title", null],
+  heroSubtitle: ["hero_subtitle", null],
+  amenities: ["amenities", null],
+  nearbyPlaces: ["nearby_places", null],
   phone: ["phone", "CONTACT_PHONE"],
   email: ["email", "CONTACT_EMAIL"],
   address: ["address", "CONTACT_ADDRESS"],
@@ -37,7 +47,9 @@ const CACHE_TTL_MS = 30 * 1000;
 
 let cache = null;
 
+// An empty list counts as "not set", like an empty text.
 function isSet(value) {
+  if (Array.isArray(value)) return value.length > 0;
   return value !== null && value !== undefined && String(value).trim() !== "";
 }
 
@@ -111,7 +123,13 @@ async function savePropertySettings(values) {
   if (settings.length === 0) return getPropertySettingsForAdmin();
 
   const columns = settings.map((setting) => SOURCES[setting][0]);
-  const params = settings.map((setting) => (isSet(values[setting]) ? values[setting] : null));
+  // Lists go into JSONB columns, which take JSON text (the driver would
+  // otherwise send a JavaScript array as a PostgreSQL array).
+  const params = settings.map((setting) => {
+    const value = values[setting];
+    if (!isSet(value)) return null;
+    return Array.isArray(value) ? JSON.stringify(value) : value;
+  });
   const placeholders = columns.map((_, index) => `$${index + 1}`);
   const updates = columns.map((column) => `${column} = EXCLUDED.${column}`);
 
