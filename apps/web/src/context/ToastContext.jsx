@@ -4,10 +4,13 @@ import i18n from "../i18n";
 
 const ToastContext = createContext();
 
+// Toasts sit on the inverse surface, which is dark in both themes, so they
+// look the same over the guest site and the admin area.
+
 const VARIANT_STYLE = {
-  success: { accent: "var(--color-success)", Icon: Icon.CheckCircle },
-  error: { accent: "var(--color-danger)", Icon: Icon.AlertCircle },
-  info: { accent: "var(--color-gold-500)", Icon: Icon.Info },
+  success: { accent: "var(--signal-success-inverse)", Icon: Icon.CheckCircle },
+  error: { accent: "var(--signal-danger-inverse)", Icon: Icon.AlertCircle },
+  info: { accent: "var(--signal-info-inverse)", Icon: Icon.Info },
 };
 
 const DEFAULT_DURATION_MS = 4000;
@@ -69,10 +72,10 @@ export function ToastProvider({ children }) {
                 gap: 10,
                 padding: "14px 16px",
                 borderRadius: "var(--radius-md)",
-                background: "var(--color-navy-800)",
+                background: "var(--surface-inverse)",
                 border: `1px solid ${style.accent}`,
-                boxShadow: "var(--shadow-card)",
-                color: "var(--color-text-primary)",
+                boxShadow: "var(--shadow-md)",
+                color: "var(--ink-inverse)",
                 fontFamily: "var(--font-sans)",
                 fontSize: 13.5,
                 lineHeight: 1.5,
@@ -90,10 +93,14 @@ export function ToastProvider({ children }) {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "var(--color-text-muted)",
+                  color: "var(--ink-inverse-muted)",
                   cursor: "pointer",
                   fontSize: 16,
                   lineHeight: 1,
+                  // A 44px target around the small cross.
+                  width: 44,
+                  height: 44,
+                  margin: "-12px -14px -12px -6px",
                   padding: 0,
                 }}
               >

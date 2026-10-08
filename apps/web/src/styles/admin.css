@@ -1,6 +1,7 @@
 /*
-  Admin area. Every colour comes from the theme variables in index.css, so
-  changing --brand-primary / --brand-accent restyles these pages too.
+  Admin area. Every colour comes from the theme tokens in index.css, so a
+  rebrand restyles these pages too. The shell carries .theme-dark: the admin
+  area is always in the dark set, whatever the guest site shows.
 */
 .adm-shell { display: flex; min-height: 100vh; width: 100%; background: var(--color-navy-950); color: var(--color-text-primary); font-family: var(--font-sans); }
 .adm-main { margin-left: 240px; width: calc(100% - 240px); min-height: 100vh; overflow-x: clip; }
@@ -31,7 +32,7 @@
 /* ---------------------------------------------------------------- buttons */
 .adm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; padding: 10px 18px; font-weight: 700; font-size: 14px; font-family: inherit; cursor: pointer; border: 1px solid transparent; white-space: nowrap; text-decoration: none; }
 .adm-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.adm-btn--primary { background: linear-gradient(135deg, var(--color-gold-400), var(--color-gold-500)); color: var(--color-navy-950); }
+.adm-btn--primary { background: var(--accent); color: var(--on-accent); }
 .adm-btn--ghost { background: transparent; color: var(--color-gold-400); border-color: var(--color-border); }
 .adm-btn--muted { background: var(--color-navy-700); color: var(--color-text-secondary); border-color: var(--color-border-soft); font-weight: 600; }
 .adm-btn--danger { background: var(--color-danger); color: var(--color-navy-950); }
@@ -132,7 +133,7 @@ label.adm-btn input[type="file"] { display: none; }
 .adm-page-gap { min-width: 20px; text-align: center; }
 
 /* ------------------------------------------------------------------ modal */
-.adm-modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+.adm-modal-backdrop { position: fixed; inset: 0; background: var(--scrim); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
 .adm-modal { background: var(--color-navy-800); border: 1px solid var(--color-border-soft); padding: 24px; border-radius: 16px; width: 440px; max-width: 100%; max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: var(--shadow-card-hover); box-sizing: border-box; }
 .adm-modal--wide { width: 720px; }
 .adm-modal h3 { margin: 0 0 16px; font-family: var(--font-serif); font-size: 20px; color: var(--color-text-primary); }

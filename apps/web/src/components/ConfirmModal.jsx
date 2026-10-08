@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-// A yes/no question in a dialog. `variant` "dark" fits the admin area,
-// "light" the guest site; colours come from the theme (index.css).
+// A yes/no question in a dialog, in the theme of the page it opens on.
 export default function ConfirmModal({
   open,
   title,
@@ -12,7 +11,6 @@ export default function ConfirmModal({
   loading = false,
   onConfirm,
   onCancel,
-  variant = "dark",
 }) {
   const { t } = useTranslation("common");
   if (!open) return null;
@@ -20,7 +18,7 @@ export default function ConfirmModal({
   return (
     <div className="confirm-backdrop" onClick={() => !loading && onCancel?.()}>
       <div
-        className={`confirm-dialog confirm-dialog--${variant} confirm-dialog--${tone}`}
+        className={`confirm-dialog confirm-dialog--${tone}`}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
