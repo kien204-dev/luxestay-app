@@ -17,6 +17,7 @@ import { startStack } from "./stack.mjs";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SCREENSHOTS = path.resolve(HERE, "../../../test-results/my-bookings");
 const TEXT = JSON.parse(fs.readFileSync(path.join(HERE, "../src/locales/vi/myBookings.json"), "utf8"));
+const SITE = JSON.parse(fs.readFileSync(path.join(HERE, "../src/locales/vi/site.json"), "utf8"));
 const PAGE_SIZE = 5;
 
 // One booking per state a guest can see. `start` is days from today.
@@ -190,20 +191,22 @@ async function checkEveryState(page, bookings, shotPrefix) {
     for (const booking of expected) await checkCard(page, booking);
 
     if (pageNumber * PAGE_SIZE < bookings.length) {
-      await page.getByRole("button", { name: TEXT.pagination.next }).click();
+      await page.getByRole("button", { name: SITE.list.next }).click();
     }
   }
 
   for (const status of ["pending", "confirmed", "completed", "cancelled"]) {
     const expected = bookings.filter((booking) => booking.status === status);
-    await page.locator("select").first().selectOption(status);
+    await page.getByTestId(`tab-${status}`).click();
     await page.locator(".my-booking-card").filter({ hasText: expected[0].code }).waitFor();
+    // The tab carries how many there are.
+    assert.ok((await page.getByTestId(`tab-${status}`).innerText()).includes(String(expected.length)), `${status} tab count`);
     assert.equal(await page.locator(".my-booking-card").count(), expected.length, `${status} filter`);
     await screenshot(page, `${shotPrefix}-filter-${status}`);
   }
 
   // The dialogs behind the buttons, on the bookings that have them.
-  await page.locator("select").first().selectOption("pending");
+  await page.getByTestId("tab-pending").click();
   const pending = page.locator(".my-booking-card").filter({ hasText: bookings.find((b) => b.key === "pending-unpaid").code });
   await button(pending, TEXT.card.pay).click();
   await page.getByText(TEXT.paymentModal.title).waitFor();
@@ -211,11 +214,11 @@ async function checkEveryState(page, bookings, shotPrefix) {
   await page.getByRole("button", { name: TEXT.paymentModal.cancel, exact: true }).click();
 
   await button(pending, TEXT.card.cancelBooking).click();
-  await page.getByText(TEXT.cancelModal.message.split("#")[0]).waitFor();
+  await page.getByTestId("cancel-dialog").waitFor();
   await screenshot(page, `${shotPrefix}-cancel-dialog`);
-  await page.getByRole("button", { name: TEXT.cancelModal.cancelLabel, exact: true }).click();
+  await page.getByRole("button", { name: TEXT.cancelModal.keep, exact: true }).click();
 
-  await page.locator("select").first().selectOption("completed");
+  await page.getByTestId("tab-completed").click();
   const completed = page.locator(".my-booking-card").filter({ hasText: bookings.find((b) => b.key === "completed-paid").code });
   await button(completed, TEXT.card.reviewThisRoom).click();
   await page.getByText(TEXT.reviewModal.starsLabel).waitFor();
@@ -281,10 +284,10 @@ describe("My bookings in the browser", () => {
       await openMyBookings(page);
       await page.getByText(TEXT.empty.none).waitFor();
       assert.equal(await page.locator(".my-booking-card").count(), 0);
-      await page.getByRole("button", { name: TEXT.empty.exploreRooms }).waitFor();
+      await page.getByRole("link", { name: TEXT.empty.exploreRooms }).waitFor();
       await screenshot(page, "google-new-account-empty");
 
-      await page.locator("select").first().selectOption("cancelled");
+      await page.getByTestId("tab-cancelled").click();
       await page.getByText(TEXT.empty.filtered).waitFor();
       await screenshot(page, "google-new-account-empty-filter");
 
