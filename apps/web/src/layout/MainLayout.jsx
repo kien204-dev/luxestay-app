@@ -1,28 +1,22 @@
 import { useTranslation } from "react-i18next";
 import Sidebar from "../layout/components/Sidebar";
 import { useAuth } from "../context/AuthContext";
-import { useProperty } from "../context/PropertyContext";
 import { LanguageSwitch } from "../components/admin/ui";
+import DemoBanner from "../components/DemoBanner";
 import ThemeSwitch from "../components/ThemeSwitch";
 import "../styles/admin.css";
 
 function MainLayout({ children }) {
   const { t } = useTranslation("admin");
   const { user } = useAuth();
-  const property = useProperty();
 
   return (
-    <div className="adm-shell">
+    <div className="adm-root">
+      <DemoBanner admin />
+      <div className="adm-shell">
       <Sidebar />
 
       <main className="adm-main">
-        {property.demo && (
-          <div className="adm-demo-banner" role="note">
-            {property.demo.resetIntervalHours
-              ? t("demo.bannerTimed", { hours: property.demo.resetIntervalHours })
-              : t("demo.banner")}
-          </div>
-        )}
         <div className="adm-topbar">
           <h2>{t("greeting", { name: user?.name || "" })}</h2>
           <div className="adm-topbar-right">
@@ -34,6 +28,7 @@ function MainLayout({ children }) {
 
         <div className="adm-content">{children}</div>
       </main>
+      </div>
     </div>
   );
 }

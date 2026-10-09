@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { SUPPORTED_LANGUAGES } from "../config/brand";
 import { useProperty } from "../context/PropertyContext";
+import DemoBanner from "../components/DemoBanner";
 import GuestIcon from "../components/guest/icons";
 import ThemeSwitch from "../components/ThemeSwitch";
 import { ADMIN_HOME, loginPathFor } from "../utils/authRedirect";
@@ -191,6 +192,7 @@ function Footer() {
 export default function GuestLayout({ children }) {
   return (
     <div className="guest">
+      <DemoBanner />
       <Header />
       <main className="guest-main">
         {children ?? <Outlet />}

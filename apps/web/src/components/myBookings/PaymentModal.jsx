@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { DemoPaymentNote } from "../DemoBanner";
 import { formatMoney } from "./helpers";
 
 // Choose a gateway for a booking that still has to be paid.
@@ -57,7 +58,9 @@ export default function PaymentModal({ booking, providers, payingProvider, error
           </div>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
+        <DemoPaymentNote />
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, margin: "12px 0" }}>
           <button
             type="button"
             onClick={() => onPay("vnpay")}
