@@ -58,7 +58,7 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | Đăng nhập, đăng ký (email/mật khẩu, Google nếu bật), quên và đặt lại mật khẩu | Mọi người |
 | `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |
 | `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị. Orders có đặt phòng tại quầy, ghi nhận thu tiền tại quầy và PDF xác nhận | Quản trị |
-| `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, ảnh nền trang chủ, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
+| `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, ảnh nền và nội dung trang chủ, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
 | `/admin/destinations` | Ảnh và ghi công ảnh của từng điểm đến | Quản trị |
 
 Mọi trang có tiếng Việt và tiếng Anh (nút VI/EN ở đầu trang khách và trang quản trị). Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
@@ -144,7 +144,7 @@ Các tính năng dưới đây tắt cho tới khi bạn cấu hình; phần cò
 
 ### Đổi tên thương hiệu, màu, ngôn ngữ
 
-Tên, logo, ảnh nền, liên hệ và quy định: trang quản trị **Cơ sở lưu trú** (`/admin/property`), có hiệu lực ngay. Màu của cả trang khách lẫn trang quản trị: hai biến `--brand-primary` và `--brand-accent` ở đầu `apps/web/src/index.css`. Bản dịch và cách thêm ngôn ngữ: [docs/customization.md](docs/customization.md).
+Tên, logo, ảnh nền, liên hệ và quy định: trang quản trị **Cơ sở lưu trú** (`/admin/property`), có hiệu lực ngay. Màu của cả trang khách lẫn trang quản trị (hai giao diện sáng và tối): bộ token ở đầu `apps/web/src/index.css`. Bản dịch và cách thêm ngôn ngữ: [docs/customization.md](docs/customization.md).
 
 ### Ảnh phòng mẫu
 
