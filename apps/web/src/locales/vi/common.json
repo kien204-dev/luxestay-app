@@ -26,5 +26,9 @@
     "dismiss": "Đóng thông báo"
   },
   "stars": "{{count}} sao",
-  "stars_one": "{{count}} sao"
+  "stars_one": "{{count}} sao",
+  "theme": {
+    "toLight": "Chuyển sang giao diện sáng",
+    "toDark": "Chuyển sang giao diện tối"
+  }
 }

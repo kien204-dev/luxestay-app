@@ -1,77 +1,199 @@
 @import "tailwindcss";
 
 /*
-  Theme. The whole app — guest site, admin area, emails aside — takes its
-  colours from the two brand variables below; every other colour is derived
-  from them or is a neutral (text greys, success/danger). To rebrand, change
-  --brand-primary and --brand-accent (see docs/customization.md).
+  Typefaces, served from this app (src/assets/fonts, SIL OFL 1.1): nothing is
+  fetched from another host. font-display: swap shows text in the fallback
+  font until the file has arrived, so a slow connection never hides the page.
 */
+@font-face { font-family: "Cormorant Garamond"; src: url("./assets/fonts/CormorantGaramond-Variable.woff2") format("woff2"); font-weight: 300 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("./assets/fonts/CormorantGaramond-Italic-Variable.woff2") format("woff2"); font-weight: 300 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "Be Vietnam Pro"; src: url("./assets/fonts/BeVietnamPro-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Be Vietnam Pro"; src: url("./assets/fonts/BeVietnamPro-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Be Vietnam Pro"; src: url("./assets/fonts/BeVietnamPro-SemiBold.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+
+/*
+  Theme. Every colour in the app (guest site, admin area, charts, favicon,
+  placeholder drawings) comes from the tokens below; components never write a
+  colour themselves (`npm run lint` checks). There are two sets, light and
+  dark. <html data-theme> picks one: the visitor's system setting until they
+  choose with the header switch (utils/theme.js). A part of a page can pin a
+  set with .theme-light / .theme-dark (the admin area is always dark).
+
+  To rebrand, change the four accent lines in BOTH sets (and the brass pair
+  if wanted), keeping text on them readable: see docs/customization.md.
+*/
+:root,
+.theme-light {
+  color-scheme: light;
+
+  /* Brand: the accent (actions, selected states) and its companions. */
+  --accent: #2e4a3c;
+  --accent-hover: #233a2f;
+  --accent-soft: #e2e8df;
+  --on-accent: #f7f3ec;
+  /* Brass: stars, eyebrow labels, ornaments. Never for actions. */
+  --brass: #7a5a2a;
+  --brass-soft: #f2e7d3;
+
+  /* Surfaces and text. */
+  --canvas: #f5f0e8;
+  --surface: #fcfaf6;
+  --surface-sunken: #ece5d9;
+  --surface-inverse: #1e1b17;
+  --ink-inverse: #f5f0e8;
+  --scrim: rgba(20, 17, 13, 0.55);
+  --line: #e0d6c6;
+  --line-strong: #8c7f6d;
+  --ink: #1e1b17;
+  --ink-muted: #5b5348;
+  --ink-subtle: #6f665a;
+  --focus-ring: #2a5b7a;
+
+  /* Status: the same meanings everywhere, whatever the brand. */
+  --success: #2b6a52;
+  --success-soft: #dcece4;
+  --warning: #85570f;
+  --warning-soft: #f6e8cc;
+  --danger: #a3352a;
+  --danger-soft: #f7e1dc;
+  --info: #2a5b7a;
+  --info-soft: #dfe9f0;
+  --neutral: #5b5348;
+  --neutral-soft: #ebe5db;
+
+  --skeleton: #e7dfd2;
+  --skeleton-highlight: #f3ede3;
+
+  --shadow-sm: 0 1px 2px rgba(30, 27, 23, 0.06), 0 1px 1px rgba(30, 27, 23, 0.04);
+  --shadow-md: 0 8px 24px -8px rgba(30, 27, 23, 0.16), 0 2px 6px rgba(30, 27, 23, 0.06);
+  --shadow-lg: 0 24px 64px -16px rgba(30, 27, 23, 0.28), 0 4px 12px rgba(30, 27, 23, 0.08);
+}
+
+:root[data-theme="dark"],
+.theme-dark {
+  color-scheme: dark;
+
+  --accent: #a8c2a6;
+  --accent-hover: #bcd2ba;
+  --accent-soft: #223029;
+  --on-accent: #14201a;
+  --brass: #d4b07a;
+  --brass-soft: #2e261a;
+
+  --canvas: #13120f;
+  --surface: #1c1a16;
+  --surface-sunken: #0e0d0b;
+  --surface-inverse: #0a0908;
+  --ink-inverse: #f1ebe1;
+  --scrim: rgba(0, 0, 0, 0.62);
+  --line: #332f29;
+  --line-strong: #7a7164;
+  --ink: #f1ebe1;
+  --ink-muted: #b9af9f;
+  --ink-subtle: #a1978a;
+  --focus-ring: #9cc6e4;
+
+  --success: #8fcfb1;
+  --success-soft: #16291f;
+  --warning: #e7bb6c;
+  --warning-soft: #2e2414;
+  --danger: #f0a092;
+  --danger-soft: #33191a;
+  --info: #9cc6e4;
+  --info-soft: #15242f;
+  --neutral: #b9af9f;
+  --neutral-soft: #26231e;
+
+  --skeleton: #26231e;
+  --skeleton-highlight: #302c26;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 28px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(241, 235, 225, 0.06);
+  --shadow-lg: 0 28px 72px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(241, 235, 225, 0.08);
+}
+
+/* Built from the tokens above, so declared wherever a set is declared. */
+:root,
+.theme-light,
+.theme-dark {
+  --accent-ink: var(--accent);
+  /* On surface-inverse and photo scrims, which are dark in both themes. */
+  --brass-inverse: #d4b07a;
+  --signal-success-inverse: #8fcfb1;
+  --signal-danger-inverse: #f0a092;
+  --signal-info-inverse: #9cc6e4;
+  --ink-inverse-muted: color-mix(in srgb, var(--ink-inverse) 76%, transparent);
+  --line-inverse: color-mix(in srgb, var(--ink-inverse) 16%, transparent);
+
+  /*
+    Names from before this token set, still used by the admin area and the
+    signed-in pages. They point at the tokens, so those pages follow the
+    theme (and a rebrand) without being rewritten.
+  */
+  --brand-primary: var(--accent);
+  --brand-accent: var(--brass);
+  --color-navy-950: var(--canvas);
+  --color-navy-900: var(--surface-sunken);
+  --color-navy-800: var(--surface);
+  --color-navy-700: var(--neutral-soft);
+  --color-gold-500: var(--accent);
+  --color-gold-400: var(--accent);
+  --color-gold-100: var(--accent-soft);
+  --color-on-accent: var(--surface);
+  --color-surface-light: var(--surface);
+  --color-surface-muted: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line-light: var(--line);
+  --color-text-primary: var(--ink);
+  --color-text-secondary: var(--ink-muted);
+  --color-text-muted: var(--ink-subtle);
+  --color-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --color-border-soft: var(--line);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-success-strong: var(--success);
+  --color-warning-strong: var(--warning);
+  --color-danger-strong: var(--danger);
+  --color-info-strong: var(--info);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning-soft: var(--warning-soft);
+  --shadow-card: var(--shadow-md);
+  --shadow-card-hover: var(--shadow-lg);
+}
+
 :root {
-  --brand-primary: #002366;
-  --brand-accent: #c5a059;
-
-  /* Admin area: dark shades of the primary colour. */
-  --color-navy-950: color-mix(in oklab, var(--brand-primary) 10%, #05070f);
-  --color-navy-900: color-mix(in oklab, var(--brand-primary) 30%, #05070f);
-  --color-navy-800: color-mix(in oklab, var(--brand-primary) 42%, #070a14);
-  --color-navy-700: color-mix(in oklab, var(--brand-primary) 52%, #0b1020);
-  --color-gold-500: var(--brand-accent);
-  --color-gold-400: color-mix(in oklab, var(--brand-accent) 72%, #ffffff);
-  --color-gold-100: color-mix(in srgb, var(--brand-accent) 12%, transparent);
-  /* Light surfaces (guest site, light dialogs). */
-  --color-primary-deep: color-mix(in oklab, var(--brand-primary) 70%, #000000);
-  --color-accent-strong: color-mix(in oklab, var(--brand-accent) 55%, #000000);
-  --color-accent-ink: color-mix(in oklab, var(--brand-accent) 30%, #000000);
-  --color-primary-night: color-mix(in oklab, var(--brand-primary) 35%, #000000);
-  --color-on-accent: #1a1300;
-  --color-surface-light: #ffffff;
-  --color-ink: #1a1c1e;
-  --color-ink-muted: #4f5d70;
-  --color-line-light: color-mix(in srgb, var(--brand-primary) 14%, transparent);
-  --color-surface-muted: color-mix(in srgb, var(--brand-primary) 4%, #ffffff);
-  --color-danger-soft: color-mix(in srgb, var(--color-danger-strong) 8%, #ffffff);
-  --color-warning-soft: color-mix(in srgb, var(--color-warning-strong) 8%, #ffffff);
-
-  --color-text-primary: #ede7da;
-  --color-text-secondary: #a3aac4;
-  --color-text-muted: #8f97b1;
-
-  --color-border: color-mix(in srgb, var(--brand-accent) 18%, transparent);
-  --color-border-soft: rgba(148, 163, 184, 0.14);
-
-  --color-success: #67e8b4;
-  --color-warning: #fbbf24;
-  --color-danger: #f87171;
-  --color-info: #7dd3fc;
-  /* Same meanings, dark enough for text on light backgrounds. */
-  --color-success-strong: #047857;
-  --color-warning-strong: #b45309;
-  --color-danger-strong: #b91c1c;
-  --color-info-strong: #0369a1;
-
   /*
-    System font stacks only (no external @font-face/CDN import): webfonts
-    are a render-blocking network dependency, and a slow or unreachable
-    font host must never be able to hang the app's first paint.
+    Georgia is left out of the fallbacks: on this project's target systems it
+    draws Vietnamese tone marks as a separate floating glyph ("Phố" → "Phô´").
+    Times New Roman and Noto Serif compose them correctly.
   */
-  /*
-    Georgia is deliberately excluded: on this project's target systems it
-    renders Vietnamese tone marks as a separate floating glyph instead of a
-    properly composed character (e.g. "Phố" → "Phô´") even though it reports
-    partial glyph support — which means the browser never falls through to
-    the next font in the stack for those characters. Times New Roman and
-    Noto Serif were verified (screenshot comparison) to render the same
-    precomposed Vietnamese text correctly.
-  */
-  --font-serif: 'Times New Roman', 'Noto Serif', 'Liberation Serif', serif;
-  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-serif: "Cormorant Garamond", "Times New Roman", "Noto Serif", "Liberation Serif", serif;
+  --font-sans: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
 
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 144px;
 
-  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.28);
-  --shadow-card-hover: 0 14px 40px rgba(0, 0, 0, 0.34);
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  --z-sticky: 20;
+  --z-popover: 40;
+  --z-overlay: 60;
+  --z-toast: 80;
 }
 
 /* The document itself scrolls (no fixed-height html/body): window.scrollTo,
@@ -85,9 +207,20 @@ html, body {
 }
 body {
   overflow-x: clip;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 #root {
   min-height: 100vh;
+}
+
+/* One focus ring everywhere, in a hue that is not the brand's so it never
+   disappears next to an accent button. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /*
@@ -99,54 +232,43 @@ body {
 .font-body { font-family: var(--font-sans); }
 .font-label { font-family: var(--font-sans); }
 
+/* Loading placeholders: a block in the skeleton tone with a highlight
+   sweeping across it. Both names are in use; they look the same. */
 @keyframes luxe-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  to { transform: translateX(100%); }
 }
-
-.luxe-skeleton {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--brand-accent) 6%, transparent) 25%,
-    color-mix(in srgb, var(--brand-accent) 14%, transparent) 37%,
-    color-mix(in srgb, var(--brand-accent) 6%, transparent) 63%
-  );
-  background-size: 400% 100%;
-  animation: luxe-shimmer 1.6s ease-in-out infinite;
-  border-radius: var(--radius-md);
-}
-
-/* Same shimmer, tuned for light backgrounds (public-facing pages). */
+.luxe-skeleton,
 .luxe-skeleton-light {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--brand-primary) 6%, transparent) 25%,
-    color-mix(in srgb, var(--brand-primary) 12%, transparent) 37%,
-    color-mix(in srgb, var(--brand-primary) 6%, transparent) 63%
-  );
-  background-size: 400% 100%;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--skeleton);
+  border-radius: var(--radius-xs);
+}
+.luxe-skeleton::after,
+.luxe-skeleton-light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
   animation: luxe-shimmer 1.6s ease-in-out infinite;
-  border-radius: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .luxe-skeleton::after,
+  .luxe-skeleton-light::after { animation: none; }
 }
 
-/* ConfirmModal (components/ConfirmModal.jsx), for both the guest site
-   (light) and the admin area (dark). */
-.confirm-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 3500; padding: 16px; }
-.confirm-dialog { --confirm-accent: var(--color-gold-500); --confirm-on-accent: var(--color-navy-950); width: 100%; max-width: 400px; border-radius: var(--radius-lg); padding: 24px; box-sizing: border-box; }
-.confirm-dialog h3 { margin: 0 0 10px; font-size: 18px; font-weight: 700; }
+/* ConfirmModal (components/ConfirmModal.jsx): follows the theme of the page
+   it opens on. */
+.confirm-backdrop { position: fixed; inset: 0; background: var(--scrim); display: flex; align-items: center; justify-content: center; z-index: 3500; padding: 16px; }
+.confirm-dialog { --confirm-accent: var(--accent); width: 100%; max-width: 400px; border-radius: var(--radius-lg); padding: 24px; box-sizing: border-box; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-lg); color: var(--ink-muted); }
+.confirm-dialog h3 { margin: 0 0 10px; font-family: var(--font-serif); font-size: 24px; line-height: 1.25; font-weight: 600; color: var(--ink); }
 .confirm-dialog p { margin: 0 0 22px; font-size: 14px; line-height: 1.6; }
 .confirm-actions { display: flex; gap: 10px; }
-.confirm-actions button { flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-family: inherit; font-size: 14px; cursor: pointer; }
+.confirm-actions button { flex: 1; min-height: 44px; padding: 10px 14px; border-radius: var(--radius-sm); font-weight: 500; font-family: inherit; font-size: 14px; cursor: pointer; }
 .confirm-actions button:disabled { opacity: 0.7; cursor: not-allowed; }
-.confirm-ok { border: none; background: var(--confirm-accent); color: var(--confirm-on-accent); }
-.confirm-cancel { background: transparent; }
-.confirm-dialog--dark { background: var(--color-navy-700); border: 1px solid var(--color-border-soft); box-shadow: var(--shadow-card-hover); color: var(--color-text-secondary); }
-.confirm-dialog--dark h3 { font-family: var(--font-serif); color: var(--color-text-primary); }
-.confirm-dialog--dark .confirm-cancel { border: 1px solid var(--color-border-soft); color: var(--color-text-secondary); }
-.confirm-dialog--dark.confirm-dialog--danger { --confirm-accent: var(--color-danger); }
-.confirm-dialog--dark.confirm-dialog--warning { --confirm-accent: var(--color-warning); }
-.confirm-dialog--light { background: var(--color-surface-light); border: 1px solid var(--color-line-light); box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25); color: var(--color-ink-muted); --confirm-accent: var(--brand-primary); --confirm-on-accent: #ffffff; }
-.confirm-dialog--light h3 { color: var(--brand-primary); }
-.confirm-dialog--light .confirm-cancel { border: 1px solid var(--color-line-light); color: var(--color-ink-muted); }
-.confirm-dialog--light.confirm-dialog--danger { --confirm-accent: var(--color-danger-strong); }
-.confirm-dialog--light.confirm-dialog--warning { --confirm-accent: var(--color-warning-strong); }
+.confirm-ok { border: none; background: var(--confirm-accent); color: var(--surface); }
+.confirm-cancel { background: transparent; border: 1px solid var(--line-strong); color: var(--ink); }
+.confirm-dialog--danger { --confirm-accent: var(--danger); }
+.confirm-dialog--warning { --confirm-accent: var(--warning); }

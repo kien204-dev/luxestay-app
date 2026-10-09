@@ -312,7 +312,6 @@ export default function MyBookings() {
       )}
 
       <ConfirmModal
-        variant="light"
         open={bookingToCancel != null}
         title={t("myBookings:cancelModal.title")}
         message={

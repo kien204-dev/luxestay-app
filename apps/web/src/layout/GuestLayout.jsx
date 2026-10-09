@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { SUPPORTED_LANGUAGES } from "../config/brand";
 import { useProperty } from "../context/PropertyContext";
+import GuestIcon from "../components/guest/icons";
 import { ADMIN_HOME, loginPathFor } from "../utils/authRedirect";
+import { currentTheme, onThemeChange, setTheme } from "../utils/theme";
 import "../styles/guest.css";
 
 function LanguageSwitch() {
@@ -27,13 +29,68 @@ function LanguageSwitch() {
   );
 }
 
+// Light/dark. Shows what a press switches to; the choice is remembered.
+function ThemeSwitch() {
+  const { t } = useTranslation("common");
+  const theme = useSyncExternalStore(onThemeChange, currentTheme);
+  const dark = theme === "dark";
+  const label = dark ? t("theme.toLight") : t("theme.toDark");
+
+  return (
+    <button
+      type="button"
+      className="guest-icon-button"
+      aria-label={label}
+      title={label}
+      data-testid="theme-switch"
+      onClick={() => setTheme(dark ? "light" : "dark")}
+    >
+      {dark ? <GuestIcon.Sun /> : <GuestIcon.Moon />}
+    </button>
+  );
+}
+
+function Brand({ onClick }) {
+  const property = useProperty();
+
+  return (
+    <Link to="/" className="guest-brand" onClick={onClick}>
+      {property.logoUrl ? (
+        <img className="guest-brand-logo" src={property.logoUrl} alt="" width={36} height={36} />
+      ) : (
+        <span className="guest-brand-mark" aria-hidden="true">{property.initial}</span>
+      )}
+      {property.name}
+    </Link>
+  );
+}
+
+// True once the page has been scrolled away from its top.
+function useScrolled(enabled) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return undefined;
+    const update = () => setScrolled(window.scrollY > 8);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [enabled]);
+
+  return enabled && scrolled;
+}
+
 function Header() {
   const { t } = useTranslation("site");
   const { user, logout } = useAuth();
-  const property = useProperty();
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // The home page opens with its hero photo under the header.
+  const onHome = location.pathname === "/";
+  const scrolled = useScrolled(onHome);
+  const overlay = onHome && !scrolled && !menuOpen;
 
   const closeMenu = () => setMenuOpen(false);
   const navClass = ({ isActive }) => (isActive ? "is-active" : "");
@@ -45,60 +102,58 @@ function Header() {
   };
 
   return (
-    <header className="guest-header">
+    <header className={`guest-header${overlay ? " guest-header--overlay" : ""}`}>
       <div className="guest-container guest-header-inner">
-        <Link to="/" className="guest-brand" onClick={closeMenu}>
-          {property.logoUrl ? (
-            <img className="guest-brand-logo" src={property.logoUrl} alt="" />
-          ) : (
-            <span className="guest-brand-mark" aria-hidden="true">{property.initial}</span>
-          )}
-          {property.name}
-        </Link>
+        <Brand onClick={closeMenu} />
 
         <button
           type="button"
-          className="guest-menu-toggle"
+          className="guest-icon-button guest-menu-toggle"
           aria-expanded={menuOpen}
           aria-controls="guest-nav"
+          aria-label={menuOpen ? t("nav.closeMenu") : t("nav.menu")}
           onClick={() => setMenuOpen((open) => !open)}
         >
-          {t("nav.menu")}
+          {menuOpen ? <GuestIcon.Close /> : <GuestIcon.Menu />}
         </button>
 
-        <nav id="guest-nav" className={`guest-nav ${menuOpen ? "is-open" : ""}`}>
-          <NavLink to="/rooms" className={navClass} onClick={closeMenu}>
-            {t("nav.rooms")}
-          </NavLink>
-
-          {user && (
-            <NavLink to="/my-bookings" className={navClass} onClick={closeMenu}>
-              {t("nav.myBookings")}
+        <nav id="guest-nav" className={`guest-nav ${menuOpen ? "is-open" : ""}`} aria-label={t("nav.label")}>
+          <div className="guest-nav-links">
+            <NavLink to="/rooms" className={navClass} onClick={closeMenu}>
+              <span>{t("nav.rooms")}</span>
             </NavLink>
-          )}
-
-          {user?.role === "admin" && (
-            <NavLink to={ADMIN_HOME} className={navClass} onClick={closeMenu}>
-              {t("nav.admin")}
-            </NavLink>
-          )}
-
-          {user ? (
-            <>
-              <NavLink to="/settings" className={navClass} onClick={closeMenu}>
-                {user.name || t("nav.account")}
-              </NavLink>
-              <button type="button" className="guest-nav-button" onClick={handleLogout}>
-                {t("nav.logout")}
-              </button>
-            </>
-          ) : (
-            <Link to={loginPathFor(location)} className="g-btn g-btn--primary g-btn--small" onClick={closeMenu}>
-              {t("nav.login")}
+            <Link to="/#destinations" onClick={closeMenu}>
+              <span>{t("nav.destinations")}</span>
             </Link>
-          )}
+            <NavLink to="/my-bookings" className={navClass} onClick={closeMenu}>
+              <span>{t("nav.myBookings")}</span>
+            </NavLink>
+            {user?.role === "admin" && (
+              <NavLink to={ADMIN_HOME} className={navClass} onClick={closeMenu}>
+                <span>{t("nav.admin")}</span>
+              </NavLink>
+            )}
+          </div>
 
-          <LanguageSwitch />
+          <div className="guest-nav-tools">
+            <LanguageSwitch />
+            <ThemeSwitch />
+            {user ? (
+              <>
+                <NavLink to="/settings" className={navClass} onClick={closeMenu}>
+                  <GuestIcon.User />
+                  <span>{user.name || t("nav.account")}</span>
+                </NavLink>
+                <button type="button" className="guest-nav-button" onClick={handleLogout}>
+                  <span>{t("nav.logout")}</span>
+                </button>
+              </>
+            ) : (
+              <Link to={loginPathFor(location)} className="g-btn g-btn--primary" onClick={closeMenu}>
+                {t("nav.login")}
+              </Link>
+            )}
+          </div>
         </nav>
       </div>
     </header>
@@ -108,36 +163,36 @@ function Header() {
 function Footer() {
   const { t } = useTranslation("site");
   const property = useProperty();
-  const contactLines = [
-    property.address,
-    property.phone && `${t("footer.phone")}: ${property.phone}`,
-    property.email && `${t("footer.email")}: ${property.email}`,
-  ].filter(Boolean);
+  const hasContact = property.phone || property.email;
 
   return (
     <footer className="guest-footer">
       <div className="guest-container">
         <div className="guest-footer-grid">
-          <div>
-            <h4>{property.name}</h4>
-            <p style={{ margin: 0, lineHeight: 1.6 }}>{t("footer.tagline")}</p>
+          <div className="guest-footer-brand">
+            <Brand />
+            <p>{property.address || t("footer.tagline")}</p>
           </div>
 
-          <div>
-            <h4>{t("footer.explore")}</h4>
+          <nav aria-label={t("footer.explore")}>
+            <h3>{t("footer.explore")}</h3>
             <ul>
               <li><Link to="/rooms">{t("nav.rooms")}</Link></li>
+              <li><Link to="/#destinations">{t("nav.destinations")}</Link></li>
               <li><Link to="/my-bookings">{t("nav.myBookings")}</Link></li>
             </ul>
-          </div>
+          </nav>
 
-          {contactLines.length > 0 && (
+          {hasContact && (
             <div>
-              <h4>{t("footer.contact")}</h4>
+              <h3>{t("footer.contact")}</h3>
               <ul>
-                {contactLines.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
+                {property.phone && (
+                  <li><a href={`tel:${property.phone.replace(/[^\d+]/g, "")}`}>{property.phone}</a></li>
+                )}
+                {property.email && (
+                  <li><a href={`mailto:${property.email}`}>{property.email}</a></li>
+                )}
               </ul>
             </div>
           )}

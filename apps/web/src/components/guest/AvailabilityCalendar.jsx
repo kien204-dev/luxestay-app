@@ -141,7 +141,7 @@ export default function AvailabilityCalendar({ roomId, checkIn, checkOut, onSele
       <div className="calendar-legend">
         <span><i style={{ background: "var(--color-surface-muted)" }} />{t("calendar.free")}</span>
         <span><i style={{ background: "var(--color-danger-soft)" }} />{t("calendar.taken")}</span>
-        <span><i style={{ background: "var(--g-navy)" }} />{t("calendar.selected")}</span>
+        <span><i style={{ background: "var(--accent)" }} />{t("calendar.selected")}</span>
       </div>
       <p className="guest-muted" style={{ fontSize: 12, margin: "10px 0 0" }}>
         {choosingCheckOut ? t("calendar.hintCheckOut") : t("calendar.hintCheckIn")}

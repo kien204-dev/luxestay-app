@@ -95,7 +95,7 @@ Tuỳ chọn:
 
 ## Thông tin cơ sở lưu trú
 
-Tên, logo, ảnh nền trang chủ, số điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí được sửa ở trang quản trị **Cơ sở lưu trú** (`/admin/property`) và lưu trong cơ sở dữ liệu. Thứ tự ưu tiên cho từng mục:
+Tên, logo, ảnh nền và nội dung trang chủ (tiêu đề, mô tả, tiện ích, điểm lân cận; xem [customization.md](customization.md#nội-dung-trang-chủ)), số điện thoại, email, địa chỉ, giờ nhận/trả phòng và số ngày hủy miễn phí được sửa ở trang quản trị **Cơ sở lưu trú** (`/admin/property`) và lưu trong cơ sở dữ liệu. Thứ tự ưu tiên cho từng mục:
 
 1. giá trị đã lưu ở trang quản trị;
 2. biến môi trường (`APP_NAME`, `CONTACT_*`, `CHECK_IN_TIME`, `CHECK_OUT_TIME`, `FREE_CANCELLATION_DAYS`);

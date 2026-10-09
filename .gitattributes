@@ -3,6 +3,7 @@
 *.conf text eol=lf
 Dockerfile text eol=lf
 *.ttf binary
+*.woff2 binary
 *.png binary
 *.jpg binary
 *.jpeg binary

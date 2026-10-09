@@ -1,6 +1,6 @@
 # Vấn đề đã biết
 
-Cập nhật: 2026-10-06 (phiên bản 1.0.0-rc.2).
+Cập nhật: 2026-10-09 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại trang chủ).
 
 ## Chưa kiểm chứng với dịch vụ thật
 
@@ -23,6 +23,11 @@ Cập nhật: 2026-10-06 (phiên bản 1.0.0-rc.2).
 - **Liên kết Google với tài khoản có mật khẩu chưa có bước xác nhận bằng mật khẩu.** Lần đăng nhập Google đầu tiên bằng email trùng với một tài khoản khách có sẵn sẽ tự liên kết hai tài khoản (Google đã xác minh email đó). Sau khi đã liên kết, chỉ đúng tài khoản Google đó vào được. Dự kiến sau v1: việc liên kết chỉ làm từ trang Tài khoản, khi đang đăng nhập và nhập lại mật khẩu.
 - **Tài khoản quản trị không đăng nhập được bằng Google**, kể cả khi đã liên kết: chỉ dùng mật khẩu. Quản trị viên trước giờ chỉ dùng Google lấy mật khẩu tạm bằng `npm run admin:reset -- --email <email>` ([installation.md](installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)). Trang đăng nhập vẫn hiện nút Google cho mọi người; quản trị viên bấm vào sẽ nhận thông báo hướng dẫn dùng mật khẩu.
 - **Mã nguồn chưa dùng TypeScript** (dự kiến Giai đoạn 6).
+- **Trang chủ chưa có khối "Trải nghiệm"** như trong bản thiết kế: hệ thống chưa có dữ liệu cho hoạt động/dịch vụ kèm giá và thời lượng. Ý tưởng cho sau: một danh sách trải nghiệm do admin quản lý (ảnh, tên, mô tả, giá, thời lượng). Cũng chưa làm vì cùng lý do: form đăng ký nhận ưu đãi qua email ở cuối trang, bản đồ ở khối "Vị trí" (hiện chỉ có địa chỉ, danh sách điểm lân cận và nút mở Google Maps), điểm đánh giá theo từng tiêu chí, nút lưu phòng yêu thích.
+- **Nội dung trang chủ do admin nhập chỉ có một bản** (tiêu đề, mô tả, tiện ích, điểm lân cận): khách xem tiếng Anh thấy đúng câu admin đã nhập. Câu mặc định khi để trống thì có bản vi/en.
+- **Giao diện tối áp cho trang khách; trang quản trị luôn tối.** Email và phiếu PDF không theo theme. Favicon và hình vẽ thay ảnh luôn vẽ theo bộ màu sáng.
+- **Khối "Tiện ích" dùng lại ảnh nền trang chủ** (như bản thiết kế); chưa có ô tải ảnh riêng cho khối này.
+- **Ô ngày ở thanh tìm phòng là ô ngày của trình duyệt**, nên định dạng ngày theo ngôn ngữ của trình duyệt, không phải theo nút VI/EN.
 
 ## Cơ sở dữ liệu
 

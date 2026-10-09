@@ -73,7 +73,7 @@ export default function PaymentStep({ booking, policy }) {
       <button
         type="button"
         className="g-btn g-btn--block"
-        style={{ background: "transparent", color: "var(--g-muted)" }}
+        style={{ background: "transparent", color: "var(--ink-muted)" }}
         disabled={paying !== null}
         onClick={() => navigate("/my-bookings")}
       >

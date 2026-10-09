@@ -1,7 +1,10 @@
 {
   "nav": {
     "menu": "Menu",
+    "closeMenu": "Đóng menu",
+    "label": "Điều hướng chính",
     "rooms": "Phòng",
+    "destinations": "Điểm đến",
     "myBookings": "Đặt phòng của tôi",
     "admin": "Quản trị",
     "account": "Tài khoản",
@@ -12,8 +15,6 @@
     "tagline": "Đặt phòng trực tiếp: xem phòng trống theo thời gian thực, thanh toán trực tuyến, quy định hủy rõ ràng.",
     "explore": "Khám phá",
     "contact": "Liên hệ",
-    "phone": "Điện thoại",
-    "email": "Email",
     "credits": "Ghi công ảnh"
   },
   "search": {
@@ -21,19 +22,32 @@
     "locationPlaceholder": "Thành phố, khu vực…",
     "checkIn": "Nhận phòng",
     "checkOut": "Trả phòng",
-    "guests": "Số khách",
+    "guests": "Khách",
     "anyGuests": "Bất kỳ",
     "guestsOption": "{{count}} khách",
+    "adults": "{{count}} người lớn",
+    "adults_one": "{{count}} người lớn",
+    "children": "{{count}} trẻ em",
+    "children_one": "{{count}} trẻ em",
+    "adultsTitle": "Người lớn",
+    "childrenTitle": "Trẻ em",
+    "fewerAdults": "Bớt người lớn",
+    "moreAdults": "Thêm người lớn",
+    "fewerChildren": "Bớt trẻ em",
+    "moreChildren": "Thêm trẻ em",
+    "done": "Xong",
     "submit": "Tìm phòng trống",
     "errors": {
       "bothDates": "Vui lòng chọn cả ngày nhận phòng và ngày trả phòng.",
       "checkOutAfterCheckIn": "Ngày trả phòng phải sau ngày nhận phòng."
-    }
+    },
+    "label": "Tìm phòng trống"
   },
   "home": {
     "documentTitle": "Đặt phòng trực tuyến",
     "heroTitle": "Tìm phòng cho kỳ nghỉ của bạn",
     "heroSubtitle": "Chọn ngày, xem phòng còn trống và đặt trong vài phút tại {{brand}}.",
+    "ratingOutOfFive": "{{score}} / 5",
     "destinationsEyebrow": "Nơi chúng tôi có phòng",
     "destinationsTitle": "Điểm đến",
     "destinationMeta": "{{count}} phòng · từ {{price}}",
@@ -51,12 +65,31 @@
       "paymentTitle": "Thanh toán trực tuyến",
       "paymentText": "Thanh toán qua cổng thanh toán ngay sau khi đặt, hoặc để sau trong thời gian giữ chỗ."
     },
-    "photoCredit": "Ảnh: {{author}} · {{license}}"
+    "photoCredit": "Ảnh: {{author}} · {{license}}",
+    "rooms": {
+      "loading": "Đang tải phòng nổi bật…",
+      "emptyTitle": "Chưa có phòng để đặt",
+      "emptyText": "Danh sách phòng đang được cập nhật. Vui lòng quay lại sau.",
+      "errorTitle": "Chưa tải được danh sách phòng",
+      "errorText": "Kết nối tới máy chủ bị gián đoạn. Vui lòng thử lại.",
+      "call": "Gọi {{phone}}"
+    },
+    "amenitiesEyebrow": "Tiện ích",
+    "amenitiesTitle": "Có sẵn cho kỳ nghỉ của bạn",
+    "voices": {
+      "eyebrow": "Khách nói gì",
+      "title": "Đánh giá của khách",
+      "previous": "Đánh giá trước",
+      "next": "Đánh giá tiếp theo",
+      "position": "Đánh giá {{current}} trên {{total}}"
+    },
+    "locationEyebrow": "Vị trí",
+    "locationTitle": "Quanh đây có gì",
+    "directions": "Chỉ đường"
   },
   "room": {
     "perNight": "/ đêm",
-    "maxGuests": "Tối đa {{count}} khách",
-    "view": "Xem phòng"
+    "maxGuests": "Tối đa {{count}} khách"
   },
   "list": {
     "documentTitle": "Danh sách phòng",

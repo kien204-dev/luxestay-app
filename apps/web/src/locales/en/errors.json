@@ -154,6 +154,9 @@
   "SETTINGS_SAVED": "Settings saved.",
   "INVALID_TIME": "Check-in/out times must look like HH:MM (for example 14:00).",
   "INVALID_CANCELLATION_DAYS": "Free cancellation days must be a whole number from 0 to 365.",
+  "INVALID_LIST": "{{fieldLabel}} is not valid.",
+  "LIST_TOO_LONG": "{{fieldLabel}} can have at most {{max}} rows.",
+  "LIST_ROW_NEEDS_NAME": "{{fieldLabel}}: every row needs a name.",
   "LOGO_SAVED": "Logo updated.",
   "LOGO_REMOVED": "Logo removed.",
   "HERO_SAVED": "Home page photo updated.",
@@ -181,7 +184,14 @@
     "license": "Licence",
     "licenseUrl": "Licence link",
     "sourceUrl": "Source link",
-    "changes": "Changes"
+    "changes": "Changes",
+    "heroTitle": "Home page title",
+    "heroSubtitle": "Home page description",
+    "amenities": "Amenities",
+    "nearbyPlaces": "Nearby places",
+    "description": "Description",
+    "note": "Note",
+    "distance": "Distance"
   },
   "network": "Could not reach the server. Check your connection and try again.",
   "unknown": "Something went wrong. Please try again."

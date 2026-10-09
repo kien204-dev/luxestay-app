@@ -4,14 +4,21 @@ import { RoomRatingSummary } from "../RoomReviews";
 import { normalizeImageUrl, placeholderFor, roomPlaceholder, showFallback } from "../../utils/imageUrl";
 import { formatMoney } from "../../utils/format";
 import { stayQuery } from "../../utils/stayQuery";
+import GuestIcon from "./icons";
 
 // `fallback` is what to draw when there is no photo (or it fails to load).
+// Photos are cropped to their frame by CSS; width/height give the browser a
+// 4:3 box to reserve before the file arrives. Pass loading="eager" for a
+// photo that is on screen when the page opens.
 export function RoomImage({ src, alt, fallback = roomPlaceholder(), ...rest }) {
   return (
     <img
       src={normalizeImageUrl(src, fallback)}
       alt={alt}
+      width={800}
+      height={600}
       loading="lazy"
+      decoding="async"
       onError={(event) => showFallback(event, fallback)}
       {...rest}
     />
@@ -19,33 +26,43 @@ export function RoomImage({ src, alt, fallback = roomPlaceholder(), ...rest }) {
 }
 
 // One room in a grid. `stay` (dates/guests already chosen) travels along in
-// the link so the room page opens with them filled in.
-export default function RoomCard({ room, stay }) {
+// the link so the room page opens with them filled in. `lead` is the large
+// card of the home page: a taller photo and the room's description.
+export default function RoomCard({ room, stay, lead = false }) {
   const { t, i18n } = useTranslation("site");
 
   return (
-    <Link to={`/rooms/${room.id}${stayQuery(stay)}`} className="room-card">
-      <div className="room-card-media">
-        <RoomImage src={room.image} alt={room.room_name} fallback={placeholderFor(room.room_name || room.id)} />
+    <article className={`room-card${lead ? " room-card--lead" : ""}`}>
+      <div className="room-card-media guest-photo">
         <span className="room-card-badge">{room.room_type}</span>
+        <RoomImage src={room.image} alt="" fallback={placeholderFor(room.room_name || room.id)} />
       </div>
 
       <div className="room-card-body">
-        <h3>{room.room_name}</h3>
         <div className="room-card-meta">
-          {[room.location, t("room.maxGuests", { count: Number(room.capacity) || 1 })]
-            .filter(Boolean)
-            .join(" · ")}
+          <span>
+            <GuestIcon.Guests small />
+            {t("room.maxGuests", { count: Number(room.capacity) || 1 })}
+          </span>
+          {room.location && (
+            <span>
+              <GuestIcon.Pin small />
+              {room.location}
+            </span>
+          )}
         </div>
-        <RoomRatingSummary roomId={room.id} />
+        <h3>
+          <Link to={`/rooms/${room.id}${stayQuery(stay)}`}>{room.room_name}</Link>
+        </h3>
+        {lead && room.description && <p className="room-card-desc">{room.description}</p>}
 
         <div className="room-card-footer">
           <span className="room-price">
             {formatMoney(room.price, i18n.language)} <small>{t("room.perNight")}</small>
           </span>
-          <span className="g-btn g-btn--outline g-btn--small">{t("room.view")}</span>
+          <RoomRatingSummary roomId={room.id} />
         </div>
       </div>
-    </Link>
+    </article>
   );
 }

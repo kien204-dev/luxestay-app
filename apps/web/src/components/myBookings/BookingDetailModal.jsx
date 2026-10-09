@@ -32,7 +32,9 @@ export default function BookingDetailModal({ booking, onClose }) {
           maxWidth: 920,
           background: "var(--color-surface-light)",
           borderRadius: 16,
-          overflow: "hidden",
+          // Taller than the screen: scroll inside, so the close button stays reachable.
+          maxHeight: "calc(100vh - 40px)",
+          overflowY: "auto",
           boxShadow: "0 24px 80px color-mix(in srgb, var(--color-ink) 35%, transparent)",
         }}
       >

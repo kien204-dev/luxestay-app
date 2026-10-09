@@ -8,19 +8,19 @@ import { readThemeColors } from "./themeColors";
 // neighbours differ.
 
 function parseRgb(color) {
-  const [r = 0, g = 35, b = 102] = (String(color).match(/[\d.]+/g) || []).map(Number);
+  const [r = 0, g = 0, b = 0] = (String(color).match(/[\d.]+/g) || []).map(Number);
   return [r, g, b];
 }
 
 const toHex = (rgb) => `#${rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("")}`;
 const mix = (a, b, weight) => a.map((v, i) => v * (1 - weight) + b[i] * weight);
 
-// Six shades built from the theme: the primary colour, deepened, and nudged
+// Six shades built from the theme: the accent colour, deepened, and nudged
 // towards five neighbouring tones.
 function themePalettes() {
-  const { primary, accent } = readThemeColors();
-  const base = parseRgb(primary);
-  const line = toHex(parseRgb(accent));
+  const { accent, brassInverse } = readThemeColors();
+  const base = parseRgb(accent);
+  const line = toHex(parseRgb(brassInverse));
   const tints = [base, [20, 90, 110], [40, 85, 60], [90, 45, 110], [110, 70, 40], [40, 70, 140]];
   return tints.map((tint, i) => {
     const from = i === 0 ? base : mix(base, tint, 0.45);

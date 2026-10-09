@@ -6,6 +6,18 @@
     <meta name="description" content="Đặt phòng trực tuyến: xem phòng trống theo ngày và đặt trong vài phút." />
     <!-- Title, favicon and lang are set from the brand configuration in src/main.jsx and src/i18n.js -->
     <title></title>
+    <script>
+      // Before the first paint: the visitor's stored choice of theme, else
+      // their system setting. Same rule as src/utils/theme.js.
+      (function () {
+        var theme = null;
+        try { theme = localStorage.getItem("luxestay_theme"); } catch (e) { /* storage unavailable */ }
+        if (theme !== "light" && theme !== "dark") {
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

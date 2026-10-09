@@ -37,11 +37,11 @@ function Panel({ title, children }) {
 export default function DashboardCharts({ analytics }) {
   const { t, i18n } = useTranslation("dashboard");
   const locale = i18n.language === "en" ? "en-US" : "vi-VN";
-  const colors = useMemo(() => readThemeColors(), []);
+  const colors = useMemo(() => readThemeColors("dark"), []);
   const axis = { stroke: colors.muted, tick: { fill: colors.muted, fontSize: 12 } };
   const tooltip = {
     contentStyle: { backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, color: colors.text },
-    labelStyle: { color: colors.accentSoft },
+    labelStyle: { color: colors.accent },
   };
   const statusColor = { confirmed: colors.success, pending: colors.warning, completed: colors.info, cancelled: colors.danger };
 

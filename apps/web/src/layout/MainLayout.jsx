@@ -11,7 +11,7 @@ function MainLayout({ children }) {
   const property = useProperty();
 
   return (
-    <div className="adm-shell">
+    <div className="adm-shell theme-dark">
       <Sidebar />
 
       <main className="adm-main">

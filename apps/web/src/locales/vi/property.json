@@ -52,5 +52,24 @@
       "title": "Tiêu đề gốc",
       "sourceUrl": "Link trang gốc của ảnh"
     }
+  },
+  "home": {
+    "title": "Nội dung trang chủ",
+    "subtitle": "Tiêu đề ở đầu trang chủ và hai khối Tiện ích, Vị trí. Nội dung được hiển thị nguyên văn ở mọi ngôn ngữ. Ô nào để trống thì trang chủ dùng câu mặc định; danh sách để trống thì khối đó không hiện.",
+    "heroTitle": "Tiêu đề",
+    "heroSubtitle": "Mô tả dưới tiêu đề",
+    "amenities": "Tiện ích",
+    "amenitiesHint": "Tối đa 12 dòng. Hiện ở khối “Tiện ích” của trang chủ.",
+    "amenityName": "Tên tiện ích",
+    "amenityDescription": "Mô tả ngắn",
+    "nearbyPlaces": "Điểm lân cận",
+    "nearbyPlacesHint": "Tối đa 8 dòng. Hiện ở khối “Vị trí” của trang chủ, cùng địa chỉ ở phần Thông tin và quy định.",
+    "placeName": "Địa điểm",
+    "placeNote": "Ghi chú",
+    "placeDistance": "Khoảng cách",
+    "addRow": "Thêm dòng",
+    "removeRow": "Xóa dòng {{index}}",
+    "rowField": "{{label}}, dòng {{index}}",
+    "save": "Lưu nội dung trang chủ"
   }
 }
