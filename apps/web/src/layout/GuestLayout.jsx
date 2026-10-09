@@ -1,12 +1,12 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { SUPPORTED_LANGUAGES } from "../config/brand";
 import { useProperty } from "../context/PropertyContext";
 import GuestIcon from "../components/guest/icons";
+import ThemeSwitch from "../components/ThemeSwitch";
 import { ADMIN_HOME, loginPathFor } from "../utils/authRedirect";
-import { currentTheme, onThemeChange, setTheme } from "../utils/theme";
 import "../styles/guest.css";
 
 function LanguageSwitch() {
@@ -26,27 +26,6 @@ function LanguageSwitch() {
         </button>
       ))}
     </div>
-  );
-}
-
-// Light/dark. Shows what a press switches to; the choice is remembered.
-function ThemeSwitch() {
-  const { t } = useTranslation("common");
-  const theme = useSyncExternalStore(onThemeChange, currentTheme);
-  const dark = theme === "dark";
-  const label = dark ? t("theme.toLight") : t("theme.toDark");
-
-  return (
-    <button
-      type="button"
-      className="guest-icon-button"
-      aria-label={label}
-      title={label}
-      data-testid="theme-switch"
-      onClick={() => setTheme(dark ? "light" : "dark")}
-    >
-      {dark ? <GuestIcon.Sun /> : <GuestIcon.Moon />}
-    </button>
   );
 }
 
@@ -137,7 +116,7 @@ function Header() {
 
           <div className="guest-nav-tools">
             <LanguageSwitch />
-            <ThemeSwitch />
+            <ThemeSwitch className="guest-icon-button" />
             {user ? (
               <>
                 <NavLink to="/settings" className={navClass} onClick={closeMenu}>

@@ -16,8 +16,9 @@
   placeholder drawings) comes from the tokens below; components never write a
   colour themselves (`npm run lint` checks). There are two sets, light and
   dark. <html data-theme> picks one: the visitor's system setting until they
-  choose with the header switch (utils/theme.js). A part of a page can pin a
-  set with .theme-light / .theme-dark (the admin area is always dark).
+  choose with the header switch (utils/theme.js), on the guest site and in
+  the admin area alike. A part of a page can pin a set with .theme-light /
+  .theme-dark.
 
   To rebrand, change the four accent lines in BOTH sets (and the brass pair
   if wanted), keeping text on them readable: see docs/customization.md.

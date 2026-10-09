@@ -6,8 +6,8 @@
 
 ### Thêm
 
-- **Trang chủ dựng lại theo bản thiết kế mới, bằng dữ liệu thật.** Ảnh nền, tiêu đề và mô tả lấy từ trang Cơ sở lưu trú; điểm đánh giá ở đầu trang tính từ đánh giá của khách và chỉ hiện khi có đánh giá. "Phòng nổi bật" gồm một thẻ lớn và hai thẻ nhỏ, có đủ trạng thái đang tải (khung xương), trống, lỗi kèm nút Thử lại, và sẵn sàng. Các khối "Tiện ích", "Khách nói gì", "Vị trí" chỉ hiện khi có dữ liệu.
-- **Giao diện sáng và tối** cho trang khách: theo cài đặt của máy, có nút chuyển ở đầu trang, lựa chọn được nhớ trên trình duyệt. Trang quản trị luôn dùng bộ tối.
+- **Trang chủ dựng lại theo bản thiết kế mới, bằng dữ liệu thật.** Ảnh nền, tiêu đề và mô tả lấy từ trang Cơ sở lưu trú; điểm đánh giá ở đầu trang tính từ đánh giá của khách và, cùng khối "Khách nói gì", chỉ hiện khi có từ 3 đánh giá. "Phòng nổi bật" gồm một thẻ lớn và hai thẻ nhỏ, có đủ trạng thái đang tải (khung xương), trống, lỗi kèm nút Thử lại, và sẵn sàng. Các khối "Tiện ích", "Khách nói gì", "Vị trí" chỉ hiện khi có dữ liệu.
+- **Giao diện sáng và tối** cho trang khách và trang quản trị: theo cài đặt của máy, có nút chuyển ở đầu trang, lựa chọn được nhớ trên trình duyệt. Trang quản trị trước đây luôn tối, nay mặc định sáng trên máy đặt chế độ sáng.
 - **Bộ màu và kiểu chữ mới**: token màu (nền kem, accent xanh rêu, brass, màu trạng thái, viền focus) cho cả hai giao diện thay bảng navy/vàng; font Cormorant Garamond và Be Vietnam Pro tự phục vụ từ ứng dụng (SIL OFL 1.1), không gọi Google Fonts. Cách đổi màu: [docs/customization.md](docs/customization.md#màu-theme).
 - Trang **Cơ sở lưu trú** có thêm phần **Nội dung trang chủ**: tiêu đề, mô tả, danh sách tiện ích, danh sách điểm lân cận (migration `017_home_page_content.sql`; mặc định trống).
 - API `GET /api/reviews/featured` (công khai): điểm trung bình và số đánh giá đang hiển thị, cùng tối đa 5 đánh giá từ 4 sao có nội dung.
@@ -17,6 +17,7 @@
 
 ### Thay đổi
 
+- **Dữ liệu mẫu không còn kèm đánh giá**, trừ khi `DEMO_MODE=true` (bản demo có 3 đánh giá mẫu cho 3 kỳ lưu trú mẫu đã hoàn tất). Cơ sở dữ liệu đã seed từ trước vẫn giữ đánh giá mẫu cũ: ẩn nó ở trang Đặt phòng → Đánh giá nếu không muốn.
 - Thẻ phòng: tên phòng là liên kết (cả thẻ vẫn bấm được); phòng chưa có đánh giá không còn dòng "Chưa có đánh giá" trên thẻ.
 - Menu đầu trang luôn có "Đặt phòng của tôi" (chưa đăng nhập thì được đưa tới trang đăng nhập) và thêm "Điểm đến".
 - Các tên biến màu cũ (`--brand-primary`, `--brand-accent`, `--color-*`) vẫn dùng được nhưng nay trỏ vào token mới. **Nếu bạn đã đổi `--brand-primary` / `--brand-accent` để rebrand: chuyển sang sửa `--accent` (và ba biến đi kèm) theo hướng dẫn.**

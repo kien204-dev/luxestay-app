@@ -137,8 +137,7 @@ describe("home page content", () => {
   });
 
   it("quotes only visible, well-rated reviews that say something, and scores all visible ones", async () => {
-    // The sample data comes with one review; start from none.
-    await pool.query("DELETE FROM room_reviews");
+    // The sample data has no review outside a demo.
     const none = await api("/api/reviews/featured");
     assert.equal(none.status, 200);
     assert.deepEqual(none.body, { data: [], averageRating: 0, totalReviews: 0 });

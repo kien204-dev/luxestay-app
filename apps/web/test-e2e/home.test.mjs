@@ -20,6 +20,7 @@ const TEXT = JSON.parse(fs.readFileSync(path.join(HERE, "../src/locales/vi/site.
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
 const ROOMS_REQUEST = /\/api\/rooms\?/;
+const ADMIN = { email: "admin@example.com", password: "Admin-E2E-12345" };
 
 let stack;
 
@@ -82,8 +83,26 @@ async function screenshot(page, name, locator) {
   await page.screenshot({ path: file, fullPage: true });
 }
 
+// A finished stay with its review, written straight to the tables. `index`
+// picks the room, so every review is for a different one.
+async function addReview(index, rating, comment) {
+  await stack.pool.query(
+    `WITH guest AS (SELECT id FROM users WHERE email = 'user@example.com'),
+          room AS (SELECT id, price FROM rooms ORDER BY id OFFSET $1::int LIMIT 1),
+          stay AS (
+            INSERT INTO bookings (user_id, room_id, check_in, check_out, total_price, guests, status, payment_status)
+            SELECT guest.id, room.id, CURRENT_DATE - 60, CURRENT_DATE - 58, room.price * 2, 2, 'completed', 'paid'
+            FROM guest, room
+            RETURNING id, user_id, room_id
+          )
+     INSERT INTO room_reviews (room_id, user_id, booking_id, rating, comment)
+     SELECT room_id, user_id, id, $2, $3 FROM stay`,
+    [30 + index, rating, comment]
+  );
+}
+
 // The headline, amenities and nearby places an admin would type under
-// "Cơ sở lưu trú", and a few more reviews, written straight to the tables.
+// "Cơ sở lưu trú", written straight to the table.
 async function fillHomeContent() {
   const { pool } = stack;
   await pool.query(
@@ -106,25 +125,11 @@ async function fillHomeContent() {
       ]),
     ]
   );
-  for (const [index, comment] of ["Đánh giá thử thứ nhất của khách.", "Đánh giá thử thứ hai của khách."].entries()) {
-    await pool.query(
-      `WITH guest AS (SELECT id FROM users WHERE email = 'user@example.com'),
-            room AS (SELECT id, price FROM rooms ORDER BY id OFFSET $1::int LIMIT 1),
-            stay AS (
-              INSERT INTO bookings (user_id, room_id, check_in, check_out, total_price, guests, status, payment_status)
-              SELECT guest.id, room.id, CURRENT_DATE - 60, CURRENT_DATE - 58, room.price * 2, 2, 'completed', 'paid'
-              FROM guest, room
-              RETURNING id, user_id, room_id
-            )
-       INSERT INTO room_reviews (room_id, user_id, booking_id, rating, comment)
-       SELECT room_id, user_id, id, 4, $2 FROM stay`,
-      [30 + index, comment]
-    );
-  }
 }
 
 describe("The home page in the browser", () => {
   before(async () => {
+    process.env.SEED_ADMIN_PASSWORD = ADMIN.password;
     stack = await startStack();
   });
 
@@ -148,11 +153,10 @@ describe("The home page in the browser", () => {
           assert.equal(await page.locator(".home-rooms .room-card--lead").count(), 1);
           assert.ok((await page.locator(".dest-card").count()) > 0);
 
-          // The sample data has one review: the score is computed from it.
-          assert.match(await page.getByTestId("hero-rating").innerText(), /5,0 \/ 5/);
-          await page.getByTestId("guest-voices").waitFor();
-
-          // Nothing was written for these, so they are not there at all.
+          // No guest has reviewed yet (sample reviews are for demos only),
+          // and nothing was written for the other sections: none is there.
+          assert.equal((await page.getByTestId("hero-rating").innerText()).trim(), "");
+          assert.equal(await page.getByTestId("guest-voices").count(), 0);
           assert.equal(await page.getByTestId("amenities").count(), 0);
           assert.equal(await page.getByTestId("location").count(), 0);
 
@@ -297,6 +301,61 @@ describe("The home page in the browser", () => {
     }
   });
 
+  it("keeps the score and the guest quotes back until there are three reviews", async () => {
+    await addReview(0, 5, "Đánh giá thử thứ nhất của khách.");
+    await addReview(1, 4, "Đánh giá thử thứ hai của khách.");
+
+    const { context, page, problems } = await openPage();
+    try {
+      // Two reviews: still nothing.
+      await openHome(page);
+      assert.equal((await page.getByTestId("hero-rating").innerText()).trim(), "");
+      assert.equal(await page.getByTestId("guest-voices").count(), 0);
+
+      // The third one brings both: (5 + 4 + 4) / 3.
+      await addReview(2, 4, "Đánh giá thử thứ ba của khách.");
+      await page.reload();
+      await page.getByTestId("guest-voices").waitFor();
+      assert.match(await page.getByTestId("hero-rating").innerText(), /4,3 \/ 5/);
+      assert.ok((await page.getByTestId("hero-rating").innerText()).includes("3 đánh giá"));
+      assert.deepEqual(problems, []);
+    } finally {
+      await context.close();
+    }
+  });
+
+  it("gives the admin area the same light/dark choice, light by default", async () => {
+    const { context, page, problems } = await openPage({ colorScheme: "light" });
+    try {
+      await page.goto(`${stack.baseUrl}/login`);
+      await page.fill("#login-email", ADMIN.email);
+      await page.fill("#login-password", ADMIN.password);
+      await page.click('button[type="submit"]');
+      await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+      await page.goto(`${stack.baseUrl}/admin/property`);
+      await page.getByTestId("home-content-form").waitFor();
+
+      const html = page.locator("html");
+      const shell = () => page.locator(".adm-shell").evaluate((element) => getComputedStyle(element).backgroundColor);
+      assert.equal(await html.getAttribute("data-theme"), "light");
+      assert.equal(await shell(), "rgb(245, 240, 232)");
+      await page.evaluate(() => document.fonts.ready);
+      await screenshot(page, "admin-property-light");
+
+      await page.getByTestId("theme-switch").click();
+      assert.equal(await html.getAttribute("data-theme"), "dark");
+      assert.equal(await shell(), "rgb(19, 18, 15)");
+      await screenshot(page, "admin-property-dark");
+
+      // One choice for the whole site: the guest pages are dark now too.
+      await page.goto(`${stack.baseUrl}/`);
+      assert.equal(await html.getAttribute("data-theme"), "dark");
+      assert.deepEqual(problems, []);
+    } finally {
+      await context.close();
+    }
+  });
+
   it("shows the headline, amenities, location and reviews once they exist", async () => {
     await fillHomeContent();
     try {
@@ -309,7 +368,7 @@ describe("The home page in the browser", () => {
             assert.equal(await page.getByTestId("amenities").locator("li").count(), 4);
             assert.equal(await page.getByTestId("location").locator("li").count(), 2);
 
-            // Three reviews now (5, 4, 4): the score and the quotes follow.
+            // The three reviews of the test above (5, 4, 4).
             assert.match(await page.getByTestId("hero-rating").innerText(), /4,3 \/ 5/);
             const voices = page.getByTestId("guest-voices");
             const first = await voices.locator("blockquote").innerText();

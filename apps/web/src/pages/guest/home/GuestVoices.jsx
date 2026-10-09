@@ -12,7 +12,8 @@ function initialsOf(name) {
 
 // What guests wrote: the score across every visible review, and the best
 // ones with a comment, one at a time. `reviews` is the API's
-// /reviews/featured answer; with nothing to quote the section is left out.
+// /reviews/featured answer, or null while there are too few reviews (see
+// Home.jsx); with nothing to quote the section is left out.
 export default function GuestVoices({ reviews }) {
   const { t, i18n } = useTranslation("site");
   const [index, setIndex] = useState(0);

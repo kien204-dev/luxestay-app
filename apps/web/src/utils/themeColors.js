@@ -18,10 +18,9 @@ const NAMES = {
   info: "--info",
 };
 
-// `theme` is the token set to read ("light" or "dark"), whatever the page is
-// showing: the admin area's charts are always dark, and the favicon and
-// placeholders are drawn from the light set so they do not change when the
-// visitor switches theme.
+// `theme` is the token set to read ("light" or "dark"). Charts pass the
+// theme on screen; the favicon and placeholders are drawn from the light set
+// so they do not change when the visitor switches theme.
 export function readThemeColors(theme = "light") {
   if (typeof document === "undefined") return {};
   const probe = document.createElement("span");

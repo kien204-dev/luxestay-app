@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { currentTheme, onThemeChange } from "../../../utils/theme";
 import { readThemeColors } from "../../../utils/themeColors";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -37,7 +38,9 @@ function Panel({ title, children }) {
 export default function DashboardCharts({ analytics }) {
   const { t, i18n } = useTranslation("dashboard");
   const locale = i18n.language === "en" ? "en-US" : "vi-VN";
-  const colors = useMemo(() => readThemeColors("dark"), []);
+  // Redrawn in the other set's colours when the theme is switched.
+  const theme = useSyncExternalStore(onThemeChange, currentTheme);
+  const colors = useMemo(() => readThemeColors(theme), [theme]);
   const axis = { stroke: colors.muted, tick: { fill: colors.muted, fontSize: 12 } };
   const tooltip = {
     contentStyle: { backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 8, color: colors.text },
