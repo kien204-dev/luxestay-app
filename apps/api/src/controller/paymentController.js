@@ -209,6 +209,23 @@ exports.getPaymentForBooking = async (req, res) => {
   }
 };
 
+// The gateway's own result code from its signed notice ("24" = cancelled at
+// VNPay, say), or null before any notice arrived. The result page turns the
+// common ones into a reason; it decides nothing.
+function gatewayCodeOf(rawCallback) {
+  if (!rawCallback) return null;
+  let callback = rawCallback;
+  if (typeof callback === "string") {
+    try {
+      callback = JSON.parse(callback);
+    } catch {
+      return null;
+    }
+  }
+  const code = callback.vnp_ResponseCode ?? callback.resultCode;
+  return code === undefined || code === null ? null : String(code);
+}
+
 // Looked up by the frontend's payment-result page, which only has the
 // gateway's correlation id (vnp_TxnRef / MoMo orderId) from the return-URL
 // query params — those params are informational only (not signature
@@ -224,7 +241,7 @@ exports.getPaymentByTransactionRef = async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT p.id, p.booking_id, p.provider, p.transaction_ref, p.status,
-              p.amount, p.currency, p.created_at, p.updated_at,
+              p.amount, p.currency, p.created_at, p.updated_at, p.raw_callback,
               b.user_id AS booking_user_id, b.status AS booking_status,
               b.payment_status AS booking_payment_status
        FROM payments p
@@ -254,6 +271,7 @@ exports.getPaymentByTransactionRef = async (req, res) => {
         currency: row.currency,
         created_at: row.created_at,
         updated_at: row.updated_at,
+        gatewayCode: gatewayCodeOf(row.raw_callback),
       },
       bookingStatus: row.booking_status,
       bookingPaymentStatus: row.booking_payment_status,

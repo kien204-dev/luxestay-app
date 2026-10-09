@@ -6,6 +6,7 @@ const {
   getBookingById,
   getBookingCalendar,
   getBookingPolicy,
+  getBookingCounts,
   getBookingSummary,
   getBookingReceipt,
   markBookingPaid,
@@ -20,6 +21,7 @@ const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 
 router.get("/", verifyToken, getBookings);
 router.get("/policy", getBookingPolicy);
+router.get("/counts", verifyToken, getBookingCounts);
 router.get("/summary", verifyToken, checkRole("admin"), getBookingSummary);
 router.get("/calendar", verifyToken, checkRole("admin"), getBookingCalendar);
 router.get("/:id/receipt", verifyToken, getBookingReceipt);
