@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   getRooms,
   getRoomLocations,
+  getRoomFilters,
   getRoomDestinations,
   getRoomAvailability,
   getRoomById,
@@ -22,6 +23,7 @@ const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 // Ai cũng xem được danh sách phòng (khách chưa đăng nhập vẫn cần duyệt phòng)
 router.get("/", getRooms);
 router.get("/locations", getRoomLocations);
+router.get("/filters", getRoomFilters);
 router.get("/destinations", getRoomDestinations);
 router.get("/:id/availability", getRoomAvailability);
 router.get("/:id", getRoomById);
