@@ -121,7 +121,8 @@
 .mobile-book-bar { display: none; }
 
 /* Loading: blocks in the page's shape. */
-.room-loading-head { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-7) 0 var(--space-5); }
+.room-loading-line { display: flex; align-items: center; min-height: 44px; }
+.room-loading-title { width: 420px; max-width: 80%; height: 60px; }
 .room-loading-main { display: flex; flex-direction: column; gap: var(--space-4); }
 .room-loading-panel { box-shadow: none; }
 .gallery > span.guest-photo { cursor: default; }
@@ -166,6 +167,11 @@
   .pager-position { display: block; }
 
   .guest .detail-header h1 { font-size: 36px; line-height: 40px; }
+  .room-loading-title { height: 40px; }
+  /* The score arrives after the page: it has a line of its own, so the
+     labels beside it do not wrap (and push the photos down) when it does. */
+  .detail-sub a { flex-basis: 100%; }
+  .detail-sub { row-gap: 0; }
   .gallery, .gallery--2 { grid-template-columns: 1fr; grid-template-rows: 280px; margin: 0 calc(var(--space-4) * -1); }
   .gallery > .guest-photo:not(:first-child), .gallery-all { display: none; }
   .gallery > .guest-photo:first-child { grid-row: auto; grid-column: auto; border-radius: 0; }

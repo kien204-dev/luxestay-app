@@ -9,6 +9,7 @@ import { RoomImage } from "../../components/guest/RoomCard";
 import StateMessage from "../../components/guest/StateMessage";
 import GuestIcon from "../../components/guest/icons";
 import RoomReviews, { RoomRatingSummary } from "../../components/RoomReviews";
+import { useProperty } from "../../context/PropertyContext";
 import { getRoomById } from "../../services/roomService";
 import { useAsyncData } from "../../utils/useAsyncData";
 import { useBookingPolicy } from "../../utils/useBookingPolicy";
@@ -167,10 +168,14 @@ function Loading() {
   return (
     <div className="guest-container room-page" aria-busy="true" data-testid="room-loading">
       <span className="sr-only" role="status">{t("detail.loading")}</span>
-      <div className="room-loading-head">
-        {block({ height: 12, width: 180 })}
-        {block({ height: 52, width: 420, maxWidth: "80%" })}
-        {block({ height: 12, width: 300, maxWidth: "60%" })}
+      {/* The same boxes as the real heading, so the photos do not move when it arrives. */}
+      <div className="page-head page-head--tight">
+        <div className="room-loading-line">{block({ height: 12, width: 180 })}</div>
+      </div>
+      <div className="detail-header">
+        {block({ height: 16, width: 160 })}
+        <span className="luxe-skeleton-light room-loading-title" />
+        <div className="room-loading-line">{block({ height: 12, width: 300, maxWidth: "60%" })}</div>
       </div>
       <div className="gallery gallery--5">
         {Array.from({ length: MOSAIC_SIZE }, (_, i) => <span key={i} className="luxe-skeleton-light guest-photo" />)}
@@ -199,6 +204,7 @@ export default function RoomDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
   const stay = readStay(searchParams);
   const policy = useBookingPolicy();
+  const property = useProperty();
 
   const { data: room, loading, error, reload } = useAsyncData(`room:${id}`, () => getRoomById(id));
   // While switching rooms, `room` is still the previous one for a moment.
@@ -241,9 +247,11 @@ export default function RoomDetail() {
   const facts = [
     { icon: <GuestIcon.Bed />, title: current.room_type, text: t("detail.factType") },
     { icon: <GuestIcon.Guests />, title: t("room.maxGuests", { count: Number(current.capacity) || 1 }), text: t("detail.factCapacity") },
-    policy?.checkInTime && { icon: <GuestIcon.Clock />, title: policy.checkInTime, text: t("detail.factCheckIn") },
-    policy?.checkOutTime && { icon: <GuestIcon.Clock />, title: policy.checkOutTime, text: t("detail.factCheckOut") },
-  ].filter(Boolean);
+    // The property's times are known from the first paint (PropertyContext),
+    // so the row does not grow when the booking policy arrives.
+    { icon: <GuestIcon.Clock />, title: policy?.checkInTime || property.checkInTime, text: t("detail.factCheckIn") },
+    { icon: <GuestIcon.Clock />, title: policy?.checkOutTime || property.checkOutTime, text: t("detail.factCheckOut") },
+  ];
 
   return (
     <div className="guest-container room-page" data-testid="room-page">
