@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { createPayment } from "../../services/paymentService";
 import { usePaymentProviders } from "../../utils/usePaymentProviders";
 import { formatDate, formatMoney } from "../../utils/format";
+import { DemoPaymentNote } from "../DemoBanner";
 import CancellationPolicy from "./CancellationPolicy";
 
 const PROVIDER_LABEL_KEY = { vnpay: "payment.payVnpay", momo: "payment.payMomo" };
@@ -55,6 +56,7 @@ export default function PaymentStep({ booking, policy }) {
       </div>
 
       <CancellationPolicy policy={policy} checkIn={checkIn} />
+      <DemoPaymentNote />
 
       {error && <div className="g-alert" role="alert">{error}</div>}
 

@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatRating } from "../../../components/RoomReviews";
+import { formatRating, initialsOf } from "../../../components/RoomReviews";
 import StarRating from "../../../components/StarRating";
 import GuestIcon from "../../../components/guest/icons";
-
-// Initials of the (already shortened) reviewer name, for the round badge.
-function initialsOf(name) {
-  const words = String(name || "").replace(/\./g, "").split(/\s+/).filter(Boolean);
-  return [words[0], words.length > 1 ? words.at(-1) : ""].map((word) => Array.from(word || "")[0] || "").join("").toUpperCase();
-}
 
 // What guests wrote: the score across every visible review, and the best
 // ones with a comment, one at a time. `reviews` is the API's

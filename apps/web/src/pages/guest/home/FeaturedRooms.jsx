@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import RoomCard from "../../../components/guest/RoomCard";
+import StateMessage from "../../../components/guest/StateMessage";
 import GuestIcon from "../../../components/guest/icons";
 import { useProperty } from "../../../context/PropertyContext";
 import { getRooms } from "../../../services/roomService";
@@ -32,32 +33,6 @@ function Loading() {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-// "No rooms yet" or "could not load", with what the visitor can do next.
-function Message({ error = false, title, text, children }) {
-  return (
-    <div className={`home-state${error ? " home-state--error" : ""}`} role={error ? "alert" : undefined}>
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        {error ? (
-          <>
-            <path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z" />
-            <path d="M48 46v14M48 66v1" />
-          </>
-        ) : (
-          <>
-            <path d="M20 84V44a28 28 0 0 1 56 0v40" />
-            <path d="M12 84h72" />
-            <path d="M30 84V48a18 18 0 0 1 36 0v36" />
-            <circle cx="58" cy="64" r="1.6" />
-          </>
-        )}
-      </svg>
-      <h3>{title}</h3>
-      <p>{text}</p>
-      {children && <div className="home-state-actions">{children}</div>}
     </div>
   );
 }
@@ -96,18 +71,18 @@ export default function FeaturedRooms() {
 
         {state === "loading" && <Loading />}
         {state === "error" && (
-          <Message error title={t("home.rooms.errorTitle")} text={t("home.rooms.errorText")}>
+          <StateMessage error title={t("home.rooms.errorTitle")} text={t("home.rooms.errorText")}>
             <button type="button" className="g-btn g-btn--primary" onClick={reload}>
               <GuestIcon.Retry />
               {t("list.retry")}
             </button>
             {call}
-          </Message>
+          </StateMessage>
         )}
         {state === "empty" && (
-          <Message title={t("home.rooms.emptyTitle")} text={t("home.rooms.emptyText")}>
+          <StateMessage title={t("home.rooms.emptyTitle")} text={t("home.rooms.emptyText")}>
             {call}
-          </Message>
+          </StateMessage>
         )}
         {state === "ready" && (
           <div className="home-rooms">

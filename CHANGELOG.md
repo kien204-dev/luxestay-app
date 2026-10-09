@@ -14,9 +14,16 @@
 - Thanh tìm phòng có bộ đếm người lớn / trẻ em (tổng số người được dùng để lọc theo sức chứa).
 - `npm run test:e2e` chạy thêm test trình duyệt cho trang chủ (hai giao diện, màn hình 360–1440 px, bốn trạng thái phòng nổi bật, vùng bấm ≥ 44 px), ảnh chụp ở `test-results/home/`.
 - `robots.txt`, và nginx nén gzip cho JavaScript/CSS/JSON.
+- **Trang danh sách phòng theo thiết kế mới**: lọc theo địa điểm, ngày, số khách, khoảng giá và loại phòng (các lựa chọn lấy từ phòng đang có), sắp xếp, phân trang đánh số; trên điện thoại tìm kiếm và bộ lọc gom vào một bảng trượt từ đáy; đủ trạng thái đang tải, không có phòng phù hợp (kèm các điều kiện đang bật để bỏ từng cái), lỗi kèm nút Thử lại.
+- **Trang chi tiết phòng theo thiết kế mới**: khung ảnh ghép và xem ảnh toàn màn hình (phím ←/→, Esc, focus không ra ngoài), sức chứa và giờ nhận/trả, tiện nghi, lịch trống, chính sách, đánh giá kèm phân bố sao và trạng thái chưa có đánh giá, khung đặt phòng dính bên phải, thanh giá ghim đáy trên màn hình hẹp, trạng thái đang tải và lỗi.
+- **Tiện nghi của phòng**: ô mới ở form phòng (mỗi dòng một tiện nghi, tối đa 30), hiện ở trang phòng; migration `018_room_amenities.sql`, mặc định trống thì khối Tiện nghi không hiện.
+- API: `GET /api/rooms` nhận thêm `roomType`; `GET /api/rooms/filters` trả các loại phòng đang nhận khách kèm số phòng và khoảng giá; `GET /api/rooms/:id/reviews` trả thêm `ratingCounts` (số đánh giá theo từng mức sao).
+- **Dải thông báo chế độ demo** ở đầu trang khách và trang quản trị (chỉ khi `DEMO_MODE=true`): đẩy trang xuống, đóng được trong phiên trình duyệt, một dòng trên điện thoại. Câu "Không có tiền thật nào bị trừ" chỉ hiện khi mọi cổng thanh toán đang bật đều là môi trường thử (`demo.testPayments` trong `/api/settings/public`).
 
 ### Thay đổi
 
+- **Thông báo (toast) và hộp xác nhận dùng chung một mẫu** trên cả trang khách và trang quản trị. Toast ở góc dưới phải, tối đa 3 cái; thành công và thông tin tự ẩn sau 6 giây (dừng đếm khi rê chuột vào), lỗi ở lại cho tới khi đóng. Hộp xác nhận đặt focus vào nút Hủy, Esc để hủy; **xóa phòng và xóa đơn đặt phòng yêu cầu gõ mã** (`ROOM-<id>`, `BOOKING-<id>`).
+- Tên phòng trên thẻ ở trang danh sách là tiêu đề cấp 2 (trước là cấp 3, bỏ qua một cấp).
 - **Dữ liệu mẫu không còn kèm đánh giá**, trừ khi `DEMO_MODE=true` (bản demo có 3 đánh giá mẫu cho 3 kỳ lưu trú mẫu đã hoàn tất). Cơ sở dữ liệu đã seed từ trước vẫn giữ đánh giá mẫu cũ: ẩn nó ở trang Đặt phòng → Đánh giá nếu không muốn.
 - Thẻ phòng: tên phòng là liên kết (cả thẻ vẫn bấm được); phòng chưa có đánh giá không còn dòng "Chưa có đánh giá" trên thẻ.
 - Menu đầu trang luôn có "Đặt phòng của tôi" (chưa đăng nhập thì được đưa tới trang đăng nhập) và thêm "Điểm đến".

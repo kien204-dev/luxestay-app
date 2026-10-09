@@ -129,13 +129,19 @@ exports.getRoomReviews = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const statsResult = await pool.query(
-      `SELECT COUNT(*)::int AS total, COALESCE(AVG(rating), 0) AS average
+      `SELECT COUNT(*)::int AS total, COALESCE(AVG(rating), 0) AS average,
+              COUNT(*) FILTER (WHERE rating = 5)::int AS r5,
+              COUNT(*) FILTER (WHERE rating = 4)::int AS r4,
+              COUNT(*) FILTER (WHERE rating = 3)::int AS r3,
+              COUNT(*) FILTER (WHERE rating = 2)::int AS r2,
+              COUNT(*) FILTER (WHERE rating = 1)::int AS r1
        FROM room_reviews
        WHERE room_id = $1 AND is_hidden = false`,
       [roomId]
     );
-    const total = statsResult.rows[0].total;
-    const average = Number(statsResult.rows[0].average);
+    const stats = statsResult.rows[0];
+    const total = stats.total;
+    const average = Number(stats.average);
 
     const result = await pool.query(
       `SELECT rv.id, rv.rating, rv.comment, rv.created_at, u.name AS user_name
@@ -159,6 +165,8 @@ exports.getRoomReviews = async (req, res) => {
       })),
       averageRating: Math.round(average * 10) / 10,
       totalReviews: total,
+      // How many visible reviews gave each number of stars.
+      ratingCounts: { 5: stats.r5 || 0, 4: stats.r4 || 0, 3: stats.r3 || 0, 2: stats.r2 || 0, 1: stats.r1 || 0 },
       pagination: {
         page,
         limit,

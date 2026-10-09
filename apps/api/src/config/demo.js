@@ -15,6 +15,24 @@ function demoResetIntervalHours() {
   return Number.isFinite(hours) && hours > 0 ? hours : 0;
 }
 
+// True when every payment gateway that is switched on points at its
+// provider's test environment, so no real money can move. The demo banner
+// only says "no real money is charged" when this holds: demo mode itself
+// does not replace the gateways.
+function demoUsesTestPayments() {
+  const vnpayUrl = process.env.VNPAY_PAY_URL || "https://sandbox.vnpayment.vn/";
+  const momoOn = String(process.env.MOMO_ENABLED).toLowerCase() === "true";
+  const momoUrl = process.env.MOMO_API_URL || "https://test-payment.momo.vn/";
+  const host = (url) => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return "";
+    }
+  };
+  return host(vnpayUrl) === "sandbox.vnpayment.vn" && (!momoOn || host(momoUrl) === "test-payment.momo.vn");
+}
+
 // The sample accounts a demo visitor signs in with (see db/seed.js).
 function demoAccounts() {
   const { getSeedAccounts } = require("../db/seed");
@@ -42,4 +60,4 @@ function isBlockedForDemo(method, url) {
   return BLOCKED.some((rule) => rule.methods.includes(method) && rule.path.test(path));
 }
 
-module.exports = { demoAccounts, demoResetIntervalHours, isBlockedForDemo, isDemoAccount, isDemoMode };
+module.exports = { demoAccounts, demoResetIntervalHours, demoUsesTestPayments, isBlockedForDemo, isDemoAccount, isDemoMode };

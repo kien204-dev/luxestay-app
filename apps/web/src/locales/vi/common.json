@@ -23,12 +23,23 @@
     "cancel": "Hủy",
     "confirm": "Xác nhận",
     "working": "Đang xử lý...",
-    "dismiss": "Đóng thông báo"
+    "dismiss": "Đóng thông báo",
+    "close": "Đóng",
+    "typeToConfirm": "Nhập mã sau để xác nhận:"
   },
   "stars": "{{count}} sao",
   "stars_one": "{{count}} sao",
   "theme": {
     "toLight": "Chuyển sang giao diện sáng",
     "toDark": "Chuyển sang giao diện tối"
+  },
+  "demo": {
+    "tag": "Demo",
+    "guest": "Đây là bản demo: dữ liệu mẫu được đặt lại định kỳ.",
+    "guestTestPayments": "Đây là bản demo: đặt phòng và thanh toán đều là thử nghiệm.",
+    "short": "Bản demo",
+    "shortTestPayments": "Bản demo · thanh toán thử nghiệm",
+    "noRealMoney": "Không có tiền thật nào bị trừ.",
+    "close": "Đóng thông báo demo"
   }
 }

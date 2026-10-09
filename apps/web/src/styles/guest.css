@@ -132,51 +132,58 @@ input.search-seg-value:focus-visible { outline: none; }
 .room-card-body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
 .room-card-meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font: 400 14px/22px var(--font-sans); color: var(--ink-muted); }
 .room-card-meta span { display: inline-flex; align-items: center; gap: 6px; }
-.guest .room-card h3 { font-size: 28px; line-height: 34px; }
-.room-card h3 a::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-md); }
-.room-card h3 a:focus-visible { outline: none; }
-.room-card h3 a:focus-visible::after { outline: 2px solid var(--focus-ring); outline-offset: 6px; }
+.guest .room-card-name { font-size: 28px; line-height: 34px; }
+.room-card-name a::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-md); }
+.room-card-name a:focus-visible { outline: none; }
+.room-card-name a:focus-visible::after { outline: 2px solid var(--focus-ring); outline-offset: 6px; }
 .room-card-desc { margin: 0; max-width: 520px; font: 400 15px/24px var(--font-sans); color: var(--ink-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .room-card-footer { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--line); }
 .room-price { font: 600 30px/34px var(--font-serif); font-variant-numeric: lining-nums; color: var(--ink); }
 .room-price small { font: 400 14px/22px var(--font-sans); color: var(--ink-muted); }
 
-.guest-state { text-align: center; padding: 56px 16px; color: var(--ink-muted); }
-.guest-state p { margin: 0 0 16px; }
 .skeleton-card { height: 380px; }
 
+/* Empty and error states: one message in a quiet box, with what to do next. */
+.guest-message { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); padding: var(--space-8) var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.guest-message > svg { width: 96px; height: 96px; margin-bottom: var(--space-2); color: var(--brass); stroke: currentColor; fill: none; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.guest-message--error > svg { color: var(--danger); }
+.guest .guest-message > :is(h1, h2, h3) { font-size: 28px; line-height: 34px; font-weight: 600; }
+.guest-message p { margin: 0; max-width: 480px; font: 400 15px/24px var(--font-sans); color: var(--ink-muted); }
+.guest-message-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-3); margin-top: var(--space-3); }
+.guest-message--compact { padding: var(--space-6) var(--space-4); }
+.guest-message--compact > svg { width: 56px; height: 56px; }
+.guest .guest-message--compact > :is(h1, h2, h3) { font-size: 22px; line-height: 28px; }
+
+/* Small pieces shared by the pages: breadcrumb, page title block, filter
+   chips and labels. */
+.crumbs { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin: 0; padding: 0; list-style: none; font: 400 13px/20px var(--font-sans); color: var(--ink-muted); }
+.crumbs li { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.crumbs li + li::before { content: "/"; color: var(--line-strong); }
+.crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+.crumbs a:hover { color: var(--ink); text-decoration: underline; }
+.crumbs [aria-current] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.page-head { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5) 0 var(--space-6); }
+.page-head--tight { padding-bottom: 0; }
+.guest .page-head h1 { font-size: 56px; line-height: 60px; font-weight: 500; letter-spacing: -0.01em; }
+.page-head p { margin: 0; color: var(--ink-muted); }
+.chip { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; box-sizing: border-box; padding: 0 var(--space-4); border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font: 500 14px/20px var(--font-sans); white-space: nowrap; cursor: pointer; }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.chip small { font: 400 13px/20px var(--font-sans); color: var(--ink-muted); }
+.badge { display: inline-flex; align-items: center; min-height: 24px; padding: 0 10px; border-radius: var(--radius-xs); font: 500 12px/20px var(--font-sans); letter-spacing: 0.02em; }
+.badge--brass { background: var(--brass-soft); color: var(--brass); }
+.badge--accent { background: var(--accent-soft); color: var(--accent-ink); }
+
 /* ------------------------------------------------------------- room list */
-.list-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: var(--space-5); }
-.list-toolbar select { width: auto; }
 .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin: var(--space-7) 0 0; font-size: 15px; color: var(--ink-muted); }
 
-/* ----------------------------------------------------------- room detail */
-.detail-header { padding: var(--space-6) 0 0; }
-.guest .detail-header h1 { font-size: clamp(34px, 4vw, 48px); line-height: 1.12; font-weight: 500; letter-spacing: -0.01em; margin: 10px 0 8px; }
-.detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-7); align-items: start; padding: var(--space-5) 0 var(--space-9); }
-.detail-main > section { margin-top: var(--space-7); }
-.guest .detail-main > section > h2 { font-size: 30px; line-height: 36px; margin-bottom: var(--space-4); }
-.detail-description { font-size: 17px; line-height: 30px; color: var(--ink-muted); white-space: pre-line; margin: 0; }
-.detail-facts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: var(--space-4); }
-.detail-fact { border: 1px solid var(--line); border-radius: var(--radius-xs); padding: 6px 12px; font-size: 13px; line-height: 20px; color: var(--ink); background: var(--surface); }
-
-.gallery-main { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: var(--radius-xs); overflow: hidden; background: var(--surface-sunken); }
-.gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.gallery-thumbs { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding: 4px; }
-.gallery-thumb { flex: 0 0 96px; height: 68px; border-radius: var(--radius-xs); overflow: hidden; border: 2px solid transparent; padding: 0; cursor: pointer; background: var(--surface-sunken); }
-.gallery-thumb.is-active { border-color: var(--accent); }
-.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
+/* --------------------------------------------------------- booking panel */
 .booking-panel { position: sticky; top: calc(var(--header-h) + var(--space-4)); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-5); box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 14px; }
 .booking-panel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .booking-summary { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; font-size: 14px; }
 .booking-summary div { display: flex; justify-content: space-between; gap: 12px; }
 .booking-total { font-weight: 600; font-size: 17px; color: var(--ink); }
 .coupon-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-
-/* On small screens the booking form sits below the room details, so a bar
-   pinned to the bottom keeps the price and a way to it always in reach. */
-.mobile-book-bar { display: none; }
 
 /* -------------------------------------------------------------- calendar */
 .calendar { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 18px; max-width: 460px; }
@@ -243,9 +250,6 @@ input.search-seg-value:focus-visible { outline: none; }
 }
 
 @media (max-width: 960px) {
-  .detail-layout { grid-template-columns: 1fr; gap: var(--space-5); padding-bottom: 96px; }
-  .booking-panel { position: static; scroll-margin-top: calc(var(--header-h) + 12px); }
-  .mobile-book-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-sticky); background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px; box-shadow: var(--shadow-md); }
 
   /* The menu folds behind a button; opened, it drops down under the header. */
   .guest-menu-toggle { display: inline-grid; }
@@ -264,6 +268,7 @@ input.search-seg-value:focus-visible { outline: none; }
   .guest { --header-h: 64px; }
   .guest-container { padding: 0 var(--space-4); }
   .guest-section { padding: var(--space-8) 0; }
+  .guest .page-head h1 { font-size: 40px; line-height: 44px; }
   .guest .guest-section-title { font-size: 38px; line-height: 44px; }
   .guest-brand { font-size: 24px; }
   .guest-footer-grid { grid-template-columns: 1fr 1fr; padding: var(--space-7) 0; }
@@ -309,10 +314,4 @@ input.search-seg-value:focus-visible { outline: none; }
 .review-muted { color: var(--ink-muted); font-size: 14px; }
 .review-summary { display: inline-flex; align-items: center; gap: 6px; font: 500 14px/20px var(--font-sans); color: var(--ink); white-space: nowrap; }
 .review-summary svg { width: 14px; height: 14px; fill: var(--brass); }
-.review-summary strong { color: var(--ink); }
-.review-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
-.review-list li { border-bottom: 1px solid var(--line); padding-bottom: 14px; }
-.review-list p { color: var(--ink); font-size: 15px; margin: 6px 0 0; line-height: 24px; }
-.review-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-.review-head strong { color: var(--ink); font-size: 15px; }
 .guest .review-link { background: none; border: none; color: var(--accent-ink); text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0; font-family: inherit; }

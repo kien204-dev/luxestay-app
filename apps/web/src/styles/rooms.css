@@ -1,0 +1,190 @@
+/*
+  The room list and the room page (pages/guest/RoomList.jsx, RoomDetail.jsx).
+  Shared pieces (search bar, room cards, chips, breadcrumb, state message,
+  booking panel) are in guest.css; colours, type and spacing are the tokens
+  in index.css.
+*/
+
+/* ============================================================== room list */
+.rooms-page { padding-bottom: var(--space-9); }
+.rooms-page > .guest-message { margin-top: var(--space-2); }
+
+.rooms-tools { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-5) 0; }
+.rooms-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.rooms-sort { margin-left: auto; }
+.rooms-sort select { width: auto; min-width: 220px; min-height: 44px; padding-top: 0; padding-bottom: 0; font-size: 14px; }
+.chip-popover { position: relative; }
+.chip-popover .search-popover { top: calc(100% + 8px); bottom: auto; left: 0; right: auto; padding-top: var(--space-4); }
+.price-filter { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.price-filter .g-btn { grid-column: 1 / -1; }
+
+.rooms-page .room-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 0; }
+.room-skeleton { display: flex; flex-direction: column; gap: 14px; }
+
+/* Phones: what is being searched, and the button that opens the sheet. */
+.rooms-search-mobile { display: flex; gap: var(--space-2); }
+.rooms-search-summary { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); min-height: 56px; padding: 8px var(--space-4); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius-pill); color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
+.rooms-search-summary > span { min-width: 0; }
+.rooms-search-summary b { display: block; font: 600 14px/20px var(--font-sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rooms-search-summary span span { display: block; font: 400 13px/18px var(--font-sans); color: var(--ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rooms-filter-button { position: relative; flex: none; width: 56px; height: 56px; display: grid; place-items: center; border-radius: var(--radius-pill); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; }
+.rooms-filter-button span { position: absolute; top: 2px; right: 2px; min-width: 20px; height: 20px; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font: 600 11px/20px var(--font-sans); text-align: center; }
+
+/* The filter sheet: a dialog that rises from the bottom of the screen. */
+.ui-dialog.filter-sheet { width: 100%; max-width: none; max-height: 88vh; margin: auto 0 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.filter-sheet .ui-dialog-head { align-items: center; padding-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+.filter-sheet .ui-dialog-head h2 { font: 600 18px/26px var(--font-sans); }
+.filter-sheet .ui-dialog-body { padding-top: 0; color: var(--ink); }
+.filter-sheet section { padding: var(--space-5) 0; border-bottom: 1px solid var(--line); }
+.filter-sheet section:last-child { border-bottom: 0; }
+.guest .filter-sheet h3, .filter-sheet h3 { margin: 0 0 var(--space-3); font: 600 16px/24px var(--font-sans); color: var(--ink); }
+.filter-sheet .search-bar { grid-template-columns: minmax(0, 1fr); }
+.filter-sheet .search-seg, .filter-sheet .search-go { grid-column: 1 / -1; }
+.filter-sheet .search-popover { top: auto; bottom: calc(100% + 8px); }
+
+/* Paging: numbers on wide screens, "page 1 of 5" on phones. */
+.pager { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--line); font: 400 14px/20px var(--font-sans); color: var(--ink-muted); }
+.pager ul { display: flex; align-items: center; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
+.pager button { min-width: 44px; height: 44px; padding: 0 var(--space-2); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--ink); font: 500 14px/20px var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
+.pager button:not(:disabled):hover { background: var(--surface-sunken); }
+.pager button[aria-current="page"] { background: var(--ink); color: var(--canvas); }
+.pager button:disabled { color: var(--ink-subtle); cursor: not-allowed; }
+.pager .pager-step { padding: 0 var(--space-3); border-color: var(--line-strong); }
+.pager .pager-step:disabled { border-color: var(--line); }
+.pager-number[aria-hidden] { min-width: 24px; text-align: center; }
+.pager-position { display: none; padding: 0 var(--space-4); color: var(--ink); }
+
+/* ============================================================== room page */
+.room-page { padding-bottom: var(--space-9); }
+.room-page--message { padding-top: var(--space-8); }
+.detail-header { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); padding-bottom: var(--space-5); }
+.room-location { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/16px var(--font-sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
+.guest .detail-header h1 { font-size: 56px; line-height: 60px; font-weight: 500; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.detail-sub { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); font: 400 14px/22px var(--font-sans); color: var(--ink-muted); }
+.detail-sub a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 4px; }
+
+/* Photo mosaic: the first photo large, up to four more beside it. */
+.gallery { position: relative; display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 260px 260px; gap: var(--space-2); }
+.gallery > .guest-photo { padding: 0; border: 0; cursor: zoom-in; }
+.gallery > .guest-photo:first-child { grid-row: span 2; }
+.gallery > button.guest-photo:hover img { transform: scale(1.03); }
+.gallery--4 > .guest-photo:nth-child(4) { grid-column: span 2; }
+.gallery--3 > .guest-photo:not(:first-child) { grid-column: span 2; }
+.gallery--2 { grid-template-columns: 2fr 1fr; }
+.gallery--2 > .guest-photo { grid-row: span 2; }
+.gallery--1 { grid-template-columns: 1fr; }
+.gallery--1 > .guest-photo { cursor: default; }
+.gallery--1 > button.guest-photo { cursor: zoom-in; }
+.gallery-all { position: absolute; right: var(--space-4); bottom: var(--space-4); background: var(--surface); }
+.gallery-count { display: none; }
+
+.detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-8); align-items: start; padding-top: var(--space-7); }
+.detail-main > section { padding: var(--space-7) 0; border-top: 1px solid var(--line); }
+.detail-main > section:first-child { padding-top: 0; border-top: 0; }
+.guest .detail-main > section > h2 { font-size: 34px; line-height: 40px; font-weight: 500; margin-bottom: var(--space-5); }
+.detail-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
+.detail-fact { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.detail-fact .guest-icon { width: 24px; height: 24px; color: var(--brass); stroke-width: 1.25; }
+.detail-fact b { font: 600 15px/22px var(--font-sans); color: var(--ink); overflow-wrap: anywhere; }
+.detail-fact span { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.detail-description { max-width: 680px; margin: 0; font: 400 17px/30px var(--font-sans); color: var(--ink-muted); white-space: pre-line; }
+.amenities { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-5); margin: 0; padding: 0; list-style: none; }
+.amenities li { display: flex; align-items: flex-start; gap: var(--space-3); font: 400 15px/22px var(--font-sans); color: var(--ink); overflow-wrap: anywhere; }
+.amenities .guest-icon { margin-top: 1px; color: var(--brass); }
+.policies { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5) var(--space-7); }
+.guest .policies h3 { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-2); font: 600 15px/22px var(--font-sans); color: var(--ink); }
+.policies h3 .guest-icon { color: var(--brass); }
+.policies p { margin: 0; font: 400 14px/22px var(--font-sans); color: var(--ink-muted); }
+.policies > .g-note { grid-column: 1 / -1; }
+.detail-main #reviews { scroll-margin-top: calc(var(--header-h) + var(--space-4)); }
+
+/* Reviews: the score and how the stars are spread, then the reviews. */
+.review-top { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: var(--space-7); align-items: center; margin-bottom: var(--space-6); }
+.review-score { margin: 0; }
+.review-score b { display: block; font: 500 88px/84px var(--font-serif); font-variant-numeric: lining-nums; letter-spacing: -0.02em; color: var(--ink); }
+.review-score span { font: 400 14px/22px var(--font-sans); color: var(--ink-muted); }
+.review-bars { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.review-bars li { display: grid; grid-template-columns: 48px 1fr 32px; gap: var(--space-3); align-items: center; font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.review-bar { height: 6px; background: var(--surface-sunken); border-radius: 3px; overflow: hidden; }
+.review-bar i { display: block; height: 100%; background: var(--brass); border-radius: 3px; }
+.review-bars b { text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); }
+.review-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-7); margin: 0; padding: 0; list-style: none; }
+.review-list li { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+.review-list p { margin: 0; font: 400 15px/25px var(--font-sans); color: var(--ink); overflow-wrap: anywhere; }
+.review-who { display: flex; align-items: center; gap: var(--space-3); }
+.review-who > span { width: 40px; height: 40px; flex: none; display: inline-grid; place-items: center; border-radius: var(--radius-pill); background: var(--brass-soft); color: var(--brass); font: 600 12px/1 var(--font-sans); }
+.review-who b { display: block; font: 600 14px/20px var(--font-sans); color: var(--ink); }
+.review-who small { display: block; font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.room-reviews .pagination { justify-content: flex-start; margin-top: var(--space-6); }
+
+/* The price and a way to the booking form, pinned to the bottom on phones. */
+.mobile-book-bar { display: none; }
+
+/* Loading: blocks in the page's shape. */
+.room-loading-line { display: flex; align-items: center; min-height: 44px; }
+.room-loading-title { width: 420px; max-width: 80%; height: 60px; }
+.room-loading-main { display: flex; flex-direction: column; gap: var(--space-4); }
+.room-loading-panel { box-shadow: none; }
+.gallery > span.guest-photo { cursor: default; }
+
+/* The gallery full screen. Always on the dark set, whatever the theme. */
+.lightbox { width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--surface-sunken); color: var(--ink); font-family: var(--font-sans); }
+.lightbox[open] { display: flex; flex-direction: column; }
+.lightbox-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-5); font: 500 14px/20px var(--font-sans); }
+.lightbox-top .ui-button:hover { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.lightbox-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lightbox-stage { flex: 1; min-height: 0; display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; gap: var(--space-4); padding: 0 var(--space-5); }
+.lightbox-stage img { width: 100%; height: 100%; min-height: 0; object-fit: contain; border-radius: var(--radius-xs); }
+.lightbox-nav { width: 56px; height: 56px; display: grid; place-items: center; border-radius: var(--radius-pill); border: 1px solid var(--line-strong); background: transparent; color: var(--ink); cursor: pointer; }
+.lightbox-nav:not(:disabled):hover { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.lightbox-nav:disabled { visibility: hidden; }
+.lightbox-thumbs { display: flex; gap: var(--space-2); justify-content: safe center; padding: var(--space-4) var(--space-5) var(--space-5); overflow-x: auto; }
+.lightbox-thumbs button { flex: none; width: 88px; height: 60px; padding: 0; border: 2px solid transparent; border-radius: var(--radius-xs); overflow: hidden; background: none; cursor: pointer; opacity: 0.55; }
+.lightbox-thumbs button[aria-current="true"] { border-color: var(--ink); opacity: 1; }
+.lightbox-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ============================================================ responsive */
+@media (max-width: 1100px) {
+  .rooms-page .room-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail-layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
+  .booking-panel { position: static; scroll-margin-top: calc(var(--header-h) + 12px); }
+  /* The booking form is below the page: a bar keeps the price in reach. */
+  .room-page { padding-bottom: 112px; }
+  .mobile-book-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-sticky); padding: var(--space-3) var(--space-4); background: var(--surface); border-top: 1px solid var(--line); box-shadow: var(--shadow-md); }
+}
+
+@media (max-width: 720px) {
+  .rooms-page .room-grid { grid-template-columns: minmax(0, 1fr); }
+  .rooms-tools { padding: var(--space-4) 0; }
+  .rooms-chips { flex-wrap: nowrap; overflow-x: auto; margin: 0 calc(var(--space-4) * -1); padding: 2px var(--space-4) 4px; width: calc(100% + 2 * var(--space-4)); box-sizing: border-box; }
+  .rooms-chips > * { flex: none; }
+  .filter-sheet .rooms-chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; width: auto; }
+  .rooms-tools > .rooms-chips .chip-popover { display: none; }
+  .rooms-sort { width: 100%; }
+  .rooms-sort select { width: 100%; }
+  .pager { justify-content: center; margin-top: var(--space-7); }
+  .pager-range, .pager-number, .pager .pager-step span { display: none; }
+  .pager-position { display: block; }
+
+  .guest .detail-header h1 { font-size: 36px; line-height: 40px; }
+  .room-loading-title { height: 40px; }
+  /* The score arrives after the page: it has a line of its own, so the
+     labels beside it do not wrap (and push the photos down) when it does. */
+  .detail-sub a { flex-basis: 100%; }
+  .detail-sub { row-gap: 0; }
+  .gallery, .gallery--2 { grid-template-columns: 1fr; grid-template-rows: 280px; margin: 0 calc(var(--space-4) * -1); }
+  .gallery > .guest-photo:not(:first-child), .gallery-all { display: none; }
+  .gallery > .guest-photo:first-child { grid-row: auto; grid-column: auto; border-radius: 0; }
+  .gallery-count { display: block; position: absolute; right: var(--space-4); bottom: var(--space-4); padding: 4px 10px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--surface-inverse) 72%, transparent); color: var(--ink-inverse); font: 500 12px/18px var(--font-sans); pointer-events: none; }
+  .gallery--1 .gallery-count { display: none; }
+  .detail-layout { padding-top: var(--space-6); }
+  .detail-facts, .amenities { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .policies, .review-list { grid-template-columns: minmax(0, 1fr); }
+  .review-top { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+  .review-score b { font-size: 64px; line-height: 64px; }
+  .lightbox-stage { grid-template-columns: minmax(0, 1fr); padding: 0; }
+  .lightbox-nav { position: absolute; top: 50%; z-index: 1; width: 44px; height: 44px; margin-top: -22px; background: var(--surface-sunken); }
+  .lightbox-nav:first-child { left: var(--space-2); }
+  .lightbox-nav:last-child { right: var(--space-2); }
+  .lightbox-stage { position: relative; }
+}

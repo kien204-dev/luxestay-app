@@ -34,7 +34,7 @@ export function BookingNotificationsProvider({ children }) {
 
     // Money that has to be sent back by hand: keep these on screen longer.
     const handleRefundPending = (booking) => {
-      toast.error(i18n.t("admin:live.refundPending", { code: formatBookingLabel(booking) }), 15000);
+      toast.error(i18n.t("admin:live.refundPending", { code: formatBookingLabel(booking) }));
     };
     const handleDuplicatePayment = (payment) => {
       toast.error(

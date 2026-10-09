@@ -41,7 +41,7 @@
 .home-rooms { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-7) var(--space-6); align-items: start; }
 .home-rooms > .room-card--lead, .home-rooms-lead { grid-column: 1 / span 7; }
 .home-rooms .room-card--lead .room-card-media { aspect-ratio: 5 / 4; }
-.guest .home-rooms .room-card--lead h3 { font-size: 40px; line-height: 46px; }
+.guest .home-rooms .room-card--lead .room-card-name { font-size: 40px; line-height: 46px; }
 .home-rooms .room-card--lead .room-card-body { gap: var(--space-3); }
 .home-rooms-stack { grid-column: 8 / span 5; display: flex; flex-direction: column; gap: var(--space-7); }
 .home-rooms-stack .room-card-media { aspect-ratio: 16 / 10; }
@@ -49,13 +49,6 @@
 .home-rooms-lead, .home-rooms-stack > .home-skeleton { display: flex; flex-direction: column; gap: var(--space-4); }
 .home-skeleton-line { height: 12px; }
 .home-skeleton-title { height: 28px; }
-/* Empty and error: one message in a quiet box. */
-.home-state { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); padding: var(--space-8) var(--space-5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
-.home-state > svg { width: 96px; height: 96px; margin-bottom: var(--space-2); color: var(--brass); stroke: currentColor; fill: none; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
-.home-state--error > svg { color: var(--danger); }
-.guest .home-state h3 { font-size: 28px; line-height: 34px; }
-.home-state p { margin: 0; max-width: 440px; font: 400 15px/24px var(--font-sans); color: var(--ink-muted); }
-.home-state-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-3) var(--space-5); margin-top: var(--space-3); }
 
 /* ----------------------------------------------------------- destinations */
 .home-destinations { scroll-margin-top: var(--header-h); padding-top: 0; }
@@ -142,7 +135,7 @@
   .home-fact + .home-fact { border-top: 1px solid var(--line); }
   .home-rooms { grid-template-columns: minmax(0, 1fr); }
   .home-rooms > .room-card--lead, .home-rooms-lead, .home-rooms-stack { grid-column: 1 / -1; }
-  .guest .home-rooms .room-card--lead h3 { font-size: 30px; line-height: 36px; }
+  .guest .home-rooms .room-card--lead .room-card-name { font-size: 30px; line-height: 36px; }
   .home-rooms .room-card--lead .room-card-media, .home-rooms-stack .room-card-media { aspect-ratio: 4 / 3; }
   .dest-grid { gap: var(--space-3); }
   .dest-card-body { padding: var(--space-7) var(--space-3) var(--space-3); }

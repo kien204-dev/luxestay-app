@@ -40,6 +40,31 @@ function parseDateOnly(value) {
   return typeof value === "string" && DATE_ONLY_PATTERN.test(value) ? value : null;
 }
 
+// A room's amenities: a short list of short texts ("Wi-Fi", "Ban công").
+const MAX_AMENITIES = 30;
+const MAX_AMENITY_LENGTH = 60;
+
+// Returns { amenities } (trimmed, blanks and repeats dropped; null when
+// there are none) or { error }. Leaving the field out means none.
+function parseAmenities(input) {
+  if (input === undefined || input === null) return { amenities: null };
+  if (!Array.isArray(input)) return { error: apiMessage("INVALID_LIST", { field: "amenities" }) };
+
+  const amenities = [];
+  for (const item of input) {
+    if (typeof item !== "string") return { error: apiMessage("INVALID_LIST", { field: "amenities" }) };
+    const text = item.trim();
+    if (text.length > MAX_AMENITY_LENGTH) {
+      return { error: apiMessage("TEXT_TOO_LONG", { field: "amenities", max: MAX_AMENITY_LENGTH }) };
+    }
+    if (text && !amenities.includes(text)) amenities.push(text);
+  }
+  if (amenities.length > MAX_AMENITIES) {
+    return { error: apiMessage("LIST_TOO_LONG", { field: "amenities", max: MAX_AMENITIES }) };
+  }
+  return { amenities: amenities.length ? JSON.stringify(amenities) : null };
+}
+
 function hasRoomQuery(query) {
   return Object.keys(query).length > 0;
 }
@@ -87,6 +112,13 @@ exports.getRooms = async (req, res) => {
       if (location && String(location).trim()) {
         values.push(`%${String(location).trim()}%`);
         filters.push(`location ILIKE $${values.length}`);
+      }
+
+      // Exactly one of the types /rooms/filters lists.
+      const { roomType } = req.query;
+      if (typeof roomType === "string" && roomType.trim()) {
+        values.push(roomType.trim());
+        filters.push(`LOWER(room_type) = LOWER($${values.length})`);
       }
 
       // Guest-facing lists never offer a room that cannot be booked at all.
@@ -150,7 +182,7 @@ exports.getRooms = async (req, res) => {
 
       const dataValues = [...values, limit, offset];
       const result = await pool.query(
-        `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at
+        `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities
          FROM rooms
          ${whereClause}
          ORDER BY ${orderColumn} ${orderDirection}, id ASC
@@ -171,7 +203,7 @@ exports.getRooms = async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at
+      `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities
        FROM rooms
        ORDER BY id ASC`
     );
@@ -182,6 +214,36 @@ exports.getRooms = async (req, res) => {
     res.status(500).json({
       ...apiMessage("SERVER_ERROR"),
     });
+  }
+};
+
+// ======================
+// GET WHAT THE ROOM LIST CAN BE FILTERED BY (public)
+// ======================
+// The room types on offer (with how many rooms each has) and the cheapest
+// and dearest nightly price, among rooms a guest can book. The list page
+// builds its filters from this, so it never offers a choice with no rooms.
+exports.getRoomFilters = async (req, res) => {
+  try {
+    const types = await pool.query(
+      `SELECT room_type AS type, COUNT(*)::int AS count
+       FROM rooms
+       WHERE status != 'maintenance'
+       GROUP BY room_type
+       ORDER BY count DESC, room_type ASC`
+    );
+    const prices = await pool.query(
+      `SELECT MIN(price) AS min, MAX(price) AS max FROM rooms WHERE status != 'maintenance'`
+    );
+
+    res.json({
+      types: types.rows,
+      minPrice: prices.rows[0].min === null ? null : Number(prices.rows[0].min),
+      maxPrice: prices.rows[0].max === null ? null : Number(prices.rows[0].max),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };
 
@@ -342,7 +404,7 @@ exports.getRoomById = async (req, res) => {
     if (!id) return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
 
     const result = await pool.query(
-      `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at
+      `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities
        FROM rooms
        WHERE id = $1`,
       [id]
@@ -361,6 +423,7 @@ exports.getRoomById = async (req, res) => {
 
     res.json({
       ...result.rows[0],
+      amenities: result.rows[0].amenities || [],
       images: imagesResult.rows,
     });
   } catch (err) {
@@ -398,6 +461,9 @@ exports.createRoom = async (req, res) => {
       return res.status(400).json(lengthError);
     }
 
+    const { amenities, error: amenitiesError } = parseAmenities(req.body.amenities);
+    if (amenitiesError) return res.status(400).json(amenitiesError);
+
     const parsedPrice = parseRoomPrice(price);
     const parsedCapacity = parsePositiveInteger(capacity, null);
 
@@ -419,9 +485,9 @@ exports.createRoom = async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO rooms(room_name, room_type, price, description, capacity, image, status, location)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8)
-       RETURNING id, room_name, room_type, price, description, capacity, image, status, location, created_at`,
+      `INSERT INTO rooms(room_name, room_type, price, description, capacity, image, status, location, amenities)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities`,
       [
         room_name,
         room_type,
@@ -431,6 +497,7 @@ exports.createRoom = async (req, res) => {
         image || null,
         roomStatus,
         location || null,
+        amenities,
       ]
     );
 
@@ -476,6 +543,9 @@ exports.updateRoom = async (req, res) => {
       return res.status(400).json(lengthError);
     }
 
+    const { amenities, error: amenitiesError } = parseAmenities(req.body.amenities);
+    if (amenitiesError) return res.status(400).json(amenitiesError);
+
     const parsedPrice = parseRoomPrice(price);
     const parsedCapacity = parsePositiveInteger(capacity, null);
 
@@ -515,9 +585,10 @@ exports.updateRoom = async (req, res) => {
          capacity = $5,
          image = $6,
          status = $7,
-         location = $8
+         location = $8,
+         amenities = $10
        WHERE id = $9
-       RETURNING id, room_name, room_type, price, description, capacity, image, status, location, created_at`,
+       RETURNING id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities`,
       [
         room_name,
         room_type,
@@ -528,6 +599,7 @@ exports.updateRoom = async (req, res) => {
         roomStatus,
         location || null,
         id,
+        amenities,
       ]
     );
 

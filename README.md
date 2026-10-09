@@ -205,7 +205,7 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Tài khoản | `POST /login`, `/register`, `/logout`, `/forgot-password`, `/reset-password`, `/google-login` | Công khai |
 | Hồ sơ | `GET/PUT /users/me`, `PUT /users/me/password`, `POST /users/me/avatar` | Đã đăng nhập |
 | Người dùng | `GET /users?page&limit&search&role&status`, `POST /users`, `GET/PUT/DELETE /users/:id`, `PATCH /users/:id/lock` | Quản trị |
-| Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/destinations`, `/rooms/:id`, `/rooms/:id/availability`, `/rooms/:id/reviews` | Công khai |
+| Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/filters`, `/rooms/destinations`, `/rooms/:id`, `/rooms/:id/availability`, `/rooms/:id/reviews` | Công khai |
 | Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, ảnh phòng | Quản trị |
 | Đặt phòng | `GET/POST /bookings`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel` | Chủ booking hoặc quản trị |
 | Đặt phòng | `GET /bookings/policy` | Công khai |

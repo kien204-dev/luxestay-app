@@ -128,6 +128,8 @@ export default function OrdersList({ refreshKey, onChanged, onWalkIn }) {
         message={pending ? t(`confirm.${pending.kind}Message`, { code: bookingCode(pending.order.id) }) : ""}
         confirmLabel={pending ? t(`confirm.${pending.kind}Action`) : ""}
         tone={pending?.kind === "delete" ? "danger" : "default"}
+        // Deleting a booking takes its payments and review with it.
+        confirmCode={pending?.kind === "delete" ? `BOOKING-${pending.order.id}` : undefined}
         loading={Boolean(pending) && (busy.delete === pending.order.id || busy.payment === pending.order.id)}
         onConfirm={confirmPending}
         onCancel={() => setPending(null)}

@@ -73,7 +73,7 @@ Bước kiểm tra bản dịch (`scripts/check-i18n.mjs`) cũng báo câu tiế
 | Logo | `/admin/property` |
 | Ảnh nền trang chủ | `/admin/property`, hoặc đặt sẵn trong `apps/api/seed-assets/hero/` trước khi seed |
 | Ảnh điểm đến (thẻ "Điểm đến" ở trang chủ) | `/admin/destinations`; kèm ghi công nếu ảnh theo giấy phép CC BY / CC BY-SA |
-| Ảnh phòng | `/admin/rooms` → Sửa phòng |
+| Ảnh phòng | `/admin/rooms` → Sửa phòng (ảnh bìa và các ảnh phụ; trang phòng ghép tối đa 5 ảnh, còn lại xem ở chế độ toàn màn hình) |
 | Ảnh phòng mẫu khi seed | `apps/api/seed-assets/rooms/` |
 
 Ảnh tải lên tối đa 10 MB (JPG, PNG, WebP). Ảnh mẫu đi kèm theo giấy phép riêng: xem [README](../README.md#ảnh-mẫu--giấy-phép).

@@ -17,6 +17,14 @@ export const getRoomLocations = async () => {
 };
 
 // =========================
+// GET WHAT THE LIST CAN BE FILTERED BY (room types with counts, price range)
+// =========================
+export const getRoomFilters = async () => {
+  const response = await api.get("/rooms/filters");
+  return response.data;
+};
+
+// =========================
 // GET DESTINATIONS (cities with room counts, for the landing page)
 // =========================
 export const getRoomDestinations = async () => {

@@ -6,7 +6,7 @@ const {
   savePropertySettings,
 } = require("../services/propertySettings");
 const { removeUpload } = require("../services/storage");
-const { demoAccounts, demoResetIntervalHours, isDemoMode } = require("../config/demo");
+const { demoAccounts, demoResetIntervalHours, demoUsesTestPayments, isDemoMode } = require("../config/demo");
 const { pngCopyOf } = require("../middleware/imageUpload");
 const { apiMessage } = require("../utils/apiMessages");
 
@@ -42,8 +42,11 @@ exports.getPublicSettings = async (req, res) => {
     checkInTime: settings.checkInTime,
     checkOutTime: settings.checkOutTime,
     freeCancellationDays: settings.freeCancellationDays,
-    // Only on a public demo: the sample sign-ins to show on the login page.
-    ...(isDemoMode() ? { demo: { resetIntervalHours: demoResetIntervalHours(), accounts: demoAccounts() } } : {}),
+    // Only on a public demo: the sample sign-ins to show on the login page,
+    // and whether payments go to the gateways' test environments.
+    ...(isDemoMode()
+      ? { demo: { resetIntervalHours: demoResetIntervalHours(), testPayments: demoUsesTestPayments(), accounts: demoAccounts() } }
+      : {}),
   });
 };
 

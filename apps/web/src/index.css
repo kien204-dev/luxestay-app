@@ -11,6 +11,11 @@
 @font-face { font-family: "Be Vietnam Pro"; src: url("./assets/fonts/BeVietnamPro-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
 @font-face { font-family: "Be Vietnam Pro"; src: url("./assets/fonts/BeVietnamPro-SemiBold.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
 
+/* The fallback shown until Cormorant Garamond arrives: Times New Roman
+   scaled to about the same width, so a heading keeps its line breaks (and
+   the page below it its place) when the font swaps in. */
+@font-face { font-family: "Cormorant Fallback"; src: local("Times New Roman"); size-adjust: 88%; }
+
 /*
   Theme. Every colour in the app (guest site, admin area, charts, favicon,
   placeholder drawings) comes from the tokens below; components never write a
@@ -171,7 +176,7 @@
     draws Vietnamese tone marks as a separate floating glyph ("Phố" → "Phô´").
     Times New Roman and Noto Serif compose them correctly.
   */
-  --font-serif: "Cormorant Garamond", "Times New Roman", "Noto Serif", "Liberation Serif", serif;
+  --font-serif: "Cormorant Garamond", "Cormorant Fallback", "Times New Roman", "Noto Serif", "Liberation Serif", serif;
   --font-sans: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
 
   --space-1: 4px;
@@ -260,16 +265,70 @@ body {
   .luxe-skeleton-light::after { animation: none; }
 }
 
-/* ConfirmModal (components/ConfirmModal.jsx): follows the theme of the page
-   it opens on. */
-.confirm-backdrop { position: fixed; inset: 0; background: var(--scrim); display: flex; align-items: center; justify-content: center; z-index: 3500; padding: 16px; }
-.confirm-dialog { --confirm-accent: var(--accent); width: 100%; max-width: 400px; border-radius: var(--radius-lg); padding: 24px; box-sizing: border-box; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-lg); color: var(--ink-muted); }
-.confirm-dialog h3 { margin: 0 0 10px; font-family: var(--font-serif); font-size: 24px; line-height: 1.25; font-weight: 600; color: var(--ink); }
-.confirm-dialog p { margin: 0 0 22px; font-size: 14px; line-height: 1.6; }
-.confirm-actions { display: flex; gap: 10px; }
-.confirm-actions button { flex: 1; min-height: 44px; padding: 10px 14px; border-radius: var(--radius-sm); font-weight: 500; font-family: inherit; font-size: 14px; cursor: pointer; }
-.confirm-actions button:disabled { opacity: 0.7; cursor: not-allowed; }
-.confirm-ok { border: none; background: var(--confirm-accent); color: var(--surface); }
-.confirm-cancel { background: transparent; border: 1px solid var(--line-strong); color: var(--ink); }
-.confirm-dialog--danger { --confirm-accent: var(--danger); }
-.confirm-dialog--warning { --confirm-accent: var(--warning); }
+/* ------------------------------------------------------------------------
+   Shared by the guest site and the admin area: modal dialogs, the delete
+   confirmation, toasts and the demo banner.
+   ------------------------------------------------------------------------ */
+
+/* Dialog (components/Dialog.jsx): a native <dialog> opened as a modal, so the
+   browser keeps focus inside it, closes it on Escape and returns focus. */
+.ui-dialog { width: min(560px, calc(100vw - 32px)); max-width: none; margin: auto; max-height: calc(100vh - 32px); padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-lg); font-family: var(--font-sans); overflow: hidden; }
+.ui-dialog[open] { display: flex; flex-direction: column; }
+.ui-dialog::backdrop { background: rgba(14, 13, 11, 0.6); }
+.ui-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding: var(--space-5) var(--space-5) var(--space-2); }
+.ui-dialog-head h2 { margin: 0; font: 600 26px/32px var(--font-serif); font-variant-numeric: lining-nums; color: var(--ink); }
+.ui-dialog-body { padding: var(--space-2) var(--space-5) var(--space-5); overflow: auto; font: 400 15px/24px var(--font-sans); color: var(--ink-muted); }
+.ui-dialog-body p { margin: 0; }
+.ui-dialog-foot { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--line); background: var(--canvas); }
+.ui-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; box-sizing: border-box; padding: 0 var(--space-5); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--ink); font: 500 14px/20px var(--font-sans); letter-spacing: 0.02em; cursor: pointer; }
+.ui-button:disabled { cursor: not-allowed; background: var(--surface-sunken); color: var(--ink-subtle); border-color: transparent; }
+.ui-button--secondary { border-color: var(--line-strong); }
+.ui-button--secondary:not(:disabled):hover { border-color: var(--ink); background: var(--surface); }
+.ui-button--primary { background: var(--accent); color: var(--on-accent); }
+.ui-button--primary:not(:disabled):hover { background: var(--accent-hover); }
+.ui-button--danger { background: var(--danger); color: var(--surface); }
+.ui-button--icon { width: 44px; padding: 0; color: var(--ink-muted); }
+.ui-button--icon:hover { background: var(--surface-sunken); color: var(--ink); }
+.ui-icon { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.ui-confirm-mark { width: 48px; height: 48px; margin-bottom: var(--space-2); border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--danger-soft); color: var(--danger); }
+.ui-confirm-code { display: flex; flex-direction: column; gap: 6px; margin-top: var(--space-4); font: 500 14px/20px var(--font-sans); color: var(--ink); }
+.ui-confirm-code b { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.ui-confirm-code input { min-height: 48px; box-sizing: border-box; padding: 0 var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font: 400 16px/24px ui-monospace, Menlo, Consolas, monospace; }
+.ui-confirm-code input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+/* Toasts (context/ToastContext.jsx): bottom right, on the inverse surface
+   (dark in both themes). The thin bar is the countdown of a toast that hides
+   itself; hovering or focusing the toast pauses it. */
+.ui-toasts { position: fixed; right: var(--space-5); bottom: var(--space-5); z-index: 4000; display: flex; flex-direction: column; gap: var(--space-3); }
+.ui-toast { --toast-signal: var(--signal-info-inverse); position: relative; display: flex; align-items: flex-start; gap: var(--space-3); width: 380px; max-width: calc(100vw - 32px); box-sizing: border-box; padding: var(--space-4); background: var(--surface-inverse); color: var(--ink-inverse); border-radius: var(--radius-md); box-shadow: var(--shadow-md); font: 500 15px/22px var(--font-sans); overflow: hidden; animation: ui-toast-in 0.25s ease; }
+.ui-toast--success { --toast-signal: var(--signal-success-inverse); }
+.ui-toast--error { --toast-signal: var(--signal-danger-inverse); }
+.ui-toast-mark { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: var(--radius-pill); background: var(--toast-signal); color: var(--surface-inverse); }
+.ui-toast-mark .ui-icon { width: 16px; height: 16px; stroke-width: 2; }
+.ui-toast-text { flex: 1; min-width: 0; padding-top: 3px; overflow-wrap: anywhere; }
+.ui-toast-close { width: 44px; height: 44px; flex: none; margin: -10px -10px -10px 0; display: grid; place-items: center; border: 0; border-radius: var(--radius-sm); background: none; color: var(--ink-inverse-muted); cursor: pointer; }
+.ui-toast-close:hover { color: var(--ink-inverse); }
+.ui-toast :focus-visible { outline-color: var(--signal-info-inverse); }
+.ui-toast-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ink-inverse); opacity: 0.3; transform-origin: left; animation: ui-toast-bar 6s linear forwards; }
+.ui-toast:hover .ui-toast-bar, .ui-toast:focus-within .ui-toast-bar { animation-play-state: paused; }
+@keyframes ui-toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes ui-toast-bar { to { transform: scaleX(0); } }
+@media (max-width: 720px) {
+  .ui-toasts { left: var(--space-4); right: var(--space-4); bottom: var(--space-4); }
+  .ui-toast { width: 100%; max-width: none; }
+}
+
+/* Demo banner (components/DemoBanner.jsx): on top of the page, pushing it
+   down. Only rendered with DEMO_MODE=true. */
+.demo-banner { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--space-3); min-height: 36px; box-sizing: border-box; padding: 6px 56px 6px var(--space-5); background: var(--brass-soft); color: var(--ink); font: 400 13px/20px var(--font-sans); }
+.demo-banner--admin { justify-content: flex-start; }
+.demo-banner-tag { flex: none; padding: 0 6px; border: 1px solid currentColor; border-radius: var(--radius-xs); color: var(--brass); font: 600 10px/16px var(--font-sans); letter-spacing: 0.16em; text-transform: uppercase; }
+.demo-banner-short { display: none; }
+.demo-banner button { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 100%; min-height: 36px; display: grid; place-items: center; border: 0; background: transparent; color: var(--ink-muted); cursor: pointer; }
+.demo-banner button:hover { color: var(--ink); }
+.demo-banner .ui-icon { width: 16px; height: 16px; }
+@media (max-width: 720px) {
+  .demo-banner { justify-content: flex-start; font-size: 12px; line-height: 18px; }
+  .demo-banner-long { display: none; }
+  .demo-banner-short { display: inline; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
