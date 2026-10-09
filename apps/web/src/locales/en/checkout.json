@@ -1,0 +1,155 @@
+{
+  "documentTitle": "Book a room",
+  "title": "Complete your booking",
+  "crumb": "Book",
+  "loading": "Loading the booking…",
+  "heldUntil": "The room is held for you until {{time}}",
+  "stepsLabel": "Booking steps",
+  "stepNumber": "Step {{step}}",
+  "stepOf": "Step {{step}} of {{total}}",
+  "optional": "optional",
+  "continue": "Continue",
+  "back": "Back",
+  "edit": "Edit",
+  "editStep": "Edit step: {{step}}",
+  "nights": "{{count}} nights",
+  "nights_one": "{{count}} night",
+  "steps": {
+    "dates": "Dates",
+    "coupon": "Coupon",
+    "policy": "Cancellation",
+    "payment": "Payment",
+    "confirm": "Confirm"
+  },
+  "dates": {
+    "title": "Choose your dates",
+    "choose": "Choose a date",
+    "notChosen": "No dates chosen",
+    "backToRoom": "Back to the room",
+    "closeCalendar": "Close the calendar",
+    "clear": "Clear"
+  },
+  "coupon": {
+    "title": "Coupon",
+    "label": "Coupon code",
+    "apply": "Apply",
+    "remove": "Remove",
+    "skip": "Skip and continue",
+    "hint": "One coupon per booking.",
+    "checking": "Checking the code…",
+    "invalid": "This coupon is not valid.",
+    "applied": "Applied: {{amount}} off",
+    "none": "No coupon"
+  },
+  "policy": {
+    "title": "Cancellation policy",
+    "freeUntil": "Free cancellation until the end of {{date}}.",
+    "freeText": "Cancel within this time and what you paid ({{amount}}) is refunded in full.",
+    "closedTitle": "The free-cancellation time for these dates has passed.",
+    "until": "Until the end of {{date}}",
+    "from": "From {{date}}",
+    "fullRefund": "100% refund",
+    "noSelfCancel": "No online cancellation",
+    "contactProperty": "Contact the property",
+    "agree": "I have read and agree to the booking hold and cancellation rules above.",
+    "continue": "Continue to payment",
+    "doneFree": "Agreed · free cancellation until the end of {{date}}",
+    "doneAgreed": "Agreed"
+  },
+  "payment": {
+    "title": "Payment method",
+    "short": "Payment",
+    "about": {
+      "vnpay": "Vietnamese bank cards, international cards, or a QR code from your banking app",
+      "momo": "Pay with your MoMo wallet"
+    },
+    "redirect": "You will be taken to {{method}} to pay, then brought back to this site.",
+    "later": "Pay later from My bookings",
+    "nothingToPay": "Nothing to pay",
+    "freeText": "The coupon covers the whole amount: there is nothing to pay. The booking is confirmed as soon as you confirm it in the next step."
+  },
+  "confirm": {
+    "title": "Confirm and pay",
+    "titleFree": "Confirm your booking",
+    "guest": "Booked by",
+    "room": "Room",
+    "stay": "Stay",
+    "stayTimes": "{{checkIn}} (from {{checkInTime}}) → {{checkOut}} (by {{checkOutTime}})",
+    "freeCancel": "Free cancellation",
+    "pay": "Pay {{amount}} with {{method}}",
+    "confirmFree": "Confirm booking",
+    "working": "Working…"
+  },
+  "summary": {
+    "label": "Booking summary",
+    "dates": "Dates",
+    "nights": "Nights",
+    "guests": "Guests",
+    "updating": "Updating the price…"
+  },
+  "soldOut": {
+    "title": "{{room}} has just been booked for {{dates}}.",
+    "text": "Another guest reserved it before you finished. You have not been charged, and what you chose is still here.",
+    "otherDates": "Choose other dates",
+    "otherRooms": "See other rooms"
+  },
+  "stale": {
+    "paid": "The booking you made on this page has been paid.",
+    "gone": "The booking you made on this page was cancelled or its hold ran out.",
+    "toMyBookings": "View my bookings",
+    "startOver": "Start again"
+  },
+  "errors": {
+    "bookingFailed": "The booking could not be made. Please try again.",
+    "paymentFailed": "The payment could not be started. The room is still held for you; please try again."
+  },
+  "result": {
+    "bookingCode": "Booking {{code}}",
+    "codeLabel": "Booking code",
+    "amount": "Amount: {{amount}}",
+    "heldUntil": "the room is still held until {{time}}",
+    "paid": "Paid",
+    "paidWith": "Paid with",
+    "discount": "Discount",
+    "freeCancel": "Free cancellation until the end of {{date}}, from My bookings",
+    "checking": {
+      "eyebrow": "Confirming",
+      "titleWith": "Waiting for {{method}} to confirm the payment",
+      "text": "This page updates by itself when the result is in.",
+      "stay": "Please do not close this page.",
+      "created": "Booking {{code}} created",
+      "returned": "Back from the payment gateway",
+      "waiting": "Waiting for the gateway's confirmation…",
+      "confirm": "Booking confirmed"
+    },
+    "success": {
+      "eyebrow": "Payment successful",
+      "eyebrowFree": "Confirmed",
+      "title": "Your booking is confirmed"
+    },
+    "failed": {
+      "title": "The payment did not go through",
+      "textHeld": "The room is still held for you until {{time}}; you can try again now.",
+      "textRetry": "Your booking is still there; you can try to pay again.",
+      "textGone": "This booking can no longer be paid for. See its state in My bookings.",
+      "retry": "Try again with {{method}}",
+      "other": "Pay with {{method}}"
+    },
+    "reasonCode": "({{method}} code: {{code}})",
+    "reasons": {
+      "other": "The payment gateway reported that the payment failed.",
+      "vnpay": {
+        "09": "The card or account is not registered for online payments.",
+        "10": "The card or account details were entered wrongly too many times.",
+        "11": "The time allowed for the payment ran out.",
+        "12": "The card or account is locked.",
+        "13": "The verification code (OTP) was wrong.",
+        "24": "You cancelled the payment at the gateway.",
+        "51": "The account does not have enough funds.",
+        "65": "The account has reached its daily transaction limit.",
+        "75": "The paying bank is under maintenance.",
+        "79": "The payment password was entered wrongly too many times."
+      }
+    }
+  }
+}

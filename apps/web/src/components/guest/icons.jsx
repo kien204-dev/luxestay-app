@@ -29,6 +29,8 @@ const GuestIcon = {
   Bed: icon(<><path d="M3 18V7M3 13h18v5M21 13v-1.5A2.5 2.5 0 0 0 18.5 9H11v4" /><circle cx="7" cy="10.5" r="1.5" /></>),
   Clock: icon(<><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></>),
   Card: icon(<><rect x="3" y="5.5" width="18" height="13" rx="1.5" /><path d="M3 10h18M7 15h3" /></>),
+  Alert: icon(<><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5v5.5M12 16.2v.3" /></>),
+  Download: icon(<path d="M12 4v12M7 11l5 5 5-5M5 20h14" />),
   Retry: icon(<><path d="M19 12a7 7 0 1 1-2.05-4.95" /><path d="M19 4v4h-4" /></>),
 };
 

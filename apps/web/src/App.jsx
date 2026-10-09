@@ -17,6 +17,7 @@ const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
+const Checkout = lazy(() => import("./pages/guest/Checkout"));
 const MyBookings = lazy(() => import("./pages/MyBookings"));
 const PaymentResult = lazy(() => import("./pages/PaymentResult"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
@@ -59,6 +60,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/rooms" element={<RoomList />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
+          <Route path="/rooms/:id/book" element={signedIn(<Checkout />)} />
           <Route path="/my-bookings" element={signedIn(<MyBookings />)} />
           <Route path="/credits" element={<Credits />} />
 
