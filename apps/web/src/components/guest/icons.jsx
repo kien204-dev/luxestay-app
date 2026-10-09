@@ -22,6 +22,13 @@ const GuestIcon = {
   Next: icon(<path d="M9 6l6 6-6 6" />),
   Minus: icon(<path d="M5 12h14" />),
   Plus: icon(<path d="M12 5v14M5 12h14" />),
+  Down: icon(<path d="M6 9l6 6 6-6" />),
+  Check: icon(<path d="M5 12.5l4.5 4.5L19 7.5" />),
+  Filter: icon(<path d="M4 6h16M7 12h10M10 18h4" />),
+  Grid: icon(<><rect x="4" y="4" width="6.5" height="6.5" /><rect x="13.5" y="4" width="6.5" height="6.5" /><rect x="4" y="13.5" width="6.5" height="6.5" /><rect x="13.5" y="13.5" width="6.5" height="6.5" /></>),
+  Bed: icon(<><path d="M3 18V7M3 13h18v5M21 13v-1.5A2.5 2.5 0 0 0 18.5 9H11v4" /><circle cx="7" cy="10.5" r="1.5" /></>),
+  Clock: icon(<><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></>),
+  Card: icon(<><rect x="3" y="5.5" width="18" height="13" rx="1.5" /><path d="M3 10h18M7 15h3" /></>),
   Retry: icon(<><path d="M19 12a7 7 0 1 1-2.05-4.95" /><path d="M19 4v4h-4" /></>),
 };
 

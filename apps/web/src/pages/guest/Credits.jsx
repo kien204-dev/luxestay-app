@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import StateMessage from "../../components/guest/StateMessage";
 import { RoomImage } from "../../components/guest/RoomCard";
 import { getDestinationCredits } from "../../services/destinationService";
 import { placeholderFor } from "../../utils/imageUrl";
@@ -21,16 +22,13 @@ export default function Credits() {
       {loading && !data ? (
         <div className="luxe-skeleton-light skeleton-card" aria-busy="true" />
       ) : error ? (
-        <div className="guest-state">
-          <p>{t("credits.loadFailed")}</p>
-          <button type="button" className="g-btn g-btn--outline" onClick={reload}>
+        <StateMessage error heading="h2" title={t("credits.loadFailed")}>
+          <button type="button" className="g-btn g-btn--primary" onClick={reload}>
             {t("list.retry")}
           </button>
-        </div>
+        </StateMessage>
       ) : credits.length === 0 ? (
-        <div className="guest-state">
-          <p>{t("credits.empty")}</p>
-        </div>
+        <StateMessage heading="h2" title={t("credits.empty")} />
       ) : (
         <ul className="credits-list">
           {credits.map((credit) => (

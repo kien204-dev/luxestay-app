@@ -28,14 +28,16 @@ export function RoomImage({ src, alt, fallback = roomPlaceholder(), ...rest }) {
 // One room in a grid. `stay` (dates/guests already chosen) travels along in
 // the link so the room page opens with them filled in. `lead` is the large
 // card of the home page: a taller photo and the room's description.
-export default function RoomCard({ room, stay, lead = false }) {
+// `heading` is the level of the room's name in the page's outline; `eager`
+// loads the photo at once, for cards on screen when the page opens.
+export default function RoomCard({ room, stay, lead = false, heading: Heading = "h3", eager = false }) {
   const { t, i18n } = useTranslation("site");
 
   return (
     <article className={`room-card${lead ? " room-card--lead" : ""}`}>
       <div className="room-card-media guest-photo">
         <span className="room-card-badge">{room.room_type}</span>
-        <RoomImage src={room.image} alt="" fallback={placeholderFor(room.room_name || room.id)} />
+        <RoomImage src={room.image} alt="" fallback={placeholderFor(room.room_name || room.id)} loading={eager ? "eager" : "lazy"} />
       </div>
 
       <div className="room-card-body">
@@ -51,9 +53,9 @@ export default function RoomCard({ room, stay, lead = false }) {
             </span>
           )}
         </div>
-        <h3>
+        <Heading className="room-card-name">
           <Link to={`/rooms/${room.id}${stayQuery(stay)}`}>{room.room_name}</Link>
-        </h3>
+        </Heading>
         {lead && room.description && <p className="room-card-desc">{room.description}</p>}
 
         <div className="room-card-footer">
