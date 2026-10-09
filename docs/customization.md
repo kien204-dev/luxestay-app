@@ -16,7 +16,7 @@ Cũng ở trang **Cơ sở lưu trú**, phần **Nội dung trang chủ**:
 | Tiện ích (tên + mô tả ngắn, tối đa 12 dòng) | Khối "Tiện ích" | Khối không hiện |
 | Điểm lân cận (tên, ghi chú, khoảng cách; tối đa 8 dòng) | Khối "Vị trí", cùng địa chỉ | Khối không hiện |
 
-Các ô này chỉ có một bản: nội dung bạn nhập hiện nguyên văn ở mọi ngôn ngữ (giống tên và mô tả phòng). Những khối còn lại của trang chủ lấy từ dữ liệu: "Phòng nổi bật" là ba phòng mới nhất đang nhận khách, "Điểm đến" từ địa chỉ các phòng, điểm đánh giá và "Khách nói gì" từ đánh giá thật của khách (đánh giá từ 4 sao, có nội dung, không bị ẩn). Chưa có dữ liệu thì khối tương ứng không hiện.
+Các ô này chỉ có một bản: nội dung bạn nhập hiện nguyên văn ở mọi ngôn ngữ (giống tên và mô tả phòng). Những khối còn lại của trang chủ lấy từ dữ liệu: "Phòng nổi bật" là ba phòng mới nhất đang nhận khách, "Điểm đến" từ địa chỉ các phòng, điểm đánh giá và "Khách nói gì" từ đánh giá thật của khách (đánh giá từ 4 sao, có nội dung, không bị ẩn), và chỉ hiện khi cơ sở đã có từ 3 đánh giá trở lên. Dữ liệu mẫu không kèm đánh giá nào, trừ bản demo (`DEMO_MODE=true`) có 3 đánh giá mẫu. Chưa có dữ liệu thì khối tương ứng không hiện.
 
 ## Màu (theme)
 
@@ -37,7 +37,7 @@ Ví dụ một bộ xanh navy: sáng `#24384f` / `#1a2b3e` / `#e1e7ee` / `#f5f3e
 
 ### Sáng / tối
 
-Trang khách theo cài đặt sáng/tối của máy khách; nút mặt trời/mặt trăng ở đầu trang đổi qua lại và lựa chọn được nhớ trên trình duyệt đó. Trang quản trị luôn dùng bộ tối. Muốn một vùng luôn sáng hoặc luôn tối, gắn class `theme-light` / `theme-dark` cho phần tử bao ngoài.
+Trang khách và trang quản trị theo cài đặt sáng/tối của máy người dùng; nút mặt trời/mặt trăng ở đầu trang đổi qua lại và lựa chọn được nhớ trên trình duyệt đó (một lựa chọn cho cả hai khu vực). Muốn một vùng luôn sáng hoặc luôn tối, gắn class `theme-light` / `theme-dark` cho phần tử bao ngoài.
 
 `npm run lint` có bước **kiểm tra màu**: báo lỗi nếu ai đó viết thẳng mã màu vào code React thay vì dùng biến. Màu của thương hiệu bên thứ ba (logo Google, nút MoMo) được đánh dấu `theme-ignore`.
 

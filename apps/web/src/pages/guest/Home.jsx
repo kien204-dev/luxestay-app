@@ -18,6 +18,10 @@ import "../../styles/home.css";
 // (/admin/property), its rooms, destinations and reviews. A section with
 // nothing real to show is left out rather than filled with sample text.
 
+// A score from one or two reviews says little and is easy to skew, so the
+// hero's score and the guest quotes wait for this many visible reviews.
+const MIN_REVIEWS_TO_SHOW = 3;
+
 // Three statements about how booking here works. Each one is true of the
 // software itself (live availability, the configured cancellation window,
 // payment through the gateway), not marketing copy to be taken on trust.
@@ -142,7 +146,8 @@ export default function Home() {
   const navigate = useNavigate();
   const property = useProperty();
   // One request serves both the score in the hero and the quotes below.
-  const { data: reviews } = useAsyncData("featured-reviews", getFeaturedReviews);
+  const { data } = useAsyncData("featured-reviews", getFeaturedReviews);
+  const reviews = data?.totalReviews >= MIN_REVIEWS_TO_SHOW ? data : null;
   useDocumentTitle(t("home.documentTitle"));
 
   return (
@@ -171,9 +176,9 @@ export default function Home() {
             </div>
             <div className="home-hero-side">
               <p>{property.heroSubtitle || t("home.heroSubtitle", { brand: property.name })}</p>
-              {/* Only when guests have actually left reviews. */}
+              {/* Only once enough guests have left reviews. */}
               <p className="home-hero-rating" data-testid="hero-rating">
-                {reviews?.totalReviews > 0 && (
+                {reviews && (
                   <>
                     <StarIcon />
                     {t("home.ratingOutOfFive", { score: formatRating(reviews.averageRating, i18n.language) })}

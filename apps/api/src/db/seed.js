@@ -329,9 +329,19 @@ async function seedCoupon(pool, log) {
   if (result.rows.length > 0) log("  coupon: WELCOME10 (10%, tối đa 300.000 đ)");
 }
 
+// Sample reviews exist on a public demo only (DEMO_MODE=true), one per
+// finished sample stay. Anywhere else the site's score and the guest quotes
+// on its home page must come from its own guests, so none are seeded.
+const DEMO_REVIEWS = [
+  { rating: 5, comment: "Phòng sạch sẽ, vị trí thuận tiện, nhân viên nhiệt tình. Sẽ quay lại!" },
+  { rating: 4, comment: "Phòng yên tĩnh, nhận phòng nhanh. Bữa sáng nên có thêm lựa chọn." },
+  { rating: 5, comment: "Phòng đúng như ảnh, giường êm, chủ nhà chu đáo." },
+];
+
 // One stay of each kind for the demo guest, dated relative to today so the
-// sample data never goes stale: a finished stay (with a review), an upcoming
-// confirmed one, and one still waiting for payment.
+// sample data never goes stale: a finished stay, an upcoming confirmed one,
+// and one still waiting for payment. A demo gets two more finished stays, so
+// that each sample review has a stay behind it.
 async function seedBookings(pool, log, { guestId, roomIds }) {
   const existing = await pool.query("SELECT 1 FROM bookings LIMIT 1");
   if (existing.rows.length > 0 || roomIds.length < 3) return;
@@ -341,6 +351,13 @@ async function seedBookings(pool, log, { guestId, roomIds }) {
     { roomId: roomIds[1], startOffset: 7, nights: 2, guests: 2, status: "confirmed", paymentStatus: "paid" },
     { roomId: roomIds[2], startOffset: 14, nights: 1, guests: 1, status: "pending", paymentStatus: "unpaid" },
   ];
+  const reviews = isDemoMode() ? [...DEMO_REVIEWS] : [];
+  if (isDemoMode() && roomIds.length >= 5) {
+    samples.push(
+      { roomId: roomIds[3], startOffset: -24, nights: 1, guests: 2, status: "completed", paymentStatus: "paid" },
+      { roomId: roomIds[4], startOffset: -40, nights: 3, guests: 2, status: "completed", paymentStatus: "paid" }
+    );
+  }
 
   for (const sample of samples) {
     const inserted = await pool.query(
@@ -351,11 +368,12 @@ async function seedBookings(pool, log, { guestId, roomIds }) {
       [guestId, sample.roomId, sample.startOffset, sample.nights, sample.guests, sample.status, sample.paymentStatus]
     );
 
-    if (sample.status === "completed") {
+    const review = sample.status === "completed" ? reviews.shift() : null;
+    if (review) {
       await pool.query(
         `INSERT INTO room_reviews (room_id, user_id, booking_id, rating, comment)
-         VALUES ($1, $2, $3, 5, 'Phòng sạch sẽ, vị trí thuận tiện, nhân viên nhiệt tình. Sẽ quay lại!')`,
-        [inserted.rows[0].room_id, guestId, inserted.rows[0].id]
+         VALUES ($1, $2, $3, $4, $5)`,
+        [inserted.rows[0].room_id, guestId, inserted.rows[0].id, review.rating, review.comment]
       );
     }
   }

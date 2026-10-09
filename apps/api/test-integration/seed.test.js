@@ -271,9 +271,31 @@ describe("seed on start", () => {
       await runSeed();
 
       assert.equal(await count("rooms"), rooms);
-      assert.equal(await count("bookings"), 3);
+      // Two more finished stays than usual, for the demo's sample reviews.
+      assert.equal(await count("bookings"), 5);
       assert.equal(await count("coupons"), 1);
       assert.equal((await admins()).length, 1);
+    });
+
+    it("has no reviews: a site's score comes from its own guests", async () => {
+      await runSeed();
+
+      assert.equal(await count("bookings"), 3);
+      assert.equal(await count("bookings", "status = 'completed'"), 1);
+      assert.equal(await count("room_reviews"), 0);
+    });
+
+    it("has three sample reviews on a demo, each for a finished sample stay", async () => {
+      process.env.DEMO_MODE = "true";
+
+      await runSeed();
+
+      assert.equal(await count("room_reviews"), 3);
+      const orphans = await pool.query(
+        `SELECT 1 FROM room_reviews rv JOIN bookings b ON b.id = rv.booking_id
+         WHERE b.status <> 'completed' OR b.room_id <> rv.room_id`
+      );
+      assert.equal(orphans.rows.length, 0);
     });
 
     it("is added to a database in use only when asked for (--force)", async () => {

@@ -82,13 +82,14 @@ describe("admin lists and demo reset", () => {
     await assert.rejects(resetDemo(pool, { log: () => {} }), /DEMO_MODE/);
 
     process.env.DEMO_MODE = "true";
-    const before = (await pool.query("SELECT COUNT(*)::int AS n FROM bookings")).rows[0].n;
     await pool.query("UPDATE rooms SET room_name = 'Spoiled' WHERE id = 1");
 
     await resetDemo(pool, { log: () => {} });
 
     assert.equal((await pool.query("SELECT COUNT(*)::int AS n FROM users")).rows[0].n, 2);
     assert.notEqual((await pool.query("SELECT room_name FROM rooms WHERE id = 1")).rows[0].room_name, "Spoiled");
-    assert.equal((await pool.query("SELECT COUNT(*)::int AS n FROM bookings")).rows[0].n, before);
+    // A demo's sample data: five stays, three of them finished and reviewed.
+    assert.equal((await pool.query("SELECT COUNT(*)::int AS n FROM bookings")).rows[0].n, 5);
+    assert.equal((await pool.query("SELECT COUNT(*)::int AS n FROM room_reviews")).rows[0].n, 3);
   });
 });
