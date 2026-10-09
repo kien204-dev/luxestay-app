@@ -10,7 +10,8 @@ DEMO_RESET_INTERVAL_HOURS=24   # tuỳ chọn: API tự đặt lại dữ liệu
 Khi bật:
 
 - Trang đăng nhập hiện sẵn hai tài khoản mẫu (quản trị và khách) kèm mật khẩu. Tài khoản quản trị mẫu không bị buộc đổi mật khẩu.
-- Trang quản trị có dải thông báo "Bản demo".
+- Đầu trang khách và trang quản trị có dải thông báo "Demo" (đóng được, hiện lại ở phiên trình duyệt mới). Nếu VNPay đang ở sandbox và MoMo tắt hoặc ở môi trường test, dải này và bước thanh toán ghi thêm "Không có tiền thật nào bị trừ"; cấu hình cổng thật thì câu đó không hiện.
+- Dữ liệu mẫu có thêm 3 đánh giá mẫu (bản thường không có đánh giá mẫu nào).
 - Hai tài khoản mẫu **không** được: xóa bất cứ thứ gì; thêm/sửa/khóa người dùng; đổi thông tin, logo, ảnh nền của cơ sở lưu trú; đổi ảnh điểm đến; sửa phòng có sẵn hoặc thêm ảnh phụ; đổi mật khẩu, email hay hồ sơ của chính mình. Thử làm sẽ nhận thông báo "Tài khoản demo không được thay đổi dữ liệu này."
 - Vẫn được: xem mọi trang, đặt phòng, thanh toán thử, đặt phòng tại quầy, ghi nhận thu tiền, đổi trạng thái đơn, tạo mã giảm giá, thêm phòng mới, tải ảnh lên, xuất báo cáo.
 
