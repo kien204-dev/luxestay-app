@@ -1,23 +1,35 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Dialog, { CloseIcon } from "../Dialog";
+import { StarIcon } from "../guest/icons";
 import { createReview } from "../../services/reviewService";
-import StarRating from "../StarRating";
-import { formatDate } from "./helpers";
+import { apiErrorText, apiSuccessText } from "../../utils/apiError";
+import { formatDate } from "../../utils/format";
 
+// The API's own limit (reviewController.js).
+const MAX_COMMENT_LENGTH = 2000;
+const dateOf = (value) => String(value).slice(0, 10);
+
+// Stars (required) and a comment (optional) for a finished stay. The form
+// says what is wrong next to the field; what the API refuses is shown above
+// the buttons and the text typed so far stays.
 export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
   const { t, i18n } = useTranslation("myBookings");
   const lang = i18n.language;
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [tried, setTried] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!rating) {
-      setError(t("myBookings:errors.reviewRatingRequired"));
-      return;
-    }
+  const tooLong = comment.trim().length > MAX_COMMENT_LENGTH;
+  const ratingMissing = tried && !rating;
+  const close = () => !submitting && onClose();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setTried(true);
+    if (!rating || tooLong) return;
 
     setSubmitting(true);
     setError("");
@@ -27,151 +39,74 @@ export default function ReviewModal({ booking, toast, onClose, onSubmitted }) {
         rating,
         comment: comment.trim() || undefined,
       });
-      toast.success(res.message || t("myBookings:errors.reviewSuccess"));
+      toast.success(apiSuccessText(res, "myBookings:errors.reviewSuccess"));
       onSubmitted({ rating, comment: comment.trim() });
     } catch (err) {
-      setError(err.response?.data?.message || t("myBookings:errors.reviewFailed"));
+      setError(apiErrorText(err, "myBookings:errors.reviewFailed"));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div
-      onClick={() => !submitting && onClose()}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "color-mix(in srgb, var(--color-ink) 65%, transparent)",
-        zIndex: 3300,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
-      }}
-    >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        style={{
-          width: "100%",
-          maxWidth: 420,
-          background: "var(--color-surface-light)",
-          borderRadius: 16,
-          padding: 28,
-          boxShadow: "0 24px 80px color-mix(in srgb, var(--color-ink) 25%, transparent)",
-        }}
-      >
-        <h3 className="font-headline" style={{ margin: "0 0 6px", color: "var(--brand-primary)", fontSize: 20 }}>
-          {t("myBookings:reviewModal.title", { roomName: booking.room_name })}
-        </h3>
-        <p style={{ margin: "0 0 20px", color: "var(--color-ink-muted)", fontSize: 13 }}>
-          {formatDate(booking.check_in, lang)} → {formatDate(booking.check_out, lang)}
-        </p>
-
-        <label
-          style={{
-            display: "block",
-            fontSize: 11,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: "var(--color-ink-muted)",
-            marginBottom: 8,
-            fontWeight: 700,
-          }}
-        >
-          {t("myBookings:reviewModal.starsLabel")}
-        </label>
-        <div style={{ marginBottom: 20 }}>
-          <StarRating value={rating} onChange={setRating} size={28} />
+    <Dialog onClose={close} aria-labelledby="review-title" data-testid="review-dialog">
+      <form onSubmit={handleSubmit} noValidate style={{ display: "contents" }}>
+        <div className="ui-dialog-head">
+          <div>
+            <span className="room-location">{booking.room_name} · {formatDate(dateOf(booking.check_in), lang)} → {formatDate(dateOf(booking.check_out), lang)}</span>
+            <h2 id="review-title">{t("reviewModal.question")}</h2>
+          </div>
+          <button type="button" className="ui-button ui-button--icon" aria-label={t("common:dialog.close")} onClick={close} disabled={submitting}>
+            <CloseIcon />
+          </button>
         </div>
 
-        <label
-          style={{
-            display: "block",
-            fontSize: 11,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: "var(--color-ink-muted)",
-            marginBottom: 8,
-            fontWeight: 700,
-          }}
-        >
-          {t("myBookings:reviewModal.commentLabel")}
-        </label>
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          rows={4}
-          maxLength={2000}
-          placeholder={t("myBookings:reviewModal.commentPlaceholder")}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            border: "1px solid var(--color-line-light)",
-            borderRadius: 8,
-            outline: "none",
-            fontSize: 13,
-            fontFamily: "inherit",
-            resize: "vertical",
-            boxSizing: "border-box",
-            marginBottom: 16,
-          }}
-        />
+        <div className="ui-dialog-body review-form">
+          <fieldset aria-describedby="review-stars-message">
+            <legend>{t("reviewModal.starsLabel")}</legend>
+            <div className="star-input">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <label key={n} className={n <= rating ? "is-on" : ""}>
+                  <input type="radio" name="rating" value={n} checked={rating === n} onChange={() => setRating(n)} />
+                  <span className="sr-only">{t("common:stars", { count: n })}</span>
+                  <StarIcon />
+                </label>
+              ))}
+            </div>
+            <p id="review-stars-message" className={ratingMissing ? "g-error" : "checkout-help"} role={ratingMissing ? "alert" : undefined} data-testid="review-stars-message">
+              {ratingMissing ? t("errors.reviewRatingRequired") : rating ? t("reviewModal.chosen", { count: rating }) : t("reviewModal.chooseStars")}
+            </p>
+          </fieldset>
 
-        {error && (
-          <div
-            style={{
-              background: "var(--color-danger-soft)",
-              border: "1px solid color-mix(in srgb, var(--color-danger-strong) 30%, transparent)",
-              borderRadius: 8,
-              color: "var(--color-danger-strong)",
-              fontSize: 12,
-              marginBottom: 16,
-              padding: "8px 10px",
-            }}
-          >
-            {error}
+          <div className="g-field">
+            <label className="g-label" htmlFor="review-comment">{t("reviewModal.commentLabel")}</label>
+            <textarea
+              id="review-comment"
+              className="g-input"
+              rows={4}
+              value={comment}
+              placeholder={t("reviewModal.commentPlaceholder")}
+              aria-invalid={tooLong ? "true" : undefined}
+              aria-describedby="review-comment-message"
+              onChange={(e) => setComment(e.target.value)}
+            />
+            <p id="review-comment-message" className={tooLong ? "g-error" : "checkout-help"} role={tooLong ? "alert" : undefined}>
+              {tooLong
+                ? t("reviewModal.tooLong", { max: MAX_COMMENT_LENGTH, count: comment.trim().length })
+                : t("reviewModal.publicNote")}
+            </p>
           </div>
-        )}
 
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            style={{
-              flex: 1,
-              padding: "12px",
-              borderRadius: 8,
-              border: "1px solid var(--color-line-light)",
-              background: "transparent",
-              color: "var(--color-ink-muted)",
-              fontWeight: 600,
-              cursor: submitting ? "not-allowed" : "pointer",
-            }}
-          >
-            {t("myBookings:reviewModal.cancel")}
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              flex: 1,
-              padding: "12px",
-              borderRadius: 8,
-              border: "none",
-              background: "var(--brand-primary)",
-              color: "var(--color-surface-light)",
-              fontWeight: 700,
-              cursor: submitting ? "not-allowed" : "pointer",
-              opacity: submitting ? 0.7 : 1,
-            }}
-          >
-            {submitting ? t("myBookings:reviewModal.submitting") : t("myBookings:reviewModal.submit")}
+          {error && <p className="g-alert" role="alert">{error}</p>}
+        </div>
+
+        <div className="ui-dialog-foot">
+          <button type="button" className="ui-button ui-button--secondary" onClick={onClose} disabled={submitting}>{t("reviewModal.cancel")}</button>
+          <button type="submit" className="ui-button ui-button--primary" disabled={submitting}>
+            {submitting ? t("reviewModal.submitting") : t("reviewModal.submit")}
           </button>
         </div>
       </form>
-    </div>
+    </Dialog>
   );
 }

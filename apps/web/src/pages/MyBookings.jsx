@@ -1,342 +1,235 @@
-import { useEffect, useState } from "react";
-import { useAsyncData } from "../utils/useAsyncData";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getBookings, cancelBooking, getBookingPolicy } from "../services/bookingService";
-import { createPayment } from "../services/paymentService";
-import { useToast } from "../context/ToastContext";
-import { usePaymentProviders } from "../utils/usePaymentProviders";
-import Icon from "../utils/icon";
-import ConfirmModal from "../components/ConfirmModal";
+import Pagination from "../components/guest/Pagination";
+import StateMessage from "../components/guest/StateMessage";
+import GuestIcon from "../components/guest/icons";
 import BookingCard from "../components/myBookings/BookingCard";
 import BookingDetailModal from "../components/myBookings/BookingDetailModal";
-import BookingFilters from "../components/myBookings/BookingFilters";
+import CancelModal from "../components/myBookings/CancelModal";
 import PaymentModal from "../components/myBookings/PaymentModal";
 import ReviewModal from "../components/myBookings/ReviewModal";
 import { PAGE_SIZE } from "../components/myBookings/helpers";
-import "../styles/my-bookings.css";
+import { useToast } from "../context/ToastContext";
+import { cancelBooking, getBookingCounts, getBookings } from "../services/bookingService";
+import { createPayment } from "../services/paymentService";
+import { apiErrorText } from "../utils/apiError";
+import { useAsyncData } from "../utils/useAsyncData";
+import { useBookingPolicy } from "../utils/useBookingPolicy";
+import { useDocumentTitle } from "../utils/useDocumentTitle";
+import { usePaymentProviders } from "../utils/usePaymentProviders";
+import "../styles/rooms.css";
+import "../styles/booking.css";
+
+// The tabs, and what each asks the API for. They are the booking's real
+// states; "refund" is a cancelled booking whose payment is waiting to be
+// sent back.
+const TABS = [
+  { key: "all", query: {} },
+  { key: "pending", query: { status: "pending" } },
+  { key: "confirmed", query: { status: "confirmed" } },
+  { key: "completed", query: { status: "completed" } },
+  { key: "cancelled", query: { status: "cancelled" } },
+  { key: "refund_pending", query: { payment_status: "refund_pending" } },
+];
 
 export default function MyBookings() {
-  const navigate = useNavigate();
-  const toast = useToast();
-  const paymentProviders = usePaymentProviders();
-  const [freeCancellationDays, setFreeCancellationDays] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getBookingPolicy()
-      .then((res) => {
-        if (!cancelled) setFreeCancellationDays(res.data?.freeCancellationDays ?? null);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const { t } = useTranslation("myBookings");
-  const [cancellingId, setCancellingId] = useState(null);
-  const [bookingToCancel, setBookingToCancel] = useState(null);
-  const [payingBooking, setPayingBooking] = useState(null);
-  const [payingProvider, setPayingProvider] = useState(null);
-  const [payError, setPayError] = useState("");
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [reviewingBooking, setReviewingBooking] = useState(null);
-  const [submittedReviews, setSubmittedReviews] = useState({});
-  const [statusFilter, setStatusFilter] = useState("");
+  useDocumentTitle(t("header.title"));
+  const toast = useToast();
+  const policy = useBookingPolicy();
+  const paymentProviders = usePaymentProviders();
+
+  const [tab, setTab] = useState("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
+  const [cancellingBusy, setCancellingBusy] = useState(false);
+  const [paying, setPaying] = useState(null);
+  const [payingProvider, setPayingProvider] = useState(null);
+  const [payError, setPayError] = useState("");
+  const [reviewing, setReviewing] = useState(null);
 
-  // One request per combination of filters and page; changing any of them
-  // (see changeFilter / setPage) loads the matching list.
-  const bookingsQuery = useAsyncData(
-    `my-bookings:${statusFilter}:${fromDate}:${toDate}:${page}`,
-    async () => {
-      const res = await getBookings({
-        page,
-        limit: PAGE_SIZE,
-        ...(statusFilter ? { status: statusFilter } : {}),
-        ...(fromDate ? { from: fromDate } : {}),
-        ...(toDate ? { to: toDate } : {}),
-      });
-      return res.data;
-    }
-  );
+  // One request per combination of tab, dates and page.
+  const list = useAsyncData(`my-bookings:${tab}:${fromDate}:${toDate}:${page}`, async () => {
+    const res = await getBookings({
+      page,
+      limit: PAGE_SIZE,
+      ...TABS.find((item) => item.key === tab).query,
+      ...(fromDate ? { from: fromDate } : {}),
+      ...(toDate ? { to: toDate } : {}),
+    });
+    return res.data;
+  });
+  const counts = useAsyncData("my-booking-counts", getBookingCounts);
 
-  const bookings = bookingsQuery.data?.data || [];
-  const meta = {
-    total: bookingsQuery.data?.total ?? 0,
-    totalPages: bookingsQuery.data?.totalPages ?? 1,
-  };
-  const loading = bookingsQuery.loading;
-  const error = bookingsQuery.error
-    ? bookingsQuery.error.response?.data?.message || t("myBookings:errors.loadFailed")
-    : "";
-  const reloadBookings = bookingsQuery.reload;
-  const setBookings = (update) =>
-    bookingsQuery.setData((current) => (current ? { ...current, data: update(current.data) } : current));
+  const bookings = list.data?.data || [];
+  const total = list.data?.total ?? 0;
+  const totalPages = list.data?.totalPages ?? 1;
+  const filtered = tab !== "all" || fromDate || toDate;
+  const state = list.loading ? "loading" : list.error ? "error" : bookings.length === 0 ? "empty" : "ready";
 
-  // A new filter always starts again from the first page.
-  const changeFilters = (changes) => {
-    if ("statusFilter" in changes) setStatusFilter(changes.statusFilter);
-    if ("fromDate" in changes) setFromDate(changes.fromDate);
-    if ("toDate" in changes) setToDate(changes.toDate);
+  // A new tab or date always starts again from the first page.
+  const choose = (change) => {
+    change();
     setPage(1);
   };
-
-  const openPayment = (booking) => {
-    setPayError("");
-    setPayingBooking(booking);
+  const reload = () => {
+    list.reload();
+    counts.reload();
   };
 
-  const requestCancel = (id) => setBookingToCancel(id);
-
   const confirmCancel = async () => {
-    const id = bookingToCancel;
-    if (id == null) return;
-
-    setCancellingId(id);
+    setCancellingBusy(true);
     try {
-      const res = await cancelBooking(id);
+      const res = await cancelBooking(cancelling.id);
       const cancelled = res.data?.booking || {};
-      setSelectedBooking((booking) =>
-        booking?.id === id
-          ? { ...booking, status: "cancelled", payment_status: cancelled.payment_status ?? booking.payment_status }
-          : booking
-      );
-      reloadBookings();
-      toast.success(
-        cancelled.payment_status === "refund_pending"
-          ? t("myBookings:errors.cancelSuccessRefund")
-          : t("myBookings:errors.cancelSuccess")
-      );
-      setBookingToCancel(null);
+      toast.success(cancelled.payment_status === "refund_pending" ? t("errors.cancelSuccessRefund") : t("errors.cancelSuccess"));
+      setCancelling(null);
+      setSelectedBooking(null);
+      reload();
     } catch (err) {
-      toast.error(err.response?.data?.message || t("myBookings:errors.cancelFailed"));
+      // The dialog stays open with the booking as it was.
+      toast.error(apiErrorText(err, "myBookings:errors.cancelFailed"));
     } finally {
-      setCancellingId(null);
+      setCancellingBusy(false);
     }
   };
 
-  const handleReviewSubmitted = (bookingId, review) => {
-    setSubmittedReviews((prev) => ({ ...prev, [bookingId]: review }));
-    setBookings((list) =>
-      list.map((b) => (b.id === bookingId ? { ...b, has_review: true } : b))
-    );
-    setReviewingBooking(null);
-  };
-
-  const handlePayNow = async (provider) => {
-    if (!payingBooking) return;
-
+  const payNow = async (provider) => {
     setPayError("");
     setPayingProvider(provider);
     try {
-      const res = await createPayment(payingBooking.id, provider);
+      const res = await createPayment(paying.id, provider);
       window.location.href = res.data.payUrl;
     } catch (err) {
-      setPayError(
-        err.response?.data?.message || t("myBookings:errors.paymentInitFailed")
-      );
+      setPayError(apiErrorText(err, "myBookings:errors.paymentInitFailed"));
       setPayingProvider(null);
     }
   };
 
   return (
-    <div
-      className="font-body"
-      style={{ background: "var(--color-surface-muted)", color: "var(--color-ink)" }}
-    >
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px" }}>
-        <div className="my-bookings-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 20 }}>
-          <h1 className="font-headline" style={{ margin: 0, fontSize: 28, color: "var(--brand-primary)" }}>
-            {t("myBookings:header.title")}
-          </h1>
-          <button
-            onClick={reloadBookings}
-            disabled={loading}
-            style={{ padding: "8px 16px", background: "var(--brand-primary)", color: "var(--color-surface-light)", border: "none", borderRadius: 6, cursor: loading ? "not-allowed" : "pointer", fontSize: 13 }}
-          >
-            {loading ? t("myBookings:header.refreshing") : t("myBookings:header.refresh")}
+    <div className="guest-container my-bookings" data-testid="my-bookings" data-state={state}>
+      <div className="page-head">
+        <ol className="crumbs">
+          <li><Link to="/">{t("site:list.home")}</Link></li>
+          <li aria-current="page">{t("header.title")}</li>
+        </ol>
+        <h1>{t("header.title")}</h1>
+      </div>
+
+      <div className="booking-tabs" role="tablist" aria-label={t("filters.status")}>
+        {TABS.map(({ key }) => (
+          <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => choose(() => setTab(key))} data-testid={`tab-${key}`}>
+            {t(`tabs.${key}`)}
+            {counts.data && <span>{counts.data[key] ?? 0}</span>}
           </button>
+        ))}
+      </div>
+
+      <div className="booking-filters">
+        <div className="g-field">
+          <label className="g-label" htmlFor="bookings-from">{t("filters.fromDate")}</label>
+          <input id="bookings-from" className="g-input" type="date" value={fromDate} onChange={(e) => choose(() => setFromDate(e.target.value))} />
         </div>
-
-        <BookingFilters statusFilter={statusFilter} fromDate={fromDate} toDate={toDate} onChange={changeFilters} />
-
-        {error && (
-          <div
-            style={{
-              background: "var(--color-danger-soft)",
-              color: "var(--color-danger-strong)",
-              padding: 16,
-              borderRadius: 8,
-              marginBottom: 20,
-            }}
-          >
-            {error}
-          </div>
+        <div className="g-field">
+          <label className="g-label" htmlFor="bookings-to">{t("filters.toDate")}</label>
+          <input id="bookings-to" className="g-input" type="date" value={toDate} onChange={(e) => choose(() => setToDate(e.target.value))} />
+        </div>
+        {(fromDate || toDate) && (
+          <button type="button" className="g-btn g-btn--link" onClick={() => choose(() => { setFromDate(""); setToDate(""); })}>{t("filters.clear")}</button>
         )}
+        <button type="button" className="g-btn g-btn--outline booking-refresh" onClick={reload} disabled={list.loading}>
+          <GuestIcon.Retry small />
+          {list.loading ? t("header.refreshing") : t("header.refresh")}
+        </button>
+      </div>
 
-        {loading ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  background: "var(--color-surface-light)",
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  boxShadow: "0 2px 12px color-mix(in srgb, var(--color-ink) 6%, transparent)",
-                  display: "grid",
-                  gridTemplateColumns: "140px 1fr auto",
-                  gap: 0,
-                }}
-              >
-                <div className="luxe-skeleton-light" style={{ minHeight: 120, borderRadius: 0 }} />
-                <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
-                  <div className="luxe-skeleton-light" style={{ height: 14, width: "30%" }} />
-                  <div className="luxe-skeleton-light" style={{ height: 18, width: "50%" }} />
-                  <div className="luxe-skeleton-light" style={{ height: 14, width: "40%" }} />
-                </div>
-                <div style={{ padding: "20px 24px", display: "flex", alignItems: "center" }}>
-                  <div className="luxe-skeleton-light" style={{ height: 32, width: 90 }} />
-                </div>
+      {state === "loading" && (
+        <div aria-busy="true" data-testid="bookings-loading">
+          <span className="sr-only" role="status">{t("header.refreshing")}</span>
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} className="my-booking-card">
+              <span className="luxe-skeleton-light" style={{ minHeight: 160 }} />
+              <div className="my-booking-main">
+                <span className="luxe-skeleton-light" style={{ width: 120, height: 24 }} />
+                <span className="luxe-skeleton-light" style={{ width: "55%", height: 28 }} />
+                <span className="luxe-skeleton-light" style={{ width: "70%", height: 12 }} />
               </div>
-            ))}
-          </div>
-        ) : bookings.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 20px" }}>
-            <span style={{ color: "var(--brand-accent)", display: "flex", justifyContent: "center", marginBottom: 12 }}>
-              <Icon.CalendarOff />
-            </span>
-            <p style={{ color: "var(--color-ink-muted)", marginBottom: 20 }}>
-              {statusFilter || fromDate || toDate
-                ? t("myBookings:empty.filtered")
-                : t("myBookings:empty.none")}
-            </p>
-            <button
-              onClick={() => navigate("/rooms")}
-              style={{
-                padding: "12px 24px",
-                background: "var(--brand-primary)",
-                color: "var(--color-surface-light)",
-                border: "none",
-                borderRadius: 6,
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              {t("myBookings:empty.exploreRooms")}
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div className="my-booking-side">
+                <span className="luxe-skeleton-light" style={{ width: 140, height: 28 }} />
+                <span className="luxe-skeleton-light" style={{ width: 180, height: 44 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {state === "error" && (
+        <StateMessage error heading="h2" title={t("errors.loadFailed")} text={t("errors.loadFailedText")} testId="bookings-error">
+          <button type="button" className="g-btn g-btn--primary" onClick={reload}>
+            <GuestIcon.Retry />
+            {t("site:list.retry")}
+          </button>
+        </StateMessage>
+      )}
+
+      {state === "empty" && (
+        <StateMessage heading="h2" title={filtered ? t(`emptyTab.${tab}`) : t("empty.title")} text={filtered ? t("empty.filtered") : t("empty.none")} testId="bookings-empty">
+          <Link className="g-btn g-btn--primary" to="/rooms">{t("empty.exploreRooms")}</Link>
+        </StateMessage>
+      )}
+
+      {state === "ready" && (
+        <>
+          <div className="my-booking-list">
             {bookings.map((booking) => (
               <BookingCard
                 key={booking.id}
                 booking={booking}
-                cancelling={cancellingId === booking.id}
-                submittedReview={submittedReviews[booking.id]}
+                policy={policy}
                 onDetails={setSelectedBooking}
-                onPay={openPayment}
-                onCancel={requestCancel}
-                onReview={setReviewingBooking}
+                onPay={(b) => { setPayError(""); setPaying(b); }}
+                onCancel={setCancelling}
+                onReview={setReviewing}
               />
             ))}
           </div>
-        )}
-
-        {!loading && meta.totalPages > 1 && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 16,
-              marginTop: 28,
-            }}
-          >
-            <button
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1 || loading}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 6,
-                border: "1px solid var(--color-line-light)",
-                background: "var(--color-surface-light)",
-                color: page <= 1 ? "var(--color-line-light)" : "var(--brand-primary)",
-                cursor: page <= 1 ? "not-allowed" : "pointer",
-                fontSize: 13,
-                fontWeight: 600,
-              }}
-            >
-              {t("myBookings:pagination.prev")}
-            </button>
-            <span style={{ color: "var(--color-ink-muted)", fontSize: 13 }}>
-              {t("myBookings:pagination.pageInfo", { page, totalPages: meta.totalPages, total: meta.total })}
-            </span>
-            <button
-              onClick={() => setPage(page + 1)}
-              disabled={page >= meta.totalPages || loading}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 6,
-                border: "1px solid var(--color-line-light)",
-                background: "var(--color-surface-light)",
-                color: page >= meta.totalPages ? "var(--color-line-light)" : "var(--brand-primary)",
-                cursor: page >= meta.totalPages ? "not-allowed" : "pointer",
-                fontSize: 13,
-                fontWeight: 600,
-              }}
-            >
-              {t("myBookings:pagination.next")}
-            </button>
-          </div>
-        )}
-      </main>
-
-      {selectedBooking && (
-        <BookingDetailModal
-          booking={selectedBooking}
-          onClose={() => setSelectedBooking(null)}
-        />
+          <Pagination page={page} totalPages={totalPages} total={total} pageSize={PAGE_SIZE} onChange={setPage} rangeKey="list.showingBookings" />
+        </>
       )}
 
-      {reviewingBooking && (
-        <ReviewModal
-          booking={reviewingBooking}
-          toast={toast}
-          onClose={() => setReviewingBooking(null)}
-          onSubmitted={(review) => handleReviewSubmitted(reviewingBooking.id, review)}
-        />
-      )}
+      {selectedBooking && <BookingDetailModal booking={selectedBooking} onClose={() => setSelectedBooking(null)} />}
 
-      <ConfirmModal
-        open={bookingToCancel != null}
-        title={t("myBookings:cancelModal.title")}
-        message={
-          t("myBookings:cancelModal.message", { id: String(bookingToCancel).padStart(4, "0") }) +
-          (freeCancellationDays != null
-            ? ` ${t("myBookings:cancelModal.policy", { count: freeCancellationDays })}`
-            : "")
-        }
-        confirmLabel={t("myBookings:cancelModal.confirmLabel")}
-        cancelLabel={t("myBookings:cancelModal.cancelLabel")}
-        tone="danger"
-        loading={cancellingId === bookingToCancel}
-        onConfirm={confirmCancel}
-        onCancel={() => setBookingToCancel(null)}
-      />
-
-      {payingBooking && (
+      {paying && (
         <PaymentModal
-          booking={payingBooking}
+          booking={paying}
           providers={paymentProviders}
           payingProvider={payingProvider}
           error={payError}
-          onPay={handlePayNow}
-          onClose={() => setPayingBooking(null)}
+          onPay={payNow}
+          onClose={() => setPaying(null)}
         />
+      )}
+
+      {reviewing && (
+        <ReviewModal
+          booking={reviewing}
+          toast={toast}
+          onClose={() => setReviewing(null)}
+          onSubmitted={() => {
+            setReviewing(null);
+            list.setData((current) =>
+              current ? { ...current, data: current.data.map((b) => (b.id === reviewing.id ? { ...b, has_review: true } : b)) } : current
+            );
+          }}
+        />
+      )}
+
+      {cancelling && (
+        <CancelModal booking={cancelling} policy={policy} cancelling={cancellingBusy} onConfirm={confirmCancel} onClose={() => setCancelling(null)} />
       )}
     </div>
   );

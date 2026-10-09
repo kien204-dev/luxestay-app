@@ -3,14 +3,25 @@
 
 export const PAGE_SIZE = 5;
 
-export function getStatusFilterOptions(t) {
-  return [
-    { value: "", label: t("myBookings:filters.statusOptions.all") },
-    { value: "pending", label: t("myBookings:filters.statusOptions.pending") },
-    { value: "confirmed", label: t("myBookings:filters.statusOptions.confirmed") },
-    { value: "completed", label: t("myBookings:filters.statusOptions.completed") },
-    { value: "cancelled", label: t("myBookings:filters.statusOptions.cancelled") },
-  ];
+// Badge colours (the status-badge tones of booking.css).
+export const STATUS_TONE = { pending: "warning", confirmed: "success", completed: "neutral", cancelled: "danger" };
+export const PAYMENT_TONE = { pending: "warning", paid: "success", failed: "danger", refund_pending: "info", refunded: "neutral" };
+
+// What the guest may do with a booking, by the rules the API applies
+// (paymentController.createPayment, bookingController.cancelBooking). The
+// buttons follow these; the API still decides.
+export function canPayOnline(booking) {
+  return ["pending", "confirmed"].includes(booking.status) && ["unpaid", "pending", "failed"].includes(booking.payment_status);
+}
+
+// A paid booking can only be cancelled online while its free-cancellation
+// window is open; an unpaid one at any time.
+export function canCancelOnline(booking, policy) {
+  if (!["pending", "confirmed"].includes(booking.status)) return false;
+  if (booking.payment_status !== "paid" || !policy) return true;
+  const checkIn = new Date(`${String(booking.check_in).slice(0, 10)}T00:00:00Z`);
+  const today = new Date(`${policy.today}T00:00:00Z`);
+  return Math.round((checkIn - today) / 86400000) >= (Number(policy.freeCancellationDays) || 0);
 }
 
 export const STATUS_STYLE = {
@@ -28,15 +39,6 @@ export function getStatusLabel(t) {
     completed: t("myBookings:status.completed"),
   };
 }
-
-export const PAYMENT_STATUS_STYLE = {
-  unpaid: { color: "var(--color-ink-muted)", bg: "color-mix(in srgb, var(--color-ink-muted) 12%, transparent)" },
-  pending: { color: "var(--color-warning-strong)", bg: "color-mix(in srgb, var(--color-warning-strong) 12%, transparent)" },
-  paid: { color: "var(--color-success-strong)", bg: "color-mix(in srgb, var(--color-success-strong) 12%, transparent)" },
-  failed: { color: "var(--color-danger-strong)", bg: "color-mix(in srgb, var(--color-danger-strong) 12%, transparent)" },
-  refund_pending: { color: "var(--color-warning-strong)", bg: "color-mix(in srgb, var(--color-warning-strong) 12%, transparent)" },
-  refunded: { color: "var(--color-ink-muted)", bg: "color-mix(in srgb, var(--color-ink-muted) 12%, transparent)" },
-};
 
 export function getPaymentStatusLabel(t) {
   return {

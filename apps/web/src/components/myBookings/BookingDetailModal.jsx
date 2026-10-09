@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import "../../styles/my-bookings.css";
 import { normalizeImageUrl, useFallbackImage } from "../../utils/imageUrl";
 import { STATUS_STYLE, getStatusLabel, formatMoney, formatDate, calculateNights, buildTimeline } from "./helpers";
 

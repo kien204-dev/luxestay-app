@@ -1,6 +1,5 @@
 {
   "header": {
-    "back": "← Back",
     "title": "My Bookings",
     "refreshing": "Loading...",
     "refresh": "Refresh"
@@ -9,14 +8,7 @@
     "status": "Status",
     "fromDate": "From date",
     "toDate": "To date",
-    "clear": "Clear filters",
-    "statusOptions": {
-      "all": "All statuses",
-      "pending": "Pending",
-      "confirmed": "Confirmed",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    }
+    "clear": "Clear filters"
   },
   "status": {
     "confirmed": "Confirmed",
@@ -35,10 +27,10 @@
   "empty": {
     "filtered": "No bookings match the current filters.",
     "none": "No bookings yet — book a stay to start your journey.",
-    "exploreRooms": "Explore rooms"
+    "exploreRooms": "Explore rooms",
+    "title": "No bookings yet"
   },
   "card": {
-    "maxGuests": "Up to {{count}} guests",
     "totalLocked": "Total locked in",
     "details": "Details",
     "pay": "Pay",
@@ -47,36 +39,63 @@
     "reviewed": "Reviewed",
     "reviewThisRoom": "Review this room",
     "downloadReceipt": "Download PDF",
-    "downloadFailed": "Could not download the confirmation"
-  },
-  "pagination": {
-    "prev": "← Prev",
-    "next": "Next →",
-    "pageInfo": "Page {{page}} / {{totalPages}} · {{total}} bookings"
+    "downloadFailed": "Could not download the confirmation",
+    "paid": "Paid",
+    "refundAmount": "Refund due",
+    "refunded": "Refunded",
+    "bookAgain": "Book this room again",
+    "refundProgress": "Refund progress",
+    "refundCancelled": "Cancelled",
+    "refundProcessing": "In progress",
+    "refundDone": "Refunded",
+    "note": {
+      "heldUntil": "The room is held until {{time}}. After that the booking cancels itself.",
+      "freeUntil": "Free cancellation until the end of {{date}}",
+      "windowPassed": "The free-cancellation time has passed. To cancel, please contact the property.",
+      "payOnlineOrDesk": "Pay online now, or at the desk when you check in.",
+      "completed": "Checked out on {{date}}.",
+      "refundPending": "What you paid is waiting to be sent back by the property.",
+      "refundedOn": "Refunded on {{date}}.",
+      "refunded": "Refunded.",
+      "cancelledOn": "Cancelled on {{date}}. Nothing was owed back on this booking.",
+      "cancelled": "Nothing was owed back on this booking."
+    },
+    "maxGuests": "Up to {{count}} guests"
   },
   "cancelModal": {
-    "title": "Cancel booking",
-    "message": "Are you sure you want to cancel booking #BK-{{id}}? This action cannot be undone.",
     "confirmLabel": "Cancel booking",
-    "cancelLabel": "No",
-    "policy": "A paid booking can only be cancelled at least {{count}} day(s) before check-in, and will be refunded."
+    "titleFor": "Cancel booking {{code}}?",
+    "insideWindow": "You are within the free-cancellation time (until the end of {{date}}).",
+    "notPaid": "Nothing has been paid for this booking.",
+    "refundLabel": "Amount refunded",
+    "paidSoFar": "Paid so far",
+    "fee": "Cancellation fee",
+    "refundHow": "The property sends this back to you; the refund's state is shown in My bookings.",
+    "noRefundNeeded": "There is nothing to refund.",
+    "irreversible": "A cancellation cannot be undone.",
+    "keep": "Keep the booking",
+    "confirmRefund": "Cancel and refund {{amount}}"
   },
   "paymentModal": {
     "title": "Choose a payment method",
-    "summary": "Booking #{{id}} · {{amount}}",
     "redirecting": "Redirecting...",
     "payVnpay": "Pay with VNPay",
     "payMomo": "Pay with MoMo",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "summaryCode": "Booking {{code}} · {{amount}}"
   },
   "reviewModal": {
-    "title": "Review {{roomName}}",
     "starsLabel": "Rating",
     "commentLabel": "Comment (optional)",
     "commentPlaceholder": "Share your experience with this room...",
-    "cancel": "Cancel",
+    "cancel": "Later",
     "submitting": "Submitting...",
-    "submit": "Submit review"
+    "submit": "Submit review",
+    "question": "How was your stay?",
+    "chooseStars": "Choose 1 to 5 stars.",
+    "chosen": "{{count}} / 5 stars",
+    "tooLong": "A comment can be up to {{max}} characters (now {{count}}).",
+    "publicNote": "Reviews are public on the room's page; your name is shortened."
   },
   "detailModal": {
     "bookingId": "Booking ID #{{id}}",
@@ -116,6 +135,23 @@
     "reviewRatingRequired": "Please choose a star rating.",
     "reviewSuccess": "Thank you for your review!",
     "reviewFailed": "Failed to submit review, please try again",
-    "cancelSuccessRefund": "Booking cancelled. Your payment will be refunded once the property confirms it."
+    "cancelSuccessRefund": "Booking cancelled. Your payment will be refunded once the property confirms it.",
+    "loadFailedText": "Your bookings are safe. Check your connection and try again."
+  },
+  "tabs": {
+    "all": "All",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "refund_pending": "Refund pending"
+  },
+  "emptyTab": {
+    "all": "No bookings in these dates",
+    "pending": "No pending bookings",
+    "confirmed": "No confirmed bookings",
+    "completed": "No completed stays",
+    "cancelled": "No cancelled bookings",
+    "refund_pending": "No refunds pending"
   }
 }

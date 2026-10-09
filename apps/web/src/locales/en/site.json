@@ -139,7 +139,9 @@
     "removeFilter": "Remove {{filter}}",
     "showing": "Showing {{from}}–{{to}} of {{count}} rooms",
     "showing_one": "Showing {{from}}–{{to}} of {{count}} room",
-    "goToPage": "Page {{page}}"
+    "goToPage": "Page {{page}}",
+    "showingBookings": "Showing {{from}}–{{to}} of {{count}} bookings",
+    "showingBookings_one": "Showing {{from}}–{{to}} of {{count}} booking"
   },
   "detail": {
     "documentTitle": "Room",
@@ -197,31 +199,21 @@
   "booking": {
     "title": "Book this room",
     "guests": "Guests (up to {{count}})",
-    "coupon": "Coupon code (optional)",
-    "couponPlaceholder": "Enter code",
-    "couponApply": "Apply",
-    "couponApplied": "Applied",
     "nightsLine_one": "{{count}} night × {{price}}",
     "nightsLine_other": "{{count}} nights × {{price}}",
     "discount": "Code {{code}}",
     "total": "Total",
-    "submit": "Confirm booking",
-    "submitting": "Booking…",
     "loginToBook": "Sign in to book",
     "loginHint": "Your dates and guests are kept while you sign in.",
     "notBookable": "This room is not taking guests at the moment.",
-    "confirmedToast": "Booking made and confirmed.",
-    "paymentTitle": "Payment",
     "errors": {
       "bothDates": "Please choose a check-in and a check-out date.",
       "checkInPast": "Check-in cannot be in the past.",
       "checkOutAfterCheckIn": "Check-out must be after check-in.",
-      "datesTaken": "Some nights in your dates are already booked. Check the availability calendar and pick other dates.",
-      "couponEmpty": "Please enter a coupon code.",
-      "couponNeedsDates": "Choose your dates before applying a code.",
-      "couponInvalid": "This coupon code is not valid.",
-      "failed": "The booking could not be made. Please try again."
-    }
+      "datesTaken": "Some nights in your dates are already booked. Check the availability calendar and pick other dates."
+    },
+    "notChargedYet": "You are not charged at this step.",
+    "freeUntil": "Free cancellation until the end of {{date}}"
   },
   "policy": {
     "title": "Holding and cancellation rules",
@@ -236,17 +228,7 @@
     "paidClosed_other": "Check-in is less than {{count}} days away: once paid, this booking can no longer be cancelled online. To cancel, please contact the property."
   },
   "payment": {
-    "created": "Booking created",
-    "title": "Complete your payment",
-    "notice": "Booking #{{id}} is waiting for payment.",
-    "stay": "Stay",
-    "total": "Amount due",
-    "pay": "Pay",
-    "payVnpay": "Pay with VNPay",
-    "payMomo": "Pay with MoMo",
     "redirecting": "Taking you to the payment gateway…",
-    "payLater": "Pay later",
-    "initFailed": "Payment could not be started. Please try again.",
     "result": {
       "documentTitle": "Payment result",
       "toMyBookings": "See my bookings",
