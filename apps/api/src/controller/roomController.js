@@ -182,7 +182,7 @@ exports.getRooms = async (req, res) => {
 
       const dataValues = [...values, limit, offset];
       const result = await pool.query(
-        `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at
+        `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities
          FROM rooms
          ${whereClause}
          ORDER BY ${orderColumn} ${orderDirection}, id ASC
@@ -203,7 +203,7 @@ exports.getRooms = async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at
+      `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities
        FROM rooms
        ORDER BY id ASC`
     );

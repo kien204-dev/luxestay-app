@@ -8,13 +8,20 @@ import { normalizeImageUrl, showFallback } from "../../../utils/imageUrl";
 import RoomGallery from "./RoomGallery";
 import { ROOM_STATUSES } from "./roomStatus";
 
-const EMPTY = { room_name: "", room_type: "", location: "", price: "", capacity: 2, description: "", image: "", status: "available" };
+const EMPTY = { room_name: "", room_type: "", location: "", price: "", capacity: 2, description: "", amenities: "", image: "", status: "available" };
 
 // Create a room, or edit one (`room` set). Calls onSaved(name, created).
 export default function RoomFormModal({ room, onClose, onSaved }) {
   const { t } = useTranslation("rooms");
   const [form, setForm] = useState(() =>
-    room ? { ...Object.fromEntries(Object.keys(EMPTY).map((k) => [k, room[k] ?? EMPTY[k]])), price: Number(room.price) || "" } : EMPTY
+    room
+      ? {
+          ...Object.fromEntries(Object.keys(EMPTY).map((k) => [k, room[k] ?? EMPTY[k]])),
+          price: Number(room.price) || "",
+          // Edited as text, one amenity per line.
+          amenities: (room.amenities || []).join("\n"),
+        }
+      : EMPTY
   );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -50,7 +57,7 @@ export default function RoomFormModal({ room, onClose, onSaved }) {
 
     setSaving(true);
     try {
-      const payload = { ...form, price, capacity };
+      const payload = { ...form, price, capacity, amenities: form.amenities.split("\n").map((line) => line.trim()).filter(Boolean) };
       if (room) await updateRoom(room.id, payload);
       else await createRoom(payload);
       onSaved(form.room_name, !room);
@@ -91,6 +98,9 @@ export default function RoomFormModal({ room, onClose, onSaved }) {
           </Field>
           <Field label={t("form.description")} htmlFor="room-description" wide>
             <textarea id="room-description" className="adm-textarea" rows={3} value={form.description || ""} onChange={set("description")} />
+          </Field>
+          <Field label={t("form.amenities")} htmlFor="room-amenities" hint={t("form.amenitiesHint")} wide>
+            <textarea id="room-amenities" className="adm-textarea" rows={4} value={form.amenities} onChange={set("amenities")} />
           </Field>
         </div>
 
