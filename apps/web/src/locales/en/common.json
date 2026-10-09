@@ -23,12 +23,23 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "working": "Working...",
-    "dismiss": "Dismiss notification"
+    "dismiss": "Dismiss notification",
+    "close": "Close",
+    "typeToConfirm": "Type this code to confirm:"
   },
   "stars": "{{count}} stars",
   "stars_one": "{{count}} star",
   "theme": {
     "toLight": "Switch to light theme",
     "toDark": "Switch to dark theme"
+  },
+  "demo": {
+    "tag": "Demo",
+    "guest": "This is a demo: the sample data is reset from time to time.",
+    "guestTestPayments": "This is a demo: bookings and payments are for testing only.",
+    "short": "Demo site",
+    "shortTestPayments": "Demo · test payments",
+    "noRealMoney": "No real money is charged.",
+    "close": "Close the demo notice"
   }
 }

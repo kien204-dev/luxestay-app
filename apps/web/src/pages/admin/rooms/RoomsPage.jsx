@@ -120,6 +120,8 @@ export default function RoomsPage() {
         message={t("confirm.deleteMessage", { name: toDelete?.room_name })}
         confirmLabel={t("admin:delete")}
         tone="danger"
+        // Gone for good, photos included: typed to confirm.
+        confirmCode={toDelete ? `ROOM-${toDelete.id}` : undefined}
         loading={Boolean(toDelete) && deletingId === toDelete.id}
         onConfirm={confirmDelete}
         onCancel={() => setToDelete(null)}
