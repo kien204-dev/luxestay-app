@@ -1,7 +1,7 @@
 /*
   Admin area. Every colour comes from the theme tokens in index.css, so a
-  rebrand restyles these pages too. The shell carries .theme-dark: the admin
-  area is always in the dark set, whatever the guest site shows.
+  rebrand restyles these pages too, and they follow the same light/dark
+  choice as the guest site (the switch is in the top bar).
 */
 .adm-shell { display: flex; min-height: 100vh; width: 100%; background: var(--color-navy-950); color: var(--color-text-primary); font-family: var(--font-sans); }
 .adm-main { margin-left: 240px; width: calc(100% - 240px); min-height: 100vh; overflow-x: clip; }
