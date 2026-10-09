@@ -2694,6 +2694,28 @@ describe("hotel booking API", () => {
       assert.equal((await request(baseUrl, "/api/users", { headers: authHeader(adminToken) })).response.status, 200);
       const publicSettings = await request(baseUrl, "/api/settings/public");
       assert.deepEqual(publicSettings.body.demo.accounts.map((account) => account.role), ["admin", "user"]);
+
+      // "No real money" is only claimed while every gateway is a test one.
+      const savedPayments = { vnpay: process.env.VNPAY_PAY_URL, momo: process.env.MOMO_ENABLED, momoUrl: process.env.MOMO_API_URL };
+      const testPayments = async () => (await request(baseUrl, "/api/settings/public")).body.demo.testPayments;
+      try {
+        delete process.env.VNPAY_PAY_URL;
+        delete process.env.MOMO_ENABLED;
+        assert.equal(await testPayments(), true);
+        process.env.VNPAY_PAY_URL = "https://pay.vnpay.vn/vpcpay.html";
+        assert.equal(await testPayments(), false);
+        process.env.VNPAY_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+        process.env.MOMO_ENABLED = "true";
+        process.env.MOMO_API_URL = "https://payment.momo.vn/v2/gateway/api/create";
+        assert.equal(await testPayments(), false);
+        process.env.MOMO_API_URL = "https://test-payment.momo.vn/v2/gateway/api/create";
+        assert.equal(await testPayments(), true);
+      } finally {
+        for (const [name, value] of [["VNPAY_PAY_URL", savedPayments.vnpay], ["MOMO_ENABLED", savedPayments.momo], ["MOMO_API_URL", savedPayments.momoUrl]]) {
+          if (value === undefined) delete process.env[name];
+          else process.env[name] = value;
+        }
+      }
     } finally {
       if (saved === undefined) delete process.env.DEMO_MODE;
       else process.env.DEMO_MODE = saved;
