@@ -9,8 +9,10 @@ const {
   forgotPasswordRateLimit,
   loginRateLimit,
   registerRateLimit,
+  resetCheckRateLimit,
   resetPasswordRateLimit,
 } = require("../middleware/rateLimit");
+const { getResetTokenTtlMinutes } = require("../config/auth");
 const { isStrongPassword } = require("../utils/password");
 const { TEXT_LIMITS, findTextLimitError } = require("../utils/textLimits");
 const {
@@ -35,11 +37,6 @@ function publicUser(user) {
     ...safeUser
   } = user;
   return safeUser;
-}
-
-function getResetTokenTtlMinutes() {
-  const ttl = Number(process.env.RESET_TOKEN_TTL_MINUTES || 15);
-  return Number.isFinite(ttl) && ttl > 0 ? ttl : 15;
 }
 
 function hashResetToken(token) {
@@ -172,6 +169,44 @@ router.post("/forgot-password", forgotPasswordRateLimit, async (req, res) => {
     return res.json(apiMessage("RESET_EMAIL_SENT"));
   } catch (err) {
     console.error("FORGOT PASSWORD ERROR:", err);
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+});
+
+// Opening a reset link: says whether it still works before the visitor types
+// a new password. A working link names its account (whoever holds the link
+// received it at that address). A link that is no longer usable says why,
+// "expired" with its times or "used", and nothing about the account; an
+// unknown token is just "invalid".
+router.post("/reset-password/check", resetCheckRateLimit, async (req, res) => {
+  const token = typeof req.body.token === "string" ? req.body.token : "";
+  if (!token) return res.status(400).json({ ...apiMessage("RESET_FIELDS_REQUIRED") });
+
+  try {
+    const result = await pool.query(
+      `SELECT t.created_at, t.expires_at, t.used_at, t.expires_at <= NOW() AS expired, u.email
+       FROM password_reset_tokens t
+       JOIN users u ON u.id = t.user_id AND u.deleted_at IS NULL
+       WHERE t.token_hash = $1
+       ORDER BY t.id DESC
+       LIMIT 1`,
+      [hashResetToken(token)]
+    );
+    const link = result.rows[0];
+
+    if (!link) return res.status(400).json({ ...apiMessage("RESET_TOKEN_INVALID"), reason: "invalid" });
+    if (link.used_at) return res.status(400).json({ ...apiMessage("RESET_TOKEN_INVALID"), reason: "used" });
+    if (link.expired) {
+      return res.status(400).json({
+        ...apiMessage("RESET_TOKEN_INVALID"),
+        reason: "expired",
+        createdAt: link.created_at,
+        expiresAt: link.expires_at,
+      });
+    }
+    return res.json({ valid: true, email: link.email, expiresAt: link.expires_at });
+  } catch (err) {
+    console.error("RESET LINK CHECK ERROR:", err);
     return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 });

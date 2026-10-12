@@ -3271,6 +3271,7 @@ describe("hotel booking API", () => {
       assert.deepEqual(Object.keys(result.body).sort(), [
         "address",
         "amenities",
+        "auth",
         "checkInTime",
         "checkOutTime",
         "email",
@@ -3283,6 +3284,13 @@ describe("hotel booking API", () => {
         "nearbyPlaces",
         "phone",
       ]);
+      // What the sign-in pages follow, and nothing else about accounts.
+      assert.deepEqual(result.body.auth, {
+        googleLogin: true,
+        resetLinkMinutes: 15,
+        passwordRules: [{ id: "minLength", min: 8 }, { id: "letter" }, { id: "digit" }],
+        forgotPassword: { limit: 5, windowMinutes: 60 },
+      });
       // Home page content is empty until an admin writes it.
       assert.equal(result.body.heroTitle, "");
       assert.deepEqual(result.body.amenities, []);

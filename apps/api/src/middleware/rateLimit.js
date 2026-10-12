@@ -33,16 +33,27 @@ const registerRateLimit = rateLimit({
   limit: 20,
 });
 
+// Published to the web app (config/auth.js), whose "send again" button
+// follows it.
+const FORGOT_PASSWORD_LIMIT = { limit: 5, windowMinutes: 60 };
+
 const forgotPasswordRateLimit = rateLimit({
   ...commonOptions,
-  windowMs: 60 * 60 * 1000,
-  limit: 5,
+  windowMs: FORGOT_PASSWORD_LIMIT.windowMinutes * 60 * 1000,
+  limit: FORGOT_PASSWORD_LIMIT.limit,
 });
 
 const resetPasswordRateLimit = rateLimit({
   ...commonOptions,
   windowMs: 60 * 60 * 1000,
   limit: 10,
+});
+
+// Opening a reset link checks it first (see routes/auth.js).
+const resetCheckRateLimit = rateLimit({
+  ...commonOptions,
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
 });
 
 const uploadRateLimit = rateLimit({
@@ -53,9 +64,11 @@ const uploadRateLimit = rateLimit({
 
 module.exports = {
   apiRateLimit,
+  FORGOT_PASSWORD_LIMIT,
   forgotPasswordRateLimit,
   loginRateLimit,
   registerRateLimit,
+  resetCheckRateLimit,
   resetPasswordRateLimit,
   uploadRateLimit,
 };
