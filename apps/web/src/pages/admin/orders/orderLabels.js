@@ -13,10 +13,6 @@ export const PAYMENT_STATUSES = ["unpaid", "pending", "paid", "failed", "refund_
 export const STATUS_TONE = { pending: "warning", confirmed: "success", completed: "info", cancelled: "danger" };
 export const PAYMENT_TONE = { unpaid: "neutral", pending: "warning", paid: "success", failed: "danger", refund_pending: "warning", refunded: "neutral" };
 
-export function bookingCode(id) {
-  return `#BK-${String(id).padStart(4, "0")}`;
-}
-
 // The one money action that applies to a booking: record a desk payment, or
 // confirm a refund has been sent.
 export function paymentActionFor(order) {

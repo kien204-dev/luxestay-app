@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Dialog, { CloseIcon } from "../Dialog";
 import { addDays, formatDate, formatMoney } from "../../utils/format";
-import { bookingCode } from "../../pages/admin/orders/orderLabels";
+import { bookingCode } from "../../utils/bookingCode";
 
 const dateOf = (value) => String(value).slice(0, 10);
 

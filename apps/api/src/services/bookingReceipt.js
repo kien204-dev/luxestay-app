@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
 const { daysBetween } = require("../utils/time.js");
+const { bookingCode } = require("../utils/bookingCode.js");
 const { ownFilename } = require("./storage.js");
 const { pngCopyOf } = require("../middleware/imageUpload.js");
 
@@ -96,10 +97,6 @@ function formatDate(dateStr, lang) {
     month: "2-digit",
     year: "numeric",
   });
-}
-
-function bookingCode(id) {
-  return `#BK-${String(id).padStart(4, "0")}`;
 }
 
 // The logo as image bytes pdfkit can embed (PNG or JPEG), or null. Uploads
@@ -231,4 +228,4 @@ async function buildReceiptPdf(booking, property, { language } = {}) {
   });
 }
 
-module.exports = { bookingCode, buildReceiptPdf, loadLogoForPdf, receiptAmounts };
+module.exports = { buildReceiptPdf, loadLogoForPdf, receiptAmounts };

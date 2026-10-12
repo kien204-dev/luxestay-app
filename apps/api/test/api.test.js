@@ -3216,7 +3216,7 @@ describe("hotel booking API", () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     assert.equal(state.sentAdminEmails.length, 1);
     assert.deepEqual(state.sentAdminEmails[0].to, ["admin@example.com"]);
-    assert.match(state.sentAdminEmails[0].subject, /#1950/);
+    assert.match(state.sentAdminEmails[0].subject, /#BK-1950/);
 
     const byGuest = await request(baseUrl, "/api/bookings/1950/refund", {
       method: "PATCH",

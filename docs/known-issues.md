@@ -29,13 +29,18 @@ Cập nhật: 2026-10-09 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại
 - **Luồng đặt phòng so với bản thiết kế**: không có "Giá thành viên", danh sách "Mã dành cho bạn", giờ đến dự kiến, yêu cầu đặc biệt, thanh toán tại khách sạn, giá từng ngày trên lịch, "Thêm vào lịch", lời nhắn về quản gia: hệ thống chưa có dữ liệu hoặc tính năng tương ứng. Chính sách hủy chỉ có hai mốc đúng với cách API xử lý (trong hạn: hoàn toàn bộ; quá hạn: không tự hủy trực tuyến), không có mốc "hoàn 50%".
 - **Phòng chỉ được giữ từ bước cuối của luồng đặt phòng** (khi đặt phòng được tạo), không phải từ lúc bắt đầu chọn ngày: trong lúc khách đi qua các bước, người khác vẫn có thể đặt trước. Khi đó trang báo "phòng vừa có người đặt" và giữ nguyên dữ liệu đã nhập.
 - **Lý do thanh toán thất bại** chỉ được diễn giải cho các mã phổ biến của VNPay; mã khác (và MoMo) hiện câu chung kèm mã của cổng.
-- **Mã đặt phòng hiển thị theo hai dạng** có từ trước: `#0012` trên thẻ ở Đặt phòng của tôi, `#BK-0012` ở trang kết quả, hộp thoại, email và trang quản trị.
 - **Chế độ demo không tự thay cổng thanh toán**: muốn bản demo không động tới tiền thật thì để VNPay ở sandbox và MoMo tắt hoặc ở môi trường test (mặc định là vậy); khi đó dải demo mới ghi "Không có tiền thật nào bị trừ".
 - **Trang chủ chưa có khối "Trải nghiệm"** như trong bản thiết kế: hệ thống chưa có dữ liệu cho hoạt động/dịch vụ kèm giá và thời lượng. Ý tưởng cho sau: một danh sách trải nghiệm do admin quản lý (ảnh, tên, mô tả, giá, thời lượng). Cũng chưa làm vì cùng lý do: form đăng ký nhận ưu đãi qua email ở cuối trang, bản đồ ở khối "Vị trí" (hiện chỉ có địa chỉ, danh sách điểm lân cận và nút mở Google Maps), điểm đánh giá theo từng tiêu chí, nút lưu phòng yêu thích.
 - **Nội dung trang chủ do admin nhập chỉ có một bản** (tiêu đề, mô tả, tiện ích, điểm lân cận): khách xem tiếng Anh thấy đúng câu admin đã nhập. Câu mặc định khi để trống thì có bản vi/en.
 - **Email và phiếu PDF không theo giao diện sáng/tối.** Favicon và hình vẽ thay ảnh luôn vẽ theo bộ màu sáng.
 - **Khối "Tiện ích" dùng lại ảnh nền trang chủ** (như bản thiết kế); chưa có ô tải ảnh riêng cho khối này.
 - **Ô ngày ở thanh tìm phòng là ô ngày của trình duyệt**, nên định dạng ngày theo ngôn ngữ của trình duyệt, không phải theo nút VI/EN.
+
+## Mã đặt phòng
+
+Một định dạng ở mọi nơi: `#BK-0012` (số đặt phòng, đủ 4 chữ số; từ 10000 trở đi thì dài thêm, ví dụ `#BK-12345`). Dùng trên thẻ ở Đặt phòng của tôi, trang kết quả thanh toán, các hộp thoại, trang quản trị, thông báo trực tiếp cho admin, email khách, email cảnh báo admin và phiếu PDF. Ở chỗ không hợp ký tự `#` thì bỏ nó đi: tên tệp PDF (`booking-BK-0012.pdf`) và mã phải gõ để xác nhận xoá đơn (`BK-0012`, trước đây là `BOOKING-12`). Định dạng nằm ở một chỗ cho mỗi phía: `apps/api/src/utils/bookingCode.js` và `apps/web/src/utils/bookingCode.js`.
+
+Mã này chỉ là số đặt phòng được trình bày lại, nên đoán được (số liền nhau); mọi trang và API vẫn kiểm tra quyền theo tài khoản, không dựa vào việc mã khó đoán.
 
 ## Cơ sở dữ liệu
 

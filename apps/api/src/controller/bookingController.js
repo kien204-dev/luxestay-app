@@ -7,6 +7,7 @@ const { getPropertySettings } = require("../services/propertySettings.js");
 const { loadBookingDetails, notifyBooking, SUPPORTED_LANGUAGES } = require("../services/bookingEmails.js");
 const { buildReceiptPdf } = require("../services/bookingReceipt.js");
 const { apiMessage } = require("../utils/apiMessages");
+const { bookingRef } = require("../utils/bookingCode.js");
 
 const ACTIVE_STATUSES = ["pending", "confirmed"];
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -479,7 +480,7 @@ exports.getBookingReceipt = async (req, res) => {
     const buffer = await buildReceiptPdf(booking, property, { language: req.query.lang });
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="booking-BK-${String(id).padStart(4, "0")}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="booking-${bookingRef(id)}.pdf"`);
     return res.send(buffer);
   } catch (err) {
     console.error("BOOKING RECEIPT ERROR:", err);

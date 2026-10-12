@@ -10,7 +10,7 @@ import { useAsyncData } from "../../../utils/useAsyncData";
 import WalkInBookingModal from "./WalkInBookingModal";
 import OrdersList from "./OrdersList";
 import ReviewsPanel from "./ReviewsPanel";
-import { bookingCode } from "./orderLabels";
+import { bookingCode } from "../../../utils/bookingCode";
 
 // Admin: totals, the booking list (one page at a time) and guest reviews.
 export default function OrdersPage() {

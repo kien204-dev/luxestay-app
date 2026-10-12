@@ -234,3 +234,10 @@ test("db:reset refuses non-local or production databases unless allowed", () => 
     process.env = saved;
   }
 });
+
+test("booking codes have one format everywhere", () => {
+  const { bookingCode, bookingRef } = require("../src/utils/bookingCode");
+  assert.equal(bookingCode(7), "#BK-0007");
+  assert.equal(bookingCode(12345), "#BK-12345");
+  assert.equal(bookingRef(7), "BK-0007");
+});

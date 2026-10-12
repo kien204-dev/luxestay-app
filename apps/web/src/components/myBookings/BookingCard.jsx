@@ -6,6 +6,7 @@ import GuestIcon from "../guest/icons";
 import { useToast } from "../../context/ToastContext";
 import { downloadBookingReceipt } from "../../services/bookingService";
 import { addDays, formatDate, formatMoney, nightsBetween } from "../../utils/format";
+import { bookingCode } from "../../utils/bookingCode";
 import { placeholderFor } from "../../utils/imageUrl";
 import { canCancelOnline, canPayOnline, getPaymentStatusLabel, getStatusLabel, PAYMENT_TONE, STATUS_TONE } from "./helpers";
 
@@ -77,7 +78,7 @@ export default function BookingCard({ booking: b, policy, onDetails, onPay, onCa
           {b.payment_status && b.payment_status !== "unpaid" && (
             <span className={`status-badge is-plain is-${PAYMENT_TONE[b.payment_status] || "neutral"}`}>{getPaymentStatusLabel(t)[b.payment_status]}</span>
           )}
-          <span className="my-booking-code">#{String(b.id).padStart(4, "0")}</span>
+          <span className="my-booking-code">{bookingCode(b.id)}</span>
         </div>
         <h2>{b.room_name}</h2>
         <p className="my-booking-meta">

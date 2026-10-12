@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Badge, SkeletonRows } from "../../../components/admin/ui";
 import { formatDate, formatMoney } from "../../../utils/format";
 import useIsMobile from "../../../utils/useIsMobile";
-import { PAYMENT_TONE, STATUS_TONE, STATUS_TRANSITIONS, bookingCode, paymentActionFor } from "./orderLabels";
+import { PAYMENT_TONE, STATUS_TONE, STATUS_TRANSITIONS, paymentActionFor } from "./orderLabels";
+import { bookingCode } from "../../../utils/bookingCode";
 
 function StatusSelect({ order, busy, onChange }) {
   const { t } = useTranslation("orders");

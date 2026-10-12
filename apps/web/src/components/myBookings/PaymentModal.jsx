@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import Dialog, { CloseIcon } from "../Dialog";
 import { DemoPaymentNote } from "../DemoBanner";
 import { formatMoney } from "../../utils/format";
-import { bookingCode } from "../../pages/admin/orders/orderLabels";
+import { bookingCode } from "../../utils/bookingCode";
 
 const LABEL_KEY = { vnpay: "paymentModal.payVnpay", momo: "paymentModal.payMomo" };
 

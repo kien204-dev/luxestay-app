@@ -98,7 +98,7 @@
     "publicNote": "Reviews are public on the room's page; your name is shortened."
   },
   "detailModal": {
-    "bookingId": "Booking ID #{{id}}",
+    "bookingId": "Booking {{code}}",
     "title": "Booking details",
     "checkIn": "Check-in",
     "checkOut": "Check-out",
