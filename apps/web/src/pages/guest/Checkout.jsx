@@ -257,7 +257,13 @@ export default function Checkout() {
       return (
         <div className="guest-container checkout-page" aria-busy="true" data-testid="checkout-loading">
           <span className="sr-only" role="status">{t("loading")}</span>
-          <span className="luxe-skeleton-light" style={{ height: 52, width: 360, maxWidth: "80%", margin: "48px 0 24px" }} />
+          {/* The heading's own boxes, so the page does not move when it arrives. */}
+          <div className="checkout-top">
+            <div className="page-head page-head--tight">
+              <span className="luxe-skeleton-light" style={{ height: 12, width: 220, margin: "16px 0" }} />
+              <span className="luxe-skeleton-light checkout-loading-title" />
+            </div>
+          </div>
           <div className="checkout-grid">
             <span className="luxe-skeleton-light" style={{ height: 420 }} />
             <span className="luxe-skeleton-light" style={{ height: 360 }} />

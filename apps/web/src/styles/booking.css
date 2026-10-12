@@ -276,3 +276,7 @@
   .booking-refresh { margin-left: 0; }
   .booking-filters .g-field { flex: 1 1 140px; }
 }
+
+/* The title's place while the checkout loads (same height as the title). */
+.checkout-loading-title { width: 360px; max-width: 80%; height: 50px; }
+@media (max-width: 720px) { .checkout-loading-title { height: 40px; } }
