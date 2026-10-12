@@ -204,21 +204,7 @@ input.search-seg-value:focus-visible { outline: none; }
 .calendar-legend i { display: inline-block; width: 12px; height: 12px; border-radius: var(--radius-xs); margin-right: 6px; vertical-align: -1px; }
 
 /* The account settings page is shared with the admin area. */
-.account-light { padding: var(--space-6) 0 var(--space-9); }
 
-/* --------------------------------------------------------------- credits */
-.credits-page { padding: var(--space-7) 0 var(--space-9); }
-.guest .credits-page h1 { font-size: clamp(34px, 4vw, 48px); line-height: 1.12; font-weight: 500; margin-bottom: 10px; }
-.credits-intro { max-width: 760px; color: var(--ink-muted); margin: 0 0 28px; }
-.credits-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-5); list-style: none; padding: 0; margin: 0; }
-.credits-item { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; }
-.credits-item img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--surface-sunken); }
-.credits-item div { padding: 14px 16px 16px; font-size: 15px; line-height: 24px; }
-.guest .credits-item h2 { font-size: 24px; line-height: 30px; margin-bottom: 6px; }
-.credits-item dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; }
-.credits-item dt { color: var(--ink-muted); }
-.credits-item dd { margin: 0; overflow-wrap: anywhere; }
-.guest .credits-item a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------------------------------------------------------------- footer */
 /* A dark band in both themes: text is the inverse ink. */
@@ -228,7 +214,7 @@ input.search-seg-value:focus-visible { outline: none; }
 .guest-footer-brand .guest-brand { color: var(--ink-inverse); }
 .guest-footer-brand .guest-brand-mark { background: var(--ink-inverse); color: var(--surface-inverse); }
 .guest-footer-brand p { margin: 0; max-width: 360px; }
-.guest .guest-footer h3 { margin: 0 0 var(--space-4); color: var(--brass-inverse); font: 600 12px/16px var(--font-sans); letter-spacing: 0.16em; text-transform: uppercase; }
+.guest .guest-footer h2 { margin: 0 0 var(--space-4); color: var(--brass-inverse); font: 600 12px/16px var(--font-sans); letter-spacing: 0.16em; text-transform: uppercase; }
 .guest-footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .guest-footer li { overflow-wrap: anywhere; }
 .guest-footer li > a, .guest-footer li > span { display: inline-flex; align-items: center; min-height: 44px; }
@@ -282,33 +268,6 @@ input.search-seg-value:focus-visible { outline: none; }
   .booking-panel-row { grid-template-columns: 1fr; }
   .guest-footer-grid { grid-template-columns: 1fr; }
 }
-
-/* ------------------------------------------------------------ sign-in pages */
-.auth-wrap { display: flex; justify-content: center; padding: var(--space-7) var(--space-4) var(--space-9); }
-.auth-card { width: 100%; max-width: 460px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: var(--shadow-md); box-sizing: border-box; }
-.guest .auth-card h1 { font-size: 36px; line-height: 42px; font-weight: 500; margin-bottom: 6px; }
-.auth-card > p.auth-sub { color: var(--ink-muted); margin: 0 0 22px; font-size: 15px; line-height: 24px; }
-.auth-form { display: flex; flex-direction: column; gap: 14px; }
-.auth-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.guest .auth-link { color: var(--accent-ink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
-.auth-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 14px; color: var(--ink-muted); font-size: 14px; }
-.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.auth-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 48px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font-weight: 500; font-size: 15px; font-family: inherit; cursor: pointer; }
-.auth-google:disabled { opacity: 0.55; cursor: not-allowed; }
-.auth-foot { margin: 22px 0 0; text-align: center; color: var(--ink-muted); font-size: 15px; }
-.auth-success { background: var(--success-soft); border: 1px solid color-mix(in srgb, var(--success) 35%, transparent); color: var(--success); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; line-height: 22px; }
-.auth-password { position: relative; }
-.auth-password .g-input { padding-right: 76px; }
-.auth-password button { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); min-height: 40px; border: none; background: none; color: var(--accent-ink); font-weight: 500; font-size: 13px; cursor: pointer; padding: 6px 10px; font-family: inherit; }
-
-/* Result / error pages (payment result, 404, no access). */
-.status-card { text-align: center; }
-.status-card .auth-card { padding: 40px 32px; }
-.status-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 600; margin: 0 auto 18px; }
-.status-icon--success { background: var(--success-soft); color: var(--success); }
-.status-icon--error { background: var(--danger-soft); color: var(--danger); }
-.status-icon--pending { background: var(--brass-soft); color: var(--brass); }
-.status-card p.status-text { color: var(--ink-muted); font-size: 15px; line-height: 24px; margin: 0 0 26px; }
 
 /* ----------------------------------------------------------------- reviews */
 .review-muted { color: var(--ink-muted); font-size: 14px; }

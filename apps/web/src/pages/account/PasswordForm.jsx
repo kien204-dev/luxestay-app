@@ -1,66 +1,95 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Field } from "../../components/admin/ui";
+import { Field, FieldIcon, PasswordInput, PasswordMeter, PasswordRules, usePasswordRules } from "../../components/auth/fields";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { changeCurrentUserPassword } from "../../services/userService";
-import { apiErrorText, apiSuccessText } from "../../utils/apiError";
+import { apiErrorText } from "../../utils/apiError";
 import { isStrongPassword } from "../../utils/password";
 
 const EMPTY = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
-// Change the password, knowing the current one.
+// Change the password, knowing the current one. The API signs every other
+// session out (token_version) and keeps this one.
 export default function PasswordForm() {
   const { t } = useTranslation("account");
+  const tAuth = useTranslation("auth").t;
+  const toast = useToast();
+  const rules = usePasswordRules();
   const { user, updateCurrentUser } = useAuth();
   const [form, setForm] = useState(EMPTY);
+  const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState({ error: "", success: "" });
   const set = (key) => (event) => {
     setForm((current) => ({ ...current, [key]: event.target.value }));
-    setMessage({ error: "", success: "" });
+    setErrors((current) => ({ ...current, [key]: "", general: "" }));
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!form.currentPassword || !form.newPassword) return setMessage({ error: t("password.required"), success: "" });
-    if (!isStrongPassword(form.newPassword)) return setMessage({ error: t("password.rule"), success: "" });
-    if (form.newPassword !== form.confirmPassword) return setMessage({ error: t("password.mismatch"), success: "" });
+    const found = {
+      currentPassword: form.currentPassword ? "" : t("password.currentRequired"),
+      newPassword: isStrongPassword(form.newPassword, rules) ? "" : form.newPassword ? tAuth("errors.passwordRule") : tAuth("errors.passwordRequired"),
+      confirmPassword: form.newPassword && form.confirmPassword !== form.newPassword ? tAuth("errors.passwordMismatch") : "",
+    };
+    if (Object.values(found).some(Boolean)) return setErrors(found);
 
     setBusy(true);
     try {
-      const result = await changeCurrentUserPassword({ currentPassword: form.currentPassword, newPassword: form.newPassword });
+      await changeCurrentUserPassword({ currentPassword: form.currentPassword, newPassword: form.newPassword });
       setForm(EMPTY);
       updateCurrentUser({ must_change_password: false });
-      setMessage({ error: "", success: apiSuccessText(result, "account:password.changed") });
+      toast.success(t("password.changed"));
     } catch (err) {
-      setMessage({ error: apiErrorText(err, "account:password.failed"), success: "" });
+      const code = err.response?.data?.code;
+      if (code === "CURRENT_PASSWORD_WRONG") setErrors({ currentPassword: apiErrorText(err) });
+      else if (code === "WEAK_PASSWORD") setErrors({ newPassword: apiErrorText(err) });
+      else setErrors({ general: apiErrorText(err, "account:password.failed") });
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <form onSubmit={submit} className="adm-panel adm-panel--padded" data-testid="password-form">
-      <h2>{t("password.title")}</h2>
-      {user?.must_change_password && <p className="adm-note" style={{ margin: "0 0 16px" }}>{t("password.mustChange")}</p>}
-
-      <Alert>{message.error}</Alert>
-      {message.success && <p className="adm-note" role="status" style={{ margin: "0 0 16px", color: "var(--color-success)" }}>{message.success}</p>}
-
-      <div className="adm-form-grid">
-        <Field label={t("password.current")} htmlFor="password-current">
-          <input id="password-current" type="password" className="adm-input" value={form.currentPassword} onChange={set("currentPassword")} disabled={busy} autoComplete="current-password" />
+    <form className="ac-card" onSubmit={submit} noValidate aria-labelledby="password-title" data-testid="password-form">
+      <div className="ac-card__h">
+        <h2 id="password-title">{t("password.title")}</h2>
+        <p>{t("password.subtitle")}</p>
+      </div>
+      <div className="ac-card__b ac-card__b--narrow">
+        {user?.must_change_password && (
+          <div className="fx-alert fx-alert--warning" role="status" data-testid="must-change"><FieldIcon.Lock /><p>{t("password.mustChange")}</p></div>
+        )}
+        {errors.general && (
+          <div className="fx-alert fx-alert--danger" role="alert"><FieldIcon.Alert /><p>{errors.general}</p></div>
+        )}
+        {/* Lets password managers file the new password under this account. */}
+        <input type="email" name="username" autoComplete="username" value={user?.email || ""} readOnly hidden />
+        <Field id="password-current" label={t("password.current")} error={errors.currentPassword}>
+          <PasswordInput id="password-current" error={errors.currentPassword} value={form.currentPassword} onChange={set("currentPassword")} disabled={busy} autoComplete="current-password" />
         </Field>
-        <Field label={t("password.new")} htmlFor="password-new">
-          <input id="password-new" type="password" className="adm-input" value={form.newPassword} onChange={set("newPassword")} disabled={busy} autoComplete="new-password" />
+        <Field
+          id="password-new"
+          label={t("password.new")}
+          error={errors.newPassword}
+          help={
+            <>
+              <PasswordMeter password={form.newPassword} />
+              <PasswordRules id="password-new-rules" password={form.newPassword} />
+            </>
+          }
+        >
+          <PasswordInput id="password-new" error={errors.newPassword} describedBy="password-new-rules" value={form.newPassword} onChange={set("newPassword")} disabled={busy} autoComplete="new-password" />
         </Field>
-        <Field label={t("password.confirm")} htmlFor="password-confirm">
-          <input id="password-confirm" type="password" className="adm-input" value={form.confirmPassword} onChange={set("confirmPassword")} disabled={busy} autoComplete="new-password" />
+        <Field id="password-confirm" label={t("password.confirm")} error={errors.confirmPassword}>
+          <PasswordInput id="password-confirm" error={errors.confirmPassword} value={form.confirmPassword} onChange={set("confirmPassword")} disabled={busy} autoComplete="new-password" />
         </Field>
       </div>
-      <p className="adm-hint">{t("password.rule")}</p>
-      <div className="adm-actions" style={{ justifyContent: "flex-end", marginTop: 16 }}>
-        <button type="submit" className="adm-btn adm-btn--primary" disabled={busy}>{busy ? t("password.updating") : t("password.submit")}</button>
+      <div className="ac-card__f">
+        <button type="button" className="g-btn g-btn--ghost" onClick={() => { setForm(EMPTY); setErrors({}); }} disabled={busy}>{t("password.cancel")}</button>
+        <button type="submit" className={`g-btn g-btn--primary${busy ? " is-loading" : ""}`} aria-busy={busy || undefined} disabled={busy}>
+          <span>{t("password.submit")}</span>
+        </button>
       </div>
     </form>
   );

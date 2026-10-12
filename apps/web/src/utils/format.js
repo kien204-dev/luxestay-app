@@ -50,3 +50,6 @@ export function monthLabel(year, month, lang = "vi") {
     year: "numeric",
   });
 }
+
+// The API's email check (apps/api/src/routes/auth.js).
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

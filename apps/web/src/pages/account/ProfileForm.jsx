@@ -1,104 +1,99 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Field } from "../../components/admin/ui";
-import { useAuth } from "../../context/AuthContext";
-import { updateCurrentUserProfile, uploadAvatar } from "../../services/userService";
-import { apiErrorText, apiSuccessText } from "../../utils/apiError";
-import { IMAGE_TYPES, imageFileProblem } from "../../utils/imageFile";
-import { normalizeImageUrl } from "../../utils/imageUrl";
+import { Control, Field, FieldIcon, inputProps } from "../../components/auth/fields";
+import { useToast } from "../../context/ToastContext";
+import { updateCurrentUserProfile } from "../../services/userService";
+import { apiErrorText } from "../../utils/apiError";
+import { EMAIL_PATTERN } from "../../utils/format";
+
+// The API's phone check (apps/api/src/controller/userController.js).
+const PHONE_PATTERN = /^[0-9+\-\s()]{8,20}$/;
 
 export function toProfile(user) {
   return { name: user?.name || "", email: user?.email || "", phone: user?.phone || "", bio: user?.bio || "", avatar_url: user?.avatar_url || "" };
 }
 
-// Name, email, phone, bio and photo of the signed-in account.
-export default function ProfileForm({ initial }) {
-  const { t } = useTranslation("account");
-  const { updateCurrentUser } = useAuth();
-  const [saved, setSaved] = useState(initial);
-  const [profile, setProfile] = useState(initial);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState({ error: "", success: "" });
-  const set = (key) => (event) => {
-    setProfile((current) => ({ ...current, [key]: event.target.value }));
-    setMessage({ error: "", success: "" });
-  };
-  const initials = (profile.name || profile.email || "?").split(" ").filter(Boolean).map((w) => w[0]).join("").slice(-2).toUpperCase();
+// Which box an API refusal belongs under.
+const FIELD_OF_CODE = { INVALID_EMAIL: "email", EMAIL_EXISTS: "email", INVALID_PHONE: "phone" };
 
-  const changePhoto = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    const problem = imageFileProblem(file);
-    if (!file || problem) return problem && setMessage({ error: t(problem), success: "" });
-    setUploading(true);
-    try {
-      const result = await uploadAvatar(file);
-      setProfile((current) => ({ ...current, avatar_url: result.avatarUrl || "" }));
-      setMessage({ error: "", success: t("profile.photoReady") });
-    } catch (err) {
-      setMessage({ error: apiErrorText(err, "account:profile.photoFailed"), success: "" });
-    } finally {
-      setUploading(false);
-    }
+// The fields the account has: name, email, phone and the "about you" text.
+// `saved` is what is stored; edits stay here until "Save changes".
+export default function ProfileForm({ saved, onSaved }) {
+  const { t } = useTranslation("account");
+  const toast = useToast();
+  const [draft, setDraft] = useState(saved);
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const set = (key) => (event) => {
+    setDraft((current) => ({ ...current, [key]: event.target.value }));
+    setErrors((current) => ({ ...current, [key]: "", general: "" }));
   };
+  const changed = ["name", "email", "phone", "bio"].some((key) => draft[key] !== saved[key]);
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!profile.name.trim() || !profile.email.trim()) return setMessage({ error: t("profile.nameEmailRequired"), success: "" });
+    const found = {
+      name: draft.name.trim() ? "" : t("profile.nameRequired"),
+      email: EMAIL_PATTERN.test(draft.email.trim()) ? "" : t("profile.emailInvalid"),
+      phone: !draft.phone.trim() || PHONE_PATTERN.test(draft.phone.trim()) ? "" : t("profile.phoneInvalid"),
+    };
+    if (found.name || found.email || found.phone) return setErrors(found);
+
     setSaving(true);
     try {
-      const result = await updateCurrentUserProfile(profile);
-      const next = toProfile(result.user);
-      setProfile(next);
-      setSaved(next);
-      updateCurrentUser(result.user);
-      setMessage({ error: "", success: apiSuccessText(result, "account:profile.saved") });
+      // The photo as stored: it is saved on its own, from the card above.
+      const result = await updateCurrentUserProfile({ ...draft, avatar_url: saved.avatar_url });
+      onSaved(result.user);
+      setDraft(toProfile(result.user));
+      toast.success(t("profile.saved"));
     } catch (err) {
-      setMessage({ error: apiErrorText(err, "account:profile.saveFailed"), success: "" });
+      const data = err.response?.data;
+      const field = FIELD_OF_CODE[data?.code] || (data?.code === "TEXT_TOO_LONG" && data.params?.field);
+      if (field && field in draft) setErrors({ [field]: apiErrorText(err) });
+      else setErrors({ general: apiErrorText(err, "account:profile.saveFailed") });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <form onSubmit={submit} className="adm-panel adm-panel--padded" data-testid="profile-form">
-      <h2>{t("profile.title")}</h2>
-      <p className="adm-hint" style={{ margin: "-6px 0 18px" }}>{t("profile.subtitle")}</p>
-
-      <Alert>{message.error}</Alert>
-      {message.success && <p className="adm-note" role="status" style={{ margin: "0 0 16px", color: "var(--color-success)" }}>{message.success}</p>}
-
-      <div className="adm-two-col">
-        <div style={{ textAlign: "center" }}>
-          <div className="adm-avatar" style={{ width: 96, height: 96, borderRadius: 24, fontSize: 32, margin: "0 auto 12px" }}>
-            {profile.avatar_url ? <img src={normalizeImageUrl(profile.avatar_url, "")} alt={t("profile.photo")} /> : initials}
-          </div>
-          <label className="adm-btn adm-btn--muted adm-btn--small" style={{ opacity: uploading || saving ? 0.6 : 1 }}>
-            {uploading ? t("profile.uploading") : t("profile.changePhoto")}
-            <input type="file" accept={IMAGE_TYPES.join(",")} onChange={changePhoto} disabled={uploading || saving} data-testid="avatar-input" />
-          </label>
-          <p className="adm-hint">{t("admin:image.types")}</p>
+    <form className="ac-card" onSubmit={submit} noValidate aria-labelledby="profile-title" data-testid="profile-form">
+      <div className="ac-card__h">
+        <h2 id="profile-title">{t("profile.title")}</h2>
+        <p>{t("profile.subtitle")}</p>
+      </div>
+      <div className="ac-card__b">
+        {errors.general && (
+          <div className="fx-alert fx-alert--danger" role="alert"><FieldIcon.Alert /><p>{errors.general}</p></div>
+        )}
+        <div className="ac-grid2">
+          <Field id="profile-name" label={t("profile.name")} error={errors.name}>
+            <Control invalid={Boolean(errors.name)}>
+              <input {...inputProps("profile-name", errors.name)} value={draft.name} onChange={set("name")} disabled={saving} maxLength={100} autoComplete="name" />
+            </Control>
+          </Field>
+          <Field id="profile-phone" label={t("profile.phone")} error={errors.phone}>
+            <Control invalid={Boolean(errors.phone)}>
+              <input {...inputProps("profile-phone", errors.phone)} type="tel" value={draft.phone} onChange={set("phone")} disabled={saving} maxLength={20} autoComplete="tel" />
+            </Control>
+          </Field>
         </div>
-
-        <div className="adm-form-grid">
-          <Field label={t("profile.name")} htmlFor="profile-name">
-            <input id="profile-name" className="adm-input" value={profile.name} onChange={set("name")} disabled={saving} maxLength={100} autoComplete="name" />
-          </Field>
-          <Field label={t("profile.email")} htmlFor="profile-email">
-            <input id="profile-email" type="email" className="adm-input" value={profile.email} onChange={set("email")} disabled={saving} maxLength={255} autoComplete="email" />
-          </Field>
-          <Field label={t("profile.phone")} htmlFor="profile-phone">
-            <input id="profile-phone" type="tel" className="adm-input" value={profile.phone} onChange={set("phone")} disabled={saving} maxLength={30} autoComplete="tel" />
-          </Field>
-          <Field label={t("profile.bio")} htmlFor="profile-bio" wide>
-            <textarea id="profile-bio" className="adm-textarea" value={profile.bio} onChange={set("bio")} disabled={saving} maxLength={2000} />
-          </Field>
-          <div className="adm-actions is-wide" style={{ justifyContent: "flex-end", gridColumn: "1 / -1" }}>
-            <button type="button" className="adm-btn adm-btn--muted" onClick={() => setProfile(saved)} disabled={saving}>{t("profile.reset")}</button>
-            <button type="submit" className="adm-btn adm-btn--primary" disabled={saving || uploading}>{saving ? t("admin:saving") : t("profile.save")}</button>
-          </div>
-        </div>
+        <Field id="profile-email" label={t("profile.email")} error={errors.email}>
+          <Control icon={<FieldIcon.Mail />} invalid={Boolean(errors.email)}>
+            <input {...inputProps("profile-email", errors.email)} type="email" value={draft.email} onChange={set("email")} disabled={saving} maxLength={255} autoComplete="email" />
+          </Control>
+        </Field>
+        <Field id="profile-bio" label={<>{t("profile.bio")} <span className="ac-opt">{t("profile.optional")}</span></>} error={errors.bio}>
+          <Control invalid={Boolean(errors.bio)}>
+            <textarea {...inputProps("profile-bio", errors.bio)} value={draft.bio} onChange={set("bio")} disabled={saving} maxLength={2000} rows={3} />
+          </Control>
+        </Field>
+      </div>
+      <div className="ac-card__f">
+        <button type="button" className="g-btn g-btn--ghost" onClick={() => { setDraft(saved); setErrors({}); }} disabled={saving || !changed}>{t("profile.reset")}</button>
+        <button type="submit" className={`g-btn g-btn--primary${saving ? " is-loading" : ""}`} aria-busy={saving || undefined} disabled={saving}>
+          <span>{t("profile.save")}</span>
+        </button>
       </div>
     </form>
   );

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { signInWithPopup } from "firebase/auth";
 import { auth, isFirebaseConfigured, provider } from "../../firebase";
+import { useProperty } from "../../context/PropertyContext";
 import api from "../../services/api";
 import { getGoogleAuthErrorMessage, logGoogleAuthError } from "../../utils/googleAuthError";
 
@@ -12,21 +13,34 @@ const GOOGLE_LOGO = [
   ["#FBBC05", "M10.68 28.17c-.43-1.28-.68-2.65-.68-4.17s.25-2.89.68-4.17l-7.98-6.2C1.66 16.6 1 20.2 1 24s.66 7.4 1.7 10.37l7.98-6.2z"], // theme-ignore
 ];
 
-// "Continue with Google". Disabled (with a note) when the site has no
-// Firebase configuration. onSignedIn(user, linked) / onError(message).
+// Google sign-in is on when this site has a Firebase configuration and the
+// API has its service account (auth.googleLogin): both halves are needed.
+export function useGoogleSignIn() {
+  const { auth: options } = useProperty();
+  return isFirebaseConfigured && Boolean(options?.googleLogin);
+}
+
+// "Continue with Google" and the "or" under it; nothing at all when Google
+// sign-in is off. onSignedIn(user, linked) / onError({ code, message, email })
+// where code is the API's (e.g. GOOGLE_ADMIN_PASSWORD_REQUIRED) and email is
+// the Google account's.
 export default function GoogleSignIn({ busy, setBusy, onSignedIn, onError }) {
   const { t } = useTranslation("auth");
+  const enabled = useGoogleSignIn();
+  if (!enabled) return null;
 
   const signIn = async () => {
     if (busy) return;
     setBusy(true);
+    let email = "";
     try {
       const result = await signInWithPopup(auth, provider);
+      email = result.user.email || "";
       const res = await api.post("/google-login", { idToken: await result.user.getIdToken() });
       onSignedIn(res.data.user, res.data.linked);
     } catch (err) {
       logGoogleAuthError(err);
-      onError(getGoogleAuthErrorMessage(err));
+      onError({ code: err?.response?.data?.code, message: getGoogleAuthErrorMessage(err), email });
     } finally {
       setBusy(false);
     }
@@ -34,8 +48,7 @@ export default function GoogleSignIn({ busy, setBusy, onSignedIn, onError }) {
 
   return (
     <>
-      <div className="auth-divider">{t("common.or")}</div>
-      <button type="button" className="auth-google" onClick={signIn} disabled={busy || !isFirebaseConfigured} title={isFirebaseConfigured ? undefined : t("google.notConfigured")}>
+      <button type="button" className="au__google" onClick={signIn} disabled={busy} data-testid="google-sign-in">
         <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true">
           {GOOGLE_LOGO.map(([fill, d]) => (
             <path key={fill} fill={fill} d={d} />
@@ -43,7 +56,7 @@ export default function GoogleSignIn({ busy, setBusy, onSignedIn, onError }) {
         </svg>
         {t("google.button")}
       </button>
-      {!isFirebaseConfigured && <p className="adm-hint" style={{ textAlign: "center", color: "var(--ink-muted)" }}>{t("google.notConfigured")}</p>}
+      <div className="au__or">{t("common.or")}</div>
     </>
   );
 }

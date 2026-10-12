@@ -38,7 +38,19 @@ function buildWeb() {
   const outDir = fs.mkdtempSync(path.join(os.tmpdir(), "luxestay-e2e-web-"));
   const result = spawnSync("npx", ["vite", "build", "--outDir", outDir, "--emptyOutDir", "--logLevel", "error"], {
     cwd: WEB_DIR,
-    env: { ...process.env, VITE_API_URL: "/api" },
+    env: {
+      ...process.env,
+      VITE_API_URL: "/api",
+      // Google sign-in switched on with a stand-in for its popup (see
+      // firebase-auth-stub.mjs); the values only have to be present.
+      E2E_GOOGLE_STUB: "1",
+      VITE_FIREBASE_API_KEY: "e2e",
+      VITE_FIREBASE_AUTH_DOMAIN: "e2e.invalid",
+      VITE_FIREBASE_PROJECT_ID: "e2e",
+      VITE_FIREBASE_STORAGE_BUCKET: "e2e",
+      VITE_FIREBASE_MESSAGING_SENDER_ID: "0",
+      VITE_FIREBASE_APP_ID: "e2e",
+    },
     stdio: "inherit",
     shell: process.platform === "win32",
   });

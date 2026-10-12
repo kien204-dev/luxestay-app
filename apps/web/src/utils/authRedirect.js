@@ -5,6 +5,8 @@
 
 export const ADMIN_HOME = "/admin";
 export const GUEST_HOME = "/";
+// Where an account with a temporary password is held until it sets its own.
+export const MUST_CHANGE_PASSWORD_PATH = "/settings/password";
 
 // Only same-site paths are accepted, so a crafted link cannot use the login
 // page to bounce someone to another website.
@@ -22,7 +24,7 @@ export function loginPathFor(location) {
 
 // `search` is the query string of the login/register page itself.
 export function postLoginPath(user, search = "") {
-  if (user?.must_change_password) return "/settings";
+  if (user?.must_change_password) return MUST_CHANGE_PASSWORD_PATH;
 
   const next = safeNextPath(new URLSearchParams(search).get("next"));
   if (next) return next;

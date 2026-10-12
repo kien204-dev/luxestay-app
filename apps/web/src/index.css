@@ -332,3 +332,10 @@ body {
   .demo-banner-long { display: none; }
   .demo-banner-short { display: inline; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+/* On the sign-in pages the strip carries the sample sign-ins: kept whole on
+   a phone (they are the point of it), wrapping instead of being cut. */
+.demo-banner--sign-in b { font-weight: 600; overflow-wrap: anywhere; }
+.demo-banner-account { white-space: nowrap; }
+@media (max-width: 720px) {
+  .demo-banner--sign-in .demo-banner-account { white-space: normal; }
+}

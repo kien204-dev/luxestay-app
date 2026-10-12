@@ -16,6 +16,7 @@ const PUBLIC_AUTH_PATHS = new Set([
   "/google-login",
   "/forgot-password",
   "/reset-password",
+  "/reset-password/check",
 ]);
 
 export const SESSION_EXPIRED_EVENT = "auth:session-expired";

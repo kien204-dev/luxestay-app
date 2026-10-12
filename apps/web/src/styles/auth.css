@@ -1,0 +1,113 @@
+/*
+  Sign-in pages (login, sign-up, password reset) and the form pieces they
+  share with My account: a box with an icon, the error under it, the show
+  password button, the strength meter and the rule checklist.
+  Colours, type, spacing and radii come from the tokens in index.css.
+*/
+
+/* ----------------------------------------------------------- form pieces */
+.fx-icon { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.fx-label-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); font: 400 14px/20px var(--font-sans); }
+.guest .fx-label-row a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+.fx-control { display: flex; align-items: center; gap: var(--space-3); min-height: 48px; box-sizing: border-box; padding: 0 var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-muted); transition: border-color 0.15s, box-shadow 0.15s; }
+.fx-control:hover { border-color: var(--ink); }
+.fx-control:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.fx-control.is-invalid { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
+.fx-control.is-disabled { background: var(--surface-sunken); border-color: var(--line); }
+.fx-control > input, .fx-control > textarea { flex: 1; min-width: 0; min-height: 46px; border: 0; outline: 0; background: transparent; color: var(--ink); font: 400 16px/24px var(--font-sans); padding: 0; }
+.fx-control > textarea { min-height: 96px; padding: 11px 0; resize: vertical; }
+.fx-control > input::placeholder, .fx-control > textarea::placeholder { color: var(--ink-subtle); }
+.fx-control > input:disabled { color: var(--ink-subtle); cursor: not-allowed; }
+.fx-eye { display: grid; place-items: center; width: 40px; height: 40px; margin-right: -10px; padding: 0; border: 0; border-radius: var(--radius-xs); background: none; color: var(--ink-muted); cursor: pointer; }
+.fx-eye:hover { color: var(--ink); }
+.fx-error { display: flex; gap: 6px; align-items: flex-start; margin: 0; color: var(--danger); font: 500 13px/20px var(--font-sans); }
+.fx-error .fx-icon { width: 16px; height: 16px; margin-top: 2px; }
+.guest .fx-error a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.fx-help { margin: 0; color: var(--ink-muted); font: 400 13px/20px var(--font-sans); }
+.guest .fx-help a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.fx-alert { display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--info-soft); color: var(--ink); font: 400 14px/22px var(--font-sans); }
+.fx-alert > .fx-icon { color: var(--info); margin-top: 1px; }
+.fx-alert b { color: var(--info); font-weight: 600; }
+.fx-alert--danger { background: var(--danger-soft); }
+.fx-alert--danger > .fx-icon, .fx-alert--danger b { color: var(--danger); }
+.fx-alert--warning { background: var(--warning-soft); }
+.fx-alert--warning > .fx-icon, .fx-alert--warning b { color: var(--warning); }
+.fx-alert--success { background: var(--success-soft); }
+.fx-alert--success > .fx-icon, .fx-alert--success b { color: var(--success); }
+.fx-alert p { margin: 0; }
+
+.pw-meter { display: flex; flex-direction: column; gap: 6px; }
+.pw-meter__bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.pw-meter__bar i { height: 4px; border-radius: 2px; background: var(--line); }
+.pw-meter.is-weak i.is-on { background: var(--danger); }
+.pw-meter.is-medium i.is-on { background: var(--warning); }
+.pw-meter.is-strong i.is-on { background: var(--success); }
+.pw-meter__t { display: flex; justify-content: space-between; font: 500 13px/18px var(--font-sans); }
+.pw-meter__t span { color: var(--ink-muted); font-weight: 400; }
+.pw-meter.is-weak b { color: var(--danger); }
+.pw-meter.is-medium b { color: var(--warning); }
+.pw-meter.is-strong b { color: var(--success); }
+.pw-rules { display: grid; grid-template-columns: 1fr 1fr; gap: 4px var(--space-4); margin: 0; padding: 0; list-style: none; font: 400 13px/20px var(--font-sans); color: var(--ink-muted); }
+.pw-rules li { display: flex; gap: 6px; align-items: center; }
+.pw-rules .fx-icon { width: 14px; height: 14px; stroke-width: 2; }
+.pw-rules li.ok { color: var(--success); }
+
+/* A button busy with its request: the label hides behind a spinner, the
+   button keeps its size. */
+.g-btn.is-loading { position: relative; cursor: progress; }
+.g-btn.is-loading > span { visibility: hidden; }
+.g-btn.is-loading::after { content: ""; position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; border-radius: var(--radius-pill); border: 1.5px solid currentColor; border-right-color: transparent; animation: fx-spin 0.8s linear infinite; }
+.g-btn--primary.is-loading:disabled { background: var(--accent); color: var(--on-accent); }
+.g-btn--lg { min-height: 52px; font-size: 15px; padding: 0 var(--space-6); }
+.g-btn--ghost { background: transparent; color: var(--ink); }
+.g-btn--ghost:not(:disabled):hover { background: var(--surface-sunken); }
+@keyframes fx-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .g-btn.is-loading::after { animation-duration: 3s; }
+}
+
+/* -------------------------------------------------------------- the page */
+.au-page { min-height: 100vh; }
+/* Until the API has said whether this is a demo: the page appears once,
+   complete, instead of being pushed down by the demo strip. */
+.au-wait { min-height: 100vh; background: var(--canvas); }
+.au { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); flex: 1; min-height: 0; }
+.au__art { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: var(--space-7); background: var(--surface-inverse); color: var(--ink-inverse); }
+.au__art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.au__art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--surface-inverse) 45%, transparent), transparent 30%, transparent 50%, color-mix(in srgb, var(--surface-inverse) 75%, transparent)); }
+.au__art > * { position: relative; z-index: 1; }
+.guest .au__logo { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font: 600 30px/1 var(--font-serif); color: var(--ink-inverse); }
+.au__logo img { width: 36px; height: 36px; border-radius: var(--radius-xs); object-fit: contain; background: var(--surface); }
+.au__quote { max-width: 520px; margin: 0; font: italic 400 34px/44px var(--font-serif); }
+.au__quote small { display: block; margin-top: var(--space-4); font: 500 13px/20px var(--font-sans); font-style: normal; letter-spacing: 0.04em; color: var(--ink-inverse-muted); }
+.au__panel { display: flex; flex-direction: column; background: var(--canvas); }
+.au__top { display: flex; justify-content: space-between; align-items: center; padding: var(--space-5) var(--space-7); }
+.au__top .guest-lang { color: var(--ink-muted); }
+.au__form { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); width: 100%; max-width: 440px; margin: 0 auto; padding: var(--space-6) 0 var(--space-8); box-sizing: border-box; }
+.guest .au__form h1 { font: 500 48px/52px var(--font-serif); color: var(--ink); }
+.au__form > p.au__lead { margin: calc(var(--space-3) * -1) 0 0; font: 400 15px/24px var(--font-sans); color: var(--ink-muted); }
+.au__lead b { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+.au__google { display: flex; align-items: center; justify-content: center; gap: var(--space-3); width: 100%; min-height: 48px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font: 500 15px/22px var(--font-sans); cursor: pointer; }
+.au__google:not(:disabled):hover { border-color: var(--ink); }
+.au__google:disabled { cursor: not-allowed; color: var(--ink-subtle); }
+.au__or { display: flex; align-items: center; gap: var(--space-3); color: var(--ink-muted); font: 500 12px/16px var(--font-sans); letter-spacing: 0.14em; text-transform: uppercase; }
+.au__or::before, .au__or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.au__switch { margin: 0; text-align: center; font: 400 14px/22px var(--font-sans); color: var(--ink-muted); }
+.guest .au__switch a, .guest .au__back { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+.au__switch a { display: inline-flex; align-items: center; min-height: 44px; }
+.au__back { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; }
+.au__big-ic { width: 72px; height: 72px; border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
+.au__big-ic .fx-icon { width: 32px; height: 32px; }
+.au__big-ic.is-bad { background: var(--warning-soft); color: var(--warning); }
+.au__big-ic.is-ok { background: var(--success-soft); color: var(--success); }
+
+@media (max-width: 720px) {
+  .au { grid-template-columns: 1fr; }
+  .au__art { min-height: 200px; padding: var(--space-5); }
+  .au__quote, .au__top { display: none; }
+  .au__form { max-width: none; padding: var(--space-6) var(--space-4) var(--space-8); }
+  .guest .au__form h1 { font-size: 38px; line-height: 44px; }
+  .pw-rules { grid-template-columns: 1fr; }
+}
+.guest .au__link-button { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--accent-ink); font: 500 14px/22px var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

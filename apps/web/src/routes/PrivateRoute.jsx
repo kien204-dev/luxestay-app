@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { loginPathFor } from "../utils/authRedirect";
+import { MUST_CHANGE_PASSWORD_PATH, loginPathFor } from "../utils/authRedirect";
 import PageLoader from "../components/PageLoader";
 
 function PrivateRoute({ children, role }) {
@@ -14,15 +14,14 @@ function PrivateRoute({ children, role }) {
     return <Navigate to={loginPathFor(location)} replace />;
   }
 
-  if (
-    user.must_change_password &&
-    !["/settings", "/profile"].includes(location.pathname)
-  ) {
-    return <Navigate to="/settings" replace />;
+  // A temporary password (admin-created account, admin:reset) must be
+  // replaced before anything else.
+  if (user.must_change_password && location.pathname !== MUST_CHANGE_PASSWORD_PATH) {
+    return <Navigate to={MUST_CHANGE_PASSWORD_PATH} replace />;
   }
 
   if (role && user.role !== role) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/unauthorized" replace state={{ from: `${location.pathname}${location.search}` }} />;
   }
 
   return children;
