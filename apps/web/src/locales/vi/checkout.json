@@ -1,0 +1,155 @@
+{
+  "documentTitle": "Đặt phòng",
+  "title": "Hoàn tất đặt phòng",
+  "crumb": "Đặt phòng",
+  "loading": "Đang tải thông tin đặt phòng…",
+  "heldUntil": "Phòng được giữ cho bạn đến {{time}}",
+  "stepsLabel": "Các bước đặt phòng",
+  "stepNumber": "Bước {{step}}",
+  "stepOf": "Bước {{step}} / {{total}}",
+  "optional": "không bắt buộc",
+  "continue": "Tiếp tục",
+  "back": "Quay lại",
+  "edit": "Sửa",
+  "editStep": "Sửa bước {{step}}",
+  "nights": "{{count}} đêm",
+  "nights_one": "{{count}} đêm",
+  "steps": {
+    "dates": "Chọn ngày",
+    "coupon": "Mã giảm giá",
+    "policy": "Chính sách hủy",
+    "payment": "Thanh toán",
+    "confirm": "Xác nhận"
+  },
+  "dates": {
+    "title": "Chọn ngày lưu trú",
+    "choose": "Chọn ngày",
+    "notChosen": "Chưa chọn ngày",
+    "backToRoom": "Quay lại phòng",
+    "closeCalendar": "Đóng lịch",
+    "clear": "Xóa"
+  },
+  "coupon": {
+    "title": "Mã giảm giá",
+    "label": "Nhập mã",
+    "apply": "Áp dụng",
+    "remove": "Gỡ mã",
+    "skip": "Bỏ qua, tiếp tục",
+    "hint": "Mỗi đặt phòng dùng được một mã.",
+    "checking": "Đang kiểm tra mã…",
+    "invalid": "Mã giảm giá không hợp lệ.",
+    "applied": "Đã áp dụng: giảm {{amount}}",
+    "none": "Không dùng mã"
+  },
+  "policy": {
+    "title": "Chính sách hủy",
+    "freeUntil": "Hủy miễn phí đến hết {{date}}.",
+    "freeText": "Hủy trong thời gian này, khoản đã thanh toán ({{amount}}) được hoàn lại toàn bộ.",
+    "closedTitle": "Đã qua thời gian hủy miễn phí cho ngày bạn chọn.",
+    "until": "Đến hết {{date}}",
+    "from": "Từ {{date}}",
+    "fullRefund": "Hoàn 100%",
+    "noSelfCancel": "Không tự hủy trực tuyến",
+    "contactProperty": "Liên hệ cơ sở lưu trú",
+    "agree": "Tôi đã đọc và đồng ý với quy định giữ chỗ và hủy phòng ở trên.",
+    "continue": "Tiếp tục tới thanh toán",
+    "doneFree": "Đã đồng ý · hủy miễn phí đến hết {{date}}",
+    "doneAgreed": "Đã đồng ý"
+  },
+  "payment": {
+    "title": "Phương thức thanh toán",
+    "short": "Thanh toán",
+    "about": {
+      "vnpay": "Thẻ ATM nội địa, thẻ quốc tế hoặc quét QR từ ứng dụng ngân hàng",
+      "momo": "Thanh toán bằng ví MoMo"
+    },
+    "redirect": "Bạn sẽ được chuyển sang cổng {{method}} để thanh toán, rồi quay lại trang này.",
+    "later": "Thanh toán sau trong Đặt phòng của tôi",
+    "nothingToPay": "Không cần thanh toán",
+    "freeText": "Mã giảm giá đã trừ hết số tiền: không cần thanh toán. Đặt phòng sẽ được xác nhận ngay khi bạn bấm xác nhận ở bước sau."
+  },
+  "confirm": {
+    "title": "Xác nhận và thanh toán",
+    "titleFree": "Xác nhận đặt phòng",
+    "guest": "Người đặt",
+    "room": "Phòng",
+    "stay": "Lưu trú",
+    "stayTimes": "{{checkIn}} (từ {{checkInTime}}) → {{checkOut}} (trước {{checkOutTime}})",
+    "freeCancel": "Hủy miễn phí",
+    "pay": "Thanh toán {{amount}} qua {{method}}",
+    "confirmFree": "Xác nhận đặt phòng",
+    "working": "Đang xử lý…"
+  },
+  "summary": {
+    "label": "Tóm tắt đặt phòng",
+    "dates": "Ngày",
+    "nights": "Số đêm",
+    "guests": "Số khách",
+    "updating": "Đang cập nhật giá…"
+  },
+  "soldOut": {
+    "title": "{{room}} vừa có người đặt cho {{dates}}.",
+    "text": "Một khách khác đã giữ phòng trước khi bạn hoàn tất. Bạn chưa bị trừ tiền, và những gì bạn đã chọn vẫn còn đây.",
+    "otherDates": "Chọn ngày khác",
+    "otherRooms": "Xem phòng khác"
+  },
+  "stale": {
+    "paid": "Đặt phòng bạn tạo ở trang này đã được thanh toán.",
+    "gone": "Đặt phòng bạn tạo ở trang này đã bị hủy hoặc hết thời gian giữ chỗ.",
+    "toMyBookings": "Xem đặt phòng của tôi",
+    "startOver": "Đặt lại từ đầu"
+  },
+  "errors": {
+    "bookingFailed": "Đặt phòng thất bại. Vui lòng thử lại.",
+    "paymentFailed": "Không khởi tạo được thanh toán. Phòng vẫn đang được giữ cho bạn; vui lòng thử lại."
+  },
+  "result": {
+    "bookingCode": "Đặt phòng {{code}}",
+    "codeLabel": "Mã đặt phòng",
+    "amount": "Số tiền: {{amount}}",
+    "heldUntil": "phòng vẫn được giữ đến {{time}}",
+    "paid": "Đã thanh toán",
+    "paidWith": "Thanh toán qua",
+    "discount": "Giảm giá",
+    "freeCancel": "Hủy miễn phí đến hết {{date}} trong mục Đặt phòng của tôi",
+    "checking": {
+      "eyebrow": "Đang xác nhận",
+      "titleWith": "Đang chờ {{method}} xác nhận thanh toán",
+      "text": "Trang sẽ tự cập nhật khi có kết quả.",
+      "stay": "Vui lòng không đóng trang này.",
+      "created": "Đã tạo đặt phòng {{code}}",
+      "returned": "Đã quay lại từ cổng thanh toán",
+      "waiting": "Đang chờ cổng thanh toán xác nhận…",
+      "confirm": "Xác nhận đặt phòng"
+    },
+    "success": {
+      "eyebrow": "Thanh toán thành công",
+      "eyebrowFree": "Đã xác nhận",
+      "title": "Đặt phòng của bạn đã được xác nhận"
+    },
+    "failed": {
+      "title": "Giao dịch chưa hoàn tất",
+      "textHeld": "Phòng vẫn được giữ cho bạn đến {{time}}; bạn có thể thử lại ngay.",
+      "textRetry": "Đặt phòng vẫn còn; bạn có thể thử thanh toán lại.",
+      "textGone": "Đặt phòng này không còn thanh toán được. Xem trạng thái trong Đặt phòng của tôi.",
+      "retry": "Thử lại với {{method}}",
+      "other": "Thanh toán qua {{method}}"
+    },
+    "reasonCode": "(mã {{method}}: {{code}})",
+    "reasons": {
+      "other": "Cổng thanh toán báo giao dịch không thành công.",
+      "vnpay": {
+        "09": "Thẻ hoặc tài khoản chưa đăng ký dịch vụ thanh toán trực tuyến.",
+        "10": "Thông tin thẻ hoặc tài khoản được nhập sai quá số lần cho phép.",
+        "11": "Đã hết thời gian chờ thanh toán.",
+        "12": "Thẻ hoặc tài khoản đang bị khóa.",
+        "13": "Mã xác thực (OTP) không đúng.",
+        "24": "Bạn đã hủy giao dịch tại cổng thanh toán.",
+        "51": "Tài khoản không đủ số dư.",
+        "65": "Tài khoản đã vượt hạn mức giao dịch trong ngày.",
+        "75": "Ngân hàng thanh toán đang bảo trì.",
+        "79": "Mật khẩu thanh toán được nhập sai quá số lần cho phép."
+      }
+    }
+  }
+}

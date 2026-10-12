@@ -14,35 +14,10 @@ import { getRoomById } from "../../services/roomService";
 import { useAsyncData } from "../../utils/useAsyncData";
 import { useBookingPolicy } from "../../utils/useBookingPolicy";
 import { useDocumentTitle } from "../../utils/useDocumentTitle";
-import { formatMoney, isDateString } from "../../utils/format";
+import { formatMoney } from "../../utils/format";
 import { placeholderFor } from "../../utils/imageUrl";
-import { stayQuery } from "../../utils/stayQuery";
+import { readStay, stayQuery, writeStay } from "../../utils/stayQuery";
 import "../../styles/rooms.css";
-
-// The stay being planned is kept in the URL (?checkIn=&checkOut=&guests=):
-// it arrives from the list, survives a refresh, and is still there when the
-// guest comes back from the login page.
-function readStay(searchParams) {
-  const checkIn = searchParams.get("checkIn") || "";
-  const checkOut = searchParams.get("checkOut") || "";
-  const guests = Number(searchParams.get("guests"));
-
-  return {
-    checkIn: isDateString(checkIn) ? checkIn : "",
-    checkOut: isDateString(checkOut) ? checkOut : "",
-    guests: Number.isInteger(guests) && guests > 0 ? guests : 1,
-  };
-}
-
-// Unlike stayQuery (complete ranges only), this keeps a lone check-in: the
-// guest may have picked the first date and not the second yet.
-function writeStay({ checkIn, checkOut, guests }) {
-  const params = new URLSearchParams();
-  if (checkIn) params.set("checkIn", checkIn);
-  if (checkOut) params.set("checkOut", checkOut);
-  if (guests) params.set("guests", guests);
-  return params;
-}
 
 // The gallery full screen: one photo at a time, with previous/next (also the
 // ← and → keys), a strip of thumbnails, and Escape or "Close" to leave. It is

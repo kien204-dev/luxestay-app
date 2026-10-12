@@ -40,7 +40,8 @@ export default function DemoBanner({ admin = false }) {
     ? t("admin:demo.bannerTimed", { hours: demo.resetIntervalHours })
     : t("admin:demo.banner");
   const guestText = demo.testPayments ? t("demo.guestTestPayments") : t("demo.guest");
-  const onPaymentPage = pathname.startsWith("/payment");
+  // The checkout and the gateway's return page.
+  const onPaymentPage = pathname.startsWith("/payment") || pathname.endsWith("/book");
 
   return (
     <div className={`demo-banner${admin ? " demo-banner--admin" : ""}`} role="note" data-testid="demo-banner">

@@ -1,5 +1,6 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-import { CloseIcon } from "../components/Dialog";
+import { createContext, useCallback, useContext, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+import { CloseIcon, subscribeToDialogs, topDialog } from "../components/Dialog";
 import i18n from "../i18n";
 
 const ToastContext = createContext();
@@ -17,9 +18,14 @@ const MARKS = {
 // in the admin area. Success and info hide themselves after 6 seconds (the
 // countdown is the bar's CSS animation, which pauses while the toast is
 // hovered or focused); an error stays until it is closed.
+//
+// While a modal dialog is open the toasts are rendered inside it (the
+// innermost one): only there are they above the dialog's backdrop and still
+// clickable. Otherwise they live at the end of the page.
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const nextId = useRef(0);
+  const dialog = useSyncExternalStore(subscribeToDialogs, topDialog);
 
   const dismiss = useCallback((id) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -44,7 +50,8 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={toast}>
       {children}
 
-      <div className="ui-toasts">
+      {createPortal(
+      <div className="ui-toasts" data-testid="toasts">
         {toasts.map((item) => (
           <div
             key={item.id}
@@ -62,7 +69,9 @@ export function ToastProvider({ children }) {
             {item.variant !== "error" && <span className="ui-toast-bar" onAnimationEnd={() => dismiss(item.id)} />}
           </div>
         ))}
-      </div>
+      </div>,
+      dialog || document.body
+      )}
     </ToastContext.Provider>
   );
 }

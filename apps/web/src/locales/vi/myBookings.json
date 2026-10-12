@@ -1,6 +1,5 @@
 {
   "header": {
-    "back": "← Quay lại",
     "title": "Đặt phòng của tôi",
     "refreshing": "Đang tải...",
     "refresh": "Làm mới"
@@ -9,14 +8,7 @@
     "status": "Trạng thái",
     "fromDate": "Từ ngày",
     "toDate": "Đến ngày",
-    "clear": "Xóa bộ lọc",
-    "statusOptions": {
-      "all": "Tất cả trạng thái",
-      "pending": "Chờ xác nhận",
-      "confirmed": "Đã xác nhận",
-      "completed": "Hoàn tất",
-      "cancelled": "Đã hủy"
-    }
+    "clear": "Xóa bộ lọc"
   },
   "status": {
     "confirmed": "Đã xác nhận",
@@ -35,10 +27,10 @@
   "empty": {
     "filtered": "Không có đặt phòng nào khớp với bộ lọc hiện tại.",
     "none": "Chưa có booking nào — đặt phòng ngay để bắt đầu hành trình của bạn.",
-    "exploreRooms": "Khám phá phòng"
+    "exploreRooms": "Khám phá phòng",
+    "title": "Chưa có đặt phòng nào"
   },
   "card": {
-    "maxGuests": "Tối đa {{count}} khách",
     "totalLocked": "Tổng đã chốt",
     "details": "Chi tiết",
     "pay": "Thanh toán",
@@ -47,36 +39,63 @@
     "reviewed": "Đã đánh giá",
     "reviewThisRoom": "Đánh giá phòng này",
     "downloadReceipt": "Tải phiếu PDF",
-    "downloadFailed": "Không tải được phiếu xác nhận"
-  },
-  "pagination": {
-    "prev": "← Trước",
-    "next": "Sau →",
-    "pageInfo": "Trang {{page}} / {{totalPages}} · {{total}} đặt phòng"
+    "downloadFailed": "Không tải được phiếu xác nhận",
+    "paid": "Đã thanh toán",
+    "refundAmount": "Số tiền chờ hoàn",
+    "refunded": "Đã hoàn",
+    "bookAgain": "Đặt lại phòng này",
+    "refundProgress": "Tiến độ hoàn tiền",
+    "refundCancelled": "Đã hủy",
+    "refundProcessing": "Đang xử lý",
+    "refundDone": "Đã hoàn tiền",
+    "note": {
+      "heldUntil": "Phòng được giữ đến {{time}}. Sau đó đặt phòng tự hủy.",
+      "freeUntil": "Hủy miễn phí đến hết {{date}}",
+      "windowPassed": "Đã qua thời gian hủy miễn phí. Cần hủy, vui lòng liên hệ cơ sở lưu trú.",
+      "payOnlineOrDesk": "Thanh toán trực tuyến ngay hoặc trả tại quầy khi nhận phòng.",
+      "completed": "Đã trả phòng ngày {{date}}.",
+      "refundPending": "Khoản đã trả đang chờ cơ sở lưu trú hoàn lại.",
+      "refundedOn": "Đã hoàn tiền ngày {{date}}.",
+      "refunded": "Đã hoàn tiền.",
+      "cancelledOn": "Đã hủy ngày {{date}}. Đơn này không có khoản nào cần hoàn.",
+      "cancelled": "Đơn này không có khoản nào cần hoàn."
+    },
+    "maxGuests": "Tối đa {{count}} khách"
   },
   "cancelModal": {
-    "title": "Hủy đặt phòng",
-    "message": "Bạn có chắc muốn hủy đặt phòng #BK-{{id}}? Hành động này không thể hoàn tác.",
     "confirmLabel": "Hủy đặt phòng",
-    "cancelLabel": "Không",
-    "policy": "Đặt phòng đã thanh toán chỉ hủy được trước ngày nhận phòng ít nhất {{count}} ngày và sẽ được hoàn tiền."
+    "titleFor": "Hủy đặt phòng {{code}}?",
+    "insideWindow": "Bạn đang trong thời gian hủy miễn phí (đến hết {{date}}).",
+    "notPaid": "Đặt phòng này chưa có khoản nào được trả.",
+    "refundLabel": "Số tiền được hoàn",
+    "paidSoFar": "Đã trả",
+    "fee": "Phí hủy",
+    "refundHow": "Cơ sở lưu trú sẽ hoàn lại khoản này; trạng thái hoàn tiền hiện trong Đặt phòng của tôi.",
+    "noRefundNeeded": "Không có khoản nào cần hoàn.",
+    "irreversible": "Hủy rồi không khôi phục lại được.",
+    "keep": "Giữ đặt phòng",
+    "confirmRefund": "Hủy và hoàn {{amount}}"
   },
   "paymentModal": {
     "title": "Chọn phương thức thanh toán",
-    "summary": "Đặt phòng #{{id}} · {{amount}}",
     "redirecting": "Đang chuyển hướng...",
     "payVnpay": "Thanh toán qua VNPay",
     "payMomo": "Thanh toán qua MoMo",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "summaryCode": "Đặt phòng {{code}} · {{amount}}"
   },
   "reviewModal": {
-    "title": "Đánh giá {{roomName}}",
     "starsLabel": "Số sao",
     "commentLabel": "Nhận xét (không bắt buộc)",
     "commentPlaceholder": "Chia sẻ trải nghiệm của bạn về phòng này...",
-    "cancel": "Hủy",
+    "cancel": "Để sau",
     "submitting": "Đang gửi...",
-    "submit": "Gửi đánh giá"
+    "submit": "Gửi đánh giá",
+    "question": "Kỳ nghỉ của bạn thế nào?",
+    "chooseStars": "Chọn từ 1 đến 5 sao.",
+    "chosen": "{{count}} / 5 sao",
+    "tooLong": "Nhận xét dài tối đa {{max}} ký tự (hiện có {{count}}).",
+    "publicNote": "Đánh giá hiện công khai trên trang phòng; tên của bạn được viết tắt."
   },
   "detailModal": {
     "bookingId": "Booking ID #{{id}}",
@@ -116,6 +135,23 @@
     "reviewRatingRequired": "Vui lòng chọn số sao đánh giá.",
     "reviewSuccess": "Cảm ơn bạn đã đánh giá!",
     "reviewFailed": "Gửi đánh giá thất bại, vui lòng thử lại",
-    "cancelSuccessRefund": "Đã hủy đặt phòng. Khoản đã thanh toán sẽ được hoàn lại sau khi cơ sở lưu trú xác nhận."
+    "cancelSuccessRefund": "Đã hủy đặt phòng. Khoản đã thanh toán sẽ được hoàn lại sau khi cơ sở lưu trú xác nhận.",
+    "loadFailedText": "Các đặt phòng của bạn vẫn còn nguyên. Kiểm tra kết nối rồi thử lại."
+  },
+  "tabs": {
+    "all": "Tất cả",
+    "pending": "Chờ xác nhận",
+    "confirmed": "Đã xác nhận",
+    "completed": "Hoàn tất",
+    "cancelled": "Đã hủy",
+    "refund_pending": "Chờ hoàn tiền"
+  },
+  "emptyTab": {
+    "all": "Không có đặt phòng nào trong khoảng ngày này",
+    "pending": "Không có đặt phòng chờ xác nhận",
+    "confirmed": "Không có đặt phòng đã xác nhận",
+    "completed": "Chưa có kỳ lưu trú nào hoàn tất",
+    "cancelled": "Không có đặt phòng đã hủy",
+    "refund_pending": "Không có khoản nào chờ hoàn"
   }
 }

@@ -54,6 +54,7 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 | `/credits` | Ghi công ảnh: tác giả, giấy phép và nguồn của từng ảnh điểm đến (link ở chân trang) | Mọi người |
 | `/rooms` | Danh sách phòng, lọc theo địa điểm, ngày, số khách; phân trang | Mọi người |
 | `/rooms/:id` | Chi tiết phòng, lịch phòng trống, đặt phòng và thanh toán | Mọi người (đặt phòng cần đăng nhập) |
+| `/rooms/:id/book` | Đặt phòng 5 bước: ngày, mã giảm giá, chính sách hủy, phương thức thanh toán, xác nhận | Đã đăng nhập |
 | `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá, tải PDF xác nhận | Đã đăng nhập |
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | Đăng nhập, đăng ký (email/mật khẩu, Google nếu bật), quên và đặt lại mật khẩu | Mọi người |
 | `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |

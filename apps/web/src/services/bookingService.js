@@ -19,6 +19,9 @@ export const deleteBooking = (id) => api.delete(`/bookings/${id}`);
 
 export const getBookingPolicy = () => api.get("/bookings/policy");
 
+// How many of the signed-in guest's bookings are in each state.
+export const getBookingCounts = () => api.get("/bookings/counts").then((res) => res.data);
+
 // Admin: totals over every booking, for the cards above the orders list.
 export const getBookingSummary = () => api.get("/bookings/summary").then((res) => res.data);
 

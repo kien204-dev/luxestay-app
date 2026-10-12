@@ -1,5 +1,22 @@
 import { useEffect, useRef } from "react";
 
+// The modal dialogs that are open, innermost last. Toasts render inside the
+// last one (see ToastContext): a modal <dialog> sits in the browser's top
+// layer and makes everything outside it inert, so a toast left in the page
+// would be covered and could not be clicked.
+const openDialogs = [];
+const listeners = new Set();
+const notify = () => listeners.forEach((listener) => listener());
+
+export function subscribeToDialogs(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+export function topDialog() {
+  return openDialogs.at(-1) || null;
+}
+
 // A modal dialog. It is the browser's own <dialog>, opened with showModal():
 // focus stays inside it (the rest of the page is inert), Escape closes it,
 // and focus returns to where it was. Rendered only while open; `onClose` is
@@ -16,7 +33,11 @@ export default function Dialog({ className = "ui-dialog", onClose, children, ...
     const opener = document.activeElement;
     if (!dialog.open) dialog.showModal();
     dialog.querySelector("[data-autofocus]")?.focus();
+    openDialogs.push(dialog);
+    notify();
     return () => {
+      openDialogs.splice(openDialogs.indexOf(dialog), 1);
+      notify();
       dialog.close();
       if (opener?.isConnected) opener.focus();
     };

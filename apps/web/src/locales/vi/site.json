@@ -133,7 +133,9 @@
     "removeFilter": "Bỏ điều kiện {{filter}}",
     "showing": "Hiển thị {{from}}–{{to}} trong {{count}} phòng",
     "showing_one": "Hiển thị {{from}}–{{to}} trong {{count}} phòng",
-    "goToPage": "Trang {{page}}"
+    "goToPage": "Trang {{page}}",
+    "showingBookings": "Hiển thị {{from}}–{{to}} trong {{count}} đặt phòng",
+    "showingBookings_one": "Hiển thị {{from}}–{{to}} trong {{count}} đặt phòng"
   },
   "detail": {
     "documentTitle": "Chi tiết phòng",
@@ -191,30 +193,20 @@
   "booking": {
     "title": "Đặt phòng",
     "guests": "Số khách (tối đa {{count}})",
-    "coupon": "Mã giảm giá (không bắt buộc)",
-    "couponPlaceholder": "Nhập mã",
-    "couponApply": "Áp dụng",
-    "couponApplied": "Đã áp dụng",
     "nightsLine": "{{count}} đêm × {{price}}",
     "discount": "Mã {{code}}",
     "total": "Tổng cộng",
-    "submit": "Xác nhận đặt phòng",
-    "submitting": "Đang đặt phòng…",
     "loginToBook": "Đăng nhập để đặt phòng",
     "loginHint": "Ngày và số khách bạn chọn sẽ được giữ nguyên sau khi đăng nhập.",
     "notBookable": "Phòng này đang tạm ngưng nhận khách.",
-    "confirmedToast": "Đặt phòng thành công và đã được xác nhận.",
-    "paymentTitle": "Thanh toán",
     "errors": {
       "bothDates": "Vui lòng chọn ngày nhận phòng và ngày trả phòng.",
       "checkInPast": "Ngày nhận phòng không được ở quá khứ.",
       "checkOutAfterCheckIn": "Ngày trả phòng phải sau ngày nhận phòng.",
-      "datesTaken": "Trong khoảng ngày bạn chọn có đêm đã có người đặt. Xem lịch phòng trống và chọn ngày khác.",
-      "couponEmpty": "Vui lòng nhập mã giảm giá.",
-      "couponNeedsDates": "Vui lòng chọn ngày trước khi áp dụng mã.",
-      "couponInvalid": "Mã giảm giá không hợp lệ.",
-      "failed": "Đặt phòng thất bại. Vui lòng thử lại."
-    }
+      "datesTaken": "Trong khoảng ngày bạn chọn có đêm đã có người đặt. Xem lịch phòng trống và chọn ngày khác."
+    },
+    "notChargedYet": "Bạn chưa bị trừ tiền ở bước này.",
+    "freeUntil": "Hủy miễn phí đến hết {{date}}"
   },
   "policy": {
     "title": "Quy định giữ chỗ và hủy phòng",
@@ -225,17 +217,7 @@
     "paidClosed": "Ngày nhận phòng đã gần hơn {{count}} ngày: sau khi thanh toán, bạn không tự hủy trực tuyến được nữa. Cần hủy, vui lòng liên hệ cơ sở lưu trú."
   },
   "payment": {
-    "created": "Đã tạo đặt phòng",
-    "title": "Hoàn tất thanh toán",
-    "notice": "Đặt phòng #{{id}} đang chờ thanh toán.",
-    "stay": "Thời gian ở",
-    "total": "Cần thanh toán",
-    "pay": "Thanh toán",
-    "payVnpay": "Thanh toán qua VNPay",
-    "payMomo": "Thanh toán qua MoMo",
     "redirecting": "Đang chuyển tới cổng thanh toán…",
-    "payLater": "Thanh toán sau",
-    "initFailed": "Không khởi tạo được thanh toán. Vui lòng thử lại.",
     "result": {
       "documentTitle": "Kết quả thanh toán",
       "toMyBookings": "Xem đặt phòng của tôi",

@@ -10,7 +10,8 @@ function pagesToShow(page, totalPages) {
 
 // Paging under a list. Wide screens get "showing 1–12 of 50" and numbered
 // pages; phones get previous / "page 1 of 5" / next. Hidden with one page.
-export default function Pagination({ page, totalPages, total, pageSize, onChange }) {
+// `rangeKey` is the translation of "showing 1–12 of 50 rooms" for what is listed.
+export default function Pagination({ page, totalPages, total, pageSize, onChange, rangeKey = "list.showing" }) {
   const { t } = useTranslation("site");
   if (totalPages <= 1) return null;
 
@@ -19,7 +20,7 @@ export default function Pagination({ page, totalPages, total, pageSize, onChange
 
   return (
     <nav className="pager" aria-label={t("list.pagination")}>
-      <span className="pager-range">{t("list.showing", { from, to, count: total })}</span>
+      <span className="pager-range">{t(rangeKey, { from, to, count: total })}</span>
       <ul>
         <li>
           <button type="button" className="pager-step" disabled={page <= 1} onClick={() => onChange(page - 1)} aria-label={t("list.previous")}>

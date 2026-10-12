@@ -315,3 +315,10 @@ input.search-seg-value:focus-visible { outline: none; }
 .review-summary { display: inline-flex; align-items: center; gap: 6px; font: 500 14px/20px var(--font-sans); color: var(--ink); white-space: nowrap; }
 .review-summary svg { width: 14px; height: 14px; fill: var(--brass); }
 .guest .review-link { background: none; border: none; color: var(--accent-ink); text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0; font-family: inherit; }
+
+/* Booking panel of the room page: the button, the reassurance under it and
+   the free-cancellation line. */
+.booking-go { min-height: 52px; font-size: 15px; }
+.booking-note { margin: 0; text-align: center; font: 400 13px/20px var(--font-sans); color: var(--ink-muted); }
+.booking-free { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; padding: var(--space-3); border-radius: var(--radius-sm); background: var(--success-soft); color: var(--ink); font: 400 13px/20px var(--font-sans); }
+.booking-free .guest-icon { margin-top: 2px; color: var(--success); }

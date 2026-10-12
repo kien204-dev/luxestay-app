@@ -498,6 +498,56 @@ describe("booking and payment rules on real PostgreSQL", () => {
     assert.equal(row.payment_status, "pending");
   });
 
+  it("tells the result page the gateway's own code for a failed payment", async () => {
+    const booking = (await book(await freshRoomId(), dayFromToday(131), dayFromToday(132))).body.booking;
+    const payment = await startVnpayPayment(booking.id);
+    const lookup = () => api(`/api/payments/transactions/${payment.transactionRef}`, { cookie: guestCookie });
+
+    // Nothing heard from the gateway yet.
+    assert.equal((await lookup()).body.payment.gatewayCode, null);
+
+    await sendVnpayIpn(payment.transactionRef, booking.total_price, { vnp_ResponseCode: "24", vnp_TransactionStatus: "02" });
+    const failed = (await lookup()).body;
+    assert.equal(failed.payment.status, "failed");
+    assert.equal(failed.payment.gatewayCode, "24");
+    // Only the code: nothing else of the gateway's notice is published.
+    assert.equal(failed.payment.raw_callback, undefined);
+  });
+
+  it("counts the guest's own bookings by state for the tabs of My bookings", async () => {
+    const before = (await api("/api/bookings/counts", { cookie: guestCookie })).body;
+    const expected = (
+      await pool.query(
+        `SELECT COUNT(*)::int AS "all",
+                COUNT(*) FILTER (WHERE status = 'pending')::int AS pending,
+                COUNT(*) FILTER (WHERE status = 'confirmed')::int AS confirmed,
+                COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
+                COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled,
+                COUNT(*) FILTER (WHERE payment_status = 'refund_pending')::int AS refund_pending
+         FROM bookings WHERE user_id = (SELECT id FROM users WHERE email = $1)`,
+        [GUEST.email]
+      )
+    ).rows[0];
+    assert.deepEqual(before, expected);
+
+    // A paid booking cancelled in time moves from confirmed to cancelled,
+    // and is owed a refund.
+    const booking = (await book(await freshRoomId(), dayFromToday(133), dayFromToday(134))).body.booking;
+    const payment = await startVnpayPayment(booking.id);
+    await sendVnpayIpn(payment.transactionRef, booking.total_price);
+    const paid = (await api("/api/bookings/counts", { cookie: guestCookie })).body;
+    assert.equal(paid.all, before.all + 1);
+    assert.equal(paid.confirmed, before.confirmed + 1);
+
+    await api(`/api/bookings/${booking.id}/cancel`, { method: "PATCH", cookie: guestCookie });
+    const cancelled = (await api("/api/bookings/counts", { cookie: guestCookie })).body;
+    assert.equal(cancelled.confirmed, before.confirmed);
+    assert.equal(cancelled.cancelled, before.cancelled + 1);
+    assert.equal(cancelled.refund_pending, before.refund_pending + 1);
+
+    assert.equal((await api("/api/bookings/counts")).status, 401);
+  });
+
   it("applies the free-cancellation window to paid bookings only", async () => {
     const markPaid = (id) => api(`/api/bookings/${id}/mark-paid`, { method: "PATCH", cookie: adminCookie });
     const cancel = (id, cookie = guestCookie) => api(`/api/bookings/${id}/cancel`, { method: "PATCH", cookie });

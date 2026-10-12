@@ -382,6 +382,33 @@ exports.getBookingSummary = async (req, res) => {
   }
 };
 
+// How many bookings there are in each state, for the tabs of "My bookings":
+// the signed-in guest's own (every booking for an admin, like the list).
+// "refund_pending" is counted from the payment state and overlaps
+// "cancelled".
+exports.getBookingCounts = async (req, res) => {
+  try {
+    await runBookingMaintenance();
+
+    const mine = req.user.role !== "admin";
+    const result = await pool.query(
+      `SELECT COUNT(*)::int AS "all",
+              COUNT(*) FILTER (WHERE status = 'pending')::int AS pending,
+              COUNT(*) FILTER (WHERE status = 'confirmed')::int AS confirmed,
+              COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
+              COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled,
+              COUNT(*) FILTER (WHERE payment_status = 'refund_pending')::int AS refund_pending
+       FROM bookings${mine ? " WHERE user_id = $1" : ""}`,
+      mine ? [req.user.id] : []
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("GET BOOKING COUNTS ERROR:", err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+};
+
 // What the guest-facing pages need to explain the rules before asking the
 // server to apply them.
 exports.getBookingPolicy = async (req, res) => {
