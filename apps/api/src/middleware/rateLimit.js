@@ -56,6 +56,16 @@ const resetCheckRateLimit = rateLimit({
   limit: 30,
 });
 
+// Requests that check the current password (changing it, or the email):
+// limited like the login form, so My account cannot be used to guess it.
+// Saves that do not send a password are not counted.
+const passwordCheckRateLimit = rateLimit({
+  ...commonOptions,
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  skip: (req) => process.env.NODE_ENV === "test" || !req.body?.currentPassword,
+});
+
 const uploadRateLimit = rateLimit({
   ...commonOptions,
   windowMs: 60 * 60 * 1000,
@@ -67,6 +77,7 @@ module.exports = {
   FORGOT_PASSWORD_LIMIT,
   forgotPasswordRateLimit,
   loginRateLimit,
+  passwordCheckRateLimit,
   registerRateLimit,
   resetCheckRateLimit,
   resetPasswordRateLimit,

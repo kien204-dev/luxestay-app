@@ -42,7 +42,13 @@
     "saveFailed": "Không lưu được thông tin.",
     "nameRequired": "Vui lòng nhập họ và tên",
     "emailInvalid": "Email chưa đúng định dạng, ví dụ ten@gmail.com",
-    "phoneInvalid": "Số điện thoại gồm 8–20 ký tự: chữ số, dấu cách và + - ( )"
+    "phoneInvalid": "Số điện thoại gồm 8–20 ký tự: chữ số, dấu cách và + - ( )",
+    "currentPassword": "Mật khẩu hiện tại",
+    "currentPasswordHelp": "Đổi email cần mật khẩu hiện tại. Sau khi đổi, các thiết bị khác sẽ bị đăng xuất và email cũ nhận được thông báo.",
+    "currentPasswordRequired": "Nhập mật khẩu hiện tại để đổi email",
+    "noPassword": "Tài khoản này đăng nhập bằng Google và chưa có mật khẩu, nên chưa đổi được email. <reset>Đặt mật khẩu</reset> trước (liên kết được gửi tới email hiện tại), rồi quay lại đây.",
+    "noPasswordError": "Cần đặt mật khẩu trước khi đổi email",
+    "emailChanged": "Đã đổi email. Các thiết bị khác đã được đăng xuất."
   },
   "password": {
     "title": "Đổi mật khẩu",
@@ -55,6 +61,7 @@
     "cancel": "Huỷ",
     "submit": "Đổi mật khẩu",
     "changed": "Đã đổi mật khẩu. Các thiết bị khác đã được đăng xuất.",
-    "failed": "Không đổi được mật khẩu."
+    "failed": "Không đổi được mật khẩu.",
+    "noPassword": "Tài khoản này đăng nhập bằng Google và chưa có mật khẩu. <reset>Đặt mật khẩu</reset> qua liên kết gửi tới email của bạn."
   }
 }

@@ -23,7 +23,7 @@ const { apiMessage } = require("../utils/apiMessages");
 
 const router = express.Router();
 const PUBLIC_USER_FIELDS =
-  "id,name,email,role,phone,bio,avatar_url,created_at,updated_at,must_change_password";
+  "id,name,email,role,phone,bio,avatar_url,created_at,updated_at,must_change_password,password_set";
 const AUTH_USER_FIELDS = `${PUBLIC_USER_FIELDS},token_version,deleted_at,is_locked`;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -250,6 +250,7 @@ router.post("/reset-password", resetPasswordRateLimit, async (req, res) => {
        SET password=$1,
            token_version=token_version + 1,
            must_change_password=FALSE,
+           password_set=TRUE,
            updated_at=CURRENT_TIMESTAMP
        WHERE id=$2`,
       [hashedPassword, resetToken.user_id]
@@ -315,8 +316,8 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
       const randomPassword = crypto.randomBytes(32).toString("base64url");
       const hashed = await bcrypt.hash(randomPassword, 10);
       result = await pool.query(
-        `INSERT INTO users(name,email,password,role,google_uid)
-         VALUES($1,$2,$3,'user',$4)
+        `INSERT INTO users(name,email,password,role,google_uid,password_set)
+         VALUES($1,$2,$3,'user',$4,FALSE)
          RETURNING ${AUTH_USER_FIELDS}, google_uid`,
         [name, email, hashed, decoded.uid]
       );

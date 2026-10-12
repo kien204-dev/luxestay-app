@@ -471,13 +471,22 @@ describe("Sign-in pages, My account and the small pages in the browser", () => {
     await page.locator("#profile-phone").fill("908 214");
     await page.getByRole("button", { name: ACCOUNT.profile.save }).click();
     assert.equal(await page.locator("#profile-phone-error").innerText(), ACCOUNT.profile.phoneInvalid);
+    // A new email asks for the current password, under its own box.
     await page.locator("#profile-email").fill(ADMIN.email);
     await page.locator("#profile-phone").fill("0908 214 556");
     await page.getByRole("button", { name: ACCOUNT.profile.save }).click();
-    await page.locator("#profile-email-error").waitFor();
+    assert.equal(await page.locator("#profile-current-password-error").innerText(), ACCOUNT.profile.currentPasswordRequired);
+    await page.locator("#profile-current-password").fill("Not-my-pass-1");
+    await page.getByRole("button", { name: ACCOUNT.profile.save }).click();
+    await page.locator("#profile-current-password-error").getByText("Mật khẩu hiện tại không đúng.").waitFor();
     await shot(page, "account-desktop-details-errors");
+    // Right password, address taken: said under the email.
+    await page.locator("#profile-current-password").fill(guest.password);
+    await page.getByRole("button", { name: ACCOUNT.profile.save }).click();
+    await page.locator("#profile-email-error").waitFor();
 
     await page.locator("#profile-email").fill(guest.email);
+    assert.equal(await page.locator("#profile-current-password").count(), 0, "same email: no password asked");
     await page.route("**/api/users/me", async (route) => {
       if (route.request().method() === "PUT") await new Promise((resolve) => setTimeout(resolve, 1200));
       await route.continue();
@@ -535,6 +544,59 @@ describe("Sign-in pages, My account and the small pages in the browser", () => {
         await view.context.close();
       }
     }
+  });
+
+  it("My account: a new email with the current password signs other devices out and tells the old address", async () => {
+    const guest = await newGuest("Khách Đổi Email");
+    const { context, page, problems } = await openPage();
+    await signIn(page, guest);
+    const otherDevice = await openPage();
+    await signIn(otherDevice.page, guest);
+
+    await page.goto(`${stack.baseUrl}/settings`);
+    await page.getByTestId("profile-form").waitFor();
+    const newEmail = `moved.${Date.now()}@example.com`;
+    await page.locator("#profile-email").fill(newEmail);
+    await page.locator("#profile-current-password").fill(guest.password);
+    await shot(page, "account-desktop-email-change");
+    const mark = inbox.messages.length;
+    await page.getByRole("button", { name: ACCOUNT.profile.save }).click();
+    await page.getByText(ACCOUNT.profile.emailChanged).waitFor();
+
+    const notice = await inbox.next(guest.email, mark);
+    assert.ok(notice.text.includes(newEmail), "the old address is told the new one");
+    // This device carries on; the other one is signed out.
+    assert.equal((await page.request.get(`${stack.baseUrl}/api/users/me`)).status(), 200);
+    assert.equal((await otherDevice.page.request.get(`${stack.baseUrl}/api/users/me`)).status(), 401);
+    assert.deepEqual(problems, []);
+    await otherDevice.context.close();
+    await context.close();
+  });
+
+  it("My account: an account made by Google sign-in is asked to set a password before changing the email", async () => {
+    const { context, page, problems } = await openPage();
+    await page.goto(`${stack.baseUrl}/login`);
+    await page.evaluate(() => { window.__e2eGoogleAccount = { uid: "google-only-e2e", email: "google.only.e2e@example.com", name: "Khách Google" }; });
+    await page.getByTestId("google-sign-in").click();
+    await page.waitForURL(`${stack.baseUrl}/`);
+    await page.goto(`${stack.baseUrl}/settings`);
+    await page.getByTestId("profile-form").waitFor();
+    await page.locator("#profile-email").fill("elsewhere@example.com");
+    await page.getByTestId("email-needs-password").waitFor();
+    assert.equal(await page.locator("#profile-current-password").count(), 0);
+    await page.getByRole("button", { name: ACCOUNT.profile.save }).click();
+    assert.equal(await page.locator("#profile-email-error").innerText(), ACCOUNT.profile.noPasswordError);
+    await shot(page, "account-desktop-google-only-email");
+
+    await page.goto(`${stack.baseUrl}/settings/password`);
+    await page.getByTestId("no-password").waitFor();
+    await shot(page, "account-desktop-google-only-password");
+    // The link leads to "Forgot password", open while signed in.
+    await page.getByTestId("no-password").getByRole("link").click();
+    await page.getByTestId("forgot-page").waitFor();
+    assert.equal(await page.locator("#forgot-email").inputValue(), "google.only.e2e@example.com");
+    assert.deepEqual(problems, []);
+    await context.close();
   });
 
   it("My account: a temporary password holds the account on the password form; an admin sees it in the admin area", async () => {

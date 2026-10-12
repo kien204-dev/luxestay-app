@@ -35,6 +35,7 @@ async function resetAdmin(pool, email) {
          role = 'admin',
          is_locked = FALSE,
          must_change_password = TRUE,
+         password_set = TRUE,
          token_version = token_version + 1,
          updated_at = CURRENT_TIMESTAMP
      WHERE LOWER(email) = LOWER($2) AND deleted_at IS NULL

@@ -82,7 +82,7 @@ export default function AccountPage({ section = "profile" }) {
           ) : (
             <div className="ac-stack">
               <AvatarCard saved={saved} onSaved={onSaved} />
-              <ProfileForm saved={saved} onSaved={onSaved} />
+              <ProfileForm saved={saved} passwordSet={data.password_set !== false} onSaved={onSaved} />
             </div>
           )}
         </div>

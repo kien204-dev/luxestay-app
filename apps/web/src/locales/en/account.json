@@ -42,7 +42,13 @@
     "saveFailed": "Your details could not be saved.",
     "nameRequired": "Please enter your name",
     "emailInvalid": "That email does not look right, e.g. name@gmail.com",
-    "phoneInvalid": "A phone number is 8–20 characters: digits, spaces and + - ( )"
+    "phoneInvalid": "A phone number is 8–20 characters: digits, spaces and + - ( )",
+    "currentPassword": "Current password",
+    "currentPasswordHelp": "Changing the email needs your current password. Afterwards your other devices are signed out and the old address gets a notice.",
+    "currentPasswordRequired": "Enter your current password to change the email",
+    "noPassword": "This account signs in with Google and has no password yet, so the email cannot be changed. <reset>Set a password</reset> first (the link goes to your current email), then come back.",
+    "noPasswordError": "Set a password before changing the email",
+    "emailChanged": "Email changed. Your other devices have been signed out."
   },
   "password": {
     "title": "Change password",
@@ -55,6 +61,7 @@
     "cancel": "Cancel",
     "submit": "Change password",
     "changed": "Password changed. Your other devices have been signed out.",
-    "failed": "The password could not be changed."
+    "failed": "The password could not be changed.",
+    "noPassword": "This account signs in with Google and has no password yet. <reset>Set one</reset> through a link sent to your email."
   }
 }

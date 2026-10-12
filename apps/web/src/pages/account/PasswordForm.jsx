@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { Trans, useTranslation } from "react-i18next";
 import { Field, FieldIcon, PasswordInput, PasswordMeter, PasswordRules, usePasswordRules } from "../../components/auth/fields";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -59,6 +60,12 @@ export default function PasswordForm() {
       <div className="ac-card__b ac-card__b--narrow">
         {user?.must_change_password && (
           <div className="fx-alert fx-alert--warning" role="status" data-testid="must-change"><FieldIcon.Lock /><p>{t("password.mustChange")}</p></div>
+        )}
+        {user?.password_set === false && (
+          <div className="fx-alert fx-alert--warning" role="status" data-testid="no-password">
+            <FieldIcon.Lock />
+            <p><Trans t={t} i18nKey="password.noPassword" components={{ reset: <Link to="/forgot-password" state={{ email: user.email }} /> }} /></p>
+          </div>
         )}
         {errors.general && (
           <div className="fx-alert fx-alert--danger" role="alert"><FieldIcon.Alert /><p>{errors.general}</p></div>

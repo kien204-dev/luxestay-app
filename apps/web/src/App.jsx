@@ -74,8 +74,10 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={guestOnly(<Login />)} />
           <Route path="/register" element={guestOnly(<Register />)} />
-          <Route path="/forgot-password" element={guestOnly(<ForgotPassword />)} />
-          <Route path="/reset-password" element={guestOnly(<ResetPassword />)} />
+          {/* Open when signed in too: an account made by Google sign-in sets
+              its first password from here (My account links to it). */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
         {/* Signed-in guests and admins */}
