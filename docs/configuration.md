@@ -64,7 +64,7 @@ Tuỳ chọn:
 | `AUTH_COOKIE_NAME` | `luxestay_session` | Tên cookie |
 | `AUTH_COOKIE_SECURE` | `true` khi `NODE_ENV=production` (Docker: `false`) | Cookie chỉ gửi qua HTTPS |
 | `AUTH_COOKIE_SAME_SITE` | `none` khi production, ngược lại `lax` (Docker: `lax`) | `none` chỉ cần khi web và API ở hai tên miền khác nhau |
-| `RESET_TOKEN_TTL_MINUTES` | `15` | Hạn link đặt lại mật khẩu |
+| `RESET_TOKEN_TTL_MINUTES` | `15` | Hạn link đặt lại mật khẩu. Trang "Quên mật khẩu", email đã gửi và liên kết hết hạn đều ghi đúng số phút này |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | trống | Email. Bật khi có `SMTP_HOST`, `SMTP_PORT` và `SMTP_FROM`; `SMTP_USER`/`SMTP_PASS` chỉ cần khi máy chủ thư yêu cầu. Thiếu thì không gửi email nào (đặt phòng vẫn chạy). `SMTP_PASSWORD` cũng được chấp nhận thay `SMTP_PASS` |
 | `STORAGE_DRIVER` | `local` | Nơi lưu ảnh tải lên: `local` hoặc `s3` (xem [Lưu ảnh](#lưu-ảnh)) |
 | `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_URL` | trống | Bắt buộc khi `STORAGE_DRIVER=s3` |
@@ -91,7 +91,7 @@ Tuỳ chọn:
 | `VITE_APP_NAME` | `LuxeStay` | Tên hiển thị, tiêu đề tab và chữ cái trên favicon cho tới khi API trả lời (Docker: lấy từ `APP_NAME`) |
 | `VITE_DEFAULT_LANGUAGE` | `vi` | Ngôn ngữ khách thấy ở lần đầu (`vi` hoặc `en`); cũng là `lang` của trang (Docker: lấy từ `DEFAULT_LANGUAGE`) |
 | `VITE_CONTACT_PHONE`, `VITE_CONTACT_EMAIL`, `VITE_CONTACT_ADDRESS` | trống | Liên hệ ở chân trang cho tới khi API trả lời (Docker: lấy từ `CONTACT_*`) |
-| `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` | trống | Đăng nhập Google. Thiếu thì nút bị tắt |
+| `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` | trống | Đăng nhập Google. Nút Google chỉ hiện khi có đủ các biến này **và** API có `FIREBASE_*` |
 
 ## Thông tin cơ sở lưu trú
 

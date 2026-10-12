@@ -4,10 +4,15 @@ import { MUST_CHANGE_PASSWORD_PATH, loginPathFor } from "../utils/authRedirect";
 import PageLoader from "../components/PageLoader";
 
 function PrivateRoute({ children, role }) {
-  const { user, loading } = useAuth();
+  const { user, loading, signedOut } = useAuth();
   const location = useLocation();
 
   if (loading) return <PageLoader />;
+
+  // Just pressed "Sign out" here: home, not the login form.
+  if (!user && signedOut) {
+    return <Navigate to="/" replace />;
+  }
 
   // Not signed in: come back to this exact page afterwards.
   if (!user) {

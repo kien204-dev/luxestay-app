@@ -179,8 +179,14 @@ describe("The room list and room page in the browser", () => {
       assert.ok((await chip.innerText()).includes(String(count)));
       await chip.click();
       await page.waitForURL((url) => url.searchParams.get("type") === type);
+      // The list may still show the unfiltered result for a moment after the
+      // address changes (it is "ready" until the new request starts).
+      await page.waitForFunction(
+        (expected) => document.querySelector("[data-testid='result-count']")?.innerText.startsWith(expected),
+        `${count} `,
+        { timeout: 10000 }
+      );
       await listState(page, "ready").waitFor();
-      assert.ok((await page.getByTestId("result-count").innerText()).startsWith(`${count} `));
       assert.equal(await chip.getAttribute("aria-pressed"), "true");
 
       // A price nobody charges: nothing matches, and the page offers to take

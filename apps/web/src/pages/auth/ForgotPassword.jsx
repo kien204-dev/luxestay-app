@@ -36,7 +36,9 @@ export default function ForgotPassword() {
   const [busy, setBusy] = useState(false);
   const [resent, setResent] = useState(false);
   const [limit, setLimit] = useState(null);
-  const now = useNow(limit?.remaining === 0 ? limit.resetAt : null);
+  // The clock only ticks while waiting; until its first tick, the moment the
+  // answer came is "now".
+  const now = Math.max(useNow(limit?.remaining === 0 ? limit.resetAt : null), limit?.at || 0);
   const waiting = limit?.remaining === 0 && limit.resetAt > now;
 
   const send = async (address) => {

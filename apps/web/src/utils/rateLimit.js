@@ -1,7 +1,8 @@
 // Reads the API's rate limit headers (express-rate-limit, IETF draft 8):
 //   RateLimit: "5-in-1hrs"; r=4; t=3599   (r = requests left, t = seconds
 //   until the window resets), and Retry-After on a refused request.
-// Returns { remaining, resetAt } (resetAt in ms since epoch), or null when
+// Returns { remaining, resetAt, at } (ms since epoch; `at` is when the answer
+// was read), or null when
 // the response carries neither (a proxy dropped them, or tests switch the
 // limits off).
 export function readRateLimit(response, now = Date.now()) {
@@ -12,8 +13,8 @@ export function readRateLimit(response, now = Date.now()) {
   const reset = header.match(/(?:^|;)\s*t=(\d+)/);
   const retryAfter = Number(headers["retry-after"]);
 
-  if (remaining && reset) return { remaining: Number(remaining[1]), resetAt: now + Number(reset[1]) * 1000 };
-  if (response.status === 429 && Number.isFinite(retryAfter)) return { remaining: 0, resetAt: now + retryAfter * 1000 };
+  if (remaining && reset) return { remaining: Number(remaining[1]), resetAt: now + Number(reset[1]) * 1000, at: now };
+  if (response.status === 429 && Number.isFinite(retryAfter)) return { remaining: 0, resetAt: now + retryAfter * 1000, at: now };
   return null;
 }
 
