@@ -112,3 +112,4 @@
 }
 .guest .au__link-button { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--accent-ink); font: 500 14px/22px var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .g-btn--ghost:disabled { background: transparent; }
+.g-btn--outline:disabled { background: transparent; border-color: var(--line); }
