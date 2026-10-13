@@ -1,28 +1,61 @@
 {
   "title": "Lịch phòng",
-  "subtitle": "Chọn địa điểm rồi một phòng để xem lịch đặt theo tháng.",
-  "location": "Địa điểm",
-  "locationPlaceholder": "Gõ hoặc chọn địa điểm, rồi nhấn Enter",
   "room": "Phòng",
-  "pickLocationFirst": "Chọn địa điểm trước",
-  "loadingRooms": "Đang tải phòng...",
-  "noRooms": "Không có phòng nào ở địa điểm này",
-  "pickRoom": "Chọn một phòng ở trên để xem lịch.",
-  "previousMonth": "Tháng trước",
+  "group_one": "{{type}} · {{count}} phòng",
+  "group_other": "{{type}} · {{count}} phòng",
+  "occupancy": "công suất {{value}}%",
+  "roomsShown_one": "{{count}} phòng hiển thị",
+  "roomsShown_other": "{{count}} phòng hiển thị",
+  "prevWeek": "Tuần trước",
+  "nextWeek": "Tuần sau",
+  "prevMonth": "Tháng trước",
   "nextMonth": "Tháng sau",
-  "dayWithBooking": "Ngày {{day}}: {{status}}",
-  "status": {
+  "today": "Hôm nay",
+  "viewLabel": "Phạm vi",
+  "week": "Tuần",
+  "month": "Tháng",
+  "typesLabel": "Lọc theo hạng phòng",
+  "allTypes": "Tất cả hạng phòng",
+  "legendLabel": "Chú thích",
+  "legend": {
     "confirmed": "Đã xác nhận",
+    "inHouse": "Đang lưu trú",
     "pending": "Chờ thanh toán",
-    "completed": "Hoàn tất",
-    "cancelled": "Đã hủy"
+    "completed": "Đã trả phòng",
+    "maintenance": "Bảo trì"
   },
-  "detail": {
-    "title": "Chi tiết đặt phòng",
-    "guest": "Khách",
-    "email": "Email",
-    "dates": "Ngày",
-    "guests": "Số khách",
-    "total": "Tổng tiền"
+  "maintenance": "Đang bảo trì",
+  "nights_one": "{{count}} đêm",
+  "nights_other": "{{count}} đêm",
+  "block": {
+    "pending": "chờ TT",
+    "label": "{{room}}, {{guest}}, {{stay}}, {{state}}"
+  },
+  "gridLabel": "Lịch phòng {{period}}",
+  "errorTitle": "Không tải được lịch {{period}}",
+  "reload": "Tải lại",
+  "emptyTitle": "Chưa có phòng nào để hiển thị",
+  "emptyText": "Lịch hiển thị theo từng phòng. Thêm phòng trước, sau đó đơn đặt phòng sẽ xuất hiện ở đây.",
+  "emptyAction": "Thêm phòng",
+  "payment": {
+    "unpaid": "chưa thanh toán",
+    "pending": "đang thanh toán",
+    "paid": "đã thanh toán",
+    "failed": "thanh toán lỗi",
+    "refund_pending": "chờ hoàn tiền",
+    "refunded": "đã hoàn tiền"
+  },
+  "pop": {
+    "label": "Chi tiết đơn {{code}}",
+    "room": "Phòng",
+    "stay": "Lưu trú",
+    "guests": "Khách",
+    "guestCount_one": "{{count}} khách",
+    "guestCount_other": "{{count}} khách",
+    "payment": "Thanh toán",
+    "channel": "Kênh",
+    "desk": "Tại quầy",
+    "online": "Website",
+    "open": "Mở đơn"
   }
 }

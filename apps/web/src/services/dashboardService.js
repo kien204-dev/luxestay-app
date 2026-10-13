@@ -10,13 +10,21 @@ export const getDashboardAnalytics = async (range) => {
   return response.data;
 };
 
+// The dashboard for a window of days: { days } (the last N days at the
+// property) or { from, to } ("YYYY-MM-DD", both included).
+export const getDashboardOverview = async (params) => {
+  const response = await api.get("/dashboard/overview", { params });
+  return response.data;
+};
+
 // Downloads the report as a real browser file save (not just returning the
 // bytes) — triggers via a temporary <a download> link, then revokes the
 // blob URL once the download has started.
+// `range` is one of the old named ranges, or { from, to }.
 export const exportDashboardReport = async (range, format) => {
   try {
     const response = await api.get("/dashboard/export", {
-      params: { range, format },
+      params: typeof range === "string" ? { range, format } : { ...range, format },
       responseType: "blob",
     });
 

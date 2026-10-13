@@ -383,6 +383,18 @@ function makeFakePool(state) {
       return { rows: booking ? [{ id: booking.id }] : [] };
     }
 
+    if (text.startsWith("select room_type from rooms where lower(regexp_replace(trim(room_type)")) {
+      const typed = String(params[0]).toLowerCase();
+      const room = state.rooms.find(
+        (item) => String(item.room_type).trim().replace(/\s+/g, " ").toLowerCase() === typed && (params[1] === null || item.id !== params[1])
+      );
+      return { rows: room ? [{ room_type: room.room_type }] : [] };
+    }
+
+    if (text.startsWith("select provider, transaction_ref, amount, status, created_at, updated_at from payments where booking_id = $1")) {
+      return { rows: state.payments.filter((item) => item.booking_id === Number(params[0])) };
+    }
+
     if (text.startsWith("select 1 from payments where booking_id = $1 and status = 'success'")) {
       const found = state.payments.some(
         (item) => item.booking_id === Number(params[0]) && item.status === "success"

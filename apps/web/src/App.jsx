@@ -32,6 +32,7 @@ const Rooms = lazy(() => import("./pages/admin/rooms/RoomsPage"));
 const Orders = lazy(() => import("./pages/admin/orders/OrdersPage"));
 const Calendar = lazy(() => import("./pages/admin/calendar/CalendarPage"));
 const Coupons = lazy(() => import("./pages/admin/coupons/CouponsPage"));
+const Reviews = lazy(() => import("./pages/admin/reviews/ReviewsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const guestOnly = (page) => <PublicRoute>{page}</PublicRoute>;
@@ -92,6 +93,7 @@ function App() {
         <Route path={`${ADMIN_HOME}/orders`} element={admin(<Orders />)} />
         <Route path={`${ADMIN_HOME}/calendar`} element={admin(<Calendar />)} />
         <Route path={`${ADMIN_HOME}/coupons`} element={admin(<Coupons />)} />
+        <Route path={`${ADMIN_HOME}/reviews`} element={admin(<Reviews />)} />
         <Route path={`${ADMIN_HOME}/property`} element={admin(<PropertySettings />)} />
         <Route path={`${ADMIN_HOME}/destinations`} element={admin(<Destinations />)} />
         {Object.entries(LEGACY_ADMIN_PATHS).map(([from, to]) => (

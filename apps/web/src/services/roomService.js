@@ -111,3 +111,11 @@ export const deleteRoom = async (id) => {
   const response = await api.delete(`/rooms/${id}`);
   return response.data;
 };
+
+// =========================
+// GET ROOM TYPES IN USE (admin; with how many rooms each)
+// =========================
+export const getRoomTypes = async () => {
+  const response = await api.get("/rooms/types");
+  return response.data;
+};

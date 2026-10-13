@@ -5,8 +5,10 @@ export const getBookings = (params) => api.get("/bookings", { params });
 
 export const getBooking = (id) => api.get(`/bookings/${id}`);
 
-export const getBookingCalendar = (params) =>
-  api.get("/bookings/calendar", { params });
+// Admin: every room and the stays in a window of days ({ from, to }), for
+// the room calendar.
+export const getBookingTimeline = (params) => api.get("/bookings/timeline", { params });
+
 
 export const createBooking = (data) => api.post("/bookings", data);
 
@@ -21,9 +23,6 @@ export const getBookingPolicy = () => api.get("/bookings/policy");
 
 // How many of the signed-in guest's bookings are in each state.
 export const getBookingCounts = () => api.get("/bookings/counts").then((res) => res.data);
-
-// Admin: totals over every booking, for the cards above the orders list.
-export const getBookingSummary = () => api.get("/bookings/summary").then((res) => res.data);
 
 // The booking as a one-page PDF (the booking's owner, or an admin).
 export const downloadBookingReceipt = (id, lang) =>

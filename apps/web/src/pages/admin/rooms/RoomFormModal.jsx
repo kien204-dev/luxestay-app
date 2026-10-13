@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, Field, Modal } from "../../../components/admin/ui";
-import { createRoom, updateRoom, uploadRoomImage } from "../../../services/roomService";
+import { createRoom, getRoomTypes, updateRoom, uploadRoomImage } from "../../../services/roomService";
 import { apiErrorText } from "../../../utils/apiError";
 import { IMAGE_TYPES, imageFileProblem } from "../../../utils/imageFile";
 import { normalizeImageUrl, showFallback } from "../../../utils/imageUrl";
+import { useAsyncData } from "../../../utils/useAsyncData";
 import RoomGallery from "./RoomGallery";
 import { ROOM_STATUSES } from "./roomStatus";
+
+const NEW_TYPE = "__new__";
+// "  phòng   deluxe " and "Phòng Deluxe" are the same type (the API matches
+// the same way).
+const sameType = (a, b) => a.trim().replace(/\s+/g, " ").toLowerCase() === b.trim().replace(/\s+/g, " ").toLowerCase();
 
 const EMPTY = { room_name: "", room_type: "", location: "", price: "", capacity: 2, description: "", amenities: "", image: "", status: "available" };
 
@@ -27,6 +33,13 @@ export default function RoomFormModal({ room, onClose, onSaved }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+  // The type is picked from those in use, so one type is not spelled two
+  // ways; a new one is typed only when asked for.
+  const types = useAsyncData("room-types", getRoomTypes);
+  const typeList = (types.data || []).map((item) => item.type);
+  const [addingType, setAddingType] = useState(false);
+  const typing = addingType || (types.data && typeList.length === 0);
+  const existingMatch = typing && form.room_type.trim() ? typeList.find((type) => sameType(type, form.room_type)) : null;
 
   const uploadCover = async (event) => {
     const file = event.target.files?.[0];
@@ -57,7 +70,7 @@ export default function RoomFormModal({ room, onClose, onSaved }) {
 
     setSaving(true);
     try {
-      const payload = { ...form, price, capacity, amenities: form.amenities.split("\n").map((line) => line.trim()).filter(Boolean) };
+      const payload = { ...form, room_type: existingMatch || form.room_type.trim(), price, capacity, amenities: form.amenities.split("\n").map((line) => line.trim()).filter(Boolean) };
       if (room) await updateRoom(room.id, payload);
       else await createRoom(payload);
       onSaved(form.room_name, !room);
@@ -75,8 +88,57 @@ export default function RoomFormModal({ room, onClose, onSaved }) {
           <Field label={t("form.name")} htmlFor="room-name" wide>
             <input id="room-name" className="adm-input" value={form.room_name} onChange={set("room_name")} maxLength={150} />
           </Field>
-          <Field label={t("form.type")} htmlFor="room-type">
-            <input id="room-type" className="adm-input" value={form.room_type} onChange={set("room_type")} maxLength={100} placeholder={t("form.typePlaceholder")} />
+          <Field
+            label={t("form.type")}
+            htmlFor={typing ? "room-type-new" : "room-type"}
+            hint={existingMatch ? t("form.typeExists", { type: existingMatch }) : typing ? t("form.typeNewHint") : undefined}
+          >
+            {!typing ? (
+              <select
+                id="room-type"
+                className="adm-select"
+                value={typeList.some((type) => type === form.room_type) ? form.room_type : ""}
+                onChange={(event) => {
+                  if (event.target.value === NEW_TYPE) {
+                    setAddingType(true);
+                    setForm((current) => ({ ...current, room_type: "" }));
+                  } else set("room_type")(event);
+                }}
+                disabled={!types.data && !types.error}
+                data-testid="room-type-select"
+              >
+                <option value="">{types.data ? t("form.typeChoose") : t("form.typeLoading")}</option>
+                {typeList.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+                <option value={NEW_TYPE}>{t("form.typeAdd")}</option>
+              </select>
+            ) : (
+              <div className="adm-inline-field">
+                <input
+                  id="room-type-new"
+                  className="adm-input"
+                  value={form.room_type}
+                  onChange={set("room_type")}
+                  maxLength={100}
+                  placeholder={t("form.typePlaceholder")}
+                  autoFocus={addingType}
+                  data-testid="room-type-new"
+                />
+                {typeList.length > 0 && (
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn--ghost adm-btn--small"
+                    onClick={() => {
+                      setAddingType(false);
+                      setForm((current) => ({ ...current, room_type: existingMatch || "" }));
+                    }}
+                  >
+                    {t("form.typeBack")}
+                  </button>
+                )}
+              </div>
+            )}
           </Field>
           <Field label={t("form.status")} htmlFor="room-status">
             <select id="room-status" className="adm-select" value={form.status} onChange={set("status")}>

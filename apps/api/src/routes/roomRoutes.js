@@ -5,6 +5,7 @@ const {
   getRooms,
   getRoomLocations,
   getRoomFilters,
+  getRoomTypes,
   getRoomDestinations,
   getRoomAvailability,
   getRoomById,
@@ -24,6 +25,7 @@ const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 router.get("/", getRooms);
 router.get("/locations", getRoomLocations);
 router.get("/filters", getRoomFilters);
+router.get("/types", verifyToken, checkRole("admin"), getRoomTypes);
 router.get("/destinations", getRoomDestinations);
 router.get("/:id/availability", getRoomAvailability);
 router.get("/:id", getRoomById);

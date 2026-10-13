@@ -62,7 +62,13 @@
     "capacityInvalid": "Capacity must be a whole number greater than 0.",
     "saveFailed": "Could not save the room.",
     "amenities": "Amenities",
-    "amenitiesHint": "One per line, up to 30. Shown on the room page; leave empty to hide the Amenities section."
+    "amenitiesHint": "One per line, up to 30. Shown on the room page; leave empty to hide the Amenities section.",
+    "typeChoose": "Choose a room type",
+    "typeLoading": "Loading room types…",
+    "typeAdd": "+ Add a new room type…",
+    "typeBack": "Pick an existing type",
+    "typeNewHint": "Name of the new room type. If it matches one already in use (ignoring case and spaces), that one is used.",
+    "typeExists": "“{{type}}” already exists: the room goes into that type."
   },
   "gallery": {
     "title": "More photos",

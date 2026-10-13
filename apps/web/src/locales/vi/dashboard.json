@@ -1,93 +1,140 @@
 {
-  "header": {
-    "title": "Tổng quan",
-    "subtitle": "Số liệu vận hành theo giờ của cơ sở lưu trú."
+  "units": {
+    "billion": "tỷ",
+    "million": "tr",
+    "currency": "đ"
   },
-  "rangeLabel": "Khoảng thời gian",
-  "rangeOptions": {
-    "today": "Hôm nay",
-    "week": "7 ngày qua",
-    "month": "Tháng này",
-    "year": "Năm nay",
-    "all": "Tất cả"
-  },
-  "rangeNote": {
-    "today": "Hôm nay",
-    "week": "7 ngày qua",
-    "month": "Tháng này",
-    "year": "Năm nay",
-    "all": "Toàn bộ thời gian"
-  },
-  "chartsAllNote": "Biểu đồ bên dưới hiển thị năm nay; các thẻ số liệu tính trên toàn bộ thời gian.",
-  "status": {
-    "confirmed": "Đã xác nhận",
-    "pending": "Chờ thanh toán",
-    "completed": "Hoàn tất",
-    "cancelled": "Đã hủy"
-  },
-  "refresh": {
-    "loading": "Đang tải...",
-    "refresh": "Làm mới"
-  },
-  "export": {
-    "exporting": "Đang xuất...",
-    "excel": "Xuất Excel",
-    "pdf": "Xuất PDF"
+  "weekday": {
+    "0": "CN",
+    "1": "T2",
+    "2": "T3",
+    "3": "T4",
+    "4": "T5",
+    "5": "T6",
+    "6": "T7"
   },
   "errors": {
     "loadFailed": "Không tải được số liệu.",
-    "exportFailed": "Xuất báo cáo không thành công.",
-    "refreshed": "Đã làm mới số liệu"
+    "exportFailed": "Xuất báo cáo không thành công."
   },
-  "statCards": {
-    "totalRooms": {
-      "label": "Tổng số phòng",
-      "note": "Tất cả phòng, kể cả đang bảo trì"
+  "overview": {
+    "crumb": "Dashboard",
+    "title": "Tổng quan",
+    "range": {
+      "label": "Khoảng thời gian",
+      "d7": "7 ngày",
+      "d30": "30 ngày",
+      "custom": "Tuỳ chọn",
+      "title": "Chọn khoảng thời gian",
+      "presets": "Khoảng có sẵn",
+      "preset": {
+        "today": "Hôm nay",
+        "thisWeek": "Tuần này",
+        "thisMonth": "Tháng này",
+        "lastMonth": "Tháng trước",
+        "thisYear": "Năm nay"
+      },
+      "from": "Từ ngày",
+      "to": "Đến ngày",
+      "missing": "Chọn đủ hai ngày.",
+      "order": "Ngày bắt đầu phải trước ngày kết thúc.",
+      "future": "Chưa có số liệu cho ngày sau hôm nay.",
+      "tooLong": "Tối đa {{max}} ngày.",
+      "summary_one": "{{range}} · {{count}} ngày · so với {{prev}}",
+      "summary_other": "{{range}} · {{count}} ngày · so với {{prev}}",
+      "cancel": "Huỷ",
+      "apply": "Áp dụng"
     },
-    "occupiedTonight": {
-      "label": "Có khách đêm nay",
-      "note": "Phòng có đặt phòng đã xác nhận phủ hôm nay"
+    "export": {
+      "label": "Xuất báo cáo",
+      "working": "Đang xuất…",
+      "excel": "Excel (.xlsx)",
+      "pdf": "PDF",
+      "done": "Đã tải báo cáo xuống."
     },
-    "availableRooms": {
-      "label": "Còn trống đêm nay",
-      "note": "Không có khách và không bảo trì"
+    "kpi": {
+      "revenue": "Doanh thu",
+      "occupancy": "Công suất phòng",
+      "bookings": "Booking mới",
+      "adr": "Giá TB / đêm",
+      "vsBefore_one": "so với {{count}} ngày trước",
+      "vsBefore_other": "so với {{count}} ngày trước",
+      "noBefore": "kỳ trước chưa có doanh thu",
+      "points": "{{value}} điểm",
+      "roomNights": "{{sold}} / {{total}} đêm phòng",
+      "cancelled_one": "{{count}} đơn đã huỷ",
+      "cancelled_other": "{{count}} đơn đã huỷ",
+      "adrNote": "ADR, sau giảm giá"
     },
-    "totalBookings": {
-      "label": "Số đặt phòng",
-      "noteSuffix": "mọi trạng thái, theo ngày đặt"
+    "today": {
+      "label": "Hôm nay",
+      "checkIns": "Nhận phòng hôm nay",
+      "checkOuts": "Trả phòng hôm nay",
+      "occupied": "Phòng đang có khách",
+      "pending": "Đơn chờ thanh toán",
+      "refunds_one": "{{count}} chờ hoàn tiền",
+      "refunds_other": "{{count}} chờ hoàn tiền"
     },
-    "revenue": {
-      "label": "Doanh thu",
-      "noteSuffix": "tiền đã thu"
+    "chart": {
+      "per": {
+        "day": "theo ngày",
+        "week": "theo tuần",
+        "month": "theo tháng"
+      },
+      "revenue": "Doanh thu {{per}}",
+      "revenueLabel": "Biểu đồ doanh thu {{range}}. Dùng phím mũi tên để xem từng mốc.",
+      "peak": "cao nhất {{when}}: {{amount}}",
+      "thisPeriod": "Kỳ này",
+      "prevPeriod": "Kỳ trước ({{range}})",
+      "prevShort": "Kỳ trước",
+      "when": "Thời gian",
+      "bookings_one": "{{count}} đơn",
+      "bookings_other": "{{count}} đơn",
+      "occupancy": "Công suất phòng",
+      "occupancyLabel": "Biểu đồ công suất phòng {{range}}. Dùng phím mũi tên để xem từng mốc.",
+      "occupancySub": {
+        "day": "% phòng có khách mỗi đêm",
+        "week": "% phòng có khách, trung bình mỗi tuần",
+        "month": "% phòng có khách, trung bình mỗi tháng"
+      },
+      "perBar": {
+        "day": "Công suất mỗi đêm",
+        "week": "Công suất mỗi tuần",
+        "month": "Công suất mỗi tháng"
+      },
+      "highest": "Cao nhất kỳ",
+      "nights": "{{sold}} / {{total}} đêm phòng",
+      "noRooms": "Không có phòng nào đang mở bán.",
+      "today": "Hôm nay"
     },
-    "outstanding": {
-      "label": "Chưa thu",
-      "noteSuffix": "đơn đã xác nhận chưa thanh toán"
-    }
-  },
-  "revenueOverview": "Doanh thu",
-  "revenueLabel": "Doanh thu",
-  "bookingsLabel": "Đặt phòng",
-  "bookingsByMonth": "Số đặt phòng",
-  "topBookedRooms": {
-    "title": "Phòng được đặt nhiều nhất",
-    "empty": "Chưa có dữ liệu."
-  },
-  "bookingStatus": {
-    "title": "Trạng thái đặt phòng",
-    "empty": "Chưa có dữ liệu."
-  },
-  "recentBookings": {
-    "title": "Đặt phòng gần đây",
-    "empty": "Chưa có đặt phòng nào.",
-    "columns": {
-      "bookingId": "Mã",
+    "recent": {
+      "title": "Booking gần đây",
+      "all": "Xem tất cả đơn",
+      "empty": "Chưa có đơn nào.",
       "guest": "Khách",
       "room": "Phòng",
-      "checkIn": "Nhận phòng",
-      "checkOut": "Trả phòng",
+      "stay": "Lưu trú",
+      "total": "Tổng",
       "status": "Trạng thái",
-      "amount": "Số tiền"
+      "created": "Tạo lúc"
+    },
+    "needs": {
+      "title": "Cần xử lý",
+      "all": "Tất cả đơn",
+      "none": "Không có đơn nào chờ thanh toán hay hoàn tiền."
+    },
+    "empty": {
+      "noData": "Chưa có dữ liệu",
+      "title": "Chưa có booking trong khoảng này",
+      "text": "Không có đơn nào được tạo hay lưu trú nào trong {{range}}. Số liệu sẽ xuất hiện khi có đơn, hoặc thử chọn khoảng dài hơn.",
+      "walkIn": "Tạo đơn tại quầy",
+      "try30": "Xem 30 ngày"
+    },
+    "error": {
+      "title": "Không tải được số liệu.",
+      "chartTitle": "Biểu đồ tạm thời không khả dụng",
+      "text": "Đơn đặt phòng và lịch phòng vẫn hoạt động bình thường. Thử lại sau ít phút.",
+      "retry": "Tải lại"
     }
   }
 }

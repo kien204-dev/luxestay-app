@@ -5,6 +5,7 @@ const {
   getBookings,
   getBookingById,
   getBookingCalendar,
+  getBookingTimeline,
   getBookingPolicy,
   getBookingCounts,
   getBookingSummary,
@@ -23,6 +24,7 @@ router.get("/", verifyToken, getBookings);
 router.get("/policy", getBookingPolicy);
 router.get("/counts", verifyToken, getBookingCounts);
 router.get("/summary", verifyToken, checkRole("admin"), getBookingSummary);
+router.get("/timeline", verifyToken, checkRole("admin"), getBookingTimeline);
 router.get("/calendar", verifyToken, checkRole("admin"), getBookingCalendar);
 router.get("/:id/receipt", verifyToken, getBookingReceipt);
 router.get("/:id", verifyToken, getBookingById);
