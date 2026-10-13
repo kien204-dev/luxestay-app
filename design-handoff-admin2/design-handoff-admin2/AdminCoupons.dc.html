@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Mã giảm giá</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm " data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="coupons" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Mã giảm giá</li></ol><h1>Mã giảm giá</h1><p>6 mã · 1.798 lượt dùng · đã giảm 412.600.000 ₫ năm nay</p></div>
+          <div class="am__actions"><button type="button" class="ls-btn ls-btn--primary" onClick="{{openEdit}}"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Tạo mã mới</button></div>
+        </div>
+        <div class="ls-tablewrap">
+          <div class="ls-tablebar"><div class="ls-control" style="height: 40px; width: 280px;"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg><input aria-label="Tìm mã" placeholder="Tìm mã giảm giá"></div><button type="button" class="ls-chip" aria-pressed="true">Tất cả · 6</button><button type="button" class="ls-chip">Đang chạy · 3</button><button type="button" class="ls-chip">Đã lên lịch · 1</button><button type="button" class="ls-chip">Hết hạn · 1</button></div>
+          <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+          <table class="ls-table"><thead><tr><th>Mã</th><th class="is-num">Giá trị</th><th>Lượt dùng</th><th>Hiệu lực</th><th>Trạng thái</th><th>Bật</th><th style="width: 56px;"></th></tr></thead><tbody><tr><td><div><div class="ls-cell-main ls-code" style="font-size: 14px; color: var(--ink);">SUMMER26</div><div class="ls-cell-sub">Giảm 10%, tối đa 3tr · từ 2 đêm</div></div></td><td class="is-num">10%</td><td><div class="usage"><div class="usage__t"><i style="width: 37%;"></i></div><span>184 / 500 lượt</span></div></td><td>01/06 – 31/10/2026</td><td><span class="ls-badge ls-badge--success">Đang chạy</span></td><td><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Bật mã SUMMER26"></button></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Sửa SUMMER26" onClick="{{openEdit}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr><tr><td><div><div class="ls-cell-main ls-code" style="font-size: 14px; color: var(--ink);">VILLA3N</div><div class="ls-cell-sub">Tặng bữa tối · villa từ 4 đêm</div></div></td><td class="is-num">2.500.000 ₫</td><td><div class="usage"><div class="usage__t"><i style="width: 44%;"></i></div><span>22 / 50 lượt</span></div></td><td>01/09 – 31/12/2026</td><td><span class="ls-badge ls-badge--success">Đang chạy</span></td><td><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Bật mã VILLA3N"></button></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Sửa VILLA3N" onClick="{{openEdit}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr><tr><td><div><div class="ls-cell-main ls-code" style="font-size: 14px; color: var(--ink);">TET2027</div><div class="ls-cell-sub">Giảm 15% dịp Tết</div></div></td><td class="is-num">15%</td><td><div class="usage"><div class="usage__t"><i style="width: 0%;"></i></div><span>0 / 300 lượt</span></div></td><td>20/01 – 10/02/2027</td><td><span class="ls-badge ls-badge--info">Đã lên lịch</span></td><td><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Bật mã TET2027"></button></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Sửa TET2027" onClick="{{openEdit}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr><tr><td><div><div class="ls-cell-main ls-code" style="font-size: 14px; color: var(--ink);">WELCOME5</div><div class="ls-cell-sub">Khách mới, lần đặt đầu</div></div></td><td class="is-num">5%</td><td><div class="usage"><div class="usage__t"><i style="width: 0%;"></i></div><span>1204 / Không giới hạn lượt</span></div></td><td>Không thời hạn</td><td><span class="ls-badge ls-badge--success">Đang chạy</span></td><td><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Bật mã WELCOME5"></button></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Sửa WELCOME5" onClick="{{openEdit}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr><tr><td><div><div class="ls-cell-main ls-code" style="font-size: 14px; color: var(--ink);">AUTUMN15</div><div class="ls-cell-sub">Mùa thu 2026</div></div></td><td class="is-num">15%</td><td><div class="usage"><div class="usage__t"><i style="width: 100%;"></i></div><span>300 / 300 lượt</span></div></td><td>01/08 – 30/09/2026</td><td><span class="ls-badge ls-badge--neutral">Hết hạn</span></td><td><button type="button" class="sw" role="switch" aria-checked="false" aria-label="Bật mã AUTUMN15"></button></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Sửa AUTUMN15" onClick="{{openEdit}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr><tr><td><div><div class="ls-cell-main ls-code" style="font-size: 14px; color: var(--ink);">FLASH500K</div><div class="ls-cell-sub">Giảm nhanh cuối tuần</div></div></td><td class="is-num">500.000 ₫</td><td><div class="usage"><div class="usage__t"><i style="width: 88%;"></i></div><span>88 / 100 lượt</span></div></td><td>01/10 – 15/10/2026</td><td><span class="ls-badge ls-badge--warning">Sắp hết lượt</span></td><td><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Bật mã FLASH500K"></button></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Sửa FLASH500K" onClick="{{openEdit}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr></tbody></table>
+          </sc-if>
+
+          <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+          <div aria-busy="true" style="padding: 8px 16px;"><sc-for list="{{rows}}" as="x" hint-placeholder-count="6"><div style="display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line);"><span class="ls-skel ls-skel--text" style="width: 200px;"></span><span class="ls-skel ls-skel--text" style="width: 100px;"></span><span class="ls-skel" style="width: 140px; height: 8px; margin-top: 8px;"></span><span class="ls-skel" style="width: 44px; height: 26px; margin-left: auto;"></span></div></sc-for></div>
+          </sc-if>
+          <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg></div><p class="ls-empty__t">Chưa có mã giảm giá</p><p class="ls-empty__d">Tạo mã để thu hút khách vào mùa thấp điểm hoặc thưởng khách quay lại.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tạo mã đầu tiên</button></div></div>
+          </sc-if>
+          <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được danh sách mã</p><p class="ls-empty__d">Máy chủ không phản hồi (mã 503).</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div>
+          </sc-if>
+        </div>
+      </main>
+    </div>
+  </div>
+  <sc-if value="{{mEdit}}" hint-placeholder-val="{{false}}">
+  <div class="modal-stage">
+    <div class="ls-scrim" onClick="{{close}}"></div>
+    <aside class="ls-drawer" role="dialog" aria-modal="true" aria-labelledby="cp-t" style="position: absolute; width: 540px;">
+      <div class="ls-drawer__head"><div><div class="ls-eyebrow">Mã giảm giá</div><h2 id="cp-t" style="margin: 2px 0 0; font: 600 28px/34px var(--font-serif);">Sửa SUMMER26</h2></div><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng" onClick="{{close}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+      <div class="ls-drawer__body" style="display: flex; flex-direction: column; gap: 18px;">
+        <div class="ls-field"><label class="ls-label" for="cp-code">Mã</label><div class="ls-control"><input id="cp-code" value="SUMMER26" style="text-transform: uppercase; letter-spacing: .08em; font-family: ui-monospace, Menlo, monospace;"></div><p class="ls-help">Chữ in hoa, số, tối đa 16 ký tự. Khách nhập mã này khi thanh toán.</p></div>
+        <div class="ls-field"><span class="ls-label">Loại giảm giá</span><div class="pm" role="radiogroup" style="flex-direction: row;"><button type="button" class="pm__opt" role="radio" aria-checked="true" style="padding: 12px 16px;"><span class="pm__radio"></span><span class="pm__b"><b>Phần trăm</b><span>Giảm theo % tổng đơn</span></span></button><button type="button" class="pm__opt" role="radio" aria-checked="false" style="padding: 12px 16px;"><span class="pm__radio"></span><span class="pm__b"><b>Số tiền cố định</b><span>Trừ thẳng vào đơn</span></span></button></div></div>
+        <div class="g2"><div class="ls-field"><label class="ls-label" for="cp-v">Mức giảm</label><div class="ls-control"><input id="cp-v" value="10"><span class="ls-control__suffix">%</span></div></div><div class="ls-field"><label class="ls-label" for="cp-max">Giảm tối đa</label><div class="ls-control"><input id="cp-max" value="3.000.000"><span class="ls-control__suffix">₫</span></div></div></div>
+        <div class="g2"><div class="ls-field"><span class="ls-label">Bắt đầu</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">01/06/2026</span></div></div><div class="ls-field"><span class="ls-label">Hết hạn</span><div class="ls-control ls-control--select is-invalid" role="button" tabindex="0" aria-invalid="true" aria-describedby="cp-exp"><span class="ls-value">31/05/2026</span></div><p class="ls-error-text" id="cp-exp"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg>Ngày hết hạn phải sau ngày bắt đầu</p></div></div>
+        <div class="g2"><div class="ls-field"><label class="ls-label" for="cp-lim">Giới hạn tổng lượt</label><div class="ls-control"><input id="cp-lim" value="500"><span class="ls-control__suffix">lượt</span></div></div><div class="ls-field"><label class="ls-label" for="cp-u">Mỗi khách</label><div class="ls-control"><input id="cp-u" value="1"><span class="ls-control__suffix">lượt</span></div></div></div>
+        <div class="ls-field"><span class="ls-label">Áp dụng cho</span><div class="chipset"><button type="button" class="ls-chip" aria-pressed="true">Tất cả hạng phòng</button><button type="button" class="ls-chip">Chọn hạng phòng…</button></div></div>
+        <label class="swl"><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Chỉ đơn từ 2 đêm"></button>Chỉ áp dụng cho đơn từ 2 đêm</label>
+        <div class="ls-alert"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.5M12 7.8v.3"></path></svg><div>Khách sẽ thấy: <b>“Giảm 10%, tối đa 3.000.000 ₫ cho đơn từ 2 đêm.”</b></div></div>
+      </div>
+      <div class="ls-drawer__foot"><button type="button" class="ls-btn ls-btn--ghost" style="color: var(--danger);">Xoá mã</button><span style="flex: 1;"></span><button type="button" class="ls-btn ls-btn--secondary" onClick="{{close}}">Huỷ</button><button type="button" class="ls-btn ls-btn--primary" disabled>Lưu</button></div>
+    </aside>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"modal":{"editor":"enum","options":["none","edit"],"default":"none"},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { modal: null };
+  }
+  renderVals() {
+    const st = this.props.state ?? 'ready';
+    const m = this.state.modal ?? this.props.modal ?? 'none';
+    const extra = ((p, m, set) => ({ mEdit: m === 'edit', openEdit: () => set('edit') }))(this.props, m, (v) => this.setState({ modal: v }));
+    return Object.assign({
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      rows: [1, 2, 3, 4, 5, 6],
+      close: () => this.setState({ modal: 'none' })
+    }, extra);
+  }
+}
+</script>
+</body>
+</html>

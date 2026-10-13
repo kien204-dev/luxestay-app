@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Phòng</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm is-tall" data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="rooms" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+
+      <!-- ─── LIST ─── -->
+      <sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+      <main class="am__body">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Phòng</li></ol><h1>Phòng</h1><p>12 hạng phòng · 68 phòng vật lý · LuxeStay Đà Nẵng</p></div>
+          <div class="am__actions"><a class="ls-btn ls-btn--primary" href="#"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Thêm hạng phòng</a></div>
+        </div>
+        <div class="ls-tablewrap">
+          <div class="ls-tablebar">
+            <div class="ls-control" style="height: 40px; width: 300px;"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg><input aria-label="Tìm phòng" placeholder="Tìm tên hoặc mã phòng"></div>
+            <button type="button" class="ls-chip" aria-pressed="true">Tất cả · 12</button><button type="button" class="ls-chip">Đang bán · 10</button><button type="button" class="ls-chip">Bảo trì · 1</button><button type="button" class="ls-chip">Ngừng bán · 1</button>
+          </div>
+
+          <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+          <table class="ls-table">
+            <thead><tr><th>Hạng phòng</th><th>Loại</th><th class="is-num">Sức chứa</th><th class="is-num">Số phòng</th><th class="is-num">Giá / đêm</th><th>Trạng thái</th><th>Cập nhật</th><th style="width: 56px;"></th></tr></thead>
+            <tbody>
+              <tr><td><div class="cellrow"><span class="thumb"><img src="/_blob/3a915aa8ddcc621a511098db6e64b9e7" alt=""></span><div><div class="ls-cell-main">Ocean Pool Villa</div><div class="ls-code">OPV · 120 m² · 18 ảnh</div></div></div></td><td>Villa</td><td class="is-num">3</td><td class="is-num">8</td><td class="is-num">12.500.000 ₫</td><td><span class="ls-badge ls-badge--success">Đang bán</span></td><td class="ls-muted">Hôm nay, 09:12</td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Thao tác cho Ocean Pool Villa"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr>
+              <tr class="is-hover"><td><div class="cellrow"><span class="thumb"><img src="/_blob/3e862c5b0a8f7b8faf90c017818511b5" style="object-position: 50% 88%;" alt=""></span><div><div class="ls-cell-main">Infinity Pool Residence</div><div class="ls-code">IPR · 140 m² · 22 ảnh</div></div></div></td><td>Villa</td><td class="is-num">4</td><td class="is-num">4</td><td class="is-num">15.200.000 ₫</td><td><span class="ls-badge ls-badge--success">Đang bán</span></td><td class="ls-muted">06/10/2026</td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Thao tác"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr>
+              <tr><td><div class="cellrow"><span class="thumb"><img src="/_blob/44b3f9b009f6b2f9213cc73a9fe0f78b" alt=""></span><div><div class="ls-cell-main">Grand Heritage Suite</div><div class="ls-code">GHS · 86 m² · 15 ảnh</div></div></div></td><td>Suite</td><td class="is-num">3</td><td class="is-num">6</td><td class="is-num">8.900.000 ₫</td><td><span class="ls-badge ls-badge--success">Đang bán</span></td><td class="ls-muted">02/10/2026</td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Thao tác"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr>
+              <tr><td><div class="cellrow"><span class="thumb"><img src="/_blob/381bfb2f1a29e1c1765d0ff56c59d9ab" alt=""></span><div><div class="ls-cell-main">Garden Deluxe King</div><div class="ls-code">GDK · 42 m² · 12 ảnh</div></div></div></td><td>Deluxe</td><td class="is-num">2</td><td class="is-num">24</td><td class="is-num">4.850.000 ₫</td><td><span class="ls-badge ls-badge--success">Đang bán</span></td><td class="ls-muted">28/09/2026</td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Thao tác"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr>
+              <tr><td><div class="cellrow"><span class="thumb"><img src="/_blob/381bfb2f1a29e1c1765d0ff56c59d9ab" alt=""></span><div><div class="ls-cell-main">Garden Deluxe Twin</div><div class="ls-code">GDT · 42 m² · 9 ảnh</div></div></div></td><td>Deluxe</td><td class="is-num">2</td><td class="is-num">18</td><td class="is-num">4.600.000 ₫</td><td><span class="ls-badge ls-badge--danger">Bảo trì</span></td><td class="ls-muted">25/09/2026</td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Thao tác"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr>
+              <tr><td><div class="cellrow"><span class="thumb" style="display: grid; place-items: center; color: var(--ink-subtle);"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="1.5"></rect><path d="M3.5 15l5-4 4 3 3-2 5 4"></path></svg></span><div><div class="ls-cell-main">Sky Loft Suite</div><div class="ls-code">SLS · 68 m² · chưa có ảnh</div></div></div></td><td>Suite</td><td class="is-num">2</td><td class="is-num">0</td><td class="is-num">—</td><td><span class="ls-badge ls-badge--outline">Nháp</span></td><td class="ls-muted">20/09/2026</td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Thao tác"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></td></tr>
+            </tbody>
+          </table>
+          <div style="padding: 16px;"><nav class="ls-pager" aria-label="Phân trang"><span>Hiển thị <b style="color: var(--ink);">1–6</b> trong 12 hạng phòng</span><ul class="ls-pages"><li><button type="button" class="ls-page ls-page--nav" disabled>Trước</button></li><li><button type="button" class="ls-page" aria-current="page">1</button></li><li><button type="button" class="ls-page">2</button></li><li><button type="button" class="ls-page ls-page--nav">Sau</button></li></ul></nav></div>
+          </sc-if>
+
+          <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+          <div aria-busy="true" style="padding: 8px 16px;"><sc-for list="{{rows}}" as="x" hint-placeholder-count="6"><div style="display: flex; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line);"><span class="ls-skel" style="width: 64px; height: 48px;"></span><span class="ls-skel ls-skel--text" style="width: 220px;"></span><span class="ls-skel ls-skel--text" style="width: 80px; margin-left: auto;"></span><span class="ls-skel ls-skel--text" style="width: 120px;"></span><span class="ls-skel" style="width: 90px; height: 24px;"></span></div></sc-for></div>
+          </sc-if>
+          <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M12 72V30M12 56h72v16M84 56v-6a10 10 0 0 0-10-10H44v16"></path><circle cx="28" cy="46" r="6"></circle></svg></div><p class="ls-empty__t">Chưa có hạng phòng nào</p><p class="ls-empty__d">Tạo hạng phòng đầu tiên với ảnh, giá và tiện nghi. Khách chỉ thấy các hạng phòng ở trạng thái Đang bán.</p><div class="ls-empty__a"><a class="ls-btn ls-btn--primary" href="#">Thêm hạng phòng</a><button type="button" class="ls-btn ls-btn--secondary">Nhập từ file CSV</button></div></div>
+          </sc-if>
+          <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được danh sách phòng</p><p class="ls-empty__d">Máy chủ không phản hồi (mã 503). Thử lại sau vài giây.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div>
+          </sc-if>
+        </div>
+      </main>
+      </sc-if>
+
+      <!-- ─── FORM ─── -->
+      <sc-if value="{{isForm}}" hint-placeholder-val="{{false}}">
+      <main class="am__body" style="padding-bottom: 0;">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Phòng</a></li><li>Ocean Pool Villa</li></ol><h1>Sửa hạng phòng</h1><p>Mã OPV · cập nhật lần cuối bởi Trần Thu Hà, 09:12 hôm nay</p></div>
+          <div class="am__actions"><a class="ls-btn ls-btn--secondary ls-btn--sm" href="#">Xem trên trang khách</a></div>
+        </div>
+        <div class="ls-tabs" role="tablist" style="margin-top: -8px;"><button type="button" class="ls-tab" role="tab" aria-selected="true">Thông tin</button><button type="button" class="ls-tab" role="tab">Giá &amp; phụ thu <span class="ls-tab__err" role="img" aria-label="Có lỗi"></span></button><button type="button" class="ls-tab" role="tab">Ảnh <span class="ls-tab__n">18</span></button><button type="button" class="ls-tab" role="tab">Lịch sử</button></div>
+        <div class="card" style="padding: 32px;">
+          <div class="fsec">
+            <div class="fsec__h"><h2>Thông tin</h2><p>Hiển thị trên trang danh sách và chi tiết phòng.</p></div>
+            <div class="fsec__b">
+              <div class="g2"><div class="ls-field"><label class="ls-label" for="f-name">Tên hạng phòng</label><div class="ls-control"><input id="f-name" value="Ocean Pool Villa"></div></div><div class="ls-field"><span class="ls-label">Loại phòng</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">Villa</span><svg class="ls-icon ls-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div></div></div>
+              <div class="ls-field"><label class="ls-label" for="f-desc">Mô tả</label><div class="ls-control ls-textarea"><textarea id="f-desc">Biệt thự một phòng ngủ sát mép cát, sân hiên gỗ teak nhìn thẳng ra vịnh. Bữa sáng nổi phục vụ tại hồ bơi riêng mỗi sáng.</textarea></div><p class="ls-help">118 / 600 ký tự</p></div>
+            </div>
+          </div>
+          <div class="fsec">
+            <div class="fsec__h"><h2>Giá</h2><p>Giá mặc định mỗi đêm, đã gồm thuế. Giá theo ngày chỉnh trong Lịch phòng.</p></div>
+            <div class="fsec__b">
+              <div class="g3">
+                <div class="ls-field"><label class="ls-label" for="f-p1">Ngày thường</label><div class="ls-control"><input id="f-p1" value="12.500.000"><span class="ls-control__suffix">₫</span></div></div>
+                <div class="ls-field"><label class="ls-label" for="f-p2">Cuối tuần (T6–T7)</label><div class="ls-control is-invalid" aria-invalid="true"><input id="f-p2" value="1.420.000" aria-describedby="f-p2-m"><span class="ls-control__suffix">₫</span></div><p class="ls-error-text" id="f-p2-m"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg>Thấp hơn giá ngày thường 89%. Có thể bạn thiếu một số 0?</p></div>
+                <div class="ls-field"><label class="ls-label" for="f-p3">Phụ thu người thứ 3</label><div class="ls-control"><input id="f-p3" value="950.000"><span class="ls-control__suffix">₫ / đêm</span></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="fsec">
+            <div class="fsec__h"><h2>Sức chứa</h2></div>
+            <div class="fsec__b">
+              <div class="g3">
+                <div class="ls-guest-row" style="padding: 0;"><div class="ls-guest-row__t">Người lớn tối đa</div><div class="ls-stepper"><button type="button" class="ls-round" aria-label="Bớt"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg></button><span class="ls-stepper__n">2</span><button type="button" class="ls-round" aria-label="Thêm"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></div></div>
+                <div class="ls-guest-row" style="padding: 0;"><div class="ls-guest-row__t">Trẻ em tối đa</div><div class="ls-stepper"><button type="button" class="ls-round" aria-label="Bớt"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg></button><span class="ls-stepper__n">1</span><button type="button" class="ls-round" aria-label="Thêm"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></div></div>
+                <div class="ls-field"><label class="ls-label" for="f-area">Diện tích</label><div class="ls-control"><input id="f-area" value="120"><span class="ls-control__suffix">m²</span></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="fsec">
+            <div class="fsec__h"><h2>Tiện nghi</h2><p>12 tiện nghi đầu tiên hiển thị dạng icon trên trang chi tiết.</p></div>
+            <div class="fsec__b"><div class="chipset">
+              <button type="button" class="ls-chip" aria-pressed="true">Hồ bơi riêng</button><button type="button" class="ls-chip" aria-pressed="true">Wi-Fi</button><button type="button" class="ls-chip" aria-pressed="true">Điều hoà</button><button type="button" class="ls-chip" aria-pressed="true">Bồn tắm đứng</button><button type="button" class="ls-chip" aria-pressed="true">Máy pha espresso</button><button type="button" class="ls-chip" aria-pressed="true">Minibar</button><button type="button" class="ls-chip" aria-pressed="true">Két sắt</button><button type="button" class="ls-chip" aria-pressed="true">Smart TV</button><button type="button" class="ls-chip">Bếp nhỏ</button><button type="button" class="ls-chip">Máy giặt</button><button type="button" class="ls-chip">Nôi em bé</button><button type="button" class="ls-chip" aria-pressed="true">Quản gia 24/7</button><button type="button" class="ls-chip is-focus">+ Thêm tiện nghi</button>
+            </div></div>
+          </div>
+          <div class="fsec">
+            <div class="fsec__h"><h2>Ảnh</h2><p>Kéo để sắp xếp. Ảnh đầu tiên có viền vàng là ảnh bìa. JPG/PNG/WEBP, tối đa 10 MB, tối thiểu 1600 px.</p></div>
+            <div class="fsec__b">
+              <div class="drop {{dropCls}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"></path></svg><b>{{dropTitle}}</b><span>hoặc <a href="#">chọn từ máy</a> · tối đa 30 ảnh</span></div>
+              <div class="pgrid">
+                <div class="pimg is-cover"><img src="/_blob/3a915aa8ddcc621a511098db6e64b9e7" alt="Ảnh bìa: hồ bơi villa"><span class="pimg__tag">Ảnh bìa</span><div class="pimg__acts"><button type="button" aria-label="Xoá ảnh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"></path></svg></button></div><span class="pimg__handle" aria-label="Kéo để sắp xếp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg></span></div>
+                <div class="pimg is-ghost" aria-hidden="true"></div>
+                <div class="pimg is-drag"><img src="/_blob/3e862c5b0a8f7b8faf90c017818511b5" style="object-position: 50% 85%;" alt="Ghế nằm bên hồ bơi"><div class="pimg__acts"><button type="button" aria-label="Đặt làm ảnh bìa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg></button><button type="button" aria-label="Xoá ảnh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"></path></svg></button></div><span class="pimg__handle"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg></span></div>
+                <div class="pimg"><img src="/_blob/381bfb2f1a29e1c1765d0ff56c59d9ab" alt="Phòng ngủ"><div class="pimg__acts"><button type="button" aria-label="Đặt làm ảnh bìa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg></button><button type="button" aria-label="Xoá ảnh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"></path></svg></button></div><span class="pimg__handle"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg></span></div>
+                <div class="pimg"><img src="/_blob/e4ec4023c553a526716f2600d13599af" alt="Spa"><span class="pimg__handle"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg></span></div>
+                <div class="pimg"><img src="/_blob/cae206badc8d459b7849ab439ae92c30" alt="Bữa tối"><div class="pimg__over" role="status">Đang tải lên · 64%</div><div class="pimg__prog"><i style="width: 64%;"></i></div></div>
+                <div class="pimg"><div class="pimg__over err" role="alert"><span>IMG_2041.HEIC<br><b>Định dạng không hỗ trợ</b><br><a href="#">Xoá</a></span></div></div>
+                <div class="pimg"><img src="/_blob/44b3f9b009f6b2f9213cc73a9fe0f78b" alt="Suite"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="savebar"><span><i></i>3 thay đổi chưa lưu · 1 lỗi cần sửa</span><div style="display: flex; gap: 12px;"><button type="button" class="ls-btn ls-btn--ghost">Huỷ</button><button type="button" class="ls-btn ls-btn--secondary">Lưu nháp</button><button type="button" class="ls-btn ls-btn--primary" disabled>Lưu &amp; mở bán</button></div></div>
+      </main>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["list","form"],"default":"list"},"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"dragOver":{"editor":"boolean","default":false},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const v = this.props.view ?? 'list';
+    const st = this.props.state ?? 'ready';
+    const over = !!this.props.dragOver;
+    return {
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isList: v === 'list', isForm: v === 'form',
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      rows: [1, 2, 3, 4, 5, 6],
+      dropCls: over ? 'is-over' : '',
+      dropTitle: over ? 'Thả 3 ảnh để tải lên' : 'Kéo thả ảnh vào đây'
+    };
+  }
+}
+</script>
+</body>
+</html>

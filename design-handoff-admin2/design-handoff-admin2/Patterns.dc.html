@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Mẫu dùng chung — toast &amp; xác nhận xoá</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls" data-theme="{{theme}}" style="width: 1440px; box-sizing: border-box; padding: 64px 80px; background: var(--canvas); color: var(--ink); font-family: var(--font-sans); display: flex; flex-direction: column; gap: 64px;">
+  <section class="pat">
+    <p class="h-kicker">Mẫu dùng chung</p>
+    <h2>Toast thông báo</h2>
+    <p class="lead">Góc dưới phải trên desktop, dưới cùng và phủ ngang trên mobile (cách thanh điều hướng 16px). Tối đa 3 cái, cái mới ở dưới. Thành công và thông tin tự ẩn sau 6 giây, di chuột vào thì dừng đếm. Lỗi không tự ẩn. Lỗi của một ô nhập hiện ngay dưới ô, không dùng toast.</p>
+    <div class="pat__grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));"><div class="pat__cell"><span>Lưu thành công · tự ẩn 6 giây</span><div class="ls-toast ls-toast--success" role="status"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Đã lưu hạng phòng</div><div class="ls-toast__d">Ocean Pool Villa đã cập nhật giá và 18 ảnh.</div><div class="ls-toast__a"><button type="button">Xem trên trang khách</button></div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><span class="ls-toast__bar" style="transform: scaleX(.55);"></span></div></div><div class="pat__cell"><span>Đã xoá · có hoàn tác 10 giây</span><div class="ls-toast ls-toast--success" role="status"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Đã xoá mã FLASH500K</div><div class="ls-toast__d">88 đơn đã dùng mã vẫn giữ nguyên giá.</div><div class="ls-toast__a"><button type="button">Hoàn tác</button></div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><span class="ls-toast__bar" style="transform: scaleX(.55);"></span></div></div><div class="pat__cell"><span>Lỗi · không tự ẩn</span><div class="ls-toast ls-toast--danger" role="alert"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Không lưu được thay đổi</div><div class="ls-toast__d">Mất kết nối lúc 14:32. Dữ liệu bạn nhập vẫn còn trên form.</div><div class="ls-toast__a"><button type="button">Thử lại</button><button type="button">Sao chép chi tiết lỗi</button></div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div></div><div class="pat__cell"><span>Đang xử lý · không có nút đóng</span><div class="ls-toast ls-toast--loading" role="status"><span class="ls-toast__ic"><span class="ls-spinner"></span></span><div class="ls-toast__b"><div class="ls-toast__t">Đang tải lên 6 ảnh…</div><div class="ls-toast__d">4 / 6 xong · đừng đóng tab này.</div></div></div></div><div class="pat__cell"><span>Thông tin</span><div class="ls-toast ls-toast--info" role="status"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.5M12 7.8v.3"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Có 2 đơn mới</div><div class="ls-toast__d">LXS-0419, LXS-0420 vừa được đặt trên website.</div><div class="ls-toast__a"><button type="button">Xem đơn</button></div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div></div><div class="pat__cell"><span>Trang khách · đặt lại mật khẩu</span><div class="ls-toast ls-toast--success" role="status"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Đã gửi email</div><div class="ls-toast__d">Kiểm tra hộp thư minhanh.ng@gmail.com.</div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><span class="ls-toast__bar" style="transform: scaleX(.55);"></span></div></div></div>
+  </section>
+  <section class="pat">
+    <h2>Hộp xác nhận xoá</h2>
+    <p class="lead">Một modal cho mọi thao tác xoá. Nêu rõ <b>cái gì</b> bị xoá, <b>ảnh hưởng</b> đến đâu và có hoàn tác được không. Focus ban đầu đặt vào “Huỷ”. Xoá thứ không thể khôi phục và còn ràng buộc (như hạng phòng có đơn) thì yêu cầu gõ mã để xác nhận.</p>
+    <div class="pat__grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start;">
+      <div class="pat__cell"><span>Thường · có hoàn tác</span><div class="ls-modal" role="dialog" aria-modal="true" aria-label="Xoá mã FLASH500K?" style="box-shadow: var(--shadow-lg);">
+  <div class="ls-modal__head"><div><div class="cdel__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"></path></svg></div><h2 class="ls-modal__title">Xoá mã FLASH500K?</h2></div><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ls-modal__body" style="display: flex; flex-direction: column; gap: 12px;"><p style="margin: 0;">Mã sẽ ngừng áp dụng ngay. Bạn có 10 giây để hoàn tác sau khi xoá.</p><ul class="cdel__impact"><li><b>88 đơn</b> đã dùng mã giữ nguyên giá đã thanh toán</li><li>Khách đang ở bước thanh toán sẽ được báo mã hết hiệu lực</li></ul></div>
+  <div class="ls-modal__foot"><button type="button" class="ls-btn ls-btn--secondary is-focus">Huỷ</button><button type="button" class="ls-btn ls-btn--danger">Xoá mã</button></div>
+</div></div>
+      <div class="pat__cell"><span>Nguy hiểm · gõ mã để xác nhận</span><div class="ls-modal" role="dialog" aria-modal="true" aria-label="Xoá hạng phòng Ocean Pool Villa?" style="box-shadow: var(--shadow-lg);">
+  <div class="ls-modal__head"><div><div class="cdel__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"></path></svg></div><h2 class="ls-modal__title">Xoá hạng phòng Ocean Pool Villa?</h2></div><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ls-modal__body" style="display: flex; flex-direction: column; gap: 12px;"><p style="margin: 0;">Hạng phòng có <b style="color: var(--ink);">3 đơn sắp tới</b>. Bạn cần chuyển hoặc huỷ các đơn này trước, hoặc chọn Ngừng bán thay vì xoá.</p><ul class="cdel__impact"><li>8 phòng vật lý và 18 ảnh sẽ bị xoá vĩnh viễn</li><li>Không thể hoàn tác</li></ul><div class="ls-field"><label class="ls-label" for="cd-32">Nhập <b style="font-family: ui-monospace, Menlo, monospace;">OCEAN-POOL-VILLA</b> để xác nhận</label><div class="ls-control is-focus"><input id="cd-32" value="OCEAN-POOL"></div></div></div>
+  <div class="ls-modal__foot"><button type="button" class="ls-btn ls-btn--secondary is-focus">Huỷ</button><button type="button" class="ls-btn ls-btn--danger" disabled>Xoá vĩnh viễn</button></div>
+</div></div>
+      <div class="pat__cell"><span>Hàng loạt</span><div class="ls-modal" role="dialog" aria-modal="true" aria-label="Xoá 3 ảnh đã chọn?" style="box-shadow: var(--shadow-lg);">
+  <div class="ls-modal__head"><div><div class="cdel__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"></path></svg></div><h2 class="ls-modal__title">Xoá 3 ảnh đã chọn?</h2></div><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ls-modal__body" style="display: flex; flex-direction: column; gap: 12px;"><p style="margin: 0;">Ảnh bìa sẽ chuyển sang ảnh tiếp theo trong danh sách.</p><ul class="cdel__impact"><li>Có thể tải lại ảnh bất cứ lúc nào</li></ul></div>
+  <div class="ls-modal__foot"><button type="button" class="ls-btn ls-btn--secondary is-focus">Huỷ</button><button type="button" class="ls-btn ls-btn--danger">Xoá 3 ảnh</button></div>
+</div></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return { theme: this.props.theme ?? 'light' }; }
+}
+</script>
+</body>
+</html>

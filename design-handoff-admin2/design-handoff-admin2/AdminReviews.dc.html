@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Đánh giá</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm " data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="reviews" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Đánh giá</li></ol><h1>Đánh giá</h1><p>4,92 trung bình · 1.284 đánh giá · 3 đang ẩn</p></div>
+          <div class="am__actions"><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Xuất CSV</button></div>
+        </div>
+        <div class="ls-tablewrap">
+          <div class="ls-tablebar"><div class="ls-control" style="height: 40px; width: 280px;"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg><input aria-label="Tìm đánh giá" placeholder="Tìm theo tên, mã đơn, nội dung"></div><button type="button" class="ls-chip" aria-pressed="true">Tất cả</button><button type="button" class="ls-chip">5 sao</button><button type="button" class="ls-chip">1–3 sao · 18</button><button type="button" class="ls-chip">Chưa phản hồi · 42</button><button type="button" class="ls-chip">Đang ẩn · 3</button></div>
+          <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}"><div><div class="rva"><div><div class="rva__h"><span class="ls-avatar">LH</span><b>Lan Hương</b><span>Hà Nội · 28/09/2026</span><span class="rv-stars" role="img" aria-label="5 sao"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg></span><span class="ls-badge ls-badge--success">Hiển thị</span></div><p>Buổi sáng yên tĩnh đến mức nghe rõ tiếng sóng. Quản gia nhớ chúng tôi thích cà phê muối, hôm sau đã có sẵn ở hiên.</p><div class="rva__h" style="margin: 8px 0 0;"><span>Ocean Pool Villa · LXS-0377</span></div><div style="margin-top: 12px; padding: 12px 16px; border-left: 2px solid var(--brass); background: var(--canvas); font: 400 14px/22px var(--font-sans); color: var(--ink-muted);"><b style="color: var(--ink);">Phản hồi của khách sạn:</b> Cảm ơn chị Hương! Hẹn gặp lại hai anh chị mùa hè tới.</div></div><div class="rva__side"><label class="swl"><span style="font-size: 13px; color: var(--ink-muted);">Hiện</span><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị đánh giá của Lan Hương"></button></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Sửa phản hồi</button></div></div><div class="rva"><div><div class="rva__h"><span class="ls-avatar">TN</span><b>Trần Ngọc</b><span>TP. HCM · 21/09/2026</span><span class="rv-stars" role="img" aria-label="4 sao"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg></span><span class="ls-badge ls-badge--success">Hiển thị</span></div><p>Villa đẹp và sạch. Wi-Fi ở góc sân hiên hơi yếu, nhưng nhân viên mang bộ phát riêng đến ngay khi chúng tôi báo.</p><div class="rva__h" style="margin: 8px 0 0;"><span>Ocean Pool Villa · LXS-0352</span></div></div><div class="rva__side"><label class="swl"><span style="font-size: 13px; color: var(--ink-muted);">Hiện</span><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị đánh giá của Trần Ngọc"></button></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Phản hồi</button></div></div><div class="rva is-hidden"><div><div class="rva__h"><span class="ls-avatar">AN</span><b>Ẩn danh</b><span>12/09/2026</span><span class="rv-stars" role="img" aria-label="1 sao"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg></span><span class="ls-badge ls-badge--outline">Đang ẩn</span></div><p>Dịch vụ quá tệ!!! Liên hệ 09x để được giá rẻ hơn ở chỗ khác.</p><div class="rva__h" style="margin: 8px 0 0;"><span>Garden Deluxe King · LXS-0331</span></div></div><div class="rva__side"><label class="swl"><span style="font-size: 13px; color: var(--ink-muted);">Ẩn</span><button type="button" class="sw" role="switch" aria-checked="false" aria-label="Hiển thị đánh giá của Ẩn danh"></button></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Phản hồi</button></div></div><div class="rva"><div><div class="rva__h"><span class="ls-avatar">DM</span><b>Daniel Moreau</b><span>Lyon · 30/08/2026</span><span class="rv-stars" role="img" aria-label="5 sao"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"></path></svg></span><span class="ls-badge ls-badge--success">Hiển thị</span></div><p>The private pool is bigger than it looks in the photos. Floating breakfast was a highlight.</p><div class="rva__h" style="margin: 8px 0 0;"><span>Grand Heritage Suite · LXS-0318</span></div></div><div class="rva__side"><label class="swl"><span style="font-size: 13px; color: var(--ink-muted);">Hiện</span><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị đánh giá của Daniel Moreau"></button></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Phản hồi</button></div></div></div></sc-if>
+
+          <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+          <div aria-busy="true" style="padding: 8px 16px;"><sc-for list="{{rows}}" as="x" hint-placeholder-count="6"><div style="display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line);"><span class="ls-skel ls-skel--circle" style="width: 32px; height: 32px;"></span><div style="flex: 1;"><span class="ls-skel ls-skel--text" style="width: 30%;"></span><span class="ls-skel ls-skel--text" style="width: 80%;"></span><span class="ls-skel ls-skel--text" style="width: 60%;"></span></div><span class="ls-skel" style="width: 44px; height: 26px;"></span></div></sc-for></div>
+          </sc-if>
+          <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg></div><p class="ls-empty__t">Không có đánh giá nào khớp bộ lọc</p><p class="ls-empty__d">Chưa có đánh giá 1–3 sao trong 30 ngày qua.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--secondary">Xoá bộ lọc</button></div></div>
+          </sc-if>
+          <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được đánh giá</p><p class="ls-empty__d">Máy chủ không phản hồi (mã 503).</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div>
+          </sc-if>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"modal":{"editor":"enum","options":["none","edit"],"default":"none"},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { modal: null };
+  }
+  renderVals() {
+    const st = this.props.state ?? 'ready';
+    const m = this.state.modal ?? this.props.modal ?? 'none';
+    const extra = (() => ({}))(this.props, m, (v) => this.setState({ modal: v }));
+    return Object.assign({
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      rows: [1, 2, 3, 4, 5, 6],
+      close: () => this.setState({ modal: 'none' })
+    }, extra);
+  }
+}
+</script>
+</body>
+</html>

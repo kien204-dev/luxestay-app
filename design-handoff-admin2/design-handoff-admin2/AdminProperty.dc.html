@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Cơ sở lưu trú</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm is-tall" data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="property" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body" style="padding-bottom: 0;">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Cơ sở lưu trú</li></ol><h1>Cơ sở lưu trú</h1><p>Thông tin và thương hiệu hiển thị trên website khách</p></div>
+          <div class="am__actions"><a class="ls-btn ls-btn--secondary ls-btn--sm" href="#">Mở trang khách</a></div>
+        </div>
+        <div class="ls-tabs" role="tablist"><button type="button" class="ls-tab" role="tab" aria-selected="true">Thông tin &amp; thương hiệu</button><button type="button" class="ls-tab" role="tab">Chính sách</button><button type="button" class="ls-tab" role="tab">Thanh toán</button><button type="button" class="ls-tab" role="tab">Nhân viên <span class="ls-tab__n">9</span></button></div>
+        <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}"><div class="card" style="padding: 32px; display: grid; grid-template-columns: 1fr 420px; gap: 32px;" aria-busy="true"><div style="display: flex; flex-direction: column; gap: 16px;"><span class="ls-skel ls-skel--title" style="width: 30%;"></span><span class="ls-skel" style="height: 48px;"></span><span class="ls-skel" style="height: 48px;"></span><span class="ls-skel" style="height: 120px;"></span></div><span class="ls-skel" style="height: 420px;"></span></div></sc-if>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}"><div class="admin-state"><div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được cài đặt</p><p class="ls-empty__d">Thay đổi chưa lưu vẫn được giữ trên trình duyệt này.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div></div></sc-if>
+        <sc-if value="{{isFormVisible}}" hint-placeholder-val="{{true}}">
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}"><div class="ls-alert ls-alert--warning"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg><div><b>Cơ sở chưa hoàn tất thiết lập.</b> Thêm logo, ảnh nền và thông tin liên hệ để mở website khách.</div></div></sc-if>
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 32px; align-items: start;">
+          <div class="card fsec-stack" style="padding: 32px;">
+            <div class="fsec"><div class="fsec__h"><h2>Thông tin chung</h2></div><div class="fsec__b">
+              <div class="ls-field"><label class="ls-label" for="pp-n">Tên cơ sở</label><div class="ls-control is-focus"><input id="pp-n" value="{{pName}}"></div></div>
+              <div class="ls-field"><label class="ls-label" for="pp-t">Khẩu hiệu trên ảnh nền</label><div class="ls-control"><input id="pp-t" value="{{pTag}}"></div><p class="ls-help">Tối đa 40 ký tự · đang dùng 22</p></div>
+            </div></div>
+            <div class="fsec"><div class="fsec__h"><h2>Thương hiệu</h2><p>Logo và màu chủ đạo áp dụng cho website, email và phiếu PDF.</p></div><div class="fsec__b">
+              <div class="logo-up"><div class="logo-up__box">{{logoText}}</div><div style="display: flex; flex-direction: column; gap: 8px;"><div style="display: flex; gap: 8px;"><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"></path></svg>Tải logo</button><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm">Gỡ</button></div><p class="ls-help">SVG hoặc PNG nền trong, rộng tối thiểu 400 px.</p></div></div>
+              <div class="ls-field"><span class="ls-label">Màu chủ đạo</span><div class="swatches" role="radiogroup" aria-label="Màu chủ đạo">
+                <button type="button" class="swatch" role="radio" aria-checked="{{cMoss}}" aria-label="Xanh rêu" style="background: #2e4a3c;" onClick="{{pickMoss}}"></button>
+                <button type="button" class="swatch" role="radio" aria-checked="{{cNavy}}" aria-label="Xanh đêm" style="background: #24384f;" onClick="{{pickNavy}}"></button>
+                <button type="button" class="swatch" role="radio" aria-checked="{{cTerra}}" aria-label="Đất nung" style="background: #8f3f2a;" onClick="{{pickTerra}}"></button>
+                <button type="button" class="swatch" role="radio" aria-checked="{{cBrass}}" aria-label="Đồng" style="background: #6e5021;" onClick="{{pickBrass}}"></button>
+              </div><p class="ls-help">Mỗi màu đã kiểm tra độ tương phản với chữ trắng và nền kem.</p></div>
+              <div class="ls-field"><span class="ls-label">Ảnh nền trang chủ</span><div class="drop" style="flex-direction: row; text-align: left; padding: 16px;"><span class="thumb" style="width: 96px; height: 64px;"><img src="/_blob/3e862c5b0a8f7b8faf90c017818511b5" alt=""></span><div style="flex: 1;"><b>hero-ho-boi-hoang-hon.jpg</b><br><span>2400 × 1350 · 1,2 MB · ghi công: Lê Hải Đăng</span></div><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Đổi ảnh</button></div></div>
+            </div></div>
+            <div class="fsec"><div class="fsec__h"><h2>Liên hệ</h2></div><div class="fsec__b">
+              <div class="g2"><div class="ls-field"><label class="ls-label" for="pp-ph">Điện thoại lễ tân</label><div class="ls-control"><input id="pp-ph" value="+84 236 3 888 999"></div></div><div class="ls-field"><label class="ls-label" for="pp-em">Email</label><div class="ls-control is-invalid" aria-invalid="true"><input id="pp-em" value="stay@luxestay" aria-describedby="pp-em-m"></div><p class="ls-error-text" id="pp-em-m"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg>Email thiếu tên miền, ví dụ stay@luxestay.vn</p></div></div>
+              <div class="ls-field"><label class="ls-label" for="pp-ad">Địa chỉ</label><div class="ls-control"><input id="pp-ad" value="Trường Sa, Hòa Hải, Ngũ Hành Sơn, Đà Nẵng"></div></div>
+            </div></div>
+            <div class="fsec"><div class="fsec__h"><h2>Huỷ miễn phí</h2><p>Áp dụng cho đơn mới. Đơn đã đặt giữ chính sách lúc đặt.</p></div><div class="fsec__b">
+              <div class="ls-guest-row" style="padding: 0; max-width: 420px;"><div><div class="ls-guest-row__t">Huỷ miễn phí trước ngày nhận phòng</div><div class="ls-guest-row__s">Sau mốc này hoàn 50%</div></div><div class="ls-stepper"><button type="button" class="ls-round" aria-label="Bớt 1 ngày" onClick="{{decDays}}"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg></button><span class="ls-stepper__n">{{days}}</span><button type="button" class="ls-round" aria-label="Thêm 1 ngày" onClick="{{incDays}}"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></div></div>
+            </div></div>
+          </div>
+          <div class="pv" aria-label="Xem trước">
+            <div style="display: flex; justify-content: space-between; align-items: center;"><span class="ls-label">Xem trước</span><div class="ls-seg-ctl" role="group"><button type="button" aria-pressed="true">Desktop</button><button type="button" aria-pressed="false">Mobile</button></div></div>
+            <div class="pv__frame">
+              <div class="pv__bar"><i></i><i></i><i></i><span style="margin-left: 8px;">luxestay.vn</span></div>
+              <div class="pv__hero"><img src="/_blob/3e862c5b0a8f7b8faf90c017818511b5" alt="" style="object-position: 50% 60%;"><div class="pv__logo"><span>L</span>{{logoText}}</div><div><div class="pv__t">{{pTag}}</div><div class="pv__cta" style="background: {{accentHex}}; margin-top: 12px;">Tìm phòng</div></div></div>
+              <div class="pv__b"><b style="color: var(--ink); font-size: 14px;">{{pName}}</b><span>+84 236 3 888 999 · Trường Sa, Ngũ Hành Sơn</span><span class="ls-badge ls-badge--accent ls-badge--plain" style="align-self: flex-start;">Huỷ miễn phí trước {{days}} ngày</span></div>
+            </div>
+            <p class="ls-help">Xem trước cập nhật ngay khi bạn sửa. Khách chỉ thấy thay đổi sau khi lưu.</p>
+          </div>
+        </div>
+        </sc-if>
+        <div class="savebar"><span><i></i>4 thay đổi chưa lưu · 1 lỗi cần sửa</span><div style="display: flex; gap: 12px;"><button type="button" class="ls-btn ls-btn--ghost">Huỷ thay đổi</button><button type="button" class="ls-btn ls-btn--primary" disabled>Lưu</button></div></div>
+      </main>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"modal":{"editor":"enum","options":["none","edit"],"default":"none"},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { modal: null, accent: 'moss', days: 7 };
+  }
+  renderVals() {
+    const st = this.props.state ?? 'ready';
+    const m = this.state.modal ?? this.props.modal ?? 'none';
+    const a = this.state.accent, dd = this.state.days, empty = this.props.state === 'empty';
+    const hex = { moss: '#2e4a3c', navy: '#24384f', terra: '#8f3f2a', brass: '#6e5021' }[a];
+    const own = { pName: empty ? '' : 'LuxeStay Resort & Spa Đà Nẵng', pTag: empty ? 'Tên khách sạn của bạn' : 'Nơi thời gian chậm lại', logoText: empty ? 'Logo' : 'LuxeStay', accentHex: hex, days: dd, cMoss: a === 'moss' ? 'true' : 'false', cNavy: a === 'navy' ? 'true' : 'false', cTerra: a === 'terra' ? 'true' : 'false', cBrass: a === 'brass' ? 'true' : 'false', pickMoss: () => this.setState({ accent: 'moss' }), pickNavy: () => this.setState({ accent: 'navy' }), pickTerra: () => this.setState({ accent: 'terra' }), pickBrass: () => this.setState({ accent: 'brass' }), incDays: () => this.setState({ days: Math.min(30, dd + 1) }), decDays: () => this.setState({ days: Math.max(0, dd - 1) }) };
+    const extra = ((p, m, set) => ({ isFormVisible: (p.state ?? 'ready') === 'ready' || p.state === 'empty' }))(this.props, m, (v) => this.setState({ modal: v }));
+    return Object.assign({
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      rows: [1, 2, 3, 4, 5, 6],
+      close: () => this.setState({ modal: 'none' })
+    }, own, extra);
+  }
+}
+</script>
+</body>
+</html>

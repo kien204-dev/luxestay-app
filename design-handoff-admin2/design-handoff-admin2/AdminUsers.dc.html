@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Người dùng</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm " data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="users" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Người dùng</li></ol><h1>Người dùng</h1><p>3.412 tài khoản · 9 nhân viên · 4 đã khoá</p></div>
+          <div class="am__actions"><button type="button" class="ls-btn ls-btn--primary"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Mời nhân viên</button></div>
+        </div>
+        <div class="ls-tablewrap">
+          <div class="ls-tablebar"><div class="ls-control is-focus" style="height: 40px; width: 320px;"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg><input aria-label="Tìm người dùng" value="{{q}}" placeholder="Tên, email hoặc số điện thoại"></div><button type="button" class="ls-chip" aria-pressed="true">Tất cả</button><button type="button" class="ls-chip">Khách</button><button type="button" class="ls-chip">Nhân viên</button><button type="button" class="ls-chip">Đã khoá</button></div>
+          <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+          <table class="ls-table"><thead><tr><th>Người dùng</th><th>Vai trò</th><th class="is-num">Số đơn</th><th>Tham gia</th><th>Trạng thái</th><th style="width: 140px;"></th></tr></thead><tbody><tr><td><div class="ls-person"><span class="ls-avatar">MA</span><div><div class="ls-cell-main">Nguyễn Minh Anh</div><div class="ls-cell-sub">minhanh.ng@gmail.com</div></div></div></td><td><span class="ls-badge ls-badge--neutral ls-badge--plain">Khách</span></td><td class="is-num">7</td><td>12/03/2024</td><td><span class="ls-badge ls-badge--success">Hoạt động</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" style="color: var(--danger);" onClick="{{openLock}}">Khoá</button></td></tr><tr><td><div class="ls-person"><span class="ls-avatar">TH</span><div><div class="ls-cell-main">Trần Thu Hà</div><div class="ls-cell-sub">ha.tran@luxestay.vn</div></div></div></td><td><span class="ls-badge ls-badge--brass ls-badge--plain">Quản lý</span></td><td class="is-num">—</td><td>02/01/2024</td><td><span class="ls-badge ls-badge--success">Hoạt động</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" style="color: var(--danger);" onClick="{{openLock}}">Khoá</button></td></tr><tr><td><div class="ls-person"><span class="ls-avatar">QK</span><div><div class="ls-cell-main">Phạm Quốc Khánh</div><div class="ls-cell-sub">khanh.pham@luxestay.vn</div></div></div></td><td><span class="ls-badge ls-badge--accent ls-badge--plain">Lễ tân</span></td><td class="is-num">—</td><td>15/06/2025</td><td><span class="ls-badge ls-badge--success">Hoạt động</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" style="color: var(--danger);" onClick="{{openLock}}">Khoá</button></td></tr><tr><td><div class="ls-person"><span class="ls-avatar">JW</span><div><div class="ls-cell-main">James Whitmore</div><div class="ls-cell-sub">j.whitmore@outlook.com</div></div></div></td><td><span class="ls-badge ls-badge--neutral ls-badge--plain">Khách</span></td><td class="is-num">3</td><td>08/08/2025</td><td><span class="ls-badge ls-badge--success">Hoạt động</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" style="color: var(--danger);" onClick="{{openLock}}">Khoá</button></td></tr><tr><td><div class="ls-person"><span class="ls-avatar">XX</span><div><div class="ls-cell-main">spam.booker</div><div class="ls-cell-sub">spam.booker@mailinator.com</div></div></div></td><td><span class="ls-badge ls-badge--neutral ls-badge--plain">Khách</span></td><td class="is-num">0</td><td>01/10/2026</td><td><span class="ls-badge ls-badge--danger">Đã khoá</span></td><td><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Mở khoá</button></td></tr><tr><td><div class="ls-person"><span class="ls-avatar">PJ</span><div><div class="ls-cell-main">Park Ji-woo</div><div class="ls-cell-sub">jiwoo.p@naver.com</div></div></div></td><td><span class="ls-badge ls-badge--neutral ls-badge--plain">Khách</span></td><td class="is-num">2</td><td>19/05/2026</td><td><span class="ls-badge ls-badge--success">Hoạt động</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" style="color: var(--danger);" onClick="{{openLock}}">Khoá</button></td></tr></tbody></table>
+          <div style="padding: 16px;"><nav class="ls-pager" aria-label="Phân trang"><span>Hiển thị <b style="color: var(--ink);">1–6</b> trong 3.412</span><ul class="ls-pages"><li><button type="button" class="ls-page ls-page--nav" disabled>Trước</button></li><li><button type="button" class="ls-page" aria-current="page">1</button></li><li><button type="button" class="ls-page">2</button></li><li><button type="button" class="ls-page">3</button></li><li><span class="ls-page__gap">…</span></li><li><button type="button" class="ls-page">569</button></li><li><button type="button" class="ls-page ls-page--nav">Sau</button></li></ul></nav></div>
+          </sc-if>
+
+          <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+          <div aria-busy="true" style="padding: 8px 16px;"><sc-for list="{{rows}}" as="x" hint-placeholder-count="6"><div style="display: flex; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line);"><span class="ls-skel ls-skel--circle" style="width: 32px; height: 32px;"></span><span class="ls-skel ls-skel--text" style="width: 240px;"></span><span class="ls-skel" style="width: 64px; height: 24px; margin-left: 40px;"></span><span class="ls-skel ls-skel--text" style="width: 90px; margin-left: auto;"></span></div></sc-for></div>
+          </sc-if>
+          <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg></div><p class="ls-empty__t">Không tìm thấy “nguyen van an”</p><p class="ls-empty__d">Thử tìm bằng email hoặc số điện thoại đầy đủ.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--secondary">Xoá tìm kiếm</button></div></div>
+          </sc-if>
+          <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được danh sách người dùng</p><p class="ls-empty__d">Máy chủ không phản hồi (mã 503).</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div>
+          </sc-if>
+        </div>
+      </main>
+    </div>
+  </div>
+  <sc-if value="{{mLock}}" hint-placeholder-val="{{false}}">
+  <div class="modal-stage"><div class="ls-scrim"><div class="ls-modal" role="dialog" aria-modal="true" aria-labelledby="lk-t">
+    <div class="ls-modal__head"><div><h2 class="ls-modal__title" id="lk-t">Khoá tài khoản James Whitmore?</h2></div><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng" onClick="{{close}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <div class="ls-modal__body" style="display: flex; flex-direction: column; gap: 16px;"><p style="margin: 0;">j.whitmore@outlook.com sẽ bị đăng xuất khỏi mọi thiết bị và không thể đăng nhập hoặc đặt phòng mới. <b style="color: var(--ink);">1 đơn sắp tới</b> (LXS-0411, 16–18/10) vẫn được giữ.</p>
+      <div class="ls-field"><span class="ls-label">Lý do</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">Nghi ngờ gian lận thanh toán</span><svg class="ls-icon ls-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+      <div class="ls-field"><label class="ls-label" for="lk-n">Ghi chú nội bộ <span class="ls-opt">(không bắt buộc)</span></label><div class="ls-control ls-textarea"><textarea id="lk-n" style="min-height: 72px;">3 lần hoàn tiền bị ngân hàng từ chối trong tháng 9.</textarea></div></div>
+      <label class="au__check"><span class="ls-check-box"></span>Gửi email thông báo cho người dùng</label></div>
+    <div class="ls-modal__foot"><button type="button" class="ls-btn ls-btn--secondary is-focus" onClick="{{close}}">Huỷ</button><button type="button" class="ls-btn ls-btn--danger">Khoá tài khoản</button></div>
+  </div></div></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"modal":{"editor":"enum","options":["none","lock"],"default":"none"},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { modal: null };
+  }
+  renderVals() {
+    const st = this.props.state ?? 'ready';
+    const m = this.state.modal ?? this.props.modal ?? 'none';
+    const extra = ((p, m, set) => ({ mLock: m === 'lock', openLock: () => set('lock'), q: (p.state === 'empty') ? 'nguyen van an' : '' }))(this.props, m, (v) => this.setState({ modal: v }));
+    return Object.assign({
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      rows: [1, 2, 3, 4, 5, 6],
+      close: () => this.setState({ modal: 'none' })
+    }, extra);
+  }
+}
+</script>
+</body>
+</html>

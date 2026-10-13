@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Điểm đến</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm " data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="destinations" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Điểm đến</li></ol><h1>Điểm đến</h1><p>5 điểm đến · 1 ảnh thiếu ghi công</p></div>
+          <div class="am__actions"><button type="button" class="ls-btn ls-btn--primary"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Thêm điểm đến</button></div>
+        </div>
+        <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}"><div class="dgrid"><article class="dcard"><div class="ls-photo"><img src="/_blob/3e862c5b0a8f7b8faf90c017818511b5" alt="Đà Nẵng" style="object-position: 50% 60%;"></div><div class="dcard__b"><h3>Đà Nẵng</h3><p>3 cơ sở · 26 hạng phòng</p><span class="dcard__credit">Ảnh: Lê Hải Đăng · Ảnh đặt riêng</span></div><div class="dcard__f"><label class="swl"><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị Đà Nẵng"></button><span style="font-size: 13px;">Hiển thị</span></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openEdit}}">Đổi ảnh &amp; ghi công</button></div></article><article class="dcard"><div class="ls-photo"><img src="/_blob/835160ed93692f5ecf989f8258cee1ee" alt="Hội An" style=""></div><div class="dcard__b"><h3>Hội An</h3><p>1 cơ sở · 6 hạng phòng</p><span class="dcard__credit">Ảnh: Nguyễn Thu Trang · Wikimedia · CC BY-SA 4.0</span></div><div class="dcard__f"><label class="swl"><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị Hội An"></button><span style="font-size: 13px;">Hiển thị</span></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openEdit}}">Đổi ảnh &amp; ghi công</button></div></article><article class="dcard"><div class="ls-photo"><img src="/_blob/cabacae95a0b70d8ad651aaa6679ef47" alt="Phú Quốc" style=""></div><div class="dcard__b"><h3>Phú Quốc</h3><p>1 cơ sở · 8 hạng phòng</p><span class="dcard__credit">Ảnh: Kai Nakamura · Pexels</span></div><div class="dcard__f"><label class="swl"><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị Phú Quốc"></button><span style="font-size: 13px;">Hiển thị</span></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openEdit}}">Đổi ảnh &amp; ghi công</button></div></article><article class="dcard"><div class="ls-photo"><img src="/_blob/7303f5f7190bdeba203635dd8ff7c584" alt="Sa Pa" style=""></div><div class="dcard__b"><h3>Sa Pa</h3><p>1 cơ sở · 4 hạng phòng</p><span class="dcard__credit miss"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg>Thiếu ghi công ảnh</span></div><div class="dcard__f"><label class="swl"><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị Sa Pa"></button><span style="font-size: 13px;">Hiển thị</span></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openEdit}}">Đổi ảnh &amp; ghi công</button></div></article><article class="dcard"><div class="ls-photo"><img src="/_blob/44b3f9b009f6b2f9213cc73a9fe0f78b" alt="Đà Lạt" style=""></div><div class="dcard__b"><h3>Đà Lạt</h3><p>1 cơ sở · 5 hạng phòng</p><span class="dcard__credit">Ảnh: Phạm Quốc Khánh · Unsplash</span></div><div class="dcard__f"><label class="swl"><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Hiển thị Đà Lạt"></button><span style="font-size: 13px;">Hiển thị</span></label><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openEdit}}">Đổi ảnh &amp; ghi công</button></div></article></div></sc-if>
+        <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}"><div class="dgrid" aria-busy="true"><sc-for list="{{rows}}" as="x" hint-placeholder-count="6"><div class="dcard"><span class="ls-skel" style="aspect-ratio: 16 / 10; border-radius: 0;"></span><div class="dcard__b"><span class="ls-skel ls-skel--title" style="width: 50%;"></span><span class="ls-skel ls-skel--text" style="width: 70%;"></span></div></div></sc-for></div></sc-if>
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}"><div class="admin-state"><div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle></svg></div><p class="ls-empty__t">Chưa có điểm đến</p><p class="ls-empty__d">Điểm đến gom các cơ sở theo thành phố để khách lọc trên trang Phòng.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Thêm điểm đến</button></div></div></div></sc-if>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}"><div class="admin-state"><div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được điểm đến</p><p class="ls-empty__d">Máy chủ không phản hồi (mã 503).</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div></div></sc-if>
+      </main>
+    </div>
+  </div>
+  <sc-if value="{{mEdit}}" hint-placeholder-val="{{false}}">
+  <div class="modal-stage">
+    <div class="ls-scrim" onClick="{{close}}"></div>
+    <aside class="ls-drawer" role="dialog" aria-modal="true" aria-labelledby="ds-t" style="position: absolute; width: 520px;">
+      <div class="ls-drawer__head"><div><div class="ls-eyebrow">Điểm đến</div><h2 id="ds-t" style="margin: 2px 0 0; font: 600 28px/34px var(--font-serif);">Sa Pa</h2></div><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng" onClick="{{close}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+      <div class="ls-drawer__body" style="display: flex; flex-direction: column; gap: 18px;">
+        <div class="pimg" style="aspect-ratio: 16 / 9;"><img src="/_blob/7303f5f7190bdeba203635dd8ff7c584" alt="Ảnh hiện tại của Sa Pa"><div class="pimg__acts"><button type="button" aria-label="Xoá ảnh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"></path></svg></button></div></div>
+        <div class="drop is-over" style="padding: 20px;"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4"></path></svg><b>Thả ảnh để thay thế</b><span>JPG/WEBP, tối thiểu 2000 px chiều ngang</span></div>
+        <div class="ls-alert ls-alert--warning"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg><div>Ảnh dùng giấy phép CC hoặc từ kho ảnh cần ghi công. Thông tin dưới đây hiển thị ở trang <b>/credits</b>.</div></div>
+        <div class="ls-field"><label class="ls-label" for="ds-a">Tác giả</label><div class="ls-control is-invalid" aria-invalid="true"><input id="ds-a" placeholder="VD: Vàng A Sử" aria-describedby="ds-a-m"></div><p class="ls-error-text" id="ds-a-m"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg>Cần tên tác giả khi giấy phép yêu cầu ghi công</p></div>
+        <div class="ls-field"><label class="ls-label" for="ds-s">Liên kết nguồn</label><div class="ls-control"><input id="ds-s" value="https://commons.wikimedia.org/wiki/File:Sapa_valley.jpg"></div></div>
+        <div class="ls-field"><span class="ls-label">Giấy phép</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">CC BY-SA 4.0</span><svg class="ls-icon ls-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+      </div>
+      <div class="ls-drawer__foot"><button type="button" class="ls-btn ls-btn--secondary" onClick="{{close}}">Huỷ</button><button type="button" class="ls-btn ls-btn--primary" style="flex: 1;">Lưu ảnh &amp; ghi công</button></div>
+    </aside>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"modal":{"editor":"enum","options":["none","edit"],"default":"none"},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { modal: null };
+  }
+  renderVals() {
+    const st = this.props.state ?? 'ready';
+    const m = this.state.modal ?? this.props.modal ?? 'none';
+    const extra = ((p, m, set) => ({ mEdit: m === 'edit', openEdit: () => set('edit') }))(this.props, m, (v) => this.setState({ modal: v }));
+    return Object.assign({
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      rows: [1, 2, 3, 4, 5, 6],
+      close: () => this.setState({ modal: 'none' })
+    }, extra);
+  }
+}
+</script>
+</body>
+</html>
