@@ -14,6 +14,9 @@ const {
   deleteRoom,
   addRoomImage,
   deleteRoomImage,
+  getRoomStatusCounts,
+  reorderRoomImages,
+  setRoomCover,
 } = require("../controller/roomController.js");
 const { createReview, getRoomReviews } = require("../controller/reviewController.js");
 const { uploadRoomImage: uploadRoomImageController } = require("../controller/uploadController.js");
@@ -26,6 +29,7 @@ router.get("/", getRooms);
 router.get("/locations", getRoomLocations);
 router.get("/filters", getRoomFilters);
 router.get("/types", verifyToken, checkRole("admin"), getRoomTypes);
+router.get("/status-counts", verifyToken, checkRole("admin"), getRoomStatusCounts);
 router.get("/destinations", getRoomDestinations);
 router.get("/:id/availability", getRoomAvailability);
 router.get("/:id", getRoomById);
@@ -49,6 +53,8 @@ router.post(
   handleRoomImageUpload,
   addRoomImage
 );
+router.put("/:id/images/order", verifyToken, checkRole("admin"), reorderRoomImages);
+router.post("/:id/images/:imageId/cover", verifyToken, checkRole("admin"), setRoomCover);
 router.delete("/:id/images/:imageId", verifyToken, checkRole("admin"), deleteRoomImage);
 
 // Ai cũng xem được review (public); phải đăng nhập mới được viết review

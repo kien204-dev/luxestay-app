@@ -246,26 +246,64 @@ exports.listReviews = async (req, res) => {
       values.push(roomId);
       filters.push(`rv.room_id = $${values.length}`);
     }
+    // ?stars=5 (exactly), ?stars=low (1 to 3); ?hidden=true|false.
+    const stars = req.query.stars;
+    if (stars === "low") {
+      filters.push("rv.rating <= 3");
+    } else if (/^[1-5]$/.test(String(stars ?? ""))) {
+      values.push(Number(stars));
+      filters.push(`rv.rating = $${values.length}`);
+    }
+    if (req.query.hidden === "true" || req.query.hidden === "false") {
+      filters.push(req.query.hidden === "true" ? "rv.is_hidden = TRUE" : "rv.is_hidden = FALSE");
+    }
+    // ?q=: the reviewer's name or email, the room, the comment, or the
+    // booking code (#BK-0012, bk12, 12).
+    const keyword = typeof req.query.q === "string" ? req.query.q.trim().slice(0, 100) : "";
+    if (keyword) {
+      const code = keyword.match(/^#?\s*(?:bk)?[-\s]*0*(\d{1,9})$/i);
+      values.push(`%${keyword.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+      const like = `$${values.length}`;
+      const text = `(u.name ILIKE ${like} OR u.email ILIKE ${like} OR r.room_name ILIKE ${like} OR COALESCE(rv.comment, '') ILIKE ${like})`;
+      if (code) {
+        values.push(Number(code[1]));
+        filters.push(`(rv.booking_id = $${values.length} OR ${text})`);
+      } else {
+        filters.push(text);
+      }
+    }
     const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
 
-    const countResult = await pool.query(
-      `SELECT COUNT(*)::int AS total FROM room_reviews rv ${whereClause}`,
-      values
-    );
+    const [countResult, result, summary] = await Promise.all([
+      pool.query(
+        `SELECT COUNT(*)::int AS total
+         FROM room_reviews rv JOIN rooms r ON rv.room_id = r.id JOIN users u ON rv.user_id = u.id
+         ${whereClause}`,
+        values
+      ),
+      pool.query(
+        `SELECT rv.id, rv.room_id, rv.booking_id, rv.rating, rv.comment, rv.is_hidden, rv.created_at,
+                r.room_name, u.name AS user_name, u.email AS user_email
+         FROM room_reviews rv
+         JOIN rooms r ON rv.room_id = r.id
+         JOIN users u ON rv.user_id = u.id
+         ${whereClause}
+         ORDER BY rv.created_at DESC, rv.id DESC
+         LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+        [...values, limit, offset]
+      ),
+      // Over every review, whatever the filters: for the page heading and
+      // the filter counts. The average is of the reviews guests can see.
+      pool.query(
+        `SELECT COUNT(*)::int AS total,
+                COUNT(*) FILTER (WHERE is_hidden)::int AS hidden,
+                COUNT(*) FILTER (WHERE rating = 5)::int AS five,
+                COUNT(*) FILTER (WHERE rating <= 3)::int AS low,
+                ROUND(AVG(rating) FILTER (WHERE NOT is_hidden), 2)::float AS average
+         FROM room_reviews`
+      ),
+    ]);
     const total = countResult.rows[0].total;
-
-    const dataValues = [...values, limit, offset];
-    const result = await pool.query(
-      `SELECT rv.id, rv.room_id, rv.rating, rv.comment, rv.is_hidden, rv.created_at,
-              r.room_name, u.name AS user_name, u.email AS user_email
-       FROM room_reviews rv
-       JOIN rooms r ON rv.room_id = r.id
-       JOIN users u ON rv.user_id = u.id
-       ${whereClause}
-       ORDER BY rv.created_at DESC
-       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
-      dataValues
-    );
 
     res.json({
       data: result.rows,
@@ -275,6 +313,7 @@ exports.listReviews = async (req, res) => {
         total,
         totalPages: Math.max(1, Math.ceil(total / limit)),
       },
+      summary: summary.rows[0],
     });
   } catch (err) {
     console.error(err);

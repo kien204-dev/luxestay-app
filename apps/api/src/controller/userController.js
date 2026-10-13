@@ -50,6 +50,17 @@ function publicUserSelect() {
   return "id, name, email, role, phone, bio, avatar_url, created_at, updated_at, must_change_password, is_locked, password_set";
 }
 
+// What only the admin list shows about an account: why it was locked (never
+// sent to the account holder), how many bookings it made, and how many of
+// them are still to come (kept if the account is locked).
+const ADMIN_USER_EXTRAS = `lock_reason, lock_note, locked_at,
+  (SELECT COUNT(*)::int FROM bookings b WHERE b.user_id = users.id AND b.guest_name IS NULL) AS booking_count,
+  (SELECT COUNT(*)::int FROM bookings b WHERE b.user_id = users.id AND b.guest_name IS NULL
+     AND b.status IN ('pending', 'confirmed') AND b.check_out > CURRENT_DATE) AS upcoming_count`;
+
+const LOCK_REASONS = new Set(["fraud", "spam", "abuse", "request", "other"]);
+const LOCK_NOTE_MAX = 500;
+
 // ======================
 // GET ALL USERS
 // ======================
@@ -94,7 +105,7 @@ exports.getUsers = async (req, res) => {
     const where = conditions.join(" AND ");
     const [rows, summary] = await Promise.all([
       pool.query(
-        `SELECT ${publicUserSelect()}, COUNT(*) OVER()::int AS total_count
+        `SELECT ${publicUserSelect()}, ${ADMIN_USER_EXTRAS}, COUNT(*) OVER()::int AS total_count
          FROM users
          WHERE ${where}
          ORDER BY id ASC
@@ -491,14 +502,28 @@ exports.setUserLock = async (req, res) => {
       });
     }
 
+    // Locking may say why (from a fixed list) with an internal note;
+    // unlocking clears both.
+    const reason = req.body.reason ?? null;
+    if (req.body.locked && reason !== null && !LOCK_REASONS.has(reason)) {
+      return res.status(400).json({ ...apiMessage("INVALID_LOCK_REASON") });
+    }
+    const note = typeof req.body.note === "string" ? req.body.note.trim() : "";
+    if (note.length > LOCK_NOTE_MAX) {
+      return res.status(400).json({ ...apiMessage("TEXT_TOO_LONG", { field: "note", max: LOCK_NOTE_MAX }) });
+    }
+
     const result = await pool.query(
       `UPDATE users
        SET is_locked=$1,
            token_version=token_version + CASE WHEN $1 THEN 1 ELSE 0 END,
+           lock_reason=CASE WHEN $1 THEN $3 ELSE NULL END,
+           lock_note=CASE WHEN $1 THEN $4 ELSE NULL END,
+           locked_at=CASE WHEN $1 THEN COALESCE(locked_at, NOW()) ELSE NULL END,
            updated_at=CURRENT_TIMESTAMP
        WHERE id=$2 AND deleted_at IS NULL
-       RETURNING ${publicUserSelect()}`,
-      [req.body.locked, id]
+       RETURNING ${publicUserSelect()}, ${ADMIN_USER_EXTRAS}`,
+      [req.body.locked, id, req.body.locked ? reason : null, req.body.locked && note ? note : null]
     );
 
     if (result.rows.length === 0) {

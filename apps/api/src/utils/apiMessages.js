@@ -9,6 +9,15 @@
 
 const MESSAGES = {
   "SERVER_ERROR": "Lỗi máy chủ, vui lòng thử lại sau.",
+  "COUPON_NOT_STARTED": "Mã giảm giá chưa đến ngày áp dụng.",
+  "COUPON_START_INVALID": "Ngày bắt đầu không hợp lệ.",
+  "COUPON_DATES_ORDER": "Ngày hết hạn phải sau ngày bắt đầu.",
+  "ROOM_IMAGES_LIMIT": "Mỗi phòng có tối đa {{max}} ảnh.",
+  "ROOM_IMAGE_ORDER_INVALID": "Danh sách ảnh để sắp xếp không khớp với ảnh của phòng.",
+  "ROOM_IMAGES_REORDERED": "Đã lưu thứ tự ảnh.",
+  "ROOM_COVER_SET": "Đã đặt ảnh bìa.",
+  "INVALID_LOCK_REASON": "Lý do khoá tài khoản không hợp lệ.",
+  "ADMIN_ONLY_FILTER": "Chỉ quản trị viên được dùng bộ lọc này.",
   "TOO_MANY_REQUESTS": "Quá nhiều yêu cầu. Vui lòng thử lại sau.",
   "UNAUTHORIZED": "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.",
   "FORBIDDEN": "Bạn không có quyền truy cập chức năng này.",
@@ -183,6 +192,7 @@ const MESSAGES = {
 };
 
 const FIELD_LABELS = {
+  "note": "Ghi chú",
   "name": "Tên",
   "email": "Email",
   "bio": "Giới thiệu",

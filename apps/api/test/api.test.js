@@ -1015,7 +1015,11 @@ function makeFakePool(state) {
       return { rows: sorted.slice(offset, offset + limitNum) };
     }
 
-    if (text.includes("from room_images") && text.includes("where room_id = $1")) {
+    if (text.includes("select count(*)::int as n from room_images")) {
+      return { rows: [{ n: state.roomImages.filter((item) => item.room_id === Number(params[0])).length }] };
+    }
+
+    if (text.includes("from room_images") && text.includes("where room_id = $1") && !text.includes("insert into room_images")) {
       return {
         rows: state.roomImages.filter((item) => item.room_id === Number(params[0])),
       };
@@ -1429,6 +1433,19 @@ function makeFakePool(state) {
       };
     }
 
+    if (text.includes("as average from room_reviews") && text.includes("as hidden")) {
+      const shown = state.reviews.filter((item) => !item.is_hidden);
+      return {
+        rows: [{
+          total: state.reviews.length,
+          hidden: state.reviews.length - shown.length,
+          five: state.reviews.filter((item) => item.rating === 5).length,
+          low: state.reviews.filter((item) => item.rating <= 3).length,
+          average: shown.length ? Math.round((shown.reduce((sum, item) => sum + item.rating, 0) / shown.length) * 100) / 100 : null,
+        }],
+      };
+    }
+
     if (text.includes("count(*)::int as total from room_reviews rv")) {
       const roomId = text.includes("rv.room_id = $1") ? Number(params[0]) : null;
       const filtered = roomId
@@ -1509,6 +1526,7 @@ function makeFakePool(state) {
         min_booking_amount: params[4] != null ? Number(params[4]) : null,
         expires_at: params[5],
         usage_limit: params[6] != null ? Number(params[6]) : null,
+        starts_at: params[8] ?? null,
       });
       return { rows: [coupon] };
     }
@@ -1529,6 +1547,7 @@ function makeFakePool(state) {
         min_booking_amount: params[4] != null ? Number(params[4]) : null,
         expires_at: params[5],
         usage_limit: params[6] != null ? Number(params[6]) : null,
+        starts_at: params[7] ?? null,
         used_count: 0,
         is_active: true,
         created_at: new Date().toISOString(),
@@ -1542,9 +1561,14 @@ function makeFakePool(state) {
       return { rows: coupon ? [coupon] : [] };
     }
 
-    if (text.includes("select * from coupons order by created_at desc")) {
+    if (text.includes("select * from coupons order by created_at desc") || text.includes("as discount_total from coupons c")) {
+      const discountOf = (coupon) =>
+        state.bookings.filter((b) => b.coupon_id === coupon.id && b.status !== "cancelled").reduce((sum, b) => sum + Number(b.discount_amount || 0), 0);
       return {
-        rows: state.coupons.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+        rows: state.coupons
+          .slice()
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .map((coupon) => ({ ...coupon, discount_total: discountOf(coupon) })),
       };
     }
 

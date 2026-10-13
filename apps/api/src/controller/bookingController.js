@@ -306,8 +306,17 @@ function bookingSearchCondition(raw, params) {
 
 const PAYMENT_STATUSES = ["unpaid", "pending", "paid", "failed", "refund_pending", "refunded"];
 
+// Filters of the admin orders list: searching other people's bookings by
+// name, email or phone, and the like. A guest asking for them is refused
+// rather than silently given their own list.
+const ADMIN_ONLY_FILTERS = ["q", "stay", "room_type", "channel"];
+
 exports.getBookings = async (req, res) => {
   try {
+    if (req.user.role !== "admin" && ADMIN_ONLY_FILTERS.some((key) => req.query[key] !== undefined)) {
+      return res.status(403).json({ ...apiMessage("ADMIN_ONLY_FILTER") });
+    }
+
     await runBookingMaintenance();
 
     const allowStatus = ["pending", "confirmed", "cancelled", "completed"];

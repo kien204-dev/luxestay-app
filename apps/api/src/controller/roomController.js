@@ -73,6 +73,9 @@ function deleteLocalRoomImageFile(imageValue, { roomId } = {}) {
   removeUpload(imageValue, "rooms", { roomId: roomId ?? null });
 }
 
+// Photos a room's gallery can hold (the cover is kept apart, in rooms.image).
+const ROOM_IMAGES_MAX = 30;
+
 // ======================
 // GET ALL ROOMS
 // ======================
@@ -182,7 +185,8 @@ exports.getRooms = async (req, res) => {
 
       const dataValues = [...values, limit, offset];
       const result = await pool.query(
-        `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities
+        `SELECT id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities,
+                (SELECT COUNT(*)::int FROM room_images ri WHERE ri.room_id = rooms.id) AS image_count
          FROM rooms
          ${whereClause}
          ORDER BY ${orderColumn} ${orderDirection}, id ASC
@@ -739,10 +743,17 @@ exports.addRoomImage = async (req, res) => {
       return res.status(404).json({ ...apiMessage("ROOM_NOT_FOUND") });
     }
 
+    const count = await pool.query("SELECT COUNT(*)::int AS n FROM room_images WHERE room_id = $1", [roomId]);
+    if (count.rows[0].n >= ROOM_IMAGES_MAX) {
+      deleteLocalRoomImageFile(req.file.storedPath, { roomId });
+      return res.status(400).json({ ...apiMessage("ROOM_IMAGES_LIMIT", { max: ROOM_IMAGES_MAX }) });
+    }
+
+    // A new photo goes after the ones already there.
     const imagePath = req.file.storedPath;
     const result = await pool.query(
-      `INSERT INTO room_images (room_id, image_path)
-       VALUES ($1, $2)
+      `INSERT INTO room_images (room_id, image_path, sort_order)
+       VALUES ($1, $2, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM room_images WHERE room_id = $1))
        RETURNING id, image_path`,
       [roomId, imagePath]
     );
@@ -788,5 +799,100 @@ exports.deleteRoomImage = async (req, res) => {
     res.status(500).json({
       ...apiMessage("SERVER_ERROR"),
     });
+  }
+};
+
+// ======================
+// ADMIN: HOW MANY ROOMS IN EACH STATUS (for the list's filter chips)
+// ======================
+exports.getRoomStatusCounts = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT COUNT(*)::int AS "all",
+              COUNT(*) FILTER (WHERE status = 'available')::int AS available,
+              COUNT(*) FILTER (WHERE status = 'booked')::int AS booked,
+              COUNT(*) FILTER (WHERE status = 'maintenance')::int AS maintenance
+       FROM rooms`
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+};
+
+// ======================
+// ADMIN: ORDER OF A ROOM'S GALLERY PHOTOS
+// ======================
+// { ids: [...] }: every gallery photo of the room, once each, in the new
+// order.
+exports.reorderRoomImages = async (req, res) => {
+  try {
+    const roomId = parseId(req.params.id);
+    if (!roomId) return res.status(400).json({ ...apiMessage("INVALID_ROOM_ID") });
+
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(parseId) : null;
+    const current = await pool.query("SELECT id FROM room_images WHERE room_id = $1", [roomId]);
+    const known = new Set(current.rows.map((row) => row.id));
+    if (!ids || ids.some((id) => !id) || ids.length !== known.size || new Set(ids).size !== ids.length || ids.some((id) => !known.has(id))) {
+      return res.status(400).json({ ...apiMessage("ROOM_IMAGE_ORDER_INVALID") });
+    }
+
+    await pool.query(
+      `UPDATE room_images ri SET sort_order = o.position
+       FROM UNNEST($1::int[]) WITH ORDINALITY AS o(id, position)
+       WHERE ri.id = o.id AND ri.room_id = $2`,
+      [ids, roomId]
+    );
+    res.json({ ...apiMessage("ROOM_IMAGES_REORDERED") });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+};
+
+// ======================
+// ADMIN: MAKE A GALLERY PHOTO THE COVER
+// ======================
+// The photo and the current cover swap places, so no file is dropped: the
+// old cover takes the photo's place in the gallery (or the photo simply
+// leaves the gallery when the room had no cover).
+exports.setRoomCover = async (req, res) => {
+  const roomId = parseId(req.params.id);
+  const imageId = parseId(req.params.imageId);
+  if (!roomId || !imageId) return res.status(400).json({ ...apiMessage("INVALID_ID") });
+
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query("BEGIN");
+    const room = await client.query("SELECT image FROM rooms WHERE id = $1 FOR UPDATE", [roomId]);
+    if (room.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ ...apiMessage("ROOM_NOT_FOUND") });
+    }
+    const photo = await client.query("SELECT image_path FROM room_images WHERE id = $1 AND room_id = $2 FOR UPDATE", [imageId, roomId]);
+    if (photo.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ ...apiMessage("ROOM_IMAGE_NOT_FOUND") });
+    }
+
+    const oldCover = room.rows[0].image;
+    await client.query("UPDATE rooms SET image = $1 WHERE id = $2", [photo.rows[0].image_path, roomId]);
+    if (oldCover) {
+      await client.query("UPDATE room_images SET image_path = $1 WHERE id = $2", [oldCover, imageId]);
+    } else {
+      await client.query("DELETE FROM room_images WHERE id = $1", [imageId]);
+    }
+    await client.query("COMMIT");
+
+    const images = await pool.query("SELECT id, image_path FROM room_images WHERE room_id = $1 ORDER BY sort_order ASC, id ASC", [roomId]);
+    res.json({ ...apiMessage("ROOM_COVER_SET"), image: photo.rows[0].image_path, images: images.rows });
+  } catch (err) {
+    if (client) await client.query("ROLLBACK").catch(() => {});
+    console.error(err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  } finally {
+    if (client) client.release();
   }
 };

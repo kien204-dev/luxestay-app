@@ -45,6 +45,9 @@ function evaluateCoupon(coupon, amount) {
   if (!coupon.is_active) {
     return { valid: false, error: apiMessage("COUPON_DISABLED") };
   }
+  if (coupon.starts_at && new Date(coupon.starts_at) > new Date()) {
+    return { valid: false, error: apiMessage("COUPON_NOT_STARTED") };
+  }
   if (new Date(coupon.expires_at) < new Date()) {
     return { valid: false, error: apiMessage("COUPON_EXPIRED") };
   }
@@ -172,8 +175,15 @@ exports.reclaimCoupon = async function reclaimCoupon(client, couponId) {
 // ======================
 exports.listCoupons = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM coupons ORDER BY created_at DESC");
-    res.json(result.rows);
+    // With what each coupon has taken off bookings that still stand.
+    const result = await pool.query(
+      `SELECT c.*, COALESCE(SUM(b.discount_amount) FILTER (WHERE b.status <> 'cancelled'), 0)::numeric AS discount_total
+       FROM coupons c
+       LEFT JOIN bookings b ON b.coupon_id = c.id
+       GROUP BY c.id
+       ORDER BY c.created_at DESC`
+    );
+    res.json(result.rows.map((row) => ({ ...row, discount_total: Number(row.discount_total) || 0 })));
   } catch (err) {
     console.error("LIST COUPONS ERROR:", err);
     res.status(500).json({ ...apiMessage("SERVER_ERROR") });
@@ -213,6 +223,18 @@ function validateCouponPayload(body) {
     return { error: apiMessage("COUPON_EXPIRY_INVALID") };
   }
 
+  // Optional: from when the coupon can be used (empty = straight away).
+  let startsAt = null;
+  if (body.starts_at !== undefined && body.starts_at !== null && body.starts_at !== "") {
+    startsAt = new Date(body.starts_at);
+    if (Number.isNaN(startsAt.getTime())) {
+      return { error: apiMessage("COUPON_START_INVALID") };
+    }
+    if (expiresAt <= startsAt) {
+      return { error: apiMessage("COUPON_DATES_ORDER") };
+    }
+  }
+
   const usageLimit = parseOptionalPositiveInt(body.usage_limit);
   if (usageLimit === undefined) {
     return { error: apiMessage("COUPON_USAGE_LIMIT_INVALID") };
@@ -226,6 +248,7 @@ function validateCouponPayload(body) {
       max_discount_amount: maxDiscountAmount,
       min_booking_amount: minBookingAmount,
       expires_at: expiresAt.toISOString(),
+      starts_at: startsAt ? startsAt.toISOString() : null,
       usage_limit: usageLimit,
     },
   };
@@ -243,8 +266,8 @@ exports.createCoupon = async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO coupons
-         (code, discount_type, discount_value, max_discount_amount, min_booking_amount, expires_at, usage_limit)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+         (code, discount_type, discount_value, max_discount_amount, min_booking_amount, expires_at, usage_limit, starts_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         value.code,
@@ -254,6 +277,7 @@ exports.createCoupon = async (req, res) => {
         value.min_booking_amount,
         value.expires_at,
         value.usage_limit,
+        value.starts_at,
       ]
     );
 
@@ -283,7 +307,7 @@ exports.updateCoupon = async (req, res) => {
     const result = await pool.query(
       `UPDATE coupons
        SET code = $1, discount_type = $2, discount_value = $3, max_discount_amount = $4,
-           min_booking_amount = $5, expires_at = $6, usage_limit = $7
+           min_booking_amount = $5, expires_at = $6, usage_limit = $7, starts_at = $9
        WHERE id = $8
        RETURNING *`,
       [
@@ -295,6 +319,7 @@ exports.updateCoupon = async (req, res) => {
         value.expires_at,
         value.usage_limit,
         id,
+        value.starts_at,
       ]
     );
 
