@@ -303,12 +303,28 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
       ? decoded.name.trim().slice(0, TEXT_LIMITS.name)
       : email.split("@")[0].slice(0, TEXT_LIMITS.name);
 
+    // The Google account already linked to an account goes back to that
+    // account, whatever its email is now (the owner may have changed it).
+    // Only a Google account linked nowhere is matched by email. A deleted
+    // account still holds its uid, so it is refused below rather than
+    // replaced; if an older version left two accounts on one uid, the
+    // oldest one that is not deleted wins.
     let result = await pool.query(
       `SELECT ${AUTH_USER_FIELDS}, google_uid
        FROM users
-       WHERE LOWER(email)=LOWER($1)`,
-      [email]
+       WHERE google_uid = $1
+       ORDER BY (deleted_at IS NOT NULL), id
+       LIMIT 1`,
+      [decoded.uid]
     );
+    if (result.rows.length === 0) {
+      result = await pool.query(
+        `SELECT ${AUTH_USER_FIELDS}, google_uid
+         FROM users
+         WHERE LOWER(email)=LOWER($1)`,
+        [email]
+      );
+    }
     let user;
     let justLinked = false;
 

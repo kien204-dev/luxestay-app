@@ -171,6 +171,59 @@ describe("Google sign-in and existing accounts", () => {
     assert.equal(withPassword.body.user.must_change_password, true);
   });
 
+  it("finds a linked account by its Google uid after the email was changed, without making a new one", async () => {
+    await post("/api/register", { name: "Moving Guest", email: "moving@hotel.test", password: "Moving-Passw0rd" });
+    const linked = await googleLogin({ uid: "uid-moving", email: "moving@hotel.test", name: "Moving Guest" });
+    assert.equal(linked.body.linked, true);
+    const accountId = linked.body.user.id;
+
+    // The owner moves the account to another address (password required).
+    const login = await post("/api/login", { email: "moving@hotel.test", password: "Moving-Passw0rd" });
+    const moved = await fetch(`${baseUrl}/api/users/me`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Cookie: login.cookie },
+      body: JSON.stringify({ name: "Moving Guest", email: "moved@hotel.test", currentPassword: "Moving-Passw0rd" }),
+    });
+    assert.equal(moved.status, 200);
+    const countBefore = Number((await pool.query("SELECT COUNT(*) FROM users")).rows[0].count);
+
+    // Google still reports the old address: the same account, not a new one.
+    const again = await googleLogin({ uid: "uid-moving", email: "moving@hotel.test", name: "Moving Guest" });
+    assert.equal(again.status, 200);
+    assert.equal(again.body.user.id, accountId);
+    assert.equal(again.body.linked, false);
+    assert.equal((await whoAmI(again.cookie)).email, "moved@hotel.test");
+    assert.equal(Number((await pool.query("SELECT COUNT(*) FROM users")).rows[0].count), countBefore, "no account is created");
+    assert.equal(await userByEmail("moving@hotel.test"), undefined);
+
+    // Someone else's Google account with the old address now gets a new
+    // account of its own, not this one.
+    const stranger = await googleLogin({ uid: "uid-stranger", email: "moving@hotel.test", name: "Stranger" });
+    assert.equal(stranger.status, 200);
+    assert.notEqual(stranger.body.user.id, accountId);
+  });
+
+  it("still refuses a locked, deleted or admin account found by its Google uid", async () => {
+    await pool.query("UPDATE users SET is_locked = TRUE WHERE email = 'moved@hotel.test'");
+    const locked = await googleLogin({ uid: "uid-moving", email: "anything@hotel.test", name: "Moving Guest" });
+    assert.equal(locked.status, 403);
+    assert.equal(locked.body.code, "ACCOUNT_LOCKED");
+    assert.equal(locked.cookie, undefined);
+
+    await pool.query("UPDATE users SET is_locked = FALSE, role = 'admin' WHERE email = 'moved@hotel.test'");
+    const admin = await googleLogin({ uid: "uid-moving", email: "anything@hotel.test", name: "Moving Guest" });
+    assert.equal(admin.status, 403);
+    assert.equal(admin.body.code, "GOOGLE_ADMIN_PASSWORD_REQUIRED");
+    assert.equal(admin.cookie, undefined);
+
+    await pool.query("UPDATE users SET role = 'user', deleted_at = NOW() WHERE email = 'moved@hotel.test'");
+    const countBefore = Number((await pool.query("SELECT COUNT(*) FROM users")).rows[0].count);
+    const deleted = await googleLogin({ uid: "uid-moving", email: "anything@hotel.test", name: "Moving Guest" });
+    assert.equal(deleted.status, 401);
+    assert.equal(deleted.body.code, "ACCOUNT_DISABLED");
+    assert.equal(Number((await pool.query("SELECT COUNT(*) FROM users")).rows[0].count), countBefore, "a deleted account is not replaced");
+  });
+
   it("lets the same person use Google again once they are no longer an admin", async () => {
     await pool.query("UPDATE users SET role = 'user' WHERE email = 'guest@hotel.test'");
 

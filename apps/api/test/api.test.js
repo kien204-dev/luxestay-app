@@ -618,6 +618,13 @@ function makeFakePool(state) {
       return { rows: inUse ? [{}] : [] };
     }
 
+    if (text.includes("from users") && text.includes("where google_uid = $1")) {
+      const matches = state.users
+        .filter((item) => item.google_uid && item.google_uid === params[0])
+        .sort((a, b) => Number(Boolean(a.deleted_at)) - Number(Boolean(b.deleted_at)) || a.id - b.id);
+      return { rows: matches.slice(0, 1) };
+    }
+
     if (
       text.includes("from users") &&
       (text.includes("where email=$1") || text.includes("where lower(email)=lower($1)"))
