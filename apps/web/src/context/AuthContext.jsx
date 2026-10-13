@@ -61,14 +61,20 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired);
   }, []);
 
+  // True once the visitor pressed "Sign out" (not when a session ran out):
+  // a signed-in page they were on then sends them home, not to the login form.
+  const [signedOut, setSignedOut] = useState(false);
+
   const login = useCallback((userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
+    setSignedOut(false);
     setUser(userData);
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem("user");
     api.post("/logout").catch(() => {});
+    setSignedOut(true);
     setUser(null);
   }, []);
 
@@ -86,7 +92,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, updateCurrentUser, loading }}
+      value={{ user, login, logout, updateCurrentUser, loading, signedOut }}
     >
       {children}
     </AuthContext.Provider>

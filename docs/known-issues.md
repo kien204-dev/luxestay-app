@@ -1,6 +1,6 @@
 # Vấn đề đã biết
 
-Cập nhật: 2026-10-09 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại trang chủ).
+Cập nhật: 2026-10-12 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại trang đăng nhập và tài khoản).
 
 ## Chưa kiểm chứng với dịch vụ thật
 
@@ -21,21 +21,34 @@ Cập nhật: 2026-10-09 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại
 - **Đánh giá trên thẻ phòng** được tải riêng cho từng phòng (mỗi thẻ một yêu cầu). Với 12 phòng mỗi trang thì không đáng kể.
 - **Lọc theo loại phòng so khớp đúng tên loại** (không phân biệt hoa thường): "Deluxe" và "Phòng Deluxe" là hai loại. Đặt tên loại nhất quán ở form phòng.
 - **Đăng nhập Google: console của trình duyệt vẫn ghi `Cross-Origin-Opener-Policy policy would block the window.closed call`** trong lúc cửa sổ Google đang mở. Dòng này do chính trang đăng nhập của Google gây ra (`accounts.google.com` gửi `Cross-Origin-Opener-Policy: same-origin`, nên Firebase không hỏi được cửa sổ đó đã đóng chưa); header của trang web (`same-origin-allow-popups`) đã đúng và không thể tắt cảnh báo từ phía mình. Đăng nhập vẫn hoàn tất bình thường. Muốn hết hẳn phải bỏ cách đăng nhập bằng popup (chuyển sang chuyển hướng cả trang hoặc Google Identity Services).
+- **Đăng nhập Google tìm tài khoản theo Google uid đã liên kết trước, rồi mới theo email.** Đổi email ở trang Tài khoản không làm mất liên kết: bấm "Tiếp tục với Google" vẫn vào đúng tài khoản cũ. Chỉ một tài khoản Google chưa liên kết với tài khoản nào mới được tìm theo email (và liên kết lần đầu như trước). Nếu dữ liệu cũ có hai tài khoản cùng một uid (do bản trước tạo thêm tài khoản khi email đã đổi), tài khoản cũ nhất chưa bị xoá được dùng; tài khoản thừa không tự gộp, quản trị viên khoá hoặc xoá nó.
 - **Liên kết Google với tài khoản có mật khẩu chưa có bước xác nhận bằng mật khẩu.** Lần đăng nhập Google đầu tiên bằng email trùng với một tài khoản khách có sẵn sẽ tự liên kết hai tài khoản (Google đã xác minh email đó). Sau khi đã liên kết, chỉ đúng tài khoản Google đó vào được. Dự kiến sau v1: việc liên kết chỉ làm từ trang Tài khoản, khi đang đăng nhập và nhập lại mật khẩu.
-- **Tài khoản quản trị không đăng nhập được bằng Google**, kể cả khi đã liên kết: chỉ dùng mật khẩu. Quản trị viên trước giờ chỉ dùng Google lấy mật khẩu tạm bằng `npm run admin:reset -- --email <email>` ([installation.md](installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)). Trang đăng nhập vẫn hiện nút Google cho mọi người; quản trị viên bấm vào sẽ nhận thông báo hướng dẫn dùng mật khẩu.
+- **Tài khoản quản trị không đăng nhập được bằng Google**, kể cả khi đã liên kết: chỉ dùng mật khẩu. Quản trị viên trước giờ chỉ dùng Google lấy mật khẩu tạm bằng `npm run admin:reset -- --email <email>` ([installation.md](installation.md#quên-mật-khẩu-admin--bị-khoá-ngoài)). Khi đăng nhập Google được bật, trang đăng nhập hiện nút Google cho mọi người (trang không biết trước ai là quản trị viên); quản trị viên bấm vào sẽ nhận thông báo ngay trên form, kèm email Google vừa chọn, hướng dẫn dùng mật khẩu.
+- **Tài khoản tạo bằng Google trước migration 019** được coi là đã có mật khẩu (không phân biệt được với tài khoản mật khẩu đã liên kết Google). Khi đổi email, chủ tài khoản nhận "Mật khẩu hiện tại không đúng" thay vì hướng dẫn đặt mật khẩu; cách xử lý giống nhau: đặt mật khẩu qua "Quên mật khẩu". Tài khoản tạo bằng Google từ bản này trở đi được đánh dấu đúng.
+- **Thông báo đổi email chỉ gửi khi SMTP đã cấu hình**; thiếu SMTP thì email vẫn đổi, API ghi cảnh báo vào log.
 - **Mã nguồn chưa dùng TypeScript** (dự kiến Giai đoạn 6).
 - **Chưa có "Hoàn tác" sau khi xóa** (bản thiết kế có nút hoàn tác 10 giây trên toast). Xóa phòng, đơn đặt phòng hay ảnh ở API là xóa thật ngay (kèm ảnh trên đĩa, thanh toán và đánh giá liên quan), nên không hoàn tác an toàn được nếu chưa chuyển sang xóa mềm. Thay vào đó hộp xác nhận nêu rõ "không thể hoàn tác" và hai thao tác xóa nặng nhất yêu cầu gõ mã.
 - **Trang phòng so với bản thiết kế**: chưa có diện tích, loại giường, giá theo từng ngày trên lịch, lịch hai tháng, nút Chia sẻ / Lưu, chú thích từng ảnh, lọc theo tiện ích, kiểu xem Danh sách: hệ thống chưa có dữ liệu hoặc tính năng tương ứng. Tiện nghi là danh sách chữ do admin nhập, dùng chung một biểu tượng.
 - **Luồng đặt phòng so với bản thiết kế**: không có "Giá thành viên", danh sách "Mã dành cho bạn", giờ đến dự kiến, yêu cầu đặc biệt, thanh toán tại khách sạn, giá từng ngày trên lịch, "Thêm vào lịch", lời nhắn về quản gia: hệ thống chưa có dữ liệu hoặc tính năng tương ứng. Chính sách hủy chỉ có hai mốc đúng với cách API xử lý (trong hạn: hoàn toàn bộ; quá hạn: không tự hủy trực tuyến), không có mốc "hoàn 50%".
 - **Phòng chỉ được giữ từ bước cuối của luồng đặt phòng** (khi đặt phòng được tạo), không phải từ lúc bắt đầu chọn ngày: trong lúc khách đi qua các bước, người khác vẫn có thể đặt trước. Khi đó trang báo "phòng vừa có người đặt" và giữ nguyên dữ liệu đã nhập.
 - **Lý do thanh toán thất bại** chỉ được diễn giải cho các mã phổ biến của VNPay; mã khác (và MoMo) hiện câu chung kèm mã của cổng.
-- **Mã đặt phòng hiển thị theo hai dạng** có từ trước: `#0012` trên thẻ ở Đặt phòng của tôi, `#BK-0012` ở trang kết quả, hộp thoại, email và trang quản trị.
 - **Chế độ demo không tự thay cổng thanh toán**: muốn bản demo không động tới tiền thật thì để VNPay ở sandbox và MoMo tắt hoặc ở môi trường test (mặc định là vậy); khi đó dải demo mới ghi "Không có tiền thật nào bị trừ".
 - **Trang chủ chưa có khối "Trải nghiệm"** như trong bản thiết kế: hệ thống chưa có dữ liệu cho hoạt động/dịch vụ kèm giá và thời lượng. Ý tưởng cho sau: một danh sách trải nghiệm do admin quản lý (ảnh, tên, mô tả, giá, thời lượng). Cũng chưa làm vì cùng lý do: form đăng ký nhận ưu đãi qua email ở cuối trang, bản đồ ở khối "Vị trí" (hiện chỉ có địa chỉ, danh sách điểm lân cận và nút mở Google Maps), điểm đánh giá theo từng tiêu chí, nút lưu phòng yêu thích.
 - **Nội dung trang chủ do admin nhập chỉ có một bản** (tiêu đề, mô tả, tiện ích, điểm lân cận): khách xem tiếng Anh thấy đúng câu admin đã nhập. Câu mặc định khi để trống thì có bản vi/en.
 - **Email và phiếu PDF không theo giao diện sáng/tối.** Favicon và hình vẽ thay ảnh luôn vẽ theo bộ màu sáng.
 - **Khối "Tiện ích" dùng lại ảnh nền trang chủ** (như bản thiết kế); chưa có ô tải ảnh riêng cho khối này.
+- **Trang đăng nhập, tài khoản và trang phụ so với bản thiết kế**: không có "Ghi nhớ đăng nhập" (phiên luôn kéo dài theo `AUTH_TOKEN_TTL`), "giá thành viên", ô đồng ý Điều khoản / Chính sách (chưa có hai trang đó), ngày sinh, quốc tịch, "Đã xác minh", nhận ưu đãi qua email, "còn N lần thử", "lần đổi gần nhất", "Câu hỏi thường gặp", "Yêu cầu quyền truy cập", lọc ảnh theo loại ở trang ghi công: hệ thống chưa có dữ liệu hoặc tính năng tương ứng. Email vẫn đổi được ở trang Tài khoản (API cho phép), không khoá như bản thiết kế. Ô số điện thoại không có tiền tố +84 (số lưu dạng tự do, 8–20 ký tự). Ảnh đại diện tối đa 10 MB (giới hạn thật của pipeline ảnh), không phải 5 MB.
+- **Nút "Gửi lại email" chỉ đếm ngược khi đã hết lượt** theo giới hạn của API (5 email mỗi giờ cho mỗi địa chỉ IP); trước đó bấm được ngay. Nếu có proxy bỏ mất header `RateLimit`, nút luôn bấm được và API vẫn từ chối khi quá giới hạn.
+- **Các trang đăng nhập chờ `/api/settings/public` trả lời rồi mới vẽ** (để dải demo và nút Google không đẩy trang): nếu API chậm, trang trống thêm chừng đó thời gian. Trang khách khác (trang chủ, danh sách phòng) vẫn vẽ ngay và dải demo vẫn có thể đẩy trang xuống khi API trả lời chậm.
 - **Ô ngày ở thanh tìm phòng là ô ngày của trình duyệt**, nên định dạng ngày theo ngôn ngữ của trình duyệt, không phải theo nút VI/EN.
+
+## Mã đặt phòng
+
+Một định dạng ở mọi nơi: `#BK-0012` (số đặt phòng, đủ 4 chữ số; từ 10000 trở đi thì dài thêm, ví dụ `#BK-12345`). Dùng trên thẻ ở Đặt phòng của tôi, trang kết quả thanh toán, các hộp thoại, trang quản trị, thông báo trực tiếp cho admin, email khách, email cảnh báo admin và phiếu PDF. Ở chỗ không hợp ký tự `#` thì bỏ nó đi: tên tệp PDF (`booking-BK-0012.pdf`) và mã phải gõ để xác nhận xoá đơn (`BK-0012`, trước đây là `BOOKING-12`). Định dạng nằm ở một chỗ cho mỗi phía: `apps/api/src/utils/bookingCode.js` và `apps/web/src/utils/bookingCode.js`.
+
+Ngoại lệ duy nhất: dòng mô tả gửi sang cổng thanh toán (khách thấy ở trang VNPay/MoMo) vẫn là `Thanh toan dat phong 12`, vì VNPay chỉ nhận chữ không dấu, chữ số và dấu cách (không có `#` hay `-`).
+
+Mã này chỉ là số đặt phòng được trình bày lại, nên đoán được (số liền nhau); mọi trang và API vẫn kiểm tra quyền theo tài khoản, không dựa vào việc mã khó đoán.
 
 ## Cơ sở dữ liệu
 

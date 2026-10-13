@@ -45,7 +45,8 @@ export const changeCurrentUserPassword = async (passwordData) => {
 // =========================
 // UPLOAD CURRENT USER AVATAR
 // =========================
-export const uploadAvatar = async (file) => {
+// onProgress(fraction 0..1) while the file goes up; `signal` cancels it.
+export const uploadAvatar = async (file, { onProgress, signal } = {}) => {
   const formData = new FormData();
   formData.append("image", file);
 
@@ -53,6 +54,10 @@ export const uploadAvatar = async (file) => {
     headers: {
       "Content-Type": "multipart/form-data",
     },
+    signal,
+    // A phone photo on a slow line takes longer than the usual request.
+    timeout: 120000,
+    onUploadProgress: onProgress ? (event) => event.total && onProgress(event.loaded / event.total) : undefined,
   });
 
   return response.data;

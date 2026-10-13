@@ -9,8 +9,10 @@ const {
   forgotPasswordRateLimit,
   loginRateLimit,
   registerRateLimit,
+  resetCheckRateLimit,
   resetPasswordRateLimit,
 } = require("../middleware/rateLimit");
+const { getResetTokenTtlMinutes } = require("../config/auth");
 const { isStrongPassword } = require("../utils/password");
 const { TEXT_LIMITS, findTextLimitError } = require("../utils/textLimits");
 const {
@@ -21,7 +23,7 @@ const { apiMessage } = require("../utils/apiMessages");
 
 const router = express.Router();
 const PUBLIC_USER_FIELDS =
-  "id,name,email,role,phone,bio,avatar_url,created_at,updated_at,must_change_password";
+  "id,name,email,role,phone,bio,avatar_url,created_at,updated_at,must_change_password,password_set";
 const AUTH_USER_FIELDS = `${PUBLIC_USER_FIELDS},token_version,deleted_at,is_locked`;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,11 +37,6 @@ function publicUser(user) {
     ...safeUser
   } = user;
   return safeUser;
-}
-
-function getResetTokenTtlMinutes() {
-  const ttl = Number(process.env.RESET_TOKEN_TTL_MINUTES || 15);
-  return Number.isFinite(ttl) && ttl > 0 ? ttl : 15;
 }
 
 function hashResetToken(token) {
@@ -176,6 +173,44 @@ router.post("/forgot-password", forgotPasswordRateLimit, async (req, res) => {
   }
 });
 
+// Opening a reset link: says whether it still works before the visitor types
+// a new password. A working link names its account (whoever holds the link
+// received it at that address). A link that is no longer usable says why,
+// "expired" with its times or "used", and nothing about the account; an
+// unknown token is just "invalid".
+router.post("/reset-password/check", resetCheckRateLimit, async (req, res) => {
+  const token = typeof req.body.token === "string" ? req.body.token : "";
+  if (!token) return res.status(400).json({ ...apiMessage("RESET_FIELDS_REQUIRED") });
+
+  try {
+    const result = await pool.query(
+      `SELECT t.created_at, t.expires_at, t.used_at, t.expires_at <= NOW() AS expired, u.email
+       FROM password_reset_tokens t
+       JOIN users u ON u.id = t.user_id AND u.deleted_at IS NULL
+       WHERE t.token_hash = $1
+       ORDER BY t.id DESC
+       LIMIT 1`,
+      [hashResetToken(token)]
+    );
+    const link = result.rows[0];
+
+    if (!link) return res.status(400).json({ ...apiMessage("RESET_TOKEN_INVALID"), reason: "invalid" });
+    if (link.used_at) return res.status(400).json({ ...apiMessage("RESET_TOKEN_INVALID"), reason: "used" });
+    if (link.expired) {
+      return res.status(400).json({
+        ...apiMessage("RESET_TOKEN_INVALID"),
+        reason: "expired",
+        createdAt: link.created_at,
+        expiresAt: link.expires_at,
+      });
+    }
+    return res.json({ valid: true, email: link.email, expiresAt: link.expires_at });
+  } catch (err) {
+    console.error("RESET LINK CHECK ERROR:", err);
+    return res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+});
+
 router.post("/reset-password", resetPasswordRateLimit, async (req, res) => {
   const { token, password } = req.body;
   if (!token || !password) {
@@ -215,6 +250,7 @@ router.post("/reset-password", resetPasswordRateLimit, async (req, res) => {
        SET password=$1,
            token_version=token_version + 1,
            must_change_password=FALSE,
+           password_set=TRUE,
            updated_at=CURRENT_TIMESTAMP
        WHERE id=$2`,
       [hashedPassword, resetToken.user_id]
@@ -267,12 +303,28 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
       ? decoded.name.trim().slice(0, TEXT_LIMITS.name)
       : email.split("@")[0].slice(0, TEXT_LIMITS.name);
 
+    // The Google account already linked to an account goes back to that
+    // account, whatever its email is now (the owner may have changed it).
+    // Only a Google account linked nowhere is matched by email. A deleted
+    // account still holds its uid, so it is refused below rather than
+    // replaced; if an older version left two accounts on one uid, the
+    // oldest one that is not deleted wins.
     let result = await pool.query(
       `SELECT ${AUTH_USER_FIELDS}, google_uid
        FROM users
-       WHERE LOWER(email)=LOWER($1)`,
-      [email]
+       WHERE google_uid = $1
+       ORDER BY (deleted_at IS NOT NULL), id
+       LIMIT 1`,
+      [decoded.uid]
     );
+    if (result.rows.length === 0) {
+      result = await pool.query(
+        `SELECT ${AUTH_USER_FIELDS}, google_uid
+         FROM users
+         WHERE LOWER(email)=LOWER($1)`,
+        [email]
+      );
+    }
     let user;
     let justLinked = false;
 
@@ -280,8 +332,8 @@ router.post("/google-login", loginRateLimit, async (req, res) => {
       const randomPassword = crypto.randomBytes(32).toString("base64url");
       const hashed = await bcrypt.hash(randomPassword, 10);
       result = await pool.query(
-        `INSERT INTO users(name,email,password,role,google_uid)
-         VALUES($1,$2,$3,'user',$4)
+        `INSERT INTO users(name,email,password,role,google_uid,password_set)
+         VALUES($1,$2,$3,'user',$4,FALSE)
          RETURNING ${AUTH_USER_FIELDS}, google_uid`,
         [name, email, hashed, decoded.uid]
       );

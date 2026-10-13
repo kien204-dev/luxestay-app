@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import AuthCard, { AuthField, PasswordInput } from "../../components/auth/AuthCard";
+import { Control, Field, FieldIcon, PasswordInput, inputProps } from "../../components/auth/fields";
 import GoogleSignIn from "../../components/auth/GoogleSignIn";
 import { useAuth } from "../../context/AuthContext";
-import { useProperty } from "../../context/PropertyContext";
 import { useToast } from "../../context/ToastContext";
 import api from "../../services/api";
 import { apiErrorText } from "../../utils/apiError";
 import { postLoginPath } from "../../utils/authRedirect";
+import { EMAIL_PATTERN } from "../../utils/format";
 import { useDocumentTitle } from "../../utils/useDocumentTitle";
-
-const EMAIL_PATTERN = /\S+@\S+\.\S+/;
 
 export default function Login() {
   const { t } = useTranslation("auth");
@@ -19,79 +17,84 @@ export default function Login() {
   const navigate = useNavigate();
   const toast = useToast();
   const { login } = useAuth();
-  const property = useProperty();
   useDocumentTitle(t("login.documentTitle"));
 
   // A message handed over by the page that sent us here (after sign-up).
   const [notice] = useState(() => location.state?.success || "");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => location.state?.email || "");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  // An admin pressed "Continue with Google": { email } of that Google account.
+  const [adminNotice, setAdminNotice] = useState(null);
   const [busy, setBusy] = useState(false);
 
   const done = (user) => navigate(postLoginPath(user, location.search), { replace: true });
+  const edit = (setter, key) => (event) => {
+    setter(event.target.value);
+    setErrors((current) => ({ ...current, [key]: "", general: "" }));
+  };
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!EMAIL_PATTERN.test(email)) return setErrors({ email: t("errors.invalidEmail") });
-    if (!password) return setErrors({ password: t("errors.passwordRequired") });
+    const found = {
+      email: EMAIL_PATTERN.test(email.trim()) ? "" : t("errors.invalidEmail"),
+      password: password ? "" : t("errors.passwordRequired"),
+    };
+    if (found.email || found.password) return setErrors(found);
     setErrors({});
+    setAdminNotice(null);
     setBusy(true);
     try {
-      const res = await api.post("/login", { email, password });
+      const res = await api.post("/login", { email: email.trim(), password });
       login(res.data.user);
       done(res.data.user);
     } catch (err) {
-      setErrors({ general: apiErrorText(err, "auth:errors.wrongCredentials") });
+      // Which of the two was wrong is not said (on purpose): the message goes
+      // under the password, the box a visitor retypes.
+      if (err.response?.data?.code === "INVALID_CREDENTIALS") setErrors({ password: t("errors.wrongCredentials") });
+      else setErrors({ general: apiErrorText(err, "auth:errors.wrongCredentials") });
     } finally {
       setBusy(false);
     }
   };
 
-  const demo = property.demo?.accounts;
+  const googleFailed = ({ code, message, email: googleEmail }) => {
+    if (code === "GOOGLE_ADMIN_PASSWORD_REQUIRED") {
+      setErrors({});
+      setAdminNotice({ email: googleEmail });
+      if (googleEmail) setEmail(googleEmail);
+    } else {
+      setAdminNotice(null);
+      setErrors({ general: message });
+    }
+  };
 
   return (
-    <AuthCard
-      title={t("login.title")}
-      subtitle={t("login.subtitle")}
-      testId="login-page"
-      footer={
-        <>
-          {t("login.noAccount")}{" "}
-          <Link className="auth-link" to={`/register${location.search}`}>{t("login.createAccount")}</Link>
-        </>
-      }
-    >
-      {notice && <p className="auth-success" role="status" style={{ marginTop: 0 }}>{notice}</p>}
-      {demo && (
-        <div className="g-note" style={{ marginBottom: 14 }} data-testid="demo-accounts">
-          <strong>{t("demo.title")}</strong>
-          <ul>
-            {demo.map((account) => (
-              <li key={account.email}>
-                {t(`demo.${account.role}`)}: <code>{account.email}</code> / <code>{account.password}</code>
-              </li>
-            ))}
-          </ul>
+    <form className="au__form" onSubmit={submit} noValidate aria-labelledby="login-title" data-testid="login-page">
+      <h1 id="login-title">{t("login.title")}</h1>
+      <p className="au__lead">{t("login.subtitle")}</p>
+
+      {notice && (
+        <div className="fx-alert fx-alert--success" role="status">
+          <FieldIcon.Check />
+          <p>{notice}</p>
         </div>
       )}
-
-      <form className="auth-form" onSubmit={submit} noValidate>
-        <AuthField id="login-email" label={t("fields.email")} error={errors.email}>
-          <input id="login-email" type="email" className="g-input" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" aria-invalid={Boolean(errors.email) || undefined} disabled={busy} />
-        </AuthField>
-        <AuthField id="login-password" label={t("fields.password")} error={errors.password}>
-          <PasswordInput id="login-password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" invalid={Boolean(errors.password)} disabled={busy} />
-        </AuthField>
-        <div className="auth-row">
-          <span />
-          <Link className="auth-link" to="/forgot-password">{t("login.forgot")}</Link>
+      {adminNotice && (
+        <div className="fx-alert fx-alert--warning" role="alert" data-testid="admin-notice">
+          <FieldIcon.Lock />
+          <p>
+            <b>{t("adminNotice.title")}</b>{" "}
+            {adminNotice.email ? t("adminNotice.withEmail", { email: adminNotice.email }) : t("adminNotice.withoutEmail")}
+          </p>
         </div>
-        {errors.general && <p className="g-alert" role="alert">{errors.general}</p>}
-        <button type="submit" className="g-btn g-btn--primary g-btn--block" disabled={busy}>
-          {busy ? t("login.signingIn") : t("login.signIn")}
-        </button>
-      </form>
+      )}
+      {errors.general && (
+        <div className="fx-alert fx-alert--danger" role="alert">
+          <FieldIcon.Alert />
+          <p>{errors.general}</p>
+        </div>
+      )}
 
       <GoogleSignIn
         busy={busy}
@@ -101,8 +104,29 @@ export default function Login() {
           if (linked) toast.info(t("google.linked"));
           done(user);
         }}
-        onError={(message) => setErrors({ general: message })}
+        onError={googleFailed}
       />
-    </AuthCard>
+
+      <Field id="login-email" label={t("fields.email")} error={errors.email}>
+        <Control icon={<FieldIcon.Mail />} invalid={Boolean(errors.email)}>
+          <input {...inputProps("login-email", errors.email)} type="email" value={email} onChange={edit(setEmail, "email")} placeholder={t("fields.emailPlaceholder")} autoComplete="email" disabled={busy} />
+        </Control>
+      </Field>
+      <Field
+        id="login-password"
+        label={t("fields.password")}
+        aside={<Link to="/forgot-password" state={{ email: email.trim() }}>{t("login.forgot")}</Link>}
+        error={errors.password}
+      >
+        <PasswordInput id="login-password" icon={<FieldIcon.Lock />} error={errors.password} value={password} onChange={edit(setPassword, "password")} autoComplete="current-password" disabled={busy} />
+      </Field>
+
+      <button type="submit" className={`g-btn g-btn--primary g-btn--lg g-btn--block${busy ? " is-loading" : ""}`} aria-busy={busy || undefined} disabled={busy}>
+        <span>{t("login.signIn")}</span>
+      </button>
+      <p className="au__switch">
+        {t("login.noAccount")} <Link to={`/register${location.search}`}>{t("login.createAccount")}</Link>
+      </p>
+    </form>
   );
 }

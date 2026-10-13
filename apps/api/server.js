@@ -40,7 +40,9 @@ const corsOptions = {
   // response headers, so without this, frontend JS can't read the
   // server-suggested filename on a cross-origin download (e.g. the
   // dashboard export) — it silently falls back to a generic name instead.
-  exposedHeaders: ["Content-Disposition"],
+  // The rate limit headers likewise: the "send again" button after a
+  // password reset email counts down from them.
+  exposedHeaders: ["Content-Disposition", "RateLimit", "RateLimit-Policy", "Retry-After"],
 };
 
 const userRoutes = require("./src/routes/userRoutes");

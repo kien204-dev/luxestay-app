@@ -14,7 +14,7 @@ import { useAsyncData } from "../utils/useAsyncData";
 import { useBookingPolicy } from "../utils/useBookingPolicy";
 import { useDocumentTitle } from "../utils/useDocumentTitle";
 import { usePaymentProviders } from "../utils/usePaymentProviders";
-import { bookingCode } from "./admin/orders/orderLabels";
+import { bookingCode } from "../utils/bookingCode";
 import "../styles/rooms.css";
 import "../styles/booking.css";
 

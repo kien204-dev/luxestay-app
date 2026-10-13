@@ -40,6 +40,11 @@
     "short": "Bản demo",
     "shortTestPayments": "Bản demo · thanh toán thử nghiệm",
     "noRealMoney": "Không có tiền thật nào bị trừ.",
-    "close": "Đóng thông báo demo"
+    "close": "Đóng thông báo demo",
+    "signInWith": "Bản demo: đăng nhập thử bằng",
+    "role": {
+      "admin": "Quản trị",
+      "user": "Khách"
+    }
   }
 }

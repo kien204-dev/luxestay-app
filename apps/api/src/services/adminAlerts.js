@@ -2,6 +2,7 @@ const pool = require("../db/db.js");
 const { emitToAdmins } = require("./socket.js");
 const { isEmailConfigured, sendAdminEmail } = require("./emailService.js");
 const { getPropertySettings } = require("./propertySettings");
+const { bookingCode } = require("../utils/bookingCode.js");
 
 const REFUND_REASON_TEXT = {
   cancelled_by_guest: "khách hủy booking đã thanh toán",
@@ -46,8 +47,8 @@ function notifyRefundPending(booking) {
     refund_reason: booking.refund_reason,
   });
 
-  return emailAdmins(`Booking #${booking.id} cần hoàn tiền`, [
-    `Booking #${booking.id} đang chờ hoàn tiền.`,
+  return emailAdmins(`Booking ${bookingCode(booking.id)} cần hoàn tiền`, [
+    `Booking ${bookingCode(booking.id)} đang chờ hoàn tiền.`,
     `Số tiền: ${formatAmount(booking.total_price)}`,
     `Lý do: ${reason}`,
     "",
@@ -63,8 +64,8 @@ function notifyDuplicatePayment(booking, payment) {
     amount: payment.amount,
   });
 
-  return emailAdmins(`Booking #${booking.id} bị thanh toán hai lần`, [
-    `Booking #${booking.id} đã được thanh toán trước đó, nhưng vừa có thêm một giao dịch thành công.`,
+  return emailAdmins(`Booking ${bookingCode(booking.id)} bị thanh toán hai lần`, [
+    `Booking ${bookingCode(booking.id)} đã được thanh toán trước đó, nhưng vừa có thêm một giao dịch thành công.`,
     `Mã giao dịch: ${payment.transaction_ref} (${payment.provider})`,
     `Số tiền cần hoàn lại: ${formatAmount(payment.amount)}`,
   ]);

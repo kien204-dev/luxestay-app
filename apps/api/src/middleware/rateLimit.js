@@ -33,16 +33,37 @@ const registerRateLimit = rateLimit({
   limit: 20,
 });
 
+// Published to the web app (config/auth.js), whose "send again" button
+// follows it.
+const FORGOT_PASSWORD_LIMIT = { limit: 5, windowMinutes: 60 };
+
 const forgotPasswordRateLimit = rateLimit({
   ...commonOptions,
-  windowMs: 60 * 60 * 1000,
-  limit: 5,
+  windowMs: FORGOT_PASSWORD_LIMIT.windowMinutes * 60 * 1000,
+  limit: FORGOT_PASSWORD_LIMIT.limit,
 });
 
 const resetPasswordRateLimit = rateLimit({
   ...commonOptions,
   windowMs: 60 * 60 * 1000,
   limit: 10,
+});
+
+// Opening a reset link checks it first (see routes/auth.js).
+const resetCheckRateLimit = rateLimit({
+  ...commonOptions,
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+});
+
+// Requests that check the current password (changing it, or the email):
+// limited like the login form, so My account cannot be used to guess it.
+// Saves that do not send a password are not counted.
+const passwordCheckRateLimit = rateLimit({
+  ...commonOptions,
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  skip: (req) => process.env.NODE_ENV === "test" || !req.body?.currentPassword,
 });
 
 const uploadRateLimit = rateLimit({
@@ -53,9 +74,12 @@ const uploadRateLimit = rateLimit({
 
 module.exports = {
   apiRateLimit,
+  FORGOT_PASSWORD_LIMIT,
   forgotPasswordRateLimit,
   loginRateLimit,
+  passwordCheckRateLimit,
   registerRateLimit,
+  resetCheckRateLimit,
   resetPasswordRateLimit,
   uploadRateLimit,
 };

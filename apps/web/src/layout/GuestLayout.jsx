@@ -10,7 +10,7 @@ import ThemeSwitch from "../components/ThemeSwitch";
 import { ADMIN_HOME, loginPathFor } from "../utils/authRedirect";
 import "../styles/guest.css";
 
-function LanguageSwitch() {
+export function LanguageSwitch() {
   const { i18n, t } = useTranslation("common");
 
   return (
@@ -155,7 +155,7 @@ function Footer() {
           </div>
 
           <nav aria-label={t("footer.explore")}>
-            <h3>{t("footer.explore")}</h3>
+            <h2>{t("footer.explore")}</h2>
             <ul>
               <li><Link to="/rooms">{t("nav.rooms")}</Link></li>
               <li><Link to="/#destinations">{t("nav.destinations")}</Link></li>
@@ -165,7 +165,7 @@ function Footer() {
 
           {hasContact && (
             <div>
-              <h3>{t("footer.contact")}</h3>
+              <h2>{t("footer.contact")}</h2>
               <ul>
                 {property.phone && (
                   <li><a href={`tel:${property.phone.replace(/[^\d+]/g, "")}`}>{property.phone}</a></li>

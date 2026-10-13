@@ -13,6 +13,7 @@ import { ADMIN_HOME } from "./utils/authRedirect";
 // The public pages above ship in the first bundle. Everything behind a
 // login is loaded on demand, so a guest browsing rooms never downloads the
 // admin screens (or the charting library they use).
+const AuthLayout = lazy(() => import("./components/auth/AuthLayout"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
@@ -63,21 +64,25 @@ function App() {
           <Route path="/rooms/:id/book" element={signedIn(<Checkout />)} />
           <Route path="/my-bookings" element={signedIn(<MyBookings />)} />
           <Route path="/credits" element={<Credits />} />
-
-          {/* Sign-in pages */}
-          <Route path="/login" element={guestOnly(<Login />)} />
-          <Route path="/register" element={guestOnly(<Register />)} />
-          <Route path="/forgot-password" element={guestOnly(<ForgotPassword />)} />
-          <Route path="/reset-password" element={guestOnly(<ResetPassword />)} />
-
           <Route path="/payment/result" element={signedIn(<PaymentResult />)} />
           <Route path="/unauthorized" element={<NotFound forbidden />} />
           <Route path="*" element={<NotFound />} />
         </Route>
         <Route path="/booking" element={<Navigate to="/rooms" replace />} />
 
+        {/* Sign-in pages: their own shell, without the site header/footer */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={guestOnly(<Login />)} />
+          <Route path="/register" element={guestOnly(<Register />)} />
+          {/* Open when signed in too: an account made by Google sign-in sets
+              its first password from here (My account links to it). */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Route>
+
         {/* Signed-in guests and admins */}
         <Route path="/settings" element={signedIn(<AccountSettings />)} />
+        <Route path="/settings/password" element={signedIn(<AccountSettings section="password" />)} />
         <Route path="/profile" element={signedIn(<AccountSettings />)} />
 
         {/* Admin */}

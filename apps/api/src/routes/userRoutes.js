@@ -19,13 +19,13 @@ const {
   verifyToken,
   checkRole,
 } = require("../middleware/authMiddleware");
-const { uploadRateLimit } = require("../middleware/rateLimit");
+const { passwordCheckRateLimit, uploadRateLimit } = require("../middleware/rateLimit");
 
 // Chỉ admin mới được xem danh sách user
 router.get("/users", verifyToken, checkRole("admin"), getUsers);
 router.get("/users/me", verifyToken, getCurrentUser);
-router.put("/users/me", verifyToken, updateCurrentUser);
-router.put("/users/me/password", verifyToken, changeCurrentUserPassword);
+router.put("/users/me", verifyToken, passwordCheckRateLimit, updateCurrentUser);
+router.put("/users/me/password", verifyToken, passwordCheckRateLimit, changeCurrentUserPassword);
 router.post("/users/me/avatar", verifyToken, uploadRateLimit, handleAvatarUpload, uploadAvatar);
 
 // Chỉ admin mới được xem chi tiết user

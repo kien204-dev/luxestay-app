@@ -618,6 +618,13 @@ function makeFakePool(state) {
       return { rows: inUse ? [{}] : [] };
     }
 
+    if (text.includes("from users") && text.includes("where google_uid = $1")) {
+      const matches = state.users
+        .filter((item) => item.google_uid && item.google_uid === params[0])
+        .sort((a, b) => Number(Boolean(a.deleted_at)) - Number(Boolean(b.deleted_at)) || a.id - b.id);
+      return { rows: matches.slice(0, 1) };
+    }
+
     if (
       text.includes("from users") &&
       (text.includes("where email=$1") || text.includes("where lower(email)=lower($1)"))
@@ -699,6 +706,11 @@ function makeFakePool(state) {
       };
     }
 
+    if (text.includes("select email, password, password_set, avatar_url from users where id = $1")) {
+      const user = state.users.find((item) => item.id === Number(params[0]) && !item.deleted_at);
+      return { rows: user ? [{ email: user.email, password: user.password, password_set: user.password_set !== false, avatar_url: user.avatar_url }] : [] };
+    }
+
     if (text.includes("select id, password from users where id = $1")) {
       const user = state.users.find((item) => item.id === Number(params[0]));
       return { rows: user && !user.deleted_at ? [{ id: user.id, password: user.password }] : [] };
@@ -775,6 +787,7 @@ function makeFakePool(state) {
         user.phone = params[2] || null;
         user.bio = params[3] || null;
         user.avatar_url = params[4] || null;
+        if (params[6]) user.token_version += 1;
       } else {
         const previousRole = user.role;
         user.role = params[2];
@@ -2495,16 +2508,36 @@ describe("hotel booking API", () => {
     assert.equal(profile.body.email, "user@example.com");
     assert.equal(profile.body.password, undefined);
 
+    // A new email needs the current password, checked before anything says
+    // whether the address is taken.
+    const noPassword = await request(baseUrl, "/api/users/me", {
+      method: "PUT",
+      headers: authHeader(userToken),
+      body: JSON.stringify({ name: "Normal User", email: "admin@example.com" }),
+    });
+    assert.equal(noPassword.response.status, 400);
+    assert.equal(noPassword.body.code, "CURRENT_PASSWORD_REQUIRED");
+
+    const wrongCurrent = await request(baseUrl, "/api/users/me", {
+      method: "PUT",
+      headers: authHeader(userToken),
+      body: JSON.stringify({ name: "Normal User", email: "admin@example.com", currentPassword: "not-it-123" }),
+    });
+    assert.equal(wrongCurrent.response.status, 400);
+    assert.equal(wrongCurrent.body.code, "CURRENT_PASSWORD_WRONG");
+
     const duplicateEmail = await request(baseUrl, "/api/users/me", {
       method: "PUT",
       headers: authHeader(userToken),
       body: JSON.stringify({
         name: "Normal User",
         email: "admin@example.com",
+        currentPassword: "newpass123",
       }),
     });
 
     assert.equal(duplicateEmail.response.status, 400);
+    assert.equal(duplicateEmail.body.code, "EMAIL_EXISTS");
 
     const updated = await request(baseUrl, "/api/users/me", {
       method: "PUT",
@@ -2512,6 +2545,7 @@ describe("hotel booking API", () => {
       body: JSON.stringify({
         name: "Profile User",
         email: "profile@example.com",
+        currentPassword: "newpass123",
         role: "admin",
         phone: "0912345678",
         bio: "Booking guest",
@@ -2520,6 +2554,14 @@ describe("hotel booking API", () => {
     });
 
     assert.equal(updated.response.status, 200);
+    assert.equal(updated.body.code, "EMAIL_CHANGED");
+    // The old session ended; this one carries on with the new cookie.
+    assert.equal((await request(baseUrl, "/api/users/me", { headers: authHeader(userToken) })).response.status, 401);
+    userToken = authCookie(updated);
+    // The notice to the old address is sent after the response.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.equal(state.sentEmails.at(-1).to, "user@example.com");
+    assert.match(state.sentEmails.at(-1).text, /profile@example\.com/);
     assert.equal(updated.body.user.name, "Profile User");
     assert.equal(updated.body.user.email, "profile@example.com");
     assert.equal(updated.body.user.role, "user");
@@ -3216,7 +3258,7 @@ describe("hotel booking API", () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     assert.equal(state.sentAdminEmails.length, 1);
     assert.deepEqual(state.sentAdminEmails[0].to, ["admin@example.com"]);
-    assert.match(state.sentAdminEmails[0].subject, /#1950/);
+    assert.match(state.sentAdminEmails[0].subject, /#BK-1950/);
 
     const byGuest = await request(baseUrl, "/api/bookings/1950/refund", {
       method: "PATCH",
@@ -3271,6 +3313,7 @@ describe("hotel booking API", () => {
       assert.deepEqual(Object.keys(result.body).sort(), [
         "address",
         "amenities",
+        "auth",
         "checkInTime",
         "checkOutTime",
         "email",
@@ -3283,6 +3326,13 @@ describe("hotel booking API", () => {
         "nearbyPlaces",
         "phone",
       ]);
+      // What the sign-in pages follow, and nothing else about accounts.
+      assert.deepEqual(result.body.auth, {
+        googleLogin: true,
+        resetLinkMinutes: 15,
+        passwordRules: [{ id: "minLength", min: 8 }, { id: "letter" }, { id: "digit" }],
+        forgotPassword: { limit: 5, windowMinutes: 60 },
+      });
       // Home page content is empty until an admin writes it.
       assert.equal(result.body.heroTitle, "");
       assert.deepEqual(result.body.amenities, []);

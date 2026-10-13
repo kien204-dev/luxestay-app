@@ -9,6 +9,7 @@ const { removeUpload } = require("../services/storage");
 const { demoAccounts, demoResetIntervalHours, demoUsesTestPayments, isDemoMode } = require("../config/demo");
 const { pngCopyOf } = require("../middleware/imageUpload");
 const { apiMessage } = require("../utils/apiMessages");
+const { publicAuthOptions } = require("../config/auth");
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+\-\s().]{6,30}$/;
@@ -42,6 +43,7 @@ exports.getPublicSettings = async (req, res) => {
     checkInTime: settings.checkInTime,
     checkOutTime: settings.checkOutTime,
     freeCancellationDays: settings.freeCancellationDays,
+    auth: publicAuthOptions(),
     // Only on a public demo: the sample sign-ins to show on the login page,
     // and whether payments go to the gateways' test environments.
     ...(isDemoMode()

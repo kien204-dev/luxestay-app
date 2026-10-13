@@ -76,7 +76,7 @@ async function addBookings(email, firstRoom) {
         [booking.room_id, userId, booking.id]
       );
     }
-    created.push({ ...state, code: `#${String(booking.id).padStart(4, "0")}` });
+    created.push({ ...state, code: `#BK-${String(booking.id).padStart(4, "0")}` });
   }
   return created.reverse();
 }

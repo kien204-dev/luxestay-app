@@ -262,28 +262,35 @@
   },
   "credits": {
     "documentTitle": "Photo credits",
-    "title": "Photo credits",
-    "intro": "The destination photos on this site come from Wikimedia Commons and are used under their authors' licences. Each photo's author, licence and original page are listed below.",
-    "place": "Place",
-    "originalTitle": "Original title",
+    "crumb": "Photo credits",
+    "title": "Photo <em>credits</em>",
+    "intro": "Thank you to the photographers who let us use their work. These are the destination photos on this site, with their author, licence and original page.",
+    "usedFor": "Destination · {{name}}",
     "author": "Author",
-    "license": "Licence",
     "source": "Source",
-    "sourceLink": "Photo page on Wikimedia Commons",
     "changes": "Changes",
     "empty": "There are no photos to credit yet.",
-    "loadFailed": "Could not load the photo list."
+    "loadFailed": "The list of photos could not be loaded."
   },
   "errorPage": {
-    "toHome": "Go to the home page",
-    "toAdmin": "Go to the admin area",
+    "toHome": "Back to home",
+    "toAdmin": "Back to admin",
+    "allRooms": "See all rooms",
+    "myBookings": "My bookings",
+    "contact": "Contact the front desk",
+    "searchLabel": "Find rooms by destination",
+    "searchPlaceholder": "Search by destination, e.g. Da Nang",
+    "code": "Error {{code}}",
     "notFound": {
-      "title": "Page not found",
-      "text": "This address may have changed, been removed or never existed."
+      "title": "This page has checked out",
+      "text": "The address may have changed, or the room is no longer offered. Try another room or go back to the home page."
     },
     "forbidden": {
-      "title": "No access",
-      "text": "Your account cannot open this page. If you think this is a mistake, contact an administrator."
+      "title": "Staff only",
+      "textWithEmail": "The account <b>{{email}}</b> may not open this page. If you are staff, sign in with an admin account.",
+      "text": "This page is for admin accounts. If you are staff, sign in with an admin account.",
+      "otherAccount": "Sign in with another account",
+      "signIn": "Sign in"
     }
   },
   "reviews": {

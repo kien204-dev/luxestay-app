@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import "../../styles/my-bookings.css";
+import { bookingCode } from "../../utils/bookingCode";
 import { normalizeImageUrl, useFallbackImage } from "../../utils/imageUrl";
 import { STATUS_STYLE, getStatusLabel, formatMoney, formatDate, calculateNights, buildTimeline } from "./helpers";
 
@@ -51,7 +52,7 @@ export default function BookingDetailModal({ booking, onClose }) {
         >
           <div>
             <p style={{ margin: "0 0 4px", color: "var(--color-ink-muted)", fontSize: 12 }}>
-              {t("myBookings:detailModal.bookingId", { id: String(booking.id).padStart(4, "0") })}
+              {t("myBookings:detailModal.bookingId", { code: bookingCode(booking.id) })}
             </p>
             <h2 style={{ margin: 0, color: "var(--brand-primary)", fontSize: 22 }}>
               {t("myBookings:detailModal.title")}

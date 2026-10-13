@@ -3,11 +3,12 @@ import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
 import { getSocket } from "../services/socket";
 import i18n from "../i18n";
+import { bookingCode } from "../utils/bookingCode";
 
 const BookingNotificationsContext = createContext();
 
 function formatBookingLabel(booking) {
-  const code = `#BK-${String(booking.id).padStart(4, "0")}`;
+  const code = bookingCode(booking.id);
   return booking.room_name ? `${code} — ${booking.room_name}` : code;
 }
 

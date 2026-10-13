@@ -6,7 +6,8 @@ import { useToast } from "../../../context/ToastContext";
 import { confirmRefund, deleteBooking, downloadBookingReceipt, getBookings, markBookingPaid, updateBooking } from "../../../services/bookingService";
 import { apiErrorText } from "../../../utils/apiError";
 import { useAsyncData } from "../../../utils/useAsyncData";
-import { BOOKING_STATUSES, PAYMENT_STATUSES, bookingCode } from "./orderLabels";
+import { BOOKING_STATUSES, PAYMENT_STATUSES } from "./orderLabels";
+import { bookingCode, bookingRef } from "../../../utils/bookingCode";
 import OrdersTable from "./OrdersTable";
 
 const PAGE_SIZE = 20;
@@ -129,7 +130,7 @@ export default function OrdersList({ refreshKey, onChanged, onWalkIn }) {
         confirmLabel={pending ? t(`confirm.${pending.kind}Action`) : ""}
         tone={pending?.kind === "delete" ? "danger" : "default"}
         // Deleting a booking takes its payments and review with it.
-        confirmCode={pending?.kind === "delete" ? `BOOKING-${pending.order.id}` : undefined}
+        confirmCode={pending?.kind === "delete" ? bookingRef(pending.order.id) : undefined}
         loading={Boolean(pending) && (busy.delete === pending.order.id || busy.payment === pending.order.id)}
         onConfirm={confirmPending}
         onCancel={() => setPending(null)}

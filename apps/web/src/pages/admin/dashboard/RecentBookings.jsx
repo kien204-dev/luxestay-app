@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Badge } from "../../../components/admin/ui";
 import { formatDate, formatMoney } from "../../../utils/format";
-import { STATUS_TONE, bookingCode } from "../orders/orderLabels";
+import { STATUS_TONE } from "../orders/orderLabels";
+import { bookingCode } from "../../../utils/bookingCode";
 
 // The last five bookings made.
 export default function RecentBookings({ bookings }) {

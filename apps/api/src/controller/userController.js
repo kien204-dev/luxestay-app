@@ -5,6 +5,7 @@ const { removeUpload } = require("../services/storage.js");
 const { isStrongPassword } = require("../utils/password");
 const { findTextLimitError } = require("../utils/textLimits");
 const { apiMessage } = require("../utils/apiMessages");
+const { notifyEmailChanged } = require("../services/accountEmails");
 
 const ALLOWED_ROLES = ["admin", "user"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -46,7 +47,7 @@ function isForeignKeyError(err) {
 }
 
 function publicUserSelect() {
-  return "id, name, email, role, phone, bio, avatar_url, created_at, updated_at, must_change_password, is_locked";
+  return "id, name, email, role, phone, bio, avatar_url, created_at, updated_at, must_change_password, is_locked, password_set";
 }
 
 // ======================
@@ -338,6 +339,7 @@ exports.updateUser = async (req, res) => {
       role=$3,
       password=$4,
       phone=$5,
+      password_set=TRUE,
       token_version=token_version + 1,
       must_change_password=TRUE,
       updated_at=CURRENT_TIMESTAMP
@@ -585,6 +587,34 @@ exports.updateCurrentUser = async (req, res) => {
       });
     }
 
+    const existing = await pool.query(
+      "SELECT email, password, password_set, avatar_url FROM users WHERE id = $1 AND deleted_at IS NULL",
+      [id]
+    );
+    const current = existing.rows[0];
+    if (!current) {
+      return res.status(404).json({ ...apiMessage("USER_NOT_FOUND") });
+    }
+    const previousAvatarUrl = current.avatar_url;
+
+    // The email is what signs in and where password resets go, so changing it
+    // takes the current password (checked before saying whether the new
+    // address is taken). An account made by Google sign-in has no password of
+    // its own yet: it sets one through "Forgot password" first.
+    const emailChanged = email !== String(current.email).toLowerCase();
+    if (emailChanged) {
+      if (current.password_set === false) {
+        return res.status(403).json({ ...apiMessage("PASSWORD_NOT_SET") });
+      }
+      const currentPassword = req.body.currentPassword;
+      if (typeof currentPassword !== "string" || !currentPassword) {
+        return res.status(400).json({ ...apiMessage("CURRENT_PASSWORD_REQUIRED") });
+      }
+      if (!(await bcrypt.compare(currentPassword, current.password))) {
+        return res.status(400).json({ ...apiMessage("CURRENT_PASSWORD_WRONG") });
+      }
+    }
+
     const duplicateEmail = await pool.query(
       "SELECT id FROM users WHERE email = $1 AND id != $2",
       [email, id]
@@ -596,12 +626,6 @@ exports.updateCurrentUser = async (req, res) => {
       });
     }
 
-    const existing = await pool.query(
-      "SELECT avatar_url FROM users WHERE id = $1",
-      [id]
-    );
-    const previousAvatarUrl = existing.rows[0]?.avatar_url;
-
     const result = await pool.query(
       `UPDATE users
        SET
@@ -610,9 +634,10 @@ exports.updateCurrentUser = async (req, res) => {
          phone=$3,
          bio=$4,
          avatar_url=$5,
+         token_version=token_version + CASE WHEN $7 THEN 1 ELSE 0 END,
          updated_at=CURRENT_TIMESTAMP
        WHERE id=$6 AND deleted_at IS NULL
-       RETURNING ${publicUserSelect()}`,
+       RETURNING ${publicUserSelect()}, token_version`,
       [
         name,
         email,
@@ -620,6 +645,7 @@ exports.updateCurrentUser = async (req, res) => {
         bio || null,
         avatarUrl || null,
         id,
+        emailChanged,
       ]
     );
 
@@ -640,9 +666,17 @@ exports.updateCurrentUser = async (req, res) => {
       if (stillUsed.rows.length === 0) removeUpload(previousAvatarUrl, "avatars", { userId: id });
     }
 
+    const { token_version: _tokenVersion, ...user } = result.rows[0];
+    if (emailChanged) {
+      // Every other session ends (token_version); this one goes on with a
+      // fresh cookie. The old address is told.
+      setAuthCookie(res, result.rows[0]);
+      notifyEmailChanged({ name: user.name, oldEmail: current.email, newEmail: user.email, acceptLanguage: req.headers["accept-language"] });
+    }
+
     res.json({
-      ...apiMessage("PROFILE_UPDATED"),
-      user: result.rows[0],
+      ...apiMessage(emailChanged ? "EMAIL_CHANGED" : "PROFILE_UPDATED"),
+      user,
     });
   } catch (err) {
     console.error(err);
@@ -696,6 +730,7 @@ exports.changeCurrentUserPassword = async (req, res) => {
        SET password=$1,
            token_version=token_version + 1,
            must_change_password=FALSE,
+           password_set=TRUE,
            updated_at=CURRENT_TIMESTAMP
        WHERE id=$2 AND deleted_at IS NULL
        RETURNING id, email, role, token_version, must_change_password`,

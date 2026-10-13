@@ -26,6 +26,9 @@ const BUILD_TIME_DEFAULTS = {
   checkInTime: "14:00",
   checkOutTime: "12:00",
   freeCancellationDays: null,
+  // What the sign-in pages follow (Google on or off, reset link lifetime,
+  // password rule, reset email limit): only the API knows.
+  auth: null,
 };
 
 const PropertyContext = createContext({ ...BUILD_TIME_DEFAULTS, initial: "L", reload: () => {} });
@@ -39,7 +42,7 @@ function setFavicon(href, type) {
 }
 
 export function PropertyProvider({ children }) {
-  const { data, reload } = useAsyncData("property", getPublicSettings);
+  const { data, error, reload } = useAsyncData("property", getPublicSettings);
 
   const property = useMemo(() => {
     const settings = { ...BUILD_TIME_DEFAULTS, ...(data || {}) };
@@ -49,9 +52,12 @@ export function PropertyProvider({ children }) {
       heroImageUrl: settings.heroImageUrl ? normalizeImageUrl(settings.heroImageUrl, "") : "",
       // First letter of the name: the logo mark when there is no logo image.
       initial: (Array.from(settings.name)[0] || "L").toUpperCase(),
+      // The API has answered (or failed): a page that must not move once the
+      // demo strip or the Google button turns up waits for this.
+      ready: Boolean(data || error),
       reload,
     };
-  }, [data, reload]);
+  }, [data, error, reload]);
 
   // The browser tab follows the property: its logo if it has one, otherwise
   // a monogram of its name.

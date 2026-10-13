@@ -4,6 +4,7 @@ const { getPropertySettings } = require("./propertySettings.js");
 const { getPublicWebUrl } = require("./allowedOrigins.js");
 const { escapeHtml } = require("../utils/html.js");
 const { daysBetween } = require("../utils/time.js");
+const { bookingCode } = require("../utils/bookingCode.js");
 
 // Emails a guest receives about one booking:
 //   received   the booking exists and is waiting for payment
@@ -104,10 +105,6 @@ const TEXT = {
 
 function fill(template, values) {
   return template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ""));
-}
-
-function bookingCode(id) {
-  return `#BK-${String(id).padStart(4, "0")}`;
 }
 
 function formatDate(dateStr, lang) {

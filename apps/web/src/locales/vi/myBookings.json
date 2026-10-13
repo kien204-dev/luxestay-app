@@ -98,7 +98,7 @@
     "publicNote": "Đánh giá hiện công khai trên trang phòng; tên của bạn được viết tắt."
   },
   "detailModal": {
-    "bookingId": "Booking ID #{{id}}",
+    "bookingId": "Mã đặt phòng {{code}}",
     "title": "Chi tiết đặt phòng",
     "checkIn": "Check-in",
     "checkOut": "Check-out",

@@ -251,14 +251,12 @@
   },
   "credits": {
     "documentTitle": "Ghi công ảnh",
-    "title": "Ghi công ảnh",
-    "intro": "Ảnh các điểm đến trên trang này lấy từ Wikimedia Commons và được dùng theo giấy phép của tác giả. Dưới đây là tác giả, giấy phép và trang gốc của từng ảnh.",
-    "place": "Địa danh",
-    "originalTitle": "Tiêu đề gốc",
+    "crumb": "Ghi công ảnh",
+    "title": "Ghi công <em>ảnh</em>",
+    "intro": "Cảm ơn các tác giả đã cho phép dùng ảnh của họ. Dưới đây là ảnh các điểm đến trên trang này, kèm tác giả, giấy phép và trang gốc.",
+    "usedFor": "Điểm đến · {{name}}",
     "author": "Tác giả",
-    "license": "Giấy phép",
     "source": "Nguồn",
-    "sourceLink": "Trang ảnh trên Wikimedia Commons",
     "changes": "Thay đổi",
     "empty": "Hiện chưa có ảnh nào cần ghi công.",
     "loadFailed": "Không tải được danh sách ảnh."
@@ -266,13 +264,22 @@
   "errorPage": {
     "toHome": "Về trang chủ",
     "toAdmin": "Về trang quản trị",
+    "allRooms": "Xem tất cả phòng",
+    "myBookings": "Đặt phòng của tôi",
+    "contact": "Liên hệ lễ tân",
+    "searchLabel": "Tìm phòng theo điểm đến",
+    "searchPlaceholder": "Tìm theo điểm đến, ví dụ Đà Nẵng",
+    "code": "Mã lỗi {{code}}",
     "notFound": {
-      "title": "Không tìm thấy trang",
-      "text": "Đường dẫn này có thể đã đổi, bị xóa hoặc chưa từng tồn tại."
+      "title": "Trang này đã trả phòng",
+      "text": "Đường dẫn có thể đã thay đổi hoặc phòng không còn được mở bán. Thử tìm phòng khác hoặc quay về trang chủ."
     },
     "forbidden": {
-      "title": "Không có quyền truy cập",
-      "text": "Tài khoản của bạn không được mở trang này. Nếu bạn cho rằng đây là nhầm lẫn, hãy liên hệ quản trị viên."
+      "title": "Khu vực dành riêng",
+      "textWithEmail": "Tài khoản <b>{{email}}</b> không có quyền xem trang này. Nếu bạn là nhân viên, hãy đăng nhập bằng tài khoản quản trị.",
+      "text": "Trang này dành cho tài khoản quản trị. Nếu bạn là nhân viên, hãy đăng nhập bằng tài khoản quản trị.",
+      "otherAccount": "Đăng nhập tài khoản khác",
+      "signIn": "Đăng nhập"
     }
   },
   "reviews": {
