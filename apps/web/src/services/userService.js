@@ -90,7 +90,8 @@ export const deleteUser = async (id) => {
 // =========================
 // LOCK / UNLOCK USER
 // =========================
-export const setUserLock = async (id, locked) => {
-  const response = await api.patch(`/users/${id}/lock`, { locked });
+// Locking may say why ({ reason, note }); unlocking clears it.
+export const setUserLock = async (id, locked, { reason, note } = {}) => {
+  const response = await api.patch(`/users/${id}/lock`, locked ? { locked, reason, note } : { locked });
   return response.data;
 };

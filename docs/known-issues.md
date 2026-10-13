@@ -46,6 +46,12 @@ Cập nhật: 2026-10-13 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại
 - **Số trên các tab Đơn đặt phòng tính trên toàn bộ đơn**, không theo ô tìm hay bộ lọc đang bật; danh sách và số dòng thì theo bộ lọc.
 - **Lọc theo ngày ở trang Đơn đặt phòng** lấy các đơn nhận phòng từ ngày đầu và trả phòng đến ngày cuối (lưu trú nằm trong khoảng), như API vốn có.
 - **Lịch phòng không có khoá phòng theo ngày**: phòng bảo trì được gạch chéo cả kỳ vì hệ thống chỉ biết trạng thái bảo trì hiện tại, không biết từ ngày nào tới ngày nào. Công suất ở đầu Lịch phòng và Dashboard dùng số phòng đang mở bán hôm nay cho mọi ngày trong kỳ.
+- **Khu quản trị so với bản thiết kế (đợt 5b)**: hệ thống chưa có dữ liệu hoặc tính năng tương ứng cho: *Phòng* — giá cuối tuần, phụ thu khách thêm, số trẻ em, diện tích, bản nháp, tab và lịch sử chỉnh sửa trong trang phòng; *Mã giảm giá* — "mỗi khách N lượt", "áp dụng cho hạng phòng", "chỉ đơn từ N đêm", xoá mã (chỉ tắt; mã đã dùng phải giữ cho đơn cũ); *Đánh giá* — "Phản hồi của khách sạn", "Xuất CSV", thành phố của khách; *Người dùng* — vai trò nhân viên chi tiết (lễ tân, kế toán…), ô "gửi email báo khoá"; *Cơ sở lưu trú* — màu chủ đạo, tab Thanh toán và Nhân viên, nhiều cơ sở; *Điểm đến* — công tắc ẩn/hiện và nút "Thêm điểm đến" (điểm đến sinh từ địa chỉ phòng). Nút xoá phòng nằm ngay trên hàng (không trong menu ⋯) và nút sáng/tối ở thanh trên như đợt 5a.
+- **"Không khoá được quản trị viên cuối cùng" được bảo đảm bằng quy tắc "không tự khoá / tự hạ quyền / tự xoá"**: người đang thao tác luôn còn là quản trị viên đăng nhập được. API không có mã lỗi riêng cho "quản trị viên cuối cùng".
+- **Lý do khoá và ghi chú chỉ quản trị viên thấy**; người bị khoá vẫn nhận thông báo chung "Tài khoản đã bị khoá" khi đăng nhập, không có email báo khoá. Tài khoản khoá trước bản này không có lý do (cột trống).
+- **Trạng thái mã giảm giá được tính trên trình duyệt** theo giờ máy của quản trị viên tại lúc mở trang; ngày bắt đầu/hết hạn chọn trong ngăn là đầu ngày / cuối ngày theo giờ máy đó. API kiểm tra theo thời điểm thật khi khách đặt.
+- **Thứ tự ảnh của phòng chỉ áp cho thư viện**; ảnh bìa lưu riêng (`rooms.image`). Đổi ảnh bìa là đổi chỗ: ảnh bìa cũ vào thư viện ở vị trí của ảnh mới chọn.
+- **Ảnh mới của điểm đến xoá ghi công của ảnh cũ** trừ khi gửi kèm (trang quản trị luôn gửi các ô đang có trong ngăn và nhắc kiểm tra lại).
 - **Thanh toán ghi nhận tại quầy không có thời điểm riêng** (API không lưu): lịch sử đơn ghi "Ghi nhận đã thu tại quầy" không kèm giờ. Giờ giữ phòng và giờ huỷ hiện theo giờ của trình duyệt.
 
 ## Mã đặt phòng

@@ -138,5 +138,23 @@
       "refund_pending": "Refund due",
       "refunded": "Refunded"
     }
+  },
+  "pager": {
+    "label": "Pages",
+    "showing": "Showing",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}}"
+  },
+  "stepper": {
+    "less": "Fewer: {{label}}",
+    "more": "More: {{label}}"
+  },
+  "savebar": {
+    "changes_one": "{{count}} unsaved change",
+    "changes_other": "{{count}} unsaved changes",
+    "errors_one": "{{count}} error to fix",
+    "errors_other": "{{count}} errors to fix",
+    "clean": "Everything is saved"
   }
 }

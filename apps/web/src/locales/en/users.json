@@ -1,16 +1,26 @@
 {
   "title": "Users",
-  "subtitle": "Admin and guest accounts. Lock an account to stop it signing in while keeping its booking history.",
   "add": "Add user",
-  "searchPlaceholder": "Search by name, email or phone",
-  "empty": "No users match.",
-  "joined": "Joined {{date}}",
-  "actionFailed": "That did not work.",
+  "you": "You",
+  "listLabel": "User list",
+  "search": "Search users",
+  "searchPlaceholder": "Name, email or phone",
+  "actionFailed": "The action failed.",
+  "head": {
+    "total_one": "{{count}} account",
+    "total_other": "{{count}} accounts",
+    "admins_one": "{{count}} admin",
+    "admins_other": "{{count}} admins",
+    "locked_one": "{{count}} locked",
+    "locked_other": "{{count}} locked",
+    "loading": "Loading…"
+  },
   "filters": {
-    "role": "Filter by role",
-    "status": "Filter by status",
-    "allRoles": "All roles",
-    "allStatuses": "All statuses"
+    "label": "Filter users",
+    "all": "All",
+    "user": "Guests",
+    "admin": "Admins",
+    "locked": "Locked"
   },
   "status": {
     "active": "Active",
@@ -19,55 +29,84 @@
   "columns": {
     "person": "User",
     "role": "Role",
-    "contact": "Contact",
-    "status": "Status",
+    "bookings": "Bookings",
     "joined": "Joined",
+    "status": "Status",
     "actions": "Actions"
   },
-  "kpi": {
-    "total": "All accounts",
-    "totalSub": "Deleted accounts not counted",
-    "admins": "Admins",
-    "adminsSub": "Run the system",
-    "guests": "Guests",
-    "guestsSub": "Booking accounts",
-    "locked": "Locked",
-    "lockedSub": "Cannot sign in"
-  },
+  "joinedBookings_one": "Joined {{date}} · {{count}} booking",
+  "joinedBookings_other": "Joined {{date}} · {{count}} bookings",
+  "of_one": "of {{count}} account",
+  "of_other": "of {{count}} accounts",
   "actions": {
     "edit": "Edit",
+    "editName": "Edit {{name}}",
     "lock": "Lock",
+    "lockName": "Lock {{name}}'s account",
     "unlock": "Unlock",
-    "delete": "Delete",
-    "cannotLockSelf": "You cannot lock the account you are signed in with",
-    "cannotDeleteSelf": "You cannot delete the account you are signed in with"
+    "delete": "Delete account",
+    "cannotLockSelf": "You cannot lock the account you are signed in with"
+  },
+  "lock": {
+    "title": "Lock {{name}}'s account?",
+    "effect": "{{email}} will be signed out on every device and cannot sign in or book again.",
+    "upcoming_one": "{{count}} upcoming booking is kept.",
+    "upcoming_other": "{{count}} upcoming bookings are kept.",
+    "reason": "Reason",
+    "chooseReason": "Choose a reason",
+    "reasonRequired": "Choose why the account is locked.",
+    "reasons": {
+      "fraud": "Suspected payment fraud",
+      "spam": "Spam or fake bookings",
+      "abuse": "Broke the house rules",
+      "request": "Asked for by the account holder",
+      "other": "Other reason"
+    },
+    "note": "Internal note",
+    "optional": "(optional)",
+    "noteHint": "Only admins see it. {{count}} / {{max}} characters.",
+    "cancel": "Cancel",
+    "action": "Lock account"
   },
   "form": {
+    "eyebrow": "User",
     "addTitle": "Add user",
-    "editTitle": "Edit user",
-    "name": "Name",
+    "name": "Full name",
     "email": "Email",
     "password": "Temporary password",
-    "passwordHint": "At least 8 characters with letters and numbers. The user must change it at first sign-in.",
+    "passwordHint": "At least 8 characters with letters and digits. The user changes it at first sign-in.",
     "role": "Role",
+    "roleHint": {
+      "user": "Books on the guest site",
+      "admin": "Uses the admin area; signs in with a password only"
+    },
     "ownRole": "You cannot change your own role.",
-    "nameEmailRequired": "Please enter a name and an email.",
-    "passwordRule": "The temporary password needs at least 8 characters with letters and numbers.",
-    "saveFailed": "Could not save the user."
+    "nameRequired": "Enter the name.",
+    "emailInvalid": "That email does not look right.",
+    "passwordRule": "The temporary password needs 8+ characters with letters and digits.",
+    "cancel": "Cancel",
+    "create": "Add user",
+    "save": "Save",
+    "saveFailed": "The user could not be saved."
+  },
+  "states": {
+    "errorTitle": "Could not load the users",
+    "noMatch": "No user matches “{{term}}”",
+    "noneHere": "No users here",
+    "noMatchHelp": "Try another name, email or phone, or remove the filter.",
+    "clear": "Clear filters"
   },
   "confirm": {
-    "deleteTitle": "Delete user",
-    "deleteMessage": "Delete \"{{name}}\"? This cannot be undone. Accounts with bookings can only be locked.",
-    "lockTitle": "Lock account",
-    "lockMessage": "Lock \"{{name}}\"? They will be signed out and unable to sign in.",
-    "unlockTitle": "Unlock account",
-    "unlockMessage": "Unlock \"{{name}}\"?"
+    "deleteTitle": "Delete {{name}}?",
+    "deleteMessage": "Delete \"{{name}}\"'s account? This cannot be undone. An account with bookings can only be locked, not deleted.",
+    "unlockTitle": "Unlock {{name}}?",
+    "unlockMessage": "\"{{name}}\" can sign in again at once. The lock reason is cleared."
   },
   "toast": {
-    "created": "Added \"{{name}}\"",
-    "updated": "Updated \"{{name}}\"",
-    "deleted": "Deleted \"{{name}}\"",
-    "locked": "Locked \"{{name}}\"",
-    "unlocked": "Unlocked \"{{name}}\""
+    "created": "\"{{name}}\" added",
+    "updated": "\"{{name}}\" updated",
+    "deleted": "\"{{name}}\" deleted",
+    "locked": "\"{{name}}\" locked",
+    "unlocked": "\"{{name}}\" unlocked"
   }
 }

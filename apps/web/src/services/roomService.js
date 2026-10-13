@@ -75,7 +75,8 @@ export const uploadRoomImage = async (file) => {
 // =========================
 // ADD ROOM GALLERY IMAGE
 // =========================
-export const addRoomImage = async (roomId, file) => {
+// `onProgress(fraction)` follows the upload (0 to 1).
+export const addRoomImage = async (roomId, file, onProgress) => {
   const formData = new FormData();
   formData.append("image", file);
 
@@ -83,10 +84,22 @@ export const addRoomImage = async (roomId, file) => {
     headers: {
       "Content-Type": "multipart/form-data",
     },
+    // Photos are processed on the server after they arrive; give it time.
+    timeout: 120000,
+    onUploadProgress: onProgress ? (event) => event.total && onProgress(event.loaded / event.total) : undefined,
   });
 
   return response.data;
 };
+
+// =========================
+// ADMIN: GALLERY ORDER, COVER, STATUS COUNTS
+// =========================
+export const reorderRoomImages = async (roomId, ids) => (await api.put(`/rooms/${roomId}/images/order`, { ids })).data;
+
+export const setRoomCover = async (roomId, imageId) => (await api.post(`/rooms/${roomId}/images/${imageId}/cover`)).data;
+
+export const getRoomStatusCounts = async () => (await api.get("/rooms/status-counts")).data;
 
 // =========================
 // DELETE ROOM GALLERY IMAGE

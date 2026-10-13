@@ -1,75 +1,177 @@
 {
   "title": "Property",
-  "subtitle": "Name, logo, home page photo, contact details and house rules. Changes apply at once to the guest site, emails and confirmations.",
+  "subtitle": "Details and branding shown on the guest site, in emails and on confirmations",
+  "openSite": "Open guest site",
   "saved": "Saved",
-  "image": {
-    "upload": "Upload",
-    "replace": "Replace",
-    "remove": "Remove",
-    "uploadFailed": "Could not upload the image.",
-    "removeFailed": "Could not remove the image."
+  "states": {
+    "errorTitle": "Couldn't load the settings"
   },
-  "logo": {
-    "title": "Logo",
-    "hint": "PNG, JPG or WebP, up to 10 MB. Without a logo the site shows the name's first letter. The PDF uses a PNG copy made automatically."
+  "tabs": {
+    "label": "Settings sections",
+    "info": "Details & branding",
+    "policy": "Policies",
+    "home": "Home page",
+    "errors": "{{count}} errors"
   },
-  "hero": {
-    "title": "Home page photo",
-    "hint": "A landscape photo up to 10 MB; it is scaled to at most 2400 px. The home page darkens it so text stays readable. Only use photos you have the right to use.",
-    "none": "No photo: the home page uses a colour background"
+  "missing": {
+    "title": "Setup isn't complete.",
+    "text": "Missing: {{items}}. The guest site still works, but guests won't see these.",
+    "items": {
+      "logo": "logo",
+      "hero": "home page photo",
+      "phone": "phone number",
+      "email": "email",
+      "address": "address"
+    }
   },
-  "form": {
-    "title": "Details and house rules",
-    "subtitle": "Leave a field empty to use the default shown below it.",
-    "default": "Default: {{value}}",
-    "noDefault": "(none)",
-    "save": "Save",
-    "saveFailed": "Could not save."
+  "sections": {
+    "general": "General",
+    "generalHint": "The name and the words on the home page photo. Shown as typed in every language.",
+    "brand": "Branding",
+    "brandHint": "The logo is used on the site, in emails and on PDFs. The photo sits behind the search box on the home page.",
+    "contact": "Contact",
+    "contactHint": "Shown in the footer, emails and confirmations.",
+    "times": "Check-in and check-out",
+    "timesHint": "Shown on room pages, emails and confirmations.",
+    "cancel": "Free cancellation",
+    "cancelHint": "Applies to new bookings. Existing bookings keep the policy they were made under.",
+    "lists": "Amenities and location",
+    "listsHint": "The home page's Amenities and Location sections. An empty list hides its section."
   },
   "fields": {
     "name": "Property name",
-    "phone": "Phone",
-    "email": "Contact email",
+    "heroTitle": "Headline on the photo",
+    "heroSubtitle": "Text under the headline",
+    "phone": "Front desk phone",
+    "email": "Email",
     "address": "Address",
     "checkInTime": "Check-in time",
     "checkOutTime": "Check-out time",
-    "freeCancellationDays": "Free cancellation: days before check-in"
+    "freeCancellationDays": "Days before check-in"
   },
-  "destinations": {
-    "title": "Destination photos",
-    "subtitle": "The photos on the home page's destination cards. A destination is the part of a room's location after the last comma. Changes apply at once.",
-    "rooms": "{{count}} rooms",
-    "rooms_one": "{{count}} room",
-    "noPhoto": "no photo of its own: the card uses the first room photo or a drawing",
-    "creditHint": "Your own photo: leave the licence empty. CC BY / CC BY-SA photos: fill in author and licence so the card and the credits page show them.",
-    "saveCredit": "Save credit",
-    "creditFailed": "Could not save the credit.",
-    "fields": {
-      "place": "Place shown",
-      "author": "Author",
-      "license": "Licence (e.g. CC BY 4.0)",
-      "licenseUrl": "Licence link",
-      "title": "Original title",
-      "sourceUrl": "Link to the photo's page"
-    }
+  "form": {
+    "default": "Leave empty to use: {{value}}",
+    "noDefault": "(none)",
+    "count": "Up to {{max}} characters · {{count}} used",
+    "save": "Save",
+    "discard": "Discard changes",
+    "saveFailed": "Couldn't save."
+  },
+  "errors": {
+    "email": "Enter a full email address, e.g. stay@yourhotel.com",
+    "phone": "Use digits, +, spaces, dashes or brackets only (6–30 characters).",
+    "rowName": "Every row with text needs a name."
+  },
+  "cancel": {
+    "useDefault": "Use the default ({{count}} days)",
+    "useDefault_one": "Use the default ({{count}} day)",
+    "after": "Paid bookings can be cancelled and refunded online until this point. After it, guests contact the property. Set 0 to allow it until the day before check-in."
+  },
+  "image": {
+    "upload": "Upload image",
+    "replace": "Replace",
+    "remove": "Remove",
+    "savedAtOnce": "The logo and photo are saved as soon as they are uploaded or removed.",
+    "uploadFailed": "Couldn't upload the image.",
+    "removeFailed": "Couldn't remove the image."
+  },
+  "logo": {
+    "title": "Logo",
+    "hint": "PNG, JPG or WebP, up to 10 MB; a transparent background works best. Without a logo the site shows the name's first letter. PDFs use a PNG made automatically."
+  },
+  "hero": {
+    "title": "Home page photo",
+    "hint": "A landscape photo up to 10 MB; scaled to at most 2400 px, turned the right way up and stripped of location data. Only use photos you have the right to use.",
+    "none": "No photo: the home page uses a plain colour"
+  },
+  "preview": {
+    "label": "Preview",
+    "device": "Preview device",
+    "desktop": "Desktop",
+    "mobile": "Mobile",
+    "noContact": "No phone number or address yet",
+    "freeCancel": "Free cancellation up to {{count}} days before",
+    "freeCancel_one": "Free cancellation up to {{count}} day before",
+    "noFreeCancel": "Free cancellation until check-in",
+    "note": "The preview follows your edits. Guests see changes only after you save."
   },
   "home": {
-    "title": "Home page content",
-    "subtitle": "The headline at the top of the home page and its Amenities and Location sections. The text is shown as written in every language. An empty field falls back to the default wording; an empty list hides its section.",
-    "heroTitle": "Headline",
-    "heroSubtitle": "Text under the headline",
     "amenities": "Amenities",
-    "amenitiesHint": "Up to 12 rows. Shown in the home page's Amenities section.",
+    "amenitiesHint": "{{count}}/{{max}} rows. Shown in the home page's Amenities section.",
     "amenityName": "Amenity",
     "amenityDescription": "Short description",
     "nearbyPlaces": "Nearby places",
-    "nearbyPlacesHint": "Up to 8 rows. Shown in the home page's Location section, with the address from Details and rules.",
+    "nearbyPlacesHint": "{{count}}/{{max}} rows. Shown in the home page's Location section, with the address above.",
     "placeName": "Place",
     "placeNote": "Note",
     "placeDistance": "Distance",
     "addRow": "Add row",
     "removeRow": "Remove row {{index}}",
-    "rowField": "{{label}}, row {{index}}",
-    "save": "Save home page content"
+    "moveUp": "Move row {{index}} up",
+    "moveDown": "Move row {{index}} down",
+    "rowField": "{{label}}, row {{index}}"
+  },
+  "destinations": {
+    "title": "Destinations",
+    "subtitle": "Destination photos and their credits",
+    "lede": "Destinations come from the rooms' addresses (the part after the last comma), so they are added and removed with the rooms. The photo shows on the home page's Destinations cards; a new photo applies at once.",
+    "count": "{{count}} destinations",
+    "count_one": "{{count}} destination",
+    "missingCount": "{{count}} photos missing a credit",
+    "missingCount_one": "{{count}} photo missing a credit",
+    "allCredited": "every photo credited",
+    "creditsPage": "Photo credits page",
+    "rooms": "{{count}} rooms",
+    "rooms_one": "{{count}} room",
+    "credit": {
+      "by": "Photo: {{author}} · {{license}}",
+      "ownPhoto": "Own photo",
+      "missing": "Photo credit missing",
+      "noPhoto": "No photo of its own: uses a room photo"
+    },
+    "edit": "Change photo & credit",
+    "editName": "Change the photo and credit of {{name}}",
+    "errorTitle": "Couldn't load destinations",
+    "emptyTitle": "No destinations yet",
+    "emptyHelp": "Destinations group rooms by city so guests can filter the Rooms page. Add a room with an address to create one.",
+    "addRoom": "Add room",
+    "eyebrow": "Destination",
+    "currentAlt": "Current photo of {{name}}",
+    "newPhotoAlt": "New photo for {{name}}",
+    "newPhoto": "New photo:",
+    "removePhoto": "Remove photo",
+    "dropNew": "Drop the chosen photo",
+    "willRemove": "The photo will be removed when you save. The card will use a room photo.",
+    "undo": "Undo",
+    "noPhoto": "No photo of its own: the card uses the first room photo or a drawing.",
+    "drop": "Drop a photo to replace it",
+    "dropNow": "Drop the photo here",
+    "or": "or",
+    "pick": "choose a file",
+    "uploading": "Uploading the photo",
+    "creditHint": "Photos under a CC licence need their author and licence; once a licence is set, the details below show on /credits. For the property's own photos, leave the licence empty.",
+    "creditNew": "The old photo's credit doesn't apply to the new one: check the fields below before saving.",
+    "more": "More details (original title, place, changes)",
+    "placeholders": {
+      "author": "e.g. Jane Doe",
+      "license": "e.g. CC BY-SA 4.0",
+      "changes": "e.g. cropped, resized, converted to WebP"
+    },
+    "fields": {
+      "author": "Author",
+      "sourceUrl": "Source link",
+      "license": "Licence",
+      "licenseUrl": "Licence link",
+      "title": "Original title",
+      "place": "Place in the photo",
+      "changes": "Changes made"
+    },
+    "errors": {
+      "author": "An author is needed when the licence asks for credit",
+      "url": "Links must start with http:// or https://"
+    },
+    "cancel": "Cancel",
+    "save": "Save photo & credit",
+    "creditFailed": "Couldn't save the credit."
   }
 }

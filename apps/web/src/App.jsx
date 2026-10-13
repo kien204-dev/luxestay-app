@@ -29,6 +29,7 @@ const MainLayout = lazy(() => import("./layout/MainLayout"));
 const Dashboard = lazy(() => import("./pages/admin/dashboard/DashboardPage"));
 const Users = lazy(() => import("./pages/admin/users/UsersPage"));
 const Rooms = lazy(() => import("./pages/admin/rooms/RoomsPage"));
+const RoomEditor = lazy(() => import("./pages/admin/rooms/RoomEditor"));
 const Orders = lazy(() => import("./pages/admin/orders/OrdersPage"));
 const Calendar = lazy(() => import("./pages/admin/calendar/CalendarPage"));
 const Coupons = lazy(() => import("./pages/admin/coupons/CouponsPage"));
@@ -90,6 +91,7 @@ function App() {
         <Route path={ADMIN_HOME} element={admin(<Dashboard />)} />
         <Route path={`${ADMIN_HOME}/users`} element={admin(<Users />)} />
         <Route path={`${ADMIN_HOME}/rooms`} element={admin(<Rooms />)} />
+        <Route path={`${ADMIN_HOME}/rooms/:id`} element={admin(<RoomEditor />)} />
         <Route path={`${ADMIN_HOME}/orders`} element={admin(<Orders />)} />
         <Route path={`${ADMIN_HOME}/calendar`} element={admin(<Calendar />)} />
         <Route path={`${ADMIN_HOME}/coupons`} element={admin(<Coupons />)} />

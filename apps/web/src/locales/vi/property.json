@@ -1,75 +1,177 @@
 {
   "title": "Cơ sở lưu trú",
-  "subtitle": "Tên, logo, ảnh trang chủ, thông tin liên hệ và quy định. Có hiệu lực ngay trên trang khách, email và phiếu xác nhận, không cần cài đặt lại.",
+  "subtitle": "Thông tin và thương hiệu hiển thị trên website khách, email và phiếu xác nhận",
+  "openSite": "Mở trang khách",
   "saved": "Đã lưu",
-  "image": {
-    "upload": "Tải ảnh lên",
-    "replace": "Đổi ảnh",
-    "remove": "Xóa ảnh",
-    "uploadFailed": "Không tải được ảnh lên.",
-    "removeFailed": "Không xóa được ảnh."
+  "states": {
+    "errorTitle": "Không tải được cài đặt"
   },
-  "logo": {
-    "title": "Logo",
-    "hint": "PNG, JPG hoặc WebP, tối đa 10 MB. Không có logo thì trang dùng chữ cái đầu của tên. Phiếu PDF dùng bản PNG được tạo tự động."
+  "tabs": {
+    "label": "Phần cài đặt",
+    "info": "Thông tin & thương hiệu",
+    "policy": "Chính sách",
+    "home": "Trang chủ",
+    "errors": "{{count}} lỗi"
   },
-  "hero": {
-    "title": "Ảnh nền trang chủ",
-    "hint": "Ảnh ngang, tối đa 10 MB; được thu về tối đa 2400 px. Trang chủ phủ lớp tối lên ảnh để chữ luôn dễ đọc. Chỉ dùng ảnh bạn có quyền sử dụng.",
-    "none": "Chưa có ảnh: trang chủ dùng nền màu"
+  "missing": {
+    "title": "Cơ sở chưa hoàn tất thiết lập.",
+    "text": "Còn thiếu: {{items}}. Website khách vẫn chạy, nhưng khách sẽ không thấy các mục này.",
+    "items": {
+      "logo": "logo",
+      "hero": "ảnh nền trang chủ",
+      "phone": "số điện thoại",
+      "email": "email",
+      "address": "địa chỉ"
+    }
   },
-  "form": {
-    "title": "Thông tin và quy định",
-    "subtitle": "Để trống một ô để dùng giá trị mặc định ghi bên dưới.",
-    "default": "Mặc định: {{value}}",
-    "noDefault": "(không có)",
-    "save": "Lưu thông tin",
-    "saveFailed": "Không lưu được thông tin."
+  "sections": {
+    "general": "Thông tin chung",
+    "generalHint": "Tên và dòng chữ trên ảnh nền trang chủ. Nội dung hiển thị nguyên văn ở mọi ngôn ngữ.",
+    "brand": "Thương hiệu",
+    "brandHint": "Logo dùng cho website, email và phiếu PDF. Ảnh nền nằm sau ô tìm phòng ở trang chủ.",
+    "contact": "Liên hệ",
+    "contactHint": "Hiển thị ở chân trang, email và phiếu xác nhận.",
+    "times": "Giờ nhận và trả phòng",
+    "timesHint": "Ghi trên trang phòng, email và phiếu xác nhận.",
+    "cancel": "Huỷ miễn phí",
+    "cancelHint": "Áp dụng cho đơn mới. Đơn đã đặt giữ chính sách lúc đặt.",
+    "lists": "Tiện ích và vị trí",
+    "listsHint": "Hai khối “Tiện ích” và “Vị trí” của trang chủ. Danh sách để trống thì khối đó không hiện."
   },
   "fields": {
-    "name": "Tên cơ sở lưu trú",
-    "phone": "Số điện thoại",
-    "email": "Email liên hệ",
+    "name": "Tên cơ sở",
+    "heroTitle": "Khẩu hiệu trên ảnh nền",
+    "heroSubtitle": "Mô tả dưới khẩu hiệu",
+    "phone": "Điện thoại lễ tân",
+    "email": "Email",
     "address": "Địa chỉ",
     "checkInTime": "Giờ nhận phòng",
     "checkOutTime": "Giờ trả phòng",
-    "freeCancellationDays": "Số ngày hủy miễn phí trước ngày nhận phòng"
+    "freeCancellationDays": "Số ngày trước ngày nhận phòng"
   },
-  "destinations": {
-    "title": "Ảnh điểm đến",
-    "subtitle": "Ảnh trên các thẻ \"Điểm đến\" ở trang chủ. Điểm đến lấy từ địa chỉ của phòng (phần sau dấu phẩy cuối). Đổi ảnh có hiệu lực ngay.",
-    "rooms": "{{count}} phòng",
-    "rooms_one": "{{count}} phòng",
-    "noPhoto": "chưa có ảnh riêng: thẻ dùng ảnh phòng đầu tiên hoặc hình vẽ",
-    "creditHint": "Ảnh của bạn: để trống phần giấy phép. Ảnh CC BY / CC BY-SA: ghi đủ tác giả và giấy phép để thẻ điểm đến và trang Ghi công ảnh hiển thị.",
-    "saveCredit": "Lưu ghi công",
-    "creditFailed": "Không lưu được ghi công.",
-    "fields": {
-      "place": "Địa danh trong ảnh",
-      "author": "Tác giả",
-      "license": "Giấy phép (vd. CC BY 4.0)",
-      "licenseUrl": "Link giấy phép",
-      "title": "Tiêu đề gốc",
-      "sourceUrl": "Link trang gốc của ảnh"
-    }
+  "form": {
+    "default": "Để trống để dùng: {{value}}",
+    "noDefault": "(không có)",
+    "count": "Tối đa {{max}} ký tự · đang dùng {{count}}",
+    "save": "Lưu",
+    "discard": "Huỷ thay đổi",
+    "saveFailed": "Không lưu được thông tin."
+  },
+  "errors": {
+    "email": "Email chưa đúng, ví dụ datphong@tencoso.vn",
+    "phone": "Số điện thoại chỉ gồm chữ số, dấu +, khoảng trắng, dấu gạch hoặc ngoặc (6–30 ký tự).",
+    "rowName": "Mỗi dòng có nội dung cần có tên."
+  },
+  "cancel": {
+    "useDefault": "Dùng mặc định ({{count}} ngày)",
+    "useDefault_one": "Dùng mặc định ({{count}} ngày)",
+    "after": "Đơn đã thanh toán được huỷ và hoàn tiền trên web đến mốc này. Sau mốc này khách cần liên hệ cơ sở. Đặt 0 để luôn cho huỷ đến trước ngày nhận phòng."
+  },
+  "image": {
+    "upload": "Tải ảnh lên",
+    "replace": "Đổi ảnh",
+    "remove": "Gỡ",
+    "savedAtOnce": "Logo và ảnh nền được lưu ngay khi tải lên hoặc gỡ.",
+    "uploadFailed": "Không tải được ảnh lên.",
+    "removeFailed": "Không gỡ được ảnh."
+  },
+  "logo": {
+    "title": "Logo",
+    "hint": "PNG, JPG hoặc WebP, tối đa 10 MB; nên dùng nền trong. Không có logo thì trang dùng chữ cái đầu của tên. Phiếu PDF dùng bản PNG được tạo tự động."
+  },
+  "hero": {
+    "title": "Ảnh nền trang chủ",
+    "hint": "Ảnh ngang, tối đa 10 MB; được thu về tối đa 2400 px, tự xoay đúng chiều và bỏ thông tin vị trí. Chỉ dùng ảnh bạn có quyền sử dụng.",
+    "none": "Chưa có ảnh: trang chủ dùng nền màu"
+  },
+  "preview": {
+    "label": "Xem trước",
+    "device": "Thiết bị xem trước",
+    "desktop": "Desktop",
+    "mobile": "Mobile",
+    "noContact": "Chưa có số điện thoại và địa chỉ",
+    "freeCancel": "Huỷ miễn phí trước {{count}} ngày",
+    "freeCancel_one": "Huỷ miễn phí trước {{count}} ngày",
+    "noFreeCancel": "Huỷ miễn phí đến trước ngày nhận phòng",
+    "note": "Xem trước cập nhật ngay khi bạn sửa. Khách chỉ thấy thay đổi sau khi lưu."
   },
   "home": {
-    "title": "Nội dung trang chủ",
-    "subtitle": "Tiêu đề ở đầu trang chủ và hai khối Tiện ích, Vị trí. Nội dung được hiển thị nguyên văn ở mọi ngôn ngữ. Ô nào để trống thì trang chủ dùng câu mặc định; danh sách để trống thì khối đó không hiện.",
-    "heroTitle": "Tiêu đề",
-    "heroSubtitle": "Mô tả dưới tiêu đề",
     "amenities": "Tiện ích",
-    "amenitiesHint": "Tối đa 12 dòng. Hiện ở khối “Tiện ích” của trang chủ.",
+    "amenitiesHint": "{{count}}/{{max}} dòng. Hiện ở khối “Tiện ích” của trang chủ.",
     "amenityName": "Tên tiện ích",
     "amenityDescription": "Mô tả ngắn",
     "nearbyPlaces": "Điểm lân cận",
-    "nearbyPlacesHint": "Tối đa 8 dòng. Hiện ở khối “Vị trí” của trang chủ, cùng địa chỉ ở phần Thông tin và quy định.",
+    "nearbyPlacesHint": "{{count}}/{{max}} dòng. Hiện ở khối “Vị trí” của trang chủ, cùng địa chỉ ở trên.",
     "placeName": "Địa điểm",
     "placeNote": "Ghi chú",
     "placeDistance": "Khoảng cách",
     "addRow": "Thêm dòng",
-    "removeRow": "Xóa dòng {{index}}",
-    "rowField": "{{label}}, dòng {{index}}",
-    "save": "Lưu nội dung trang chủ"
+    "removeRow": "Xoá dòng {{index}}",
+    "moveUp": "Đưa dòng {{index}} lên",
+    "moveDown": "Đưa dòng {{index}} xuống",
+    "rowField": "{{label}}, dòng {{index}}"
+  },
+  "destinations": {
+    "title": "Điểm đến",
+    "subtitle": "Ảnh và ghi công của các điểm đến",
+    "lede": "Điểm đến lấy từ địa chỉ của phòng (phần sau dấu phẩy cuối), nên được thêm và bớt cùng với phòng. Ảnh hiện trên thẻ “Điểm đến” ở trang chủ; đổi ảnh có hiệu lực ngay.",
+    "count": "{{count}} điểm đến",
+    "count_one": "{{count}} điểm đến",
+    "missingCount": "{{count}} ảnh thiếu ghi công",
+    "missingCount_one": "{{count}} ảnh thiếu ghi công",
+    "allCredited": "ảnh đều có ghi công",
+    "creditsPage": "Trang ghi công ảnh",
+    "rooms": "{{count}} phòng",
+    "rooms_one": "{{count}} phòng",
+    "credit": {
+      "by": "Ảnh: {{author}} · {{license}}",
+      "ownPhoto": "Ảnh riêng",
+      "missing": "Thiếu ghi công ảnh",
+      "noPhoto": "Chưa có ảnh riêng: dùng ảnh phòng"
+    },
+    "edit": "Đổi ảnh & ghi công",
+    "editName": "Đổi ảnh và ghi công của {{name}}",
+    "errorTitle": "Không tải được điểm đến",
+    "emptyTitle": "Chưa có điểm đến",
+    "emptyHelp": "Điểm đến gom các phòng theo thành phố để khách lọc trên trang Phòng. Thêm phòng có địa chỉ để điểm đến xuất hiện.",
+    "addRoom": "Thêm phòng",
+    "eyebrow": "Điểm đến",
+    "currentAlt": "Ảnh hiện tại của {{name}}",
+    "newPhotoAlt": "Ảnh mới cho {{name}}",
+    "newPhoto": "Ảnh mới:",
+    "removePhoto": "Gỡ ảnh",
+    "dropNew": "Bỏ ảnh mới chọn",
+    "willRemove": "Ảnh sẽ được gỡ khi lưu. Thẻ điểm đến sẽ dùng ảnh phòng.",
+    "undo": "Hoàn tác",
+    "noPhoto": "Chưa có ảnh riêng: thẻ dùng ảnh phòng đầu tiên hoặc hình vẽ.",
+    "drop": "Thả ảnh để thay thế",
+    "dropNow": "Thả ảnh vào đây",
+    "or": "hoặc",
+    "pick": "chọn từ máy",
+    "uploading": "Đang tải ảnh lên",
+    "creditHint": "Ảnh dùng giấy phép CC cần ghi đủ tác giả và giấy phép; khi có giấy phép, thông tin dưới đây hiển thị ở trang /credits. Ảnh của cơ sở: để trống giấy phép.",
+    "creditNew": "Ghi công của ảnh cũ không còn đúng với ảnh mới: kiểm tra lại các ô dưới đây trước khi lưu.",
+    "more": "Chi tiết khác (tiêu đề gốc, địa danh, chỉnh sửa)",
+    "placeholders": {
+      "author": "VD: Nguyễn Văn A",
+      "license": "VD: CC BY-SA 4.0",
+      "changes": "VD: cắt, thu nhỏ, chuyển sang WebP"
+    },
+    "fields": {
+      "author": "Tác giả",
+      "sourceUrl": "Liên kết nguồn",
+      "license": "Giấy phép",
+      "licenseUrl": "Liên kết giấy phép",
+      "title": "Tiêu đề gốc",
+      "place": "Địa danh trong ảnh",
+      "changes": "Đã chỉnh sửa gì"
+    },
+    "errors": {
+      "author": "Cần tên tác giả khi giấy phép yêu cầu ghi công",
+      "url": "Liên kết phải bắt đầu bằng http:// hoặc https://"
+    },
+    "cancel": "Huỷ",
+    "save": "Lưu ảnh & ghi công",
+    "creditFailed": "Không lưu được ghi công."
   }
 }

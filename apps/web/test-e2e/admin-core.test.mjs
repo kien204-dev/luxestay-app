@@ -633,7 +633,7 @@ describe("The admin area in the browser", () => {
     const { context, page, problems } = await openPage();
     try {
       await page.goto(`${stack.baseUrl}/admin/rooms`);
-      await page.getByRole("button", { name: /Thêm phòng/ }).first().click();
+      await page.getByTestId("room-add").click();
       const form = page.getByTestId("room-form");
       await form.waitFor();
       const types = (await api(page, "/rooms/types")).body.map((item) => item.type);

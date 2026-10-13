@@ -1,57 +1,131 @@
 {
   "title": "Coupons",
-  "subtitle": "Codes guests enter when booking. Turn one off to stop accepting it while keeping its history.",
   "add": "New coupon",
-  "empty": "No coupons yet.",
-  "actionFailed": "That did not work.",
-  "mobileLine": "{{value}} off · used {{usage}}",
-  "expiresOn": "Expires: {{date}}",
-  "status": {
-    "active": "Active",
-    "inactive": "Off"
+  "edit": "Edit",
+  "editCode": "Edit coupon {{code}}",
+  "actionFailed": "The action failed.",
+  "listLabel": "Coupon list",
+  "search": "Search coupons",
+  "searchPlaceholder": "Search coupon code",
+  "filterLabel": "Filter by state",
+  "head": {
+    "codes_one": "{{count}} code",
+    "codes_other": "{{count}} codes",
+    "uses_one": "{{count}} use",
+    "uses_other": "{{count}} uses",
+    "saved": "{{amount}} taken off bookings that stand",
+    "loading": "Loading…"
   },
-  "type": {
-    "percent": "Percentage",
-    "fixed": "Fixed amount"
+  "filter": {
+    "all": "All",
+    "running": "Running",
+    "scheduled": "Scheduled",
+    "expired": "Expired",
+    "usedUp": "Used up",
+    "off": "Off"
+  },
+  "state": {
+    "running": "Running",
+    "almostUsed": "Nearly used up",
+    "scheduled": "Scheduled",
+    "expired": "Expired",
+    "usedUp": "Used up",
+    "off": "Off"
   },
   "columns": {
     "code": "Code",
-    "type": "Type",
     "value": "Value",
-    "usage": "Used / limit",
-    "expires": "Expires",
-    "status": "Status",
+    "usage": "Uses",
+    "period": "Valid",
+    "state": "State",
+    "active": "On",
     "actions": "Actions"
   },
-  "actions": {
-    "activate": "Turn on",
-    "deactivate": "Turn off"
+  "usage": {
+    "of": "{{used}} / {{limit}} uses",
+    "open": "{{used}} / unlimited uses"
+  },
+  "period": {
+    "until": "Until {{date}}"
+  },
+  "toggle": {
+    "on": "Switch on {{code}}",
+    "off": "Switch off {{code}}"
+  },
+  "summary": {
+    "percent": "{{value}}% off",
+    "percentMax": "{{value}}% off, at most {{max}}",
+    "fixed": "{{value}} off",
+    "min": "bookings from {{amount}}"
+  },
+  "preview": {
+    "text": "Guests will see: {{code}} gives {{rule}}.",
+    "between": "from {{from}} until the end of {{to}}",
+    "until": "until the end of {{to}}",
+    "uses_one": "{{count}} use left",
+    "uses_other": "{{count}} uses left",
+    "incomplete": "Guests will see the coupon described here once it has a code and a value."
+  },
+  "states": {
+    "errorTitle": "Could not load the coupons",
+    "none": "No coupons yet",
+    "noneHelp": "Create the first one: a percentage or an amount, start and end dates, how many uses.",
+    "noneHere": "No coupons here",
+    "noneHereHelp": "Try another filter or clear the search.",
+    "clear": "Clear filters"
   },
   "form": {
+    "eyebrow": "Coupon",
     "addTitle": "New coupon",
-    "editTitle": "Edit coupon",
+    "editTitleCode": "Edit {{code}}",
     "code": "Code",
-    "codeHint": "3–50 characters: letters, digits, dashes or underscores.",
+    "codeHint": "3–50 characters: capital letters, digits, dashes or underscores. Guests type it at checkout.",
     "type": "Discount type",
-    "value": "Value ({{unit}})",
-    "maxDiscount": "Maximum discount (VND, optional)",
-    "minAmount": "Minimum booking (VND, optional)",
-    "expires": "Expires",
-    "usageLimit": "Usage limit (optional)",
-    "noLimit": "No limit",
-    "noMinimum": "None",
-    "create": "Create",
-    "saveFailed": "Could not save the coupon.",
-    "currency": "VND"
+    "types": {
+      "percent": "Percentage",
+      "percentHint": "A share of the booking",
+      "fixed": "Fixed amount",
+      "fixedHint": "Taken straight off"
+    },
+    "value": "Discount",
+    "max": "At most",
+    "min": "Minimum booking",
+    "optional": "(optional)",
+    "currency": "VND",
+    "starts": "Starts",
+    "startsHint": "Empty: usable straight away.",
+    "expires": "Ends",
+    "pastEnd": "That day has passed: the coupon ends at once.",
+    "limit": "Total uses",
+    "limitHint": "Empty: unlimited. A cancelled or expired booking gives its use back.",
+    "used_one": "Used {{count}} time.",
+    "used_other": "Used {{count}} times.",
+    "uses": "uses",
+    "cancel": "Cancel",
+    "create": "Create coupon",
+    "save": "Save",
+    "saveFailed": "The coupon could not be saved."
   },
-  "confirm": {
-    "title": "Turn coupon off",
-    "message": "Turn off \"{{code}}\"? Guests about to use it will no longer be able to."
+  "errors": {
+    "code": "3–50 characters: capital letters, digits, - or _ only.",
+    "value": "Enter a discount above 0.",
+    "percent": "A percentage cannot be above 100.",
+    "max": "The cap must be above 0.",
+    "min": "The minimum cannot be negative.",
+    "expires": "Choose the end date.",
+    "order": "The end date must be after the start date.",
+    "limit": "Uses must be a whole number from 1.",
+    "limitUsed": "It has been used {{count}} times; the limit cannot be lower."
+  },
+  "confirmDisable": {
+    "title": "Switch off {{code}}?",
+    "message": "Guests can no longer use this coupon. The coupon and its history are kept; switch it back on any time.",
+    "action": "Switch off"
   },
   "toast": {
-    "created": "Coupon created",
-    "updated": "Coupon updated",
-    "activated": "Coupon turned on",
-    "deactivated": "Coupon turned off"
+    "created": "Coupon {{code}} created",
+    "updated": "Coupon {{code}} updated",
+    "activated": "Coupon {{code}} switched on",
+    "deactivated": "Coupon {{code}} switched off"
   }
 }

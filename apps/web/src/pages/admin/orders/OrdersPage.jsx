@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import AxIcon from "../../../components/admin/AxIcon";
 import BookingBadge from "../../../components/admin/BookingBadge";
 import OrderCard from "../../../components/admin/OrderCard";
-import { Crumbs, EmptyState, Skel } from "../../../components/admin/ax";
+import { Crumbs, EmptyState, Pager, Skel } from "../../../components/admin/ax";
 import ConfirmModal from "../../../components/ConfirmModal";
 import { initials } from "../../../layout/admin/AccountMenu";
 import { useBookingNotifications } from "../../../context/BookingNotificationsContext";
@@ -110,44 +110,6 @@ function DatesChip({ from, to, onChange }) {
         </div>
       )}
     </div>
-  );
-}
-
-function Pager({ data, onPage }) {
-  const { t } = useTranslation("orders");
-  const { page, totalPages, total, limit } = data;
-  const first = total ? (page - 1) * limit + 1 : 0;
-  const last = Math.min(total, page * limit);
-  const pages = [];
-  for (let p = 1; p <= totalPages; p += 1) {
-    if (p === 1 || p === totalPages || Math.abs(p - page) <= 1) pages.push(p);
-    else if (pages.at(-1) !== "…") pages.push("…");
-  }
-  return (
-    <nav className="ax-pager" aria-label={t("pager.label")} data-testid="orders-pagination">
-      <span>
-        {t("pager.showing")} <b>{first}–{last}</b> {t("pager.of", { count: total })}
-      </span>
-      <ul className="ax-pages">
-        <li>
-          <button type="button" className="ax-page ax-page--nav" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t("pager.previous")}</button>
-        </li>
-        {pages.map((p, i) => (
-          <li key={`${p}-${i}`}>
-            {p === "…" ? (
-              <span className="ax-page ax-page--gap" aria-hidden="true">…</span>
-            ) : (
-              <button type="button" className="ax-page" aria-current={p === page ? "page" : undefined} aria-label={t("pager.page", { page: p })} onClick={() => onPage(p)}>
-                {p}
-              </button>
-            )}
-          </li>
-        ))}
-        <li>
-          <button type="button" className="ax-page ax-page--nav" disabled={page >= totalPages} onClick={() => onPage(page + 1)}>{t("pager.next")}</button>
-        </li>
-      </ul>
-    </nav>
   );
 }
 
@@ -465,7 +427,7 @@ export default function OrdersPage() {
         </div>
         {list.error && list.data && <p className="ax-alert" role="alert">{apiErrorText(list.error, "admin:loadFailed")}</p>}
         <div className={phone ? "ax-tablebody ax-tablebody--cards" : "ax-tablebody"}>{content}</div>
-        {list.data && orders.length > 0 && <Pager data={list.data} onPage={(page) => update({ page }, { keepPage: true })} />}
+        {list.data && orders.length > 0 && <Pager {...list.data} onPage={(page) => update({ page }, { keepPage: true })} ofText={t("pager.of", { count: list.data.total })} testId="orders-pagination" />}
       </section>
 
       <button type="button" className="g-btn g-btn--primary ax-fab" onClick={() => update({ new: "desk" }, { keepPage: true })}>

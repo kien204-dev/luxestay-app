@@ -53,3 +53,42 @@ export function Alert({ tone = "danger", title, children }) {
     </div>
   );
 }
+
+// Server-side pages: "Showing 1–20 of N …", then Previous, numbers with
+// gaps, Next. `ofText` is the "of N bookings" part, worded by the caller.
+export function Pager({ page, totalPages, total, limit, onPage, ofText, testId }) {
+  const { t } = useTranslation("admin");
+  const first = total ? (page - 1) * limit + 1 : 0;
+  const last = Math.min(total, page * limit);
+  const pages = [];
+  for (let p = 1; p <= totalPages; p += 1) {
+    if (p === 1 || p === totalPages || Math.abs(p - page) <= 1) pages.push(p);
+    else if (pages.at(-1) !== "…") pages.push("…");
+  }
+  return (
+    <nav className="ax-pager" aria-label={t("pager.label")} data-testid={testId}>
+      <span>
+        {t("pager.showing")} <b>{first}–{last}</b> {ofText}
+      </span>
+      <ul className="ax-pages">
+        <li>
+          <button type="button" className="ax-page ax-page--nav" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t("pager.previous")}</button>
+        </li>
+        {pages.map((p, i) => (
+          <li key={`${p}-${i}`}>
+            {p === "…" ? (
+              <span className="ax-page ax-page--gap" aria-hidden="true">…</span>
+            ) : (
+              <button type="button" className="ax-page" aria-current={p === page ? "page" : undefined} aria-label={t("pager.page", { page: p })} onClick={() => onPage(p)}>
+                {p}
+              </button>
+            )}
+          </li>
+        ))}
+        <li>
+          <button type="button" className="ax-page ax-page--nav" disabled={page >= totalPages} onClick={() => onPage(page + 1)}>{t("pager.next")}</button>
+        </li>
+      </ul>
+    </nav>
+  );
+}

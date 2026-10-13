@@ -58,9 +58,9 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 | `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá, tải PDF xác nhận | Đã đăng nhập |
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | Đăng nhập, đăng ký (email/mật khẩu, Google nếu bật), quên và đặt lại mật khẩu | Mọi người |
 | `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |
-| `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons`, `/admin/reviews` | Quản trị. Dashboard theo khoảng ngày; Orders có tìm kiếm, đặt phòng tại quầy, ghi nhận thu tiền tại quầy, xác nhận hoàn tiền và PDF xác nhận; lịch phòng theo tuần/tháng cho mọi phòng | Quản trị |
-| `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, ảnh nền và nội dung trang chủ, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
-| `/admin/destinations` | Ảnh và ghi công ảnh của từng điểm đến | Quản trị |
+| `/admin`, `/admin/rooms`, `/admin/rooms/:id`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons`, `/admin/reviews` | Quản trị. Dashboard theo khoảng ngày; Orders có tìm kiếm, đặt phòng tại quầy, ghi nhận thu tiền tại quầy, xác nhận hoàn tiền và PDF xác nhận; lịch phòng theo tuần/tháng cho mọi phòng; trang thêm/sửa phòng với ảnh kéo thả, sắp xếp, ảnh bìa; mã giảm giá có ngày bắt đầu; khoá người dùng kèm lý do | Quản trị |
+| `/admin/property` | Thông tin cơ sở lưu trú (tab Thông tin & thương hiệu, Chính sách, Trang chủ; xem trước trang chủ): tên, logo, ảnh nền và nội dung trang chủ, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
+| `/admin/destinations` | Điểm đến: đổi ảnh và ghi công ảnh (hiện ở `/credits`) | Quản trị |
 
 Mọi trang có tiếng Việt và tiếng Anh (nút VI/EN ở đầu trang khách và trang quản trị). Khách chưa đăng nhập bấm đặt phòng sẽ được đưa tới trang đăng nhập rồi quay lại đúng phòng và ngày đã chọn.
 
@@ -161,7 +161,7 @@ Tên, logo, ảnh nền, liên hệ và quy định: trang quản trị **Cơ s�
 
 - **Các ảnh này không thuộc giấy phép thương mại của LuxeStay** (xem mục 5 của [LICENSE](LICENSE)). Người mua được dùng chúng theo đúng giấy phép riêng của từng ảnh, không phải theo giấy phép của sản phẩm.
 - Ảnh CC BY / CC BY-SA bắt buộc ghi tác giả và giấy phép nơi ảnh hiển thị. Trang web làm việc đó: chú thích nhỏ trên thẻ điểm đến (đầy đủ hơn khi rê chuột) và trang `/credits`, có link ở chân trang. Đừng gỡ hai chỗ này khi còn dùng các ảnh đó.
-- `db:seed` gán ảnh theo tên tỉnh/thành trong `credits.json` (khớp với phần sau dấu phẩy cuối của địa chỉ phòng); điểm đến đã có ảnh thì giữ nguyên. Đổi ảnh hoặc sửa ghi công ở **Ảnh điểm đến** (`/admin/destinations`); ảnh tự chụp thì để trống phần giấy phép.
+- `db:seed` gán ảnh theo tên tỉnh/thành trong `credits.json` (khớp với phần sau dấu phẩy cuối của địa chỉ phòng); điểm đến đã có ảnh thì giữ nguyên. Đổi ảnh hoặc sửa ghi công ở **Điểm đến** (`/admin/destinations`); ảnh tự chụp thì để trống phần giấy phép.
 - Muốn bán sản phẩm không kèm ảnh của bên thứ ba: xoá các file `.webp` và `credits.json` trong `seed-assets/destinations/`; thẻ điểm đến sẽ dùng ảnh phòng hoặc hình vẽ.
 
 ## Cấu trúc thư mục
@@ -205,9 +205,9 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 |---|---|---|
 | Tài khoản | `POST /login`, `/register`, `/logout`, `/forgot-password`, `/reset-password`, `/google-login` | Công khai |
 | Hồ sơ | `GET/PUT /users/me`, `PUT /users/me/password`, `POST /users/me/avatar` | Đã đăng nhập |
-| Người dùng | `GET /users?page&limit&search&role&status`, `POST /users`, `GET/PUT/DELETE /users/:id`, `PATCH /users/:id/lock` | Quản trị |
+| Người dùng | `GET /users?page&limit&search&role&status`, `POST /users`, `GET/PUT/DELETE /users/:id`, `PATCH /users/:id/lock` (`locked`, `reason`, `note`) | Quản trị |
 | Phòng | `GET /rooms`, `/rooms/locations`, `/rooms/filters`, `/rooms/destinations`, `/rooms/:id`, `/rooms/:id/availability`, `/rooms/:id/reviews` | Công khai |
-| Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, ảnh phòng | Quản trị |
+| Phòng | `POST /rooms`, `PUT/DELETE /rooms/:id`, `GET /rooms/status-counts`, ảnh phòng (`POST/DELETE /rooms/:id/images…`, `PUT /rooms/:id/images/order`, `POST /rooms/:id/images/:imageId/cover`) | Quản trị |
 | Đặt phòng | `GET/POST /bookings`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel` | Chủ booking hoặc quản trị |
 | Đặt phòng | `GET /bookings/policy` | Công khai |
 | Đặt phòng | `GET /bookings/:id/receipt` (PDF xác nhận, `?lang=vi\|en`) | Chủ booking hoặc quản trị |
@@ -218,7 +218,7 @@ Tất cả nằm dưới `/api`. Phân quyền được khai báo ngay trong `ap
 | Mã giảm giá | `POST /coupons/validate` | Đã đăng nhập |
 | Mã giảm giá | `GET/POST /coupons`, `PUT /coupons/:id`, `PATCH /coupons/:id/active` | Quản trị |
 | Đánh giá | `POST /rooms/:id/reviews` | Khách đã ở xong |
-| Đánh giá | `GET /reviews`, `PATCH /reviews/:id/hide` | Quản trị |
+| Đánh giá | `GET /reviews?stars&hidden&q&page&limit`, `PATCH /reviews/:id/hide` | Quản trị |
 | Báo cáo | `GET /dashboard/stats`, `/dashboard/analytics`, `/dashboard/export` | Quản trị |
 | Cơ sở lưu trú | `GET /settings/public` | Công khai |
 | Cơ sở lưu trú | `GET/PUT /settings`, `POST/DELETE /settings/logo`, `POST/DELETE /settings/hero` | Quản trị |

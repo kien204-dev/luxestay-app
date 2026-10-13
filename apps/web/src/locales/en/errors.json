@@ -197,5 +197,14 @@
     "distance": "Distance"
   },
   "network": "Could not reach the server. Check your connection and try again.",
-  "unknown": "Something went wrong. Please try again."
+  "unknown": "Something went wrong. Please try again.",
+  "COUPON_NOT_STARTED": "This coupon is not valid yet.",
+  "COUPON_START_INVALID": "The start date is not valid.",
+  "COUPON_DATES_ORDER": "The end date must be after the start date.",
+  "ROOM_IMAGES_LIMIT": "A room can have at most {{max}} photos.",
+  "ROOM_IMAGE_ORDER_INVALID": "The photo order does not match the room’s photos.",
+  "ROOM_IMAGES_REORDERED": "Photo order saved.",
+  "ROOM_COVER_SET": "Cover photo set.",
+  "INVALID_LOCK_REASON": "That is not a valid reason to lock an account.",
+  "ADMIN_ONLY_FILTER": "Only an admin can use this filter."
 }

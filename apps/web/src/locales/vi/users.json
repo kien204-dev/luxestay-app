@@ -1,73 +1,112 @@
 {
   "title": "Người dùng",
-  "subtitle": "Tài khoản quản trị và khách. Khóa một tài khoản để chặn đăng nhập mà vẫn giữ lịch sử đặt phòng.",
   "add": "Thêm người dùng",
-  "searchPlaceholder": "Tìm theo tên, email hoặc số điện thoại",
-  "empty": "Không có người dùng nào phù hợp.",
-  "joined": "Tham gia {{date}}",
+  "you": "Bạn",
+  "listLabel": "Danh sách người dùng",
+  "search": "Tìm người dùng",
+  "searchPlaceholder": "Tên, email hoặc số điện thoại",
   "actionFailed": "Không thực hiện được thao tác.",
+  "head": {
+    "total_one": "{{count}} tài khoản",
+    "total_other": "{{count}} tài khoản",
+    "admins_one": "{{count}} quản trị",
+    "admins_other": "{{count}} quản trị",
+    "locked_one": "{{count}} đã khoá",
+    "locked_other": "{{count}} đã khoá",
+    "loading": "Đang tải…"
+  },
   "filters": {
-    "role": "Lọc theo vai trò",
-    "status": "Lọc theo trạng thái",
-    "allRoles": "Mọi vai trò",
-    "allStatuses": "Mọi trạng thái"
+    "label": "Lọc người dùng",
+    "all": "Tất cả",
+    "user": "Khách",
+    "admin": "Quản trị",
+    "locked": "Đã khoá"
   },
   "status": {
     "active": "Hoạt động",
-    "locked": "Đã khóa"
+    "locked": "Đã khoá"
   },
   "columns": {
     "person": "Người dùng",
     "role": "Vai trò",
-    "contact": "Liên hệ",
+    "bookings": "Số đơn",
+    "joined": "Tham gia",
     "status": "Trạng thái",
-    "joined": "Ngày tham gia",
     "actions": "Thao tác"
   },
-  "kpi": {
-    "total": "Tổng tài khoản",
-    "totalSub": "Không tính tài khoản đã xóa",
-    "admins": "Quản trị",
-    "adminsSub": "Quản lý hệ thống",
-    "guests": "Khách",
-    "guestsSub": "Tài khoản đặt phòng",
-    "locked": "Đã khóa",
-    "lockedSub": "Không đăng nhập được"
-  },
+  "joinedBookings_one": "Tham gia {{date}} · {{count}} đơn",
+  "joinedBookings_other": "Tham gia {{date}} · {{count}} đơn",
+  "of_one": "trong {{count}} tài khoản",
+  "of_other": "trong {{count}} tài khoản",
   "actions": {
     "edit": "Sửa",
-    "lock": "Khóa",
-    "unlock": "Mở khóa",
-    "delete": "Xóa",
-    "cannotLockSelf": "Bạn không thể khóa chính tài khoản đang đăng nhập",
-    "cannotDeleteSelf": "Bạn không thể xóa chính tài khoản đang đăng nhập"
+    "editName": "Sửa {{name}}",
+    "lock": "Khoá",
+    "lockName": "Khoá tài khoản {{name}}",
+    "unlock": "Mở khoá",
+    "delete": "Xoá tài khoản",
+    "cannotLockSelf": "Bạn không thể khoá chính tài khoản đang đăng nhập"
+  },
+  "lock": {
+    "title": "Khoá tài khoản {{name}}?",
+    "effect": "{{email}} sẽ bị đăng xuất khỏi mọi thiết bị và không đăng nhập hoặc đặt phòng mới được.",
+    "upcoming_one": "{{count}} đơn sắp tới vẫn được giữ.",
+    "upcoming_other": "{{count}} đơn sắp tới vẫn được giữ.",
+    "reason": "Lý do",
+    "chooseReason": "Chọn lý do",
+    "reasonRequired": "Chọn lý do khoá.",
+    "reasons": {
+      "fraud": "Nghi ngờ gian lận thanh toán",
+      "spam": "Đặt phòng rác / spam",
+      "abuse": "Vi phạm quy định cơ sở",
+      "request": "Theo yêu cầu của chủ tài khoản",
+      "other": "Lý do khác"
+    },
+    "note": "Ghi chú nội bộ",
+    "optional": "(không bắt buộc)",
+    "noteHint": "Chỉ quản trị viên thấy. {{count}} / {{max}} ký tự.",
+    "cancel": "Huỷ",
+    "action": "Khoá tài khoản"
   },
   "form": {
+    "eyebrow": "Người dùng",
     "addTitle": "Thêm người dùng",
-    "editTitle": "Sửa người dùng",
     "name": "Họ tên",
     "email": "Email",
     "password": "Mật khẩu tạm",
-    "passwordHint": "Ít nhất 8 ký tự, có cả chữ và số. Người dùng sẽ phải đổi mật khẩu khi đăng nhập lần đầu.",
+    "passwordHint": "Ít nhất 8 ký tự, có cả chữ và số. Người dùng phải đổi mật khẩu khi đăng nhập lần đầu.",
     "role": "Vai trò",
+    "roleHint": {
+      "user": "Đặt phòng trên trang khách",
+      "admin": "Vào khu quản trị, chỉ đăng nhập bằng mật khẩu"
+    },
     "ownRole": "Bạn không thể tự đổi vai trò của chính mình.",
-    "nameEmailRequired": "Vui lòng nhập họ tên và email.",
+    "nameRequired": "Nhập họ tên.",
+    "emailInvalid": "Email chưa đúng.",
     "passwordRule": "Mật khẩu tạm cần ít nhất 8 ký tự, có cả chữ và số.",
+    "cancel": "Huỷ",
+    "create": "Thêm người dùng",
+    "save": "Lưu",
     "saveFailed": "Không lưu được người dùng."
   },
+  "states": {
+    "errorTitle": "Không tải được người dùng",
+    "noMatch": "Không có người dùng khớp “{{term}}”",
+    "noneHere": "Không có người dùng nào ở đây",
+    "noMatchHelp": "Thử tên, email hoặc số điện thoại khác, hoặc bỏ bộ lọc.",
+    "clear": "Xoá bộ lọc"
+  },
   "confirm": {
-    "deleteTitle": "Xóa người dùng",
-    "deleteMessage": "Xóa \"{{name}}\"? Không thể hoàn tác. Tài khoản đã có đặt phòng thì chỉ khóa được, không xóa được.",
-    "lockTitle": "Khóa tài khoản",
-    "lockMessage": "Khóa \"{{name}}\"? Người dùng sẽ bị đăng xuất và không đăng nhập được nữa.",
-    "unlockTitle": "Mở khóa tài khoản",
-    "unlockMessage": "Mở khóa \"{{name}}\"?"
+    "deleteTitle": "Xoá {{name}}?",
+    "deleteMessage": "Xoá tài khoản \"{{name}}\"? Không thể hoàn tác. Tài khoản đã có đặt phòng thì chỉ khoá được, không xoá được.",
+    "unlockTitle": "Mở khoá {{name}}?",
+    "unlockMessage": "\"{{name}}\" đăng nhập lại được ngay. Lý do khoá trước đó được xoá."
   },
   "toast": {
     "created": "Đã thêm \"{{name}}\"",
     "updated": "Đã cập nhật \"{{name}}\"",
-    "deleted": "Đã xóa \"{{name}}\"",
-    "locked": "Đã khóa \"{{name}}\"",
-    "unlocked": "Đã mở khóa \"{{name}}\""
+    "deleted": "Đã xoá \"{{name}}\"",
+    "locked": "Đã khoá \"{{name}}\"",
+    "unlocked": "Đã mở khoá \"{{name}}\""
   }
 }

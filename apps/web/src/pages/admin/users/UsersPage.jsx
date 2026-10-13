@@ -1,181 +1,290 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, KpiCard, PageHeader, Pagination, RefreshButton } from "../../../components/admin/ui";
+import AxIcon from "../../../components/admin/AxIcon";
+import { Crumbs, EmptyState, Pager, Skel } from "../../../components/admin/ax";
 import ConfirmModal from "../../../components/ConfirmModal";
+import { Avatar } from "../../../layout/admin/AccountMenu";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { deleteUser, getUsers, setUserLock } from "../../../services/userService";
 import { apiErrorText } from "../../../utils/apiError";
-import Icon from "../../../utils/icon";
+import { dayMonth, formatNumber } from "../../../utils/adminFormat";
+import { localDateString } from "../../../utils/date";
 import { useAsyncData } from "../../../utils/useAsyncData";
-import UserFormModal from "./UserFormModal";
-import UsersTable from "./UsersTable";
+import { useDocumentTitle } from "../../../utils/useDocumentTitle";
+import { PHONE_QUERY, useMedia } from "../../../utils/useMedia";
+import { LockDialog, UserDrawer } from "./UserDialogs";
 
 const PAGE_SIZE = 15;
+const FILTERS = [
+  { key: "all", params: {} },
+  { key: "user", params: { role: "user" }, count: (s) => s.users },
+  { key: "admin", params: { role: "admin" }, count: (s) => s.admins },
+  { key: "locked", params: { status: "locked" }, count: (s) => s.locked },
+];
 
-// Admin: every account, loaded a page at a time from the server, with
-// search and filters applied there too.
+// Admin: every account, a page at a time from the server, searched by name,
+// email or phone. Locking signs the account out everywhere (the API bumps
+// its token version) and asks why; an admin cannot lock, demote or delete
+// their own account, so there is always an admin left who can sign in.
 export default function UsersPage() {
-  const { t } = useTranslation("users");
-  const { user: currentUser } = useAuth();
+  const { t, i18n } = useTranslation("users");
+  const lang = i18n.language;
+  const { user: me } = useAuth();
   const toast = useToast();
-
-  const [query, setQuery] = useState({ page: 1, search: "", role: "", status: "" });
-  const [searchInput, setSearchInput] = useState("");
+  const phone = useMedia(PHONE_QUERY);
+  const [filter, setFilter] = useState(FILTERS[0]);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [text, setText] = useState("");
+  const [version, setVersion] = useState(0);
   const [editing, setEditing] = useState(null); // null | "new" | user
-  const [pending, setPending] = useState(null); // { type: "delete" | "lock", user }
-  const [busyId, setBusyId] = useState(null);
-  const [actionError, setActionError] = useState("");
+  const [locking, setLocking] = useState(null);
+  const [pending, setPending] = useState(null); // { type: unlock | delete, user }
+  const [busy, setBusy] = useState(false);
+  useDocumentTitle(t("title"));
 
-  const params = { page: query.page, limit: PAGE_SIZE, ...(query.search && { search: query.search }), ...(query.role && { role: query.role }), ...(query.status && { status: query.status }) };
-  const { data, loading, error, reload } = useAsyncData(`users:${JSON.stringify(params)}`, () => getUsers(params));
+  useEffect(() => {
+    if (text.trim() === search) return undefined;
+    const timer = setTimeout(() => {
+      setSearch(text.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [text, search]);
+
+  const params = { page, limit: PAGE_SIZE, ...filter.params, ...(search && { search }) };
+  const { data, error, loading, reload } = useAsyncData(`users:${JSON.stringify(params)}:${version}`, () => getUsers(params));
   const users = data?.data || [];
   const summary = data?.summary;
-  const update = (changes) => setQuery((current) => ({ ...current, page: 1, ...changes }));
 
-  const afterChange = (message) => {
-    toast.success(message);
-    reload();
-  };
-
-  const confirmPending = async () => {
-    const { type, user } = pending;
-    setBusyId(user.id);
-    setActionError("");
+  const run = async (work, message) => {
+    setBusy(true);
     try {
-      if (type === "delete") {
-        await deleteUser(user.id);
-        afterChange(t("toast.deleted", { name: user.name }));
-      } else {
-        await setUserLock(user.id, !user.is_locked);
-        afterChange(user.is_locked ? t("toast.unlocked", { name: user.name }) : t("toast.locked", { name: user.name }));
-      }
-      setPending(null);
+      await work();
+      toast.success(message);
+      setVersion((v) => v + 1);
+      return true;
     } catch (err) {
-      const message = apiErrorText(err, "users:actionFailed");
-      setActionError(message);
-      toast.error(message);
-      setPending(null);
+      toast.error(apiErrorText(err, "users:actionFailed"));
+      return false;
     } finally {
-      setBusyId(null);
+      setBusy(false);
     }
   };
 
-  const kpis = [
-    { label: t("kpi.total"), value: summary?.total, icon: Icon.Users, sub: t("kpi.totalSub") },
-    { label: t("kpi.admins"), value: summary?.admins, icon: Icon.Shield, tone: "danger", sub: t("kpi.adminsSub") },
-    { label: t("kpi.guests"), value: summary?.users, icon: Icon.User, tone: "info", sub: t("kpi.guestsSub") },
-    { label: t("kpi.locked"), value: summary?.locked, icon: Icon.Lock, tone: "warning", sub: t("kpi.lockedSub") },
-  ];
+  const lock = async (choice) => {
+    const user = locking;
+    if (await run(() => setUserLock(user.id, true, choice), t("toast.locked", { name: user.name }))) setLocking(null);
+  };
+  const confirmPending = async () => {
+    const { type, user } = pending;
+    const ok =
+      type === "unlock"
+        ? await run(() => setUserLock(user.id, false), t("toast.unlocked", { name: user.name }))
+        : await run(() => deleteUser(user.id), t("toast.deleted", { name: user.name }));
+    if (ok || type === "delete") setPending(null);
+    if (ok && type === "delete") setEditing(null);
+  };
 
-  return (
-    <div data-testid="users-page">
-      <PageHeader
-        title={t("title")}
-        subtitle={t("subtitle")}
-        actions={
-          <>
-            <RefreshButton onClick={reload} loading={loading} />
-            <button type="button" className="adm-btn adm-btn--primary" onClick={() => setEditing("new")}>
-              <Icon.UserPlus />
-              {t("add")}
-            </button>
-          </>
-        }
-      />
+  const status = (user) =>
+    user.is_locked ? (
+      <span className="ax-userstate">
+        <span className="ax-badge ax-badge--danger">{t("status.locked")}</span>
+        {user.lock_reason && <span className="ax-sub">{t(`lock.reasons.${user.lock_reason}`)}</span>}
+      </span>
+    ) : (
+      <span className="ax-badge ax-badge--success">{t("status.active")}</span>
+    );
+  const actions = (user) => {
+    const self = user.id === me?.id;
+    return (
+      <span className="ax-rowactions">
+        {self ? (
+          <span className="ax-sub" title={t("actions.cannotLockSelf")}>{t("you")}</span>
+        ) : user.is_locked ? (
+          <button type="button" className="g-btn g-btn--outline g-btn--small ax-btn-sm" onClick={() => setPending({ type: "unlock", user })} data-testid="user-unlock">
+            {t("actions.unlock")}
+          </button>
+        ) : (
+          <button type="button" className="g-btn g-btn--small ax-btn-sm ax-btn-ghost-danger" onClick={() => setLocking(user)} aria-label={t("actions.lockName", { name: user.name })} data-testid="user-lock">
+            {t("actions.lock")}
+          </button>
+        )}
+        <button type="button" className="g-btn g-btn--small ax-btn-sm ax-btn-ghost" onClick={() => setEditing(user)} aria-label={t("actions.editName", { name: user.name })}>
+          {t("actions.edit")}
+        </button>
+      </span>
+    );
+  };
+  const joined = (user) => (user.created_at ? dayMonth(localDateString(new Date(user.created_at)), lang, true) : "—");
+  const roleBadge = (user) => <span className={`ax-badge ax-badge--plain${user.role === "admin" ? " ax-badge--accent" : ""}`}>{t(`admin:roles.${user.role}`)}</span>;
 
-      <Alert>{actionError || (error ? apiErrorText(error, "admin:loadFailed") : "")}</Alert>
-
-      <div className="adm-kpis">
-        {kpis.map((kpi) => (
-          <KpiCard key={kpi.label} {...kpi} value={(kpi.value ?? 0).toLocaleString()} loading={!summary} />
+  let content;
+  if (error && !data) {
+    content = (
+      <EmptyState error icon="alert" title={t("states.errorTitle")} actions={<button type="button" className="g-btn g-btn--primary" onClick={reload}>{t("admin:retry")}</button>} testId="users-error">
+        {apiErrorText(error, "admin:loadFailed")}
+      </EmptyState>
+    );
+  } else if (!data) {
+    content = (
+      <div className="ax-skelrows" aria-busy="true" data-testid="users-loading">
+        {Array.from({ length: 6 }, (_, i) => (
+          <div key={i} className="ax-skelrow">
+            <Skel width={32} height={32} style={{ borderRadius: "50%" }} />
+            <Skel variant="text" width={220} />
+            <Skel width={60} height={22} />
+            <Skel variant="text" width={40} />
+            <Skel variant="text" width={100} />
+            <Skel width={90} height={24} style={{ marginLeft: "auto" }} />
+          </div>
         ))}
       </div>
-
-      <div className="adm-panel" style={{ overflow: "hidden" }}>
-        <div className="adm-toolbar">
-          <form
-            className="adm-search"
-            role="search"
-            onSubmit={(event) => {
-              event.preventDefault();
-              update({ search: searchInput.trim() });
-            }}
-          >
-            <span><Icon.Search /></span>
-            <input
-              className="adm-input"
-              type="search"
-              value={searchInput}
-              onChange={(event) => {
-                setSearchInput(event.target.value);
-                if (!event.target.value) update({ search: "" });
-              }}
-              placeholder={t("searchPlaceholder")}
-              aria-label={t("searchPlaceholder")}
-            />
-          </form>
-          <div className="adm-filters">
-            <select className="adm-select adm-select--inline" value={query.role} onChange={(e) => update({ role: e.target.value })} aria-label={t("filters.role")}>
-              <option value="">{t("filters.allRoles")}</option>
-              <option value="admin">{t("admin:roles.admin")}</option>
-              <option value="user">{t("admin:roles.user")}</option>
-            </select>
-            <select className="adm-select adm-select--inline" value={query.status} onChange={(e) => update({ status: e.target.value })} aria-label={t("filters.status")}>
-              <option value="">{t("filters.allStatuses")}</option>
-              <option value="active">{t("status.active")}</option>
-              <option value="locked">{t("status.locked")}</option>
-            </select>
+    );
+  } else if (users.length === 0) {
+    const filtered = Boolean(search) || filter.key !== "all";
+    content = (
+      <EmptyState
+        icon="users"
+        title={search ? t("states.noMatch", { term: search }) : t("states.noneHere")}
+        actions={filtered ? <button type="button" className="g-btn g-btn--outline" onClick={() => { setText(""); setSearch(""); setFilter(FILTERS[0]); setPage(1); }}>{t("states.clear")}</button> : null}
+        testId="users-empty"
+      >
+        {t("states.noMatchHelp")}
+      </EmptyState>
+    );
+  } else if (phone) {
+    content = (
+      <div className="ax-ocards" data-testid="users-cards">
+        {users.map((user) => (
+          <div key={user.id} className="ax-ocard ax-ccard">
+            <span className="ax-person">
+              <Avatar user={user} small />
+              <span className="ax-cellmain">
+                <b>{user.name}</b>
+                <span className="ax-sub">{user.email}</span>
+              </span>
+            </span>
+            <span className="ax-ocard__r1">
+              {roleBadge(user)}
+              {status(user)}
+            </span>
+            <span className="ax-ocard__meta">{t("joinedBookings", { date: joined(user), count: user.booking_count || 0 })}</span>
+            <span className="ax-ocard__r3">{actions(user)}</span>
           </div>
+        ))}
+      </div>
+    );
+  } else {
+    content = (
+      <table className="ax-table" data-testid="users-table">
+        <thead>
+          <tr>
+            <th scope="col">{t("columns.person")}</th>
+            <th scope="col">{t("columns.role")}</th>
+            <th scope="col" className="is-num">{t("columns.bookings")}</th>
+            <th scope="col">{t("columns.joined")}</th>
+            <th scope="col">{t("columns.status")}</th>
+            <th scope="col"><span className="sr-only">{t("columns.actions")}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id} data-testid="user-row">
+              <td>
+                <div className="ax-person">
+                  <Avatar user={user} small />
+                  <div className="ax-cellmain">
+                    <b>{user.name}</b>
+                    <div className="ax-sub">{[user.email, user.phone].filter(Boolean).join(" · ")}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{roleBadge(user)}</td>
+              <td className="is-num">{user.role === "admin" && !user.booking_count ? "—" : formatNumber(user.booking_count || 0, lang)}</td>
+              <td>{joined(user)}</td>
+              <td>{status(user)}</td>
+              <td className="is-right">{actions(user)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  return (
+    <div className="ax-screen" data-testid="users-page">
+      <div className="ax-head">
+        <div>
+          <Crumbs current={t("title")} />
+          <h1>{t("title")}</h1>
+          <p>
+            {summary
+              ? [t("head.total", { count: summary.total }), t("head.admins", { count: summary.admins }), t("head.locked", { count: summary.locked })].join(" · ")
+              : t("head.loading")}
+          </p>
         </div>
-
-        <UsersTable
-          users={users}
-          loading={loading && !data}
-          currentUserId={currentUser?.id}
-          busyId={busyId}
-          onEdit={(user) => setEditing(user)}
-          onLock={(user) => setPending({ type: "lock", user })}
-          onDelete={(user) => setPending({ type: "delete", user })}
-        />
-
-        {data && (
-          <Pagination
-            page={data.page}
-            totalPages={data.totalPages}
-            total={data.total}
-            pageSize={PAGE_SIZE}
-            onChange={(page) => setQuery((current) => ({ ...current, page }))}
-            testId="users-pagination"
-          />
-        )}
+        <div className="ax-actions">
+          <button type="button" className="g-btn g-btn--primary" onClick={() => setEditing("new")} data-testid="user-add">
+            <AxIcon name="plus" small />
+            {t("add")}
+          </button>
+        </div>
       </div>
 
+      <section className="ax-tablewrap" aria-label={t("listLabel")} aria-busy={loading}>
+        <div className="ax-tablebar">
+          <div className="fx-control ax-tsearch">
+            <AxIcon name="search" />
+            <input type="search" aria-label={t("search")} placeholder={t("searchPlaceholder")} value={text} onChange={(e) => setText(e.target.value)} />
+          </div>
+          <div className="ax-chipset" role="group" aria-label={t("filters.label")}>
+            {FILTERS.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                className="ax-chip"
+                aria-pressed={filter.key === item.key}
+                onClick={() => {
+                  setFilter(item);
+                  setPage(1);
+                }}
+                data-testid={`user-filter-${item.key}`}
+              >
+                {t(`filters.${item.key}`)}
+                {summary && ` · ${item.count ? item.count(summary) : summary.total}`}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={phone ? "ax-tablebody ax-tablebody--cards" : "ax-tablebody"}>{content}</div>
+        {data && users.length > 0 && (
+          <Pager page={data.page} totalPages={data.totalPages} total={data.total} limit={data.limit} onPage={setPage} ofText={t("of", { count: data.total })} testId="users-pagination" />
+        )}
+      </section>
+
       {editing && (
-        <UserFormModal
+        <UserDrawer
           user={editing === "new" ? null : editing}
-          isSelf={editing !== "new" && editing.id === currentUser?.id}
+          isSelf={editing !== "new" && editing.id === me?.id}
           onClose={() => setEditing(null)}
+          onDelete={(user) => setPending({ type: "delete", user })}
           onSaved={(saved, created) => {
             setEditing(null);
-            afterChange(created ? t("toast.created", { name: saved.name }) : t("toast.updated", { name: saved.name }));
+            toast.success(created ? t("toast.created", { name: saved.name }) : t("toast.updated", { name: saved.name }));
+            setVersion((v) => v + 1);
           }}
         />
       )}
-
+      {locking && <LockDialog user={locking} busy={busy} onConfirm={lock} onClose={() => setLocking(null)} />}
       <ConfirmModal
         open={Boolean(pending)}
-        title={pending?.type === "delete" ? t("confirm.deleteTitle") : pending?.user.is_locked ? t("confirm.unlockTitle") : t("confirm.lockTitle")}
-        message={
-          pending?.type === "delete"
-            ? t("confirm.deleteMessage", { name: pending.user.name })
-            : pending?.user.is_locked
-              ? t("confirm.unlockMessage", { name: pending?.user.name })
-              : t("confirm.lockMessage", { name: pending?.user.name })
-        }
-        confirmLabel={pending?.type === "delete" ? t("actions.delete") : pending?.user.is_locked ? t("actions.unlock") : t("actions.lock")}
-        tone={pending?.type === "delete" ? "danger" : "warning"}
-        loading={Boolean(pending) && busyId === pending.user.id}
+        title={pending ? t(`confirm.${pending.type}Title`, { name: pending.user.name }) : ""}
+        message={pending ? t(`confirm.${pending.type}Message`, { name: pending.user.name }) : ""}
+        confirmLabel={pending ? t(`actions.${pending.type}`) : ""}
+        tone={pending?.type === "delete" ? "danger" : "default"}
+        loading={busy}
         onConfirm={confirmPending}
         onCancel={() => setPending(null)}
       />

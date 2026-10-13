@@ -1,57 +1,131 @@
 {
   "title": "Mã giảm giá",
-  "subtitle": "Mã khách nhập khi đặt phòng. Tắt một mã để ngừng nhận nó mà vẫn giữ lịch sử.",
   "add": "Tạo mã mới",
-  "empty": "Chưa có mã giảm giá nào.",
+  "edit": "Sửa",
+  "editCode": "Sửa mã {{code}}",
   "actionFailed": "Thao tác không thành công.",
-  "mobileLine": "Giảm {{value}} · đã dùng {{usage}}",
-  "expiresOn": "Hết hạn: {{date}}",
-  "status": {
-    "active": "Đang bật",
-    "inactive": "Đã tắt"
+  "listLabel": "Danh sách mã giảm giá",
+  "search": "Tìm mã giảm giá",
+  "searchPlaceholder": "Tìm mã giảm giá",
+  "filterLabel": "Lọc theo trạng thái",
+  "head": {
+    "codes_one": "{{count}} mã",
+    "codes_other": "{{count}} mã",
+    "uses_one": "{{count}} lượt dùng",
+    "uses_other": "{{count}} lượt dùng",
+    "saved": "đã giảm {{amount}} cho các đơn còn hiệu lực",
+    "loading": "Đang tải…"
   },
-  "type": {
-    "percent": "Phần trăm",
-    "fixed": "Số tiền cố định"
+  "filter": {
+    "all": "Tất cả",
+    "running": "Đang chạy",
+    "scheduled": "Đã lên lịch",
+    "expired": "Hết hạn",
+    "usedUp": "Hết lượt",
+    "off": "Đã tắt"
+  },
+  "state": {
+    "running": "Đang chạy",
+    "almostUsed": "Sắp hết lượt",
+    "scheduled": "Đã lên lịch",
+    "expired": "Hết hạn",
+    "usedUp": "Hết lượt",
+    "off": "Đã tắt"
   },
   "columns": {
     "code": "Mã",
-    "type": "Loại giảm",
     "value": "Giá trị",
-    "usage": "Đã dùng / giới hạn",
-    "expires": "Hạn dùng",
-    "status": "Trạng thái",
+    "usage": "Lượt dùng",
+    "period": "Hiệu lực",
+    "state": "Trạng thái",
+    "active": "Bật",
     "actions": "Thao tác"
   },
-  "actions": {
-    "activate": "Bật",
-    "deactivate": "Tắt"
+  "usage": {
+    "of": "{{used}} / {{limit}} lượt",
+    "open": "{{used}} / không giới hạn lượt"
+  },
+  "period": {
+    "until": "Đến hết {{date}}"
+  },
+  "toggle": {
+    "on": "Bật mã {{code}}",
+    "off": "Tắt mã {{code}}"
+  },
+  "summary": {
+    "percent": "Giảm {{value}}%",
+    "percentMax": "Giảm {{value}}%, tối đa {{max}}",
+    "fixed": "Giảm {{value}}",
+    "min": "đơn từ {{amount}}"
+  },
+  "preview": {
+    "text": "Khách sẽ thấy: nhập {{code}} được {{rule}}.",
+    "between": "từ {{from}} đến hết {{to}}",
+    "until": "đến hết {{to}}",
+    "uses_one": "còn {{count}} lượt",
+    "uses_other": "còn {{count}} lượt",
+    "incomplete": "Khách sẽ thấy câu mô tả mã khi bạn nhập mã và mức giảm."
+  },
+  "states": {
+    "errorTitle": "Không tải được mã giảm giá",
+    "none": "Chưa có mã giảm giá nào",
+    "noneHelp": "Tạo mã đầu tiên: phần trăm hoặc số tiền, ngày bắt đầu và hết hạn, số lượt dùng.",
+    "noneHere": "Không có mã nào ở đây",
+    "noneHereHelp": "Thử bộ lọc khác hoặc xoá ô tìm.",
+    "clear": "Xoá bộ lọc"
   },
   "form": {
+    "eyebrow": "Mã giảm giá",
     "addTitle": "Tạo mã giảm giá",
-    "editTitle": "Sửa mã giảm giá",
+    "editTitleCode": "Sửa {{code}}",
     "code": "Mã",
-    "codeHint": "3–50 ký tự: chữ, số, gạch ngang hoặc gạch dưới.",
-    "type": "Loại giảm",
-    "value": "Giá trị ({{unit}})",
-    "maxDiscount": "Giảm tối đa (đ, không bắt buộc)",
-    "minAmount": "Đơn tối thiểu (đ, không bắt buộc)",
-    "expires": "Hạn dùng",
-    "usageLimit": "Giới hạn lượt dùng (không bắt buộc)",
-    "noLimit": "Không giới hạn",
-    "noMinimum": "Không yêu cầu",
+    "codeHint": "3–50 ký tự: chữ in hoa, số, gạch ngang hoặc gạch dưới. Khách nhập mã này khi thanh toán.",
+    "type": "Loại giảm giá",
+    "types": {
+      "percent": "Phần trăm",
+      "percentHint": "Giảm theo % tổng đơn",
+      "fixed": "Số tiền cố định",
+      "fixedHint": "Trừ thẳng vào đơn"
+    },
+    "value": "Mức giảm",
+    "max": "Giảm tối đa",
+    "min": "Đơn tối thiểu",
+    "optional": "(không bắt buộc)",
+    "currency": "đ",
+    "starts": "Bắt đầu",
+    "startsHint": "Để trống: dùng được ngay.",
+    "expires": "Hết hạn",
+    "pastEnd": "Ngày này đã qua: mã sẽ hết hạn ngay.",
+    "limit": "Giới hạn tổng lượt",
+    "limitHint": "Để trống: không giới hạn. Đơn bị huỷ hoặc hết hạn giữ chỗ sẽ trả lại lượt.",
+    "used_one": "Đã dùng {{count}} lượt.",
+    "used_other": "Đã dùng {{count}} lượt.",
+    "uses": "lượt",
+    "cancel": "Huỷ",
     "create": "Tạo mã",
-    "saveFailed": "Không lưu được mã giảm giá.",
-    "currency": "đ"
+    "save": "Lưu",
+    "saveFailed": "Không lưu được mã giảm giá."
   },
-  "confirm": {
-    "title": "Tắt mã giảm giá",
-    "message": "Tắt mã \"{{code}}\"? Khách đang định dùng mã này sẽ không áp dụng được nữa."
+  "errors": {
+    "code": "Mã dài 3–50 ký tự, chỉ gồm chữ in hoa, số, - hoặc _.",
+    "value": "Nhập mức giảm lớn hơn 0.",
+    "percent": "Giảm theo phần trăm không quá 100.",
+    "max": "Mức giảm tối đa phải lớn hơn 0.",
+    "min": "Đơn tối thiểu không được âm.",
+    "expires": "Chọn ngày hết hạn.",
+    "order": "Ngày hết hạn phải sau ngày bắt đầu.",
+    "limit": "Giới hạn lượt là số nguyên từ 1.",
+    "limitUsed": "Mã đã dùng {{count}} lượt; giới hạn không được nhỏ hơn."
+  },
+  "confirmDisable": {
+    "title": "Tắt mã {{code}}?",
+    "message": "Khách sẽ không dùng được mã này nữa. Mã và lịch sử dùng vẫn được giữ; bật lại bất cứ lúc nào.",
+    "action": "Tắt mã"
   },
   "toast": {
-    "created": "Đã tạo mã giảm giá",
-    "updated": "Đã cập nhật mã giảm giá",
-    "activated": "Đã bật mã giảm giá",
-    "deactivated": "Đã tắt mã giảm giá"
+    "created": "Đã tạo mã {{code}}",
+    "updated": "Đã cập nhật mã {{code}}",
+    "activated": "Đã bật mã {{code}}",
+    "deactivated": "Đã tắt mã {{code}}"
   }
 }

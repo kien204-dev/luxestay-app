@@ -138,5 +138,23 @@
       "refund_pending": "Chờ hoàn tiền",
       "refunded": "Đã hoàn tiền"
     }
+  },
+  "pager": {
+    "label": "Phân trang",
+    "showing": "Hiển thị",
+    "previous": "Trước",
+    "next": "Sau",
+    "page": "Trang {{page}}"
+  },
+  "stepper": {
+    "less": "Bớt {{label}}",
+    "more": "Thêm {{label}}"
+  },
+  "savebar": {
+    "changes_one": "{{count}} thay đổi chưa lưu",
+    "changes_other": "{{count}} thay đổi chưa lưu",
+    "errors_one": "{{count}} lỗi cần sửa",
+    "errors_other": "{{count}} lỗi cần sửa",
+    "clean": "Mọi thay đổi đã được lưu"
   }
 }

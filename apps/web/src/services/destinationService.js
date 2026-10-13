@@ -14,12 +14,17 @@ export const getAdminDestinations = async () => {
 
 const path = (name) => `/destinations/${encodeURIComponent(name)}`;
 
-export const uploadDestinationImage = async (name, file) => {
+// A new photo, with the credit for it (the old photo's credit is cleared).
+// onProgress(0..1) follows the upload.
+export const uploadDestinationImage = async (name, file, credit = {}, onProgress) => {
   const formData = new FormData();
+  for (const [key, value] of Object.entries(credit)) formData.append(key, value ?? "");
   formData.append("image", file);
 
   const response = await api.post(`${path(name)}/image`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
+    timeout: 120000,
+    onUploadProgress: onProgress ? (event) => event.total && onProgress(event.loaded / event.total) : undefined,
   });
   return response.data;
 };

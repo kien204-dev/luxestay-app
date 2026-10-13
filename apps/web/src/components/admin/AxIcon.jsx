@@ -18,6 +18,7 @@ const PATHS = {
   plus: <path d="M12 5v14M5 12h14" />,
   bell: <><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></>,
   chevronDown: <path d="M6 9l6 6 6-6" />,
+  chevronUp: <path d="M6 15l6-6 6 6" />,
   chevronLeft: <path d="M15 6l-6 6 6 6" />,
   chevronRight: <path d="M9 6l6 6-6 6" />,
   user: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c1.2-3.6 3.9-5.5 7-5.5s5.8 1.9 7 5.5" /></>,
@@ -48,6 +49,12 @@ const PATHS = {
   inbox: <><path d="M4 13.5l2.5-8h11l2.5 8v6H4z" /><path d="M4 13.5h5l1 2h4l1-2h5" /></>,
   chart: <path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6" />,
   filter: <path d="M4 6h16M7 12h10M10 18h4" />,
+  star: <path d="M12 4l2.4 5 5.4.6-4 3.7 1.1 5.3L12 16l-4.9 2.6 1.1-5.3-4-3.7 5.4-.6z" />,
+  image: <><rect x="3.5" y="5" width="17" height="14" rx="1.5" /><circle cx="9" cy="10" r="1.6" /><path d="M20.5 16l-5-5-8 8" /></>,
+  upload: <path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19.5h14" />,
+  minus: <path d="M5 12h14" />,
+  eye: <><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></>,
+  eyeOff: <><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><path d="M4 4l16 16" /></>,
 };
 
 export default function AxIcon({ name, small = false, className = "" }) {
