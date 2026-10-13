@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — thanh bên</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<aside class="lx as {{railClass}}" data-theme="{{theme}}" aria-label="Điều hướng quản trị" style="height: 100%; min-height: 828px; font-family: var(--font-sans);">
+  <div class="as__brand">
+    <span class="as__mark" aria-hidden="true">L</span>
+    <div>
+      <a class="as__logo" href="#">LuxeStay</a>
+      <div class="as__tag">Quản trị</div>
+    </div>
+  </div>
+  <button class="as__prop" aria-label="Đổi cơ sở lưu trú">
+    <div><b>LuxeStay Đà Nẵng</b><span>Resort &amp; Spa · 68 phòng</span></div>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+  </button>
+  <nav class="as__nav">
+    <div class="as__group">
+      <div class="as__gt">Tổng quan</div>
+      <ul>
+        <li><a class="as__link" href="#" aria-current="{{cur.dashboard}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="9" rx="1"></rect><rect x="13" y="4" width="7" height="5" rx="1"></rect><rect x="13" y="11" width="7" height="9" rx="1"></rect><rect x="4" y="15" width="7" height="5" rx="1"></rect></svg><span class="as__label">Dashboard</span></a></li>
+        <li><a class="as__link" href="#" aria-current="{{cur.calendar}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="1.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg><span class="as__label">Lịch phòng</span></a></li>
+      </ul>
+    </div>
+    <div class="as__group">
+      <div class="as__gt">Kinh doanh</div>
+      <ul>
+        <li><a class="as__link" href="#" aria-current="{{cur.bookings}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="1.5"></rect><path d="M9 4.5V3h6v1.5M8.5 10h7M8.5 14h7M8.5 18h4"></path></svg><span class="as__label">Đơn đặt phòng</span><span class="as__count">5</span><span class="as__dot"></span></a></li>
+        <li><a class="as__link" href="#" aria-current="{{cur.rooms}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18V7M3 13h18v5M21 13v-1.5A2.5 2.5 0 0 0 18.5 9H11v4"></path><circle cx="7" cy="10.5" r="1.5"></circle></svg><span class="as__label">Phòng</span></a></li>
+        <li><a class="as__link" href="#" aria-current="{{cur.coupons}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.5V4.5h8l9 9-8 8z"></path><circle cx="8" cy="9" r="1.5"></circle></svg><span class="as__label">Mã giảm giá</span></a></li>
+        <li><a class="as__link" href="#" aria-current="{{cur.reviews}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8.5 9.5h7M8.5 12.5h4"></path></svg><span class="as__label">Đánh giá</span></a></li>
+      </ul>
+    </div>
+    <div class="as__group">
+      <div class="as__gt">Khách hàng</div>
+      <ul>
+        <li><a class="as__link" href="#" aria-current="{{cur.users}}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"></circle><path d="M3.5 19c.9-3 3-4.6 5.5-4.6s4.6 1.6 5.5 4.6"></path><path d="M15.5 6a3 3 0 0 1 0 5.6M17 14.6c1.8.5 3 1.9 3.6 4.4"></path></svg><span class="as__label">Người dùng</span></a></li>
+      </ul>
+    </div>
+    <div class="as__group">
+      <div class="as__gt">Cấu hình</div>
+      <ul>
+        <li><a class="as__link" href="#" aria-current="{{cur.property}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V6l8-3 8 3v14M3 20h18M10 20v-4h4v4M8 9h1M15 9h1M8 13h1M15 13h1"></path></svg><span class="as__label">Cơ sở lưu trú</span></a></li>
+        <li><a class="as__link" href="#" aria-current="{{cur.destinations}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle></svg><span class="as__label">Điểm đến</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="as__foot">
+    <a class="as__link" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"></path></svg><span class="as__label">Xem trang khách</span></a>
+    <button class="as__collapse" aria-label="{{collapseLabel}}" aria-expanded="{{expanded}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1.5"></rect><path d="M9 4v16M16 9l-3 3 3 3"></path></svg><span class="as__label">Thu gọn</span></button>
+  </div>
+</aside>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"collapsed":{"editor":"boolean","default":false},"active":{"editor":"enum","options":["dashboard","calendar","bookings","rooms","coupons","reviews","users","property","destinations"],"default":"dashboard"},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":264,"height":828}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'dashboard';
+    const keys = ['dashboard','calendar','bookings','rooms','coupons','reviews','users','property','destinations'];
+    const cur = {};
+    keys.forEach((k) => { cur[k] = k === active ? 'page' : undefined; });
+    const collapsed = !!this.props.collapsed;
+    return {
+      cur: cur,
+      theme: this.props.theme ?? 'light',
+      railClass: collapsed ? 'as--rail' : '',
+      collapseLabel: collapsed ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên',
+      expanded: collapsed ? 'false' : 'true'
+    };
+  }
+}
+</script>
+</body>
+</html>

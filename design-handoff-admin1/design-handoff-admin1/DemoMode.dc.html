@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Chế độ demo — dải thông báo</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls" data-theme="light" style="width: 1440px; box-sizing: border-box; padding: 64px 80px; background: var(--canvas); color: var(--ink); font-family: var(--font-sans); display: flex; flex-direction: column; gap: 40px;">
+  <section class="pat">
+    <p class="h-kicker">DEMO_MODE = true</p>
+    <h2>Dải thông báo chế độ demo</h2>
+    <p class="lead">Luôn nằm trên cùng, phía trên header (trang khách) hoặc phía trên sidebar và topbar (admin). Cao 36px, nền <b>brass-soft</b>, nhãn DEMO đặc màu brass. Đóng được bằng nút ×: ẩn trong phiên hiện tại (sessionStorage), mở tab mới thì hiện lại. Khi DEMO_MODE = false, không render.</p>
+  </section>
+  <div class="pat__grid">
+    <div class="pat__cell"><span>Trang khách · sáng</span>
+      <div style="border: 1px solid var(--line); border-radius: 8px; overflow: hidden;"><dc-import name="SiteHeader" active="rooms" theme="light" hint-size="100%,112px"></dc-import></div></div>
+    <div class="pat__cell"><span>Trang khách · tối</span>
+      <div style="border: 1px solid var(--line); border-radius: 8px; overflow: hidden;"><dc-import name="SiteHeader" active="rooms" theme="dark" hint-size="100%,112px"></dc-import></div></div>
+  </div>
+  <div class="pat__cell"><span>Admin · nội dung dài hơn, có liên kết đặt lại dữ liệu</span>
+    <div style="border: 1px solid var(--line); border-radius: 8px; overflow: hidden;">
+      <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ (lần tới lúc 00:00), thanh toán và email không được gửi thật.</span><a class="dm-demo-reset" href="#">Đặt lại dữ liệu mẫu</a><a class="dm__more" href="#">Mua mã nguồn</a><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+      <dc-import name="AdminTopbar" theme="light" hint-size="100%,72px"></dc-import>
+    </div></div>
+  <div class="pat__grid" style="grid-template-columns: 390px 390px minmax(0, 1fr); align-items: start;">
+    <div class="pat__cell"><span>Mobile · trang khách</span><div style="width: 390px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden;"><dc-import name="SiteHeader" active="rooms" theme="light" hint-size="390px,100px"></dc-import></div></div>
+    <div class="pat__cell"><span>Mobile · admin</span><div style="width: 390px; height: 96px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden;"><dc-import name="AdminMobile" theme="light" hint-size="390px,96px"></dc-import></div></div>
+    <div class="pat__cell"><span>Quy tắc</span><ul class="cdel__impact" style="padding-left: 18px; font-size: 14px; line-height: 24px;"><li>Không che nội dung: đẩy trang xuống, không nổi đè.</li><li>Mobile: một dòng, bỏ “Mua mã nguồn”, chữ 12px.</li><li>Trên trang thanh toán, thêm câu “Không có tiền thật nào bị trừ”.</li><li>Đọc bằng trình đọc màn hình: role="note".</li></ul></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

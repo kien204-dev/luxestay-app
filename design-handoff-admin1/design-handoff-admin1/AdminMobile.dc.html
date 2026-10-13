@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin mobile — LuxeStay</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls amb {{clipCls}}" data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note" style="padding: 6px 48px 6px 16px; font-size: 12px; line-height: 18px;"><span class="dm__tag">Demo</span><span>Bản demo · dữ liệu làm mới mỗi 24 giờ</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <header class="amb__top">
+    <button type="button" class="amb__ib" aria-label="Mở menu" onClick="{{openMenu}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"></path></svg></button>
+    <a class="amb__logo" href="#">LuxeStay <small>Quản trị</small></a>
+    <button type="button" class="amb__ib" aria-label="Tìm kiếm"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg></button>
+    <button type="button" class="amb__ib" aria-label="Thông báo, 5 đơn mới"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg><span class="at__badge">5</span></button>
+    <button type="button" class="amb__ib" aria-label="Tài khoản Trần Thu Hà"><span class="ls-avatar" style="width: 32px; height: 32px;">TH</span></button>
+  </header>
+
+  <!-- DASHBOARD -->
+  <sc-if value="{{isDash}}" hint-placeholder-val="{{true}}">
+  <main class="amb__body">
+    <div class="amb__h"><div><h1>Tổng quan</h1><p>LuxeStay Đà Nẵng · 02 – 08/10</p></div></div>
+    <div class="amb__seg" role="group" aria-label="Khoảng thời gian"><button type="button" class="ls-chip" aria-pressed="true">7 ngày</button><button type="button" class="ls-chip">30 ngày</button><button type="button" class="ls-chip">Tháng này</button><button type="button" class="ls-chip">Tuỳ chọn</button></div>
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+    <div class="amb__kpis" aria-busy="true"><sc-for list="{{four}}" as="x" hint-placeholder-count="4"><div class="card kpi"><span class="ls-skel ls-skel--text" style="width: 60%;"></span><span class="ls-skel" style="height: 32px; width: 80%;"></span><span class="ls-skel ls-skel--text" style="width: 50%;"></span></div></sc-for></div>
+    <div class="card" style="padding: 16px;"><span class="ls-skel" style="height: 180px;"></span></div>
+    </sc-if>
+    <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+    <div class="amb__state"><div class="ls-empty ls-empty--compact ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được số liệu</p><p class="ls-empty__d">Mất kết nối lúc 14:32. Đơn mới vẫn được ghi nhận.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div></div>
+    </sc-if>
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+    <div class="amb__state"><div class="ls-empty ls-empty--compact"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M14 80h68M22 80V56M38 80V40M54 80V48M70 80V28"></path></svg></div><p class="ls-empty__t">Chưa có số liệu</p><p class="ls-empty__d">Cơ sở vừa mở bán. Số liệu xuất hiện khi có đơn đầu tiên.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tạo đơn tại quầy</button></div></div></div>
+    </sc-if>
+    <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+    <div class="card amb__today" aria-label="Hôm nay">
+      <div><b>12</b><span>Check-in · 4 đã đến</span></div><div><b>9</b><span>Check-out · 6 đã đi</span></div>
+      <div><b>51 / 68</b><span>Phòng có khách</span></div><div><b style="color: var(--warning);">5</b><span>Đơn chờ thanh toán</span></div>
+    </div>
+    <div class="amb__kpis">
+      <div class="card kpi"><div class="kpi__k">Doanh thu</div><div class="kpi__v">1,28 <small>tỷ</small></div><div class="kpi__d"><span class="delta up">▲ 12,4%</span></div></div>
+      <div class="card kpi"><div class="kpi__k">Công suất</div><div class="kpi__v">74<small>%</small></div><div class="kpi__d"><span class="delta up">▲ 5,1 điểm</span></div></div>
+      <div class="card kpi"><div class="kpi__k">Booking mới</div><div class="kpi__v">146</div><div class="kpi__d"><span class="delta down">▼ 3,2%</span></div></div>
+      <div class="card kpi"><div class="kpi__k">Giá TB / đêm</div><div class="kpi__v">8,7 <small>tr</small></div><div class="kpi__d"><span class="delta up">▲ 4,0%</span></div></div>
+    </div>
+    <section class="card ch" style="padding: 16px;" aria-labelledby="m-rev">
+      <div class="ch__h"><div><h2 id="m-rev">Doanh thu 7 ngày</h2><p>triệu ₫ · cao nhất T7 03/10: 238tr</p></div></div>
+      <svg class="plot" viewBox="0 0 340 160" preserveAspectRatio="none" style="height: 160px;" role="img" aria-label="Doanh thu 7 ngày, cao nhất 238 triệu ngày 03/10">
+        <line class="grid" x1="0" x2="340" y1="10" y2="10"></line><line class="grid" x1="0" x2="340" y1="70" y2="70"></line><line class="grid" x1="0" x2="340" y1="130" y2="130" style="stroke: var(--line-strong);"></line>
+        <path class="area" d="M10 52L60 17L110 33L170 67L220 66L270 59L330 41L330 130L10 130Z"></path>
+        <path class="ln" d="M10 52L60 17L110 33L170 67L220 66L270 59L330 41"></path>
+        <circle class="dot" cx="60" cy="17" r="4"></circle>
+        <text class="axis" x="10" y="150">T6</text><text class="axis" x="55" y="150">T7</text><text class="axis" x="102" y="150">CN</text><text class="axis" x="163" y="150">T2</text><text class="axis" x="213" y="150">T3</text><text class="axis" x="263" y="150">T4</text><text class="axis" x="310" y="150">Nay</text>
+      </svg>
+    </section>
+    <div class="amb__sec"><h2>Cần xử lý</h2><a class="ls-btn ls-btn--link" href="#" style="font-size: 14px;">Tất cả đơn</a></div>
+    <div><button type="button" class="ocard is-urgent" onClick="{{openDetail}}"><div class="ocard__r1"><span class="ls-badge ls-badge--warning">Chờ thanh toán</span><span class="ls-code">LXS-0418</span></div><div class="ocard__name">Phạm Gia Bảo</div><div class="ocard__meta">Ocean Pool Villa · 24 – 27/10</div><div class="ocard__meta" style="color: var(--warning); font-weight: 500;">Hết giữ phòng lúc 16:45 · còn 12 phút</div><div class="ocard__r3"><span class="ocard__tot">37.500.000 ₫</span><span class="ls-btn ls-btn--secondary ls-btn--sm" aria-hidden="true">Chi tiết</span></div></button><button type="button" class="ocard" onClick="{{openDetail}}"><div class="ocard__r1"><span class="ls-badge ls-badge--info">Chờ hoàn tiền</span><span class="ls-code">LXS-0398</span></div><div class="ocard__name">Lê Quốc Bảo</div><div class="ocard__meta">Ocean Pool Villa · 02 – 05/11</div><div class="ocard__r3"><span class="ocard__tot">37.500.000 ₫</span><span class="ls-btn ls-btn--secondary ls-btn--sm" aria-hidden="true">Chi tiết</span></div></button></div>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- BOOKINGS -->
+  <sc-if value="{{isBook}}" hint-placeholder-val="{{false}}">
+  <main class="amb__body">
+    <div class="amb__h"><div><h1>Đơn đặt phòng</h1><p>248 đơn · tháng 10/2026</p></div></div>
+    <div class="ls-control" style="height: 44px;"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg><input aria-label="Tìm đơn" placeholder="Mã đơn, tên khách, SĐT" value="{{query}}"></div>
+    <div class="amb__seg" role="group" aria-label="Lọc trạng thái"><button type="button" class="ls-chip" aria-pressed="true">Tất cả · 248</button><button type="button" class="ls-chip">Chờ TT · 5</button><button type="button" class="ls-chip">Đã xác nhận · 162</button><button type="button" class="ls-chip">Đang ở · 51</button><button type="button" class="ls-chip">Hoàn tiền · 2</button><button type="button" class="ls-chip"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="1.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>Ngày</button></div>
+    <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+    <div><button type="button" class="ocard is-urgent" onClick="{{openDetail}}"><div class="ocard__r1"><span class="ls-badge ls-badge--warning">Chờ thanh toán</span><span class="ls-code">LXS-0418</span></div><div class="ocard__name">Phạm Gia Bảo</div><div class="ocard__meta">Ocean Pool Villa · V-05 · 24 – 27/10 · 3 đêm</div><div class="ocard__meta" style="color: var(--warning); font-weight: 500;">Hết giữ phòng lúc 16:45 · còn 12 phút</div><div class="ocard__r3"><span class="ocard__tot">37.500.000 ₫</span><span class="ls-btn ls-btn--secondary ls-btn--sm" aria-hidden="true">Chi tiết</span></div></button><button type="button" class="ocard" onClick="{{openDetail}}"><div class="ocard__r1"><span class="ls-badge ls-badge--success">Đã xác nhận</span><span class="ls-code">LXS-0417</span></div><div class="ocard__name">Emma Laurent</div><div class="ocard__meta">Garden Deluxe King · G-12 · 19 – 21/10 · 2 đêm</div><div class="ocard__r3"><span class="ocard__tot">9.700.000 ₫</span><span class="ls-btn ls-btn--secondary ls-btn--sm" aria-hidden="true">Chi tiết</span></div></button><button type="button" class="ocard" onClick="{{openDetail}}"><div class="ocard__r1"><span class="ls-badge ls-badge--info">Chờ hoàn tiền</span><span class="ls-code">LXS-0398</span></div><div class="ocard__name">Lê Quốc Bảo</div><div class="ocard__meta">Ocean Pool Villa · V-02 · 02 – 05/11 · 3 đêm</div><div class="ocard__r3"><span class="ocard__tot">37.500.000 ₫</span><span class="ls-btn ls-btn--secondary ls-btn--sm" aria-hidden="true">Chi tiết</span></div></button><button type="button" class="ocard" onClick="{{openDetail}}"><div class="ocard__r1"><span class="ls-badge ls-badge--info">Đang lưu trú</span><span class="ls-code">LXS-0411</span></div><div class="ocard__name">James Whitmore</div><div class="ocard__meta">Grand Heritage Suite · S-01 · 16 – 18/10 · 2 đêm</div><div class="ocard__r3"><span class="ocard__tot">17.800.000 ₫</span><span class="ls-btn ls-btn--secondary ls-btn--sm" aria-hidden="true">Chi tiết</span></div></button><button type="button" class="ocard" onClick="{{openDetail}}"><div class="ocard__r1"><span class="ls-badge ls-badge--warning">Chờ thanh toán</span><span class="ls-code">LXS-0409</span></div><div class="ocard__name">Trần Hoài Thương</div><div class="ocard__meta">Garden Deluxe King · G-08 · 21 – 23/10 · 2 đêm</div><div class="ocard__r3"><span class="ocard__tot">9.700.000 ₫</span><span class="ls-btn ls-btn--secondary ls-btn--sm" aria-hidden="true">Chi tiết</span></div></button></div>
+    <button type="button" class="ls-btn ls-btn--secondary ls-btn--block">Xem thêm · 5 / 248</button>
+    </sc-if>
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+    <div aria-busy="true"><sc-for list="{{four}}" as="x" hint-placeholder-count="4"><div class="ocard" style="margin-bottom: 8px;"><span class="ls-skel" style="width: 110px; height: 24px;"></span><span class="ls-skel ls-skel--text" style="width: 60%; margin-top: 12px;"></span><span class="ls-skel ls-skel--text" style="width: 80%;"></span><span class="ls-skel" style="height: 28px; width: 40%; margin-top: 12px;"></span></div></sc-for></div>
+    </sc-if>
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+    <div class="amb__state"><div class="ls-empty ls-empty--compact"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg></div><p class="ls-empty__t">Không có đơn khớp “Nguyễn Văn An”</p><p class="ls-empty__d">Thử tìm theo số điện thoại hoặc mã đơn.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--secondary">Xoá tìm kiếm</button></div></div></div>
+    </sc-if>
+    <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+    <div class="amb__state"><div class="ls-empty ls-empty--compact ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được danh sách đơn</p><p class="ls-empty__d">Kiểm tra kết nối mạng rồi thử lại.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div></div>
+    </sc-if>
+  </main>
+  <a class="ls-btn ls-btn--primary amb__fab" href="#"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Đặt tại quầy</a>
+  </sc-if>
+
+  <nav class="amb__nav" aria-label="Điều hướng quản trị">
+    <a href="#" aria-current="{{navDash}}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="9" rx="1"></rect><rect x="13" y="4" width="7" height="5" rx="1"></rect><rect x="13" y="11" width="7" height="9" rx="1"></rect><rect x="4" y="15" width="7" height="5" rx="1"></rect></svg>Tổng quan</a>
+    <a href="#" aria-current="{{navBook}}" style="position: relative;"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="1.5"></rect><path d="M9 4.5V3h6v1.5M8.5 10h7M8.5 14h7M8.5 18h4"></path></svg>Đơn<span class="at__badge">5</span></a>
+    <a href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="1.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>Lịch</a>
+    <a href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18V7M3 13h18v5M21 13v-1.5A2.5 2.5 0 0 0 18.5 9H11v4"></path><circle cx="7" cy="10.5" r="1.5"></circle></svg>Phòng</a>
+    <a href="#" onClick="{{openMenu}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>Thêm</a>
+  </nav>
+
+  <!-- DETAIL (full screen) -->
+  <sc-if value="{{isDetail}}" hint-placeholder-val="{{false}}">
+  <div class="amb__detail" role="dialog" aria-modal="true" aria-labelledby="md-t">
+    <div class="amb__dh"><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon" aria-label="Quay lại danh sách"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><b id="md-t">LXS-0418</b><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon" aria-label="Thêm thao tác"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r=".8"></circle><circle cx="12" cy="12" r=".8"></circle><circle cx="18.5" cy="12" r=".8"></circle></svg></button></div>
+    <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div><span class="ls-badge ls-badge--warning ls-badge--lg">Chờ thanh toán</span><h2 style="font: 600 28px/34px var(--font-serif); margin: 8px 0 2px;">Phạm Gia Bảo</h2><p class="ls-help" style="color: var(--warning); font-weight: 500;">Hết giữ phòng lúc 16:45 · còn 12 phút</p></div>
+      <div style="display: flex; gap: 8px;"><a class="ls-btn ls-btn--secondary ls-btn--sm" href="#" style="flex: 1;"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg>Gọi</a><a class="ls-btn ls-btn--secondary ls-btn--sm" href="#" style="flex: 1;">Zalo</a><a class="ls-btn ls-btn--secondary ls-btn--sm" href="#" style="flex: 1;">Email</a></div>
+      <section class="dsec"><h3>Lưu trú</h3><dl class="ls-dl"><dt>Phòng</dt><dd>Ocean Pool Villa · V-05</dd><dt>Ngày</dt><dd>24 – 27/10/2026 · 3 đêm</dd><dt>Khách</dt><dd>2 người lớn</dd><dt>Kênh</dt><dd>Website · ví MoMo</dd></dl></section>
+      <section class="dsec"><h3>Thanh toán</h3><div class="rf-lines"><div><span>12.500.000 ₫ × 3 đêm</span><span style="color: var(--ink);">37.500.000 ₫</span></div><div><span>Đã thu</span><span style="color: var(--ink);">0 ₫</span></div></div><div class="bdr__pay" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line);"><span style="font-weight: 600;">Còn phải thu</span><b>37.500.000 ₫</b></div></section>
+      <section class="dsec"><h3>Lịch sử</h3><ul class="tl-act"><li class="warn"><i></i><span><b>Tạo đơn</b> · giữ phòng 15 phút</span><span>16:30</span></li><li><i></i><span><b>Mở cổng MoMo</b></span><span>16:31</span></li></ul></section>
+    </div>
+    <div class="amb__dact"><button type="button" class="ls-btn ls-btn--secondary">Huỷ đơn</button><button type="button" class="ls-btn ls-btn--primary">Đã thu tiền</button></div>
+  </div>
+  </sc-if>
+
+  <!-- MENU -->
+  <sc-if value="{{isMenu}}" hint-placeholder-val="{{false}}">
+  <div class="amb__menu" role="dialog" aria-modal="true" aria-label="Menu quản trị">
+    <div class="ls-scrim"></div>
+    <dc-import name="AdminSidebar" active="bookings" theme="{{theme}}" hint-size="300px,844px"></dc-import>
+    <button type="button" class="amb__ib" aria-label="Đóng menu" style="position: absolute; top: 72px; left: 308px; background: var(--surface); color: var(--ink);"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{showToast}}" hint-placeholder-val="{{false}}">
+  <div class="toast-stage is-mobile" style="bottom: 140px;"><div class="ls-toast ls-toast--success" role="status"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Đã xác nhận thu tiền</div><div class="ls-toast__d">LXS-0409 · 9.700.000 ₫</div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"screen":{"editor":"enum","options":["dashboard","bookings","detail","menu"],"default":"dashboard"},"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"toast":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":390,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { screen: null };
+  }
+  renderVals() {
+    const sc = this.state.screen ?? this.props.screen ?? 'dashboard';
+    const st = this.props.state ?? 'ready';
+    const overlay = sc === 'detail' || sc === 'menu';
+    return {
+      theme: this.props.theme ?? 'light',
+      isDash: sc === 'dashboard', isBook: sc === 'bookings' || sc === 'detail', isDetail: sc === 'detail', isMenu: sc === 'menu',
+      navDash: sc === 'dashboard' ? 'page' : undefined, navBook: sc !== 'dashboard' ? 'page' : undefined,
+      clipCls: overlay ? 'is-clip' : '',
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      query: st === 'empty' ? 'Nguyễn Văn An' : '',
+      four: [1, 2, 3, 4],
+      showToast: !!this.props.toast,
+      openDetail: () => this.setState({ screen: 'detail' }),
+      openMenu: () => this.setState({ screen: 'menu' })
+    };
+  }
+}
+</script>
+</body>
+</html>

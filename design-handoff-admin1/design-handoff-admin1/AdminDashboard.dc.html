@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Dashboard</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm is-tall" data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="dashboard" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body" aria-busy="{{isLoading}}">
+        <div class="am__head">
+          <div>
+            <ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Dashboard</li></ol>
+            <h1>Tổng quan</h1>
+            <p>LuxeStay Đà Nẵng · {{rangeLabel}}</p>
+          </div>
+          <div class="am__actions relp">
+            <div class="ls-seg-ctl" role="group" aria-label="Khoảng thời gian">
+              <button type="button" aria-pressed="{{p7}}" onClick="{{set7}}">7 ngày</button>
+              <button type="button" aria-pressed="{{p30}}" onClick="{{set30}}">30 ngày</button>
+              <button type="button" aria-pressed="{{pc}}" onClick="{{setC}}"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="1.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>{{customLabel}}</button>
+            </div>
+            <button type="button" class="ls-btn ls-btn--secondary ls-btn--sm"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg>Xuất báo cáo</button>
+            <sc-if value="{{showPicker}}" hint-placeholder-val="{{false}}">
+            <div class="ls-popover daterange-pop" role="dialog" aria-label="Chọn khoảng thời gian">
+              <div style="display: flex;">
+                <div style="width: 160px; padding: 12px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px;">
+                  <button type="button" class="ls-option">Hôm nay</button><button type="button" class="ls-option">Tuần này</button><button type="button" class="ls-option" aria-selected="true">Tháng 9/2026</button><button type="button" class="ls-option">Quý 3/2026</button><button type="button" class="ls-option">Năm nay</button>
+                </div>
+                <div class="ls-cal" style="flex: 1; padding: 16px 20px;">
+                  <div><div class="ls-cal__head"><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Tháng trước"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><span class="ls-cal__title">Tháng 9, 2026</span><span style="width: 36px;"></span></div>
+                    <div class="ls-cal__grid" style="grid-template-columns: repeat(7, 36px);"><span class="ls-cal__dow">T2</span><span class="ls-cal__dow">T3</span><span class="ls-cal__dow">T4</span><span class="ls-cal__dow">T5</span><span class="ls-cal__dow">T6</span><span class="ls-cal__dow">T7</span><span class="ls-cal__dow">CN</span>
+                    <sc-for list="{{sepDays}}" as="d" hint-placeholder-count="30"><button type="button" class="ls-day {{d.cls}}" style="height: 36px;">{{d.n}}</button></sc-for></div></div>
+                  <div><div class="ls-cal__head"><span style="width: 36px;"></span><span class="ls-cal__title">Tháng 10, 2026</span><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Tháng sau" disabled><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></div>
+                    <div class="ls-cal__grid" style="grid-template-columns: repeat(7, 36px);"><span class="ls-cal__dow">T2</span><span class="ls-cal__dow">T3</span><span class="ls-cal__dow">T4</span><span class="ls-cal__dow">T5</span><span class="ls-cal__dow">T6</span><span class="ls-cal__dow">T7</span><span class="ls-cal__dow">CN</span>
+                    <sc-for list="{{octDays}}" as="d" hint-placeholder-count="31"><button type="button" class="ls-day {{d.cls}}" style="height: 36px;" disabled="{{d.off}}">{{d.n}}</button></sc-for></div></div>
+                </div>
+              </div>
+              <div class="ls-cal__foot"><span class="ls-help">01/09 – 30/09/2026 · 30 ngày · so với 01/08 – 31/08</span><div style="display: flex; gap: 8px;"><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" onClick="{{set7}}">Huỷ</button><button type="button" class="ls-btn ls-btn--primary ls-btn--sm">Áp dụng</button></div></div>
+            </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+        <div class="kpis">
+          <div class="card kpi"><div class="kpi__k">Doanh thu<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="1.5"></rect><path d="M3 10h18"></path></svg></div><div class="kpi__v">1,28 <small>tỷ ₫</small></div><div class="kpi__d"><span class="delta up">▲ 12,4%</span>so với 7 ngày trước</div></div>
+          <div class="card kpi"><div class="kpi__k">Công suất phòng<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18V7M3 13h18v5M21 13v-1.5A2.5 2.5 0 0 0 18.5 9H11v4"></path></svg></div><div class="kpi__v">74,0<small>%</small></div><div class="kpi__d"><span class="delta up">▲ 5,1 điểm</span>353 / 476 đêm phòng</div></div>
+          <div class="card kpi"><div class="kpi__k">Booking mới<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="1.5"></rect><path d="M8.5 10h7M8.5 14h7"></path></svg></div><div class="kpi__v">146</div><div class="kpi__d"><span class="delta down">▼ 3,2%</span>12 đơn đã huỷ</div></div>
+          <div class="card kpi"><div class="kpi__k">Giá TB / đêm<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.5V4.5h8l9 9-8 8z"></path><circle cx="8" cy="9" r="1.5"></circle></svg></div><div class="kpi__v">8,7 <small>tr ₫</small></div><div class="kpi__d"><span class="delta up">▲ 4,0%</span>ADR, đã gồm thuế</div></div>
+        </div>
+        <div class="card today" aria-label="Hôm nay">
+          <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4h8v16h-8M4 12h10M10 8l4 4-4 4"></path></svg><div><b>12</b><br><span>Check-in hôm nay · 4 đã đến</span></div></div>
+          <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4H6v16h8M20 12H10M14 8l-4 4 4 4"></path></svg><div><b>9</b><br><span>Check-out hôm nay · 6 đã đi</span></div></div>
+          <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18V7M3 13h18v5M21 13v-1.5A2.5 2.5 0 0 0 18.5 9H11v4"></path></svg><div><b>51 / 68</b><br><span>Phòng đang có khách</span></div></div>
+          <div><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg><div><b>5</b><br><span>Đơn chờ thanh toán</span></div></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 20px;">
+          <section class="card ch" aria-labelledby="rev-t">
+            <div class="ch__h">
+              <div><h2 id="rev-t">Doanh thu theo ngày</h2><p>02/10 – 08/10/2026 · triệu ₫</p></div>
+              <div class="legend"><span><i></i>Tuần này</span><span><i class="prev"></i>Tuần trước</span></div>
+            </div>
+            <div class="ch__plotwrap">
+              <svg class="plot" viewBox="0 0 720 240" preserveAspectRatio="none" role="img" aria-label="Doanh thu 7 ngày, cao nhất 238 triệu ngày 03/10">
+                <line class="grid" x1="44" x2="710" y1="16" y2="16"></line><line class="grid" x1="44" x2="710" y1="56" y2="56"></line><line class="grid" x1="44" x2="710" y1="96" y2="96"></line><line class="grid" x1="44" x2="710" y1="136" y2="136"></line><line class="grid" x1="44" x2="710" y1="176" y2="176"></line><line class="grid" x1="44" x2="710" y1="216" y2="216" style="stroke: var(--line-strong);"></line>
+                <text class="axis" x="36" y="220" text-anchor="end">0</text><text class="axis" x="36" y="180" text-anchor="end">50</text><text class="axis" x="36" y="140" text-anchor="end">100</text><text class="axis" x="36" y="100" text-anchor="end">150</text><text class="axis" x="36" y="60" text-anchor="end">200</text><text class="axis" x="36" y="20" text-anchor="end">250</text>
+                <path class="area" d="M60 76L163 25.6L267 48L370 97.6L473 95.2L577 86.4L680 59.2L680 216L60 216Z"></path>
+                <path class="ln-prev" d="M60 88L163 52L267 64L370 104L473 116L577 96L680 80"></path>
+                <path class="ln" d="M60 76L163 25.6L267 48L370 97.6L473 95.2L577 86.4L680 59.2"></path>
+                <line class="cross" x1="163" x2="163" y1="16" y2="216"></line>
+                <circle class="dot" cx="163" cy="25.6" r="5"></circle>
+                <circle class="dot" cx="680" cy="59.2" r="4"></circle>
+                <text class="axis" x="60" y="236" text-anchor="middle">T6 02</text><text class="axis" x="163" y="236" text-anchor="middle">T7 03</text><text class="axis" x="267" y="236" text-anchor="middle">CN 04</text><text class="axis" x="370" y="236" text-anchor="middle">T2 05</text><text class="axis" x="473" y="236" text-anchor="middle">T3 06</text><text class="axis" x="577" y="236" text-anchor="middle">T4 07</text><text class="axis" x="680" y="236" text-anchor="middle">Hôm nay</text>
+              </svg>
+              <div class="tip" style="left: 25%; top: 0;"><b>Thứ Bảy, 03/10</b><i></i>238.400.000 ₫ · 31 đơn<br><span style="opacity: .75;">Tuần trước: 205.100.000 ₫ (+16%)</span></div>
+            </div>
+          </section>
+          <section class="card ch" aria-labelledby="occ-t">
+            <div class="ch__h">
+              <div><h2 id="occ-t">Công suất phòng</h2><p>% phòng có khách mỗi đêm</p></div>
+              <div class="ch__big">74%</div>
+            </div>
+            <svg class="plot" viewBox="0 0 360 240" preserveAspectRatio="none" role="img" aria-label="Công suất cao nhất 94% đêm thứ Bảy 03/10">
+              <line class="grid" x1="0" x2="360" y1="16" y2="16"></line><line class="grid" x1="0" x2="360" y1="116" y2="116"></line><line class="grid" x1="0" x2="360" y1="216" y2="216" style="stroke: var(--line-strong);"></line>
+              <text class="axis" x="360" y="12" text-anchor="end">100%</text>
+              <path class="bar" d="M14 216V76a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4V216Z"></path>
+              <path class="bar hi" d="M64 216V32a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4V216Z"></path>
+              <path class="bar" d="M114 216V44a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4V216Z"></path>
+              <path class="bar" d="M164 216V98a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4V216Z"></path>
+              <path class="bar" d="M214 216V104a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4V216Z"></path>
+              <path class="bar" d="M264 216V88a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4V216Z"></path>
+              <path class="bar" d="M314 216V62a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4V216Z"></path>
+              <text class="lbl" x="82" y="22" text-anchor="middle">94%</text><text class="lbl" x="332" y="52" text-anchor="middle">79%</text>
+              <text class="axis" x="32" y="234" text-anchor="middle">T6</text><text class="axis" x="82" y="234" text-anchor="middle">T7</text><text class="axis" x="132" y="234" text-anchor="middle">CN</text><text class="axis" x="182" y="234" text-anchor="middle">T2</text><text class="axis" x="232" y="234" text-anchor="middle">T3</text><text class="axis" x="282" y="234" text-anchor="middle">T4</text><text class="axis" x="332" y="234" text-anchor="middle">T5</text>
+            </svg>
+            <div class="legend"><span><i class="bar" style="background: var(--accent);"></i>Công suất mỗi đêm</span><span><i class="bar" style="background: var(--brass);"></i>Cao nhất tuần</span></div>
+          </section>
+        </div>
+
+        <section class="ls-tablewrap" aria-labelledby="rb-t">
+          <div class="ls-tablebar"><h2 id="rb-t" style="font: 600 16px/24px var(--font-sans); margin: 0;">Booking gần đây</h2><span style="flex: 1;"></span><a class="ls-btn ls-btn--link" href="#" style="font-size: 14px;">Xem tất cả đơn</a></div>
+          <table class="ls-table">
+            <thead><tr><th>Khách</th><th>Phòng</th><th>Lưu trú</th><th class="is-num">Tổng</th><th>Trạng thái</th><th>Tạo lúc</th></tr></thead>
+            <tbody>
+              <tr><td><div class="ls-person"><span class="ls-avatar">PB</span><div><div class="ls-cell-main">Phạm Gia Bảo</div><div class="ls-code">LXS-0418</div></div></div></td><td>Ocean Pool Villa</td><td>24 – 27/10</td><td class="is-num">37.500.000 ₫</td><td><span class="ls-badge ls-badge--warning">Chờ thanh toán</span></td><td class="ls-muted">2 phút trước</td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">EL</span><div><div class="ls-cell-main">Emma Laurent</div><div class="ls-code">LXS-0417</div></div></div></td><td>Garden Deluxe King</td><td>19 – 21/10</td><td class="is-num">9.700.000 ₫</td><td><span class="ls-badge ls-badge--success">Đã xác nhận</span></td><td class="ls-muted">18 phút trước</td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">VT</span><div><div class="ls-cell-main">Võ Thanh Tâm</div><div class="ls-code">LXS-0416</div></div></div></td><td>Grand Heritage Suite</td><td>01 – 03/11</td><td class="is-num">17.800.000 ₫</td><td><span class="ls-badge ls-badge--success">Đã xác nhận</span></td><td class="ls-muted">1 giờ trước</td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">JW</span><div><div class="ls-cell-main">James Whitmore</div><div class="ls-code">LXS-0411</div></div></div></td><td>Grand Heritage Suite</td><td>16 – 18/10</td><td class="is-num">17.800.000 ₫</td><td><span class="ls-badge ls-badge--info">Đang lưu trú</span></td><td class="ls-muted">Hôm qua</td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">LB</span><div><div class="ls-cell-main">Lê Quốc Bảo</div><div class="ls-code">LXS-0398</div></div></div></td><td>Ocean Pool Villa</td><td>02 – 05/11</td><td class="is-num">37.500.000 ₫</td><td><span class="ls-badge ls-badge--danger">Đã huỷ</span></td><td class="ls-muted">Hôm qua</td></tr>
+            </tbody>
+          </table>
+        </section>
+        </sc-if>
+
+        <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+        <div class="kpis"><sc-for list="{{four}}" as="x" hint-placeholder-count="4"><div class="card kpi"><span class="ls-skel ls-skel--text" style="width: 50%;"></span><span class="ls-skel" style="height: 40px; width: 65%;"></span><span class="ls-skel ls-skel--text" style="width: 70%;"></span></div></sc-for></div>
+        <div class="card" style="height: 76px; padding: 20px;"><span class="ls-skel" style="height: 36px;"></span></div>
+        <div style="display: grid; grid-template-columns: 1.7fr 1fr; gap: 20px;"><div class="card ch"><span class="ls-skel ls-skel--title" style="width: 30%;"></span><span class="ls-skel" style="height: 240px;"></span></div><div class="card ch"><span class="ls-skel ls-skel--title" style="width: 50%;"></span><span class="ls-skel" style="height: 240px;"></span></div></div>
+        </sc-if>
+
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+        <div class="kpis"><sc-for list="{{emptyKpis}}" as="k" hint-placeholder-count="4"><div class="card kpi"><div class="kpi__k">{{k}}</div><div class="kpi__v" style="color: var(--ink-subtle);">—</div><div class="kpi__d">Chưa có dữ liệu</div></div></sc-for></div>
+        <div class="admin-state"><div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M14 80h68M22 80V56M38 80V40M54 80V48M70 80V28"></path></svg></div><p class="ls-empty__t">Chưa có booking trong khoảng này</p><p class="ls-empty__d">Cơ sở vừa mở bán từ 01/10/2026. Số liệu sẽ xuất hiện khi có đơn đầu tiên, hoặc thử chọn 30 ngày.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tạo đơn tại quầy</button><button type="button" class="ls-btn ls-btn--secondary">Xem phòng đang bán</button></div></div></div>
+        </sc-if>
+
+        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+        <div class="ls-alert ls-alert--danger" role="alert"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg><div><b>Không tải được số liệu.</b> Dịch vụ báo cáo không phản hồi (mã 504) lúc 14:32. Đơn đặt phòng và lịch vẫn hoạt động bình thường.</div></div>
+        <div class="admin-state"><div class="ls-empty ls-empty--error"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Biểu đồ tạm thời không khả dụng</p><p class="ls-empty__d">Thử lại sau ít phút. Nếu lỗi kéo dài, kiểm tra trang trạng thái hệ thống.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95"></path><path d="M19 4v4h-4"></path></svg>Tải lại</button></div></div></div>
+        </sc-if>
+      </main>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"period":{"editor":"enum","options":["7d","30d","custom"],"default":"7d"},"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { period: null };
+  }
+  renderVals() {
+    const p = this.state.period ?? this.props.period ?? '7d';
+    const st = this.props.state ?? 'ready';
+    const sep = [];
+    for (let i = 0; i < 1; i++) sep.push({ n: '', cls: 'is-empty' });
+    for (let d = 1; d <= 30; d++) sep.push({ n: d, cls: d === 1 ? 'is-start' : (d === 30 ? 'is-end' : 'is-range') });
+    const oct = [];
+    for (let i = 0; i < 3; i++) oct.push({ n: '', cls: 'is-empty', off: true });
+    for (let d = 1; d <= 31; d++) oct.push({ n: d, cls: d === 8 ? 'is-today' : (d > 8 ? 'is-disabled' : ''), off: d > 8 });
+    return {
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      p7: p === '7d' ? 'true' : 'false', p30: p === '30d' ? 'true' : 'false', pc: p === 'custom' ? 'true' : 'false',
+      set7: () => this.setState({ period: '7d' }), set30: () => this.setState({ period: '30d' }), setC: () => this.setState({ period: 'custom' }),
+      showPicker: p === 'custom',
+      customLabel: p === 'custom' ? '01/09 – 30/09' : 'Tuỳ chọn',
+      rangeLabel: p === '30d' ? '09/09 – 08/10/2026' : (p === 'custom' ? '01/09 – 30/09/2026' : '02/10 – 08/10/2026'),
+      sepDays: sep, octDays: oct,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      four: [1, 2, 3, 4],
+      emptyKpis: ['Doanh thu', 'Công suất phòng', 'Booking mới', 'Giá TB / đêm'],
+      recent: [
+        { ini: 'PB', name: 'Phạm Gia Bảo', code: 'LXS-0418', room: 'Ocean Pool Villa', dates: '24 – 27/10', total: '37.500.000 ₫', tone: 'warning', status: 'Chờ thanh toán', ago: '2 phút trước' },
+        { ini: 'EL', name: 'Emma Laurent', code: 'LXS-0417', room: 'Garden Deluxe King', dates: '19 – 21/10', total: '9.700.000 ₫', tone: 'success', status: 'Đã xác nhận', ago: '18 phút trước' },
+        { ini: 'VT', name: 'Võ Thanh Tâm', code: 'LXS-0416', room: 'Grand Heritage Suite', dates: '01 – 03/11', total: '17.800.000 ₫', tone: 'success', status: 'Đã xác nhận', ago: '1 giờ trước' },
+        { ini: 'JW', name: 'James Whitmore', code: 'LXS-0411', room: 'Grand Heritage Suite', dates: '16 – 18/10', total: '17.800.000 ₫', tone: 'info', status: 'Đang lưu trú', ago: 'Hôm qua' },
+        { ini: 'LB', name: 'Lê Quốc Bảo', code: 'LXS-0398', room: 'Ocean Pool Villa', dates: '02 – 05/11', total: '37.500.000 ₫', tone: 'danger', status: 'Đã huỷ', ago: 'Hôm qua' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

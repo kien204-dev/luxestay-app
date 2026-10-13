@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Lịch phòng</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm" data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="calendar" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body" style="gap: 20px;">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Lịch phòng</li></ol><h1>Lịch phòng</h1><p>Tháng 10/2026 · công suất 74% · 11 phòng hiển thị</p></div>
+          <div class="am__actions">
+            <div style="display: flex; align-items: center; gap: 4px;"><button type="button" class="ls-btn ls-btn--secondary ls-btn--icon ls-btn--sm" aria-label="Tháng trước"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Hôm nay</button><button type="button" class="ls-btn ls-btn--secondary ls-btn--icon ls-btn--sm" aria-label="Tháng sau"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></div>
+            <div class="ls-seg-ctl" role="group" aria-label="Phạm vi"><button type="button" aria-pressed="false">Tuần</button><button type="button" aria-pressed="true">Tháng</button></div>
+            <button type="button" class="ls-btn ls-btn--primary ls-btn--sm"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Khoá phòng</button>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <div class="rtools__chips"><button type="button" class="ls-chip" aria-pressed="true">Tất cả hạng phòng</button><button type="button" class="ls-chip">Villa</button><button type="button" class="ls-chip">Suite</button><button type="button" class="ls-chip">Deluxe</button></div>
+          <div class="tl-legend">
+            <span><i style="background: var(--success-soft); border-color: var(--success);"></i>Đã xác nhận</span>
+            <span><i style="background: var(--info-soft); border-color: var(--info);"></i>Đang lưu trú</span>
+            <span><i style="background: var(--warning-soft); border-color: var(--warning);"></i>Chờ thanh toán</span>
+            <span><i style="background: var(--neutral-soft); border-color: var(--neutral);"></i>Đã trả phòng</span>
+            <span><i style="background: repeating-linear-gradient(135deg, var(--surface-sunken) 0 3px, var(--canvas) 3px 6px); border-color: var(--line-strong);"></i>Khoá / bảo trì</span>
+          </div>
+        </div>
+
+        <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+        <div class="relp">
+        <div class="tl">
+<div class="tl__grid" role="grid" aria-label="Lịch phòng tháng 10/2026">
+<div class="tl__corner" style="grid-row: 1; grid-column: 1;">Phòng</div>
+<div class="tl__day" style="grid-row: 1; grid-column: 2;">1<small>T5</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 3;">2<small>T6</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 4;">3<small>T7</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 5;">4<small>CN</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 6;">5<small>T2</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 7;">6<small>T3</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 8;">7<small>T4</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 9;">8<small>T5</small></div>
+<div class="tl__day today" style="grid-row: 1; grid-column: 10;">9<small>T6</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 11;">10<small>T7</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 12;">11<small>CN</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 13;">12<small>T2</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 14;">13<small>T3</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 15;">14<small>T4</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 16;">15<small>T5</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 17;">16<small>T6</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 18;">17<small>T7</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 19;">18<small>CN</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 20;">19<small>T2</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 21;">20<small>T3</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 22;">21<small>T4</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 23;">22<small>T5</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 24;">23<small>T6</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 25;">24<small>T7</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 26;">25<small>CN</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 27;">26<small>T2</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 28;">27<small>T3</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 29;">28<small>T4</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 30;">29<small>T5</small></div>
+<div class="tl__day" style="grid-row: 1; grid-column: 31;">30<small>T6</small></div>
+<div class="tl__day we" style="grid-row: 1; grid-column: 32;">31<small>T7</small></div>
+<div class="tl__grp" style="grid-row: 2; grid-column: 1 / -1;">Ocean Pool Villa · 4 phòng</div>
+<div class="tl__room" style="grid-row: 3; grid-column: 1;"><b>V-01</b><span>Ocean Pool Villa</span></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 3; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 3; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 3; grid-column: 32;"></div>
+<button type="button" class="bk-blk neutral" style="grid-row: 3; grid-column: 2 / span 3;" aria-label="V-01, N. Hải, 1–4/10, Đã trả phòng">N. Hải<small>3 đêm</small></button>
+<button type="button" class="bk-blk info" style="grid-row: 3; grid-column: 7 / span 4;" aria-label="V-01, K. Seo-yeon, 6–10/10, Đang lưu trú">K. Seo-yeon<small>4 đêm</small></button>
+<button type="button" class="bk-blk success" style="grid-row: 3; grid-column: 18 / span 3;" aria-label="V-01, Minh Anh, 17–20/10, Đã xác nhận">Minh Anh<small>LXS-0418</small></button>
+<div class="tl__room" style="grid-row: 4; grid-column: 1;"><b>V-02</b><span>Ocean Pool Villa</span></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 4; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 4; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 4; grid-column: 32;"></div>
+<button type="button" class="bk-blk neutral" style="grid-row: 4; grid-column: 4 / span 2;" aria-label="V-02, R. Becker, 3–5/10, Đã trả phòng">R. Becker</button>
+<button type="button" class="bk-blk success" style="grid-row: 4; grid-column: 13 / span 5;" aria-label="V-02, Daniel M., 12–17/10, Đã xác nhận">Daniel M.<small>5 đêm</small></button>
+<button type="button" class="bk-blk warning" style="grid-row: 4; grid-column: 25 / span 3;" aria-label="V-02, Gia Bảo, 24–27/10, Chờ thanh toán">Gia Bảo<small>chờ TT</small></button>
+<div class="tl__room" style="grid-row: 5; grid-column: 1;"><b>V-03</b><span>Ocean Pool Villa</span></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 5; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 5; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 5; grid-column: 32;"></div>
+<button type="button" class="bk-blk info" style="grid-row: 5; grid-column: 9 / span 3;" aria-label="V-03, L. Hương, 8–11/10, Đang lưu trú">L. Hương<small>3 đêm</small></button>
+<button type="button" class="bk-blk success" style="grid-row: 5; grid-column: 15 / span 2;" aria-label="V-03, T. Vy, 14–16/10, Đã xác nhận">T. Vy</button>
+<button type="button" class="bk-blk success" style="grid-row: 5; grid-column: 20 / span 6;" aria-label="V-03, Tanaka K., 19–25/10, Đã xác nhận">Tanaka K.<small>6 đêm</small></button>
+<div class="tl__room" style="grid-row: 6; grid-column: 1;"><b>V-05</b><span>Ocean Pool Villa</span></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 6; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 6; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 6; grid-column: 32;"></div>
+<button type="button" class="bk-blk block" style="grid-row: 6; grid-column: 2 / span 5;" aria-label="V-05, Bảo trì hồ bơi, 1–6/10, Khoá phòng">Bảo trì hồ bơi</button>
+<button type="button" class="bk-blk success" style="grid-row: 6; grid-column: 11 / span 2;" aria-label="V-05, Q. Anh, 10–12/10, Đã xác nhận">Q. Anh</button>
+<button type="button" class="bk-blk success" style="grid-row: 6; grid-column: 28 / span 4;" aria-label="V-05, Moreau, 27–31/10, Đã xác nhận">Moreau<small>4 đêm</small></button>
+<div class="tl__grp" style="grid-row: 7; grid-column: 1 / -1;">Grand Heritage Suite · 3 phòng</div>
+<div class="tl__room" style="grid-row: 8; grid-column: 1;"><b>S-01</b><span>Grand Heritage Suite</span></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 8; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 8; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 8; grid-column: 32;"></div>
+<button type="button" class="bk-blk neutral" style="grid-row: 8; grid-column: 6 / span 2;" aria-label="S-01, P. Long, 5–7/10, Đã trả phòng">P. Long</button>
+<button type="button" class="bk-blk info" style="grid-row: 8; grid-column: 17 / span 2;" aria-label="S-01, J. Whitmore, 16–18/10, Đang lưu trú">J. Whitmore<small>đang ở</small></button>
+<button type="button" class="bk-blk success" style="grid-row: 8; grid-column: 23 / span 3;" aria-label="S-01, T. Tâm, 22–25/10, Đã xác nhận">T. Tâm</button>
+<div class="tl__room" style="grid-row: 9; grid-column: 1;"><b>S-02</b><span>Grand Heritage Suite</span></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 9; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 9; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 9; grid-column: 32;"></div>
+<button type="button" class="bk-blk neutral" style="grid-row: 9; grid-column: 3 / span 4;" aria-label="S-02, H. Mai, 2–6/10, Đã trả phòng">H. Mai</button>
+<button type="button" class="bk-blk success sel" style="grid-row: 9; grid-column: 10 / span 3;" aria-label="S-02, A. Novak, 9–12/10, Đã xác nhận">A. Novak</button>
+<button type="button" class="bk-blk warning" style="grid-row: 9; grid-column: 21 / span 2;" aria-label="S-02, L. Quân, 20–22/10, Chờ thanh toán">L. Quân<small>chờ TT</small></button>
+<div class="tl__room" style="grid-row: 10; grid-column: 1;"><b>S-03</b><span>Grand Heritage Suite</span></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 10; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 10; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 10; grid-column: 32;"></div>
+<button type="button" class="bk-blk success" style="grid-row: 10; grid-column: 12 / span 6;" aria-label="S-03, Đoàn cưới, 11–17/10, Đã xác nhận">Đoàn cưới<small>6 đêm</small></button>
+<button type="button" class="bk-blk success" style="grid-row: 10; grid-column: 27 / span 3;" aria-label="S-03, K. Ly, 26–29/10, Đã xác nhận">K. Ly</button>
+<div class="tl__grp" style="grid-row: 11; grid-column: 1 / -1;">Garden Deluxe · 4 phòng</div>
+<div class="tl__room" style="grid-row: 12; grid-column: 1;"><b>G-03</b><span>Garden Deluxe Twin</span></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 12; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 12; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 12; grid-column: 32;"></div>
+<button type="button" class="bk-blk neutral" style="grid-row: 12; grid-column: 5 / span 3;" aria-label="G-03, Ji-woo, 4–7/10, Đã trả phòng">Ji-woo</button>
+<button type="button" class="bk-blk neutral" style="grid-row: 12; grid-column: 13 / span 2;" aria-label="G-03, Ji-woo, 12–14/10, Đã trả phòng">Ji-woo</button>
+<button type="button" class="bk-blk block" style="grid-row: 12; grid-column: 16 / span 7;" aria-label="G-03, Bảo trì, 15–22/10, Khoá phòng">Bảo trì<small>điều hoà</small></button>
+<div class="tl__room" style="grid-row: 13; grid-column: 1;"><b>G-08</b><span>Garden Deluxe King</span></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 13; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 13; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 13; grid-column: 32;"></div>
+<button type="button" class="bk-blk info" style="grid-row: 13; grid-column: 8 / span 2;" aria-label="G-08, T. Hùng, 7–9/10, Đang lưu trú">T. Hùng</button>
+<button type="button" class="bk-blk warning" style="grid-row: 13; grid-column: 22 / span 2;" aria-label="G-08, H. Thương, 21–23/10, Chờ thanh toán">H. Thương<small>chờ TT</small></button>
+<button type="button" class="bk-blk success" style="grid-row: 13; grid-column: 29 / span 3;" aria-label="G-08, B. Ngọc, 28–31/10, Đã xác nhận">B. Ngọc</button>
+<div class="tl__room" style="grid-row: 14; grid-column: 1;"><b>G-12</b><span>Garden Deluxe King</span></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 14; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 14; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 14; grid-column: 32;"></div>
+<button type="button" class="bk-blk neutral" style="grid-row: 14; grid-column: 2 / span 2;" aria-label="G-12, M. Châu, 1–3/10, Đã trả phòng">M. Châu</button>
+<button type="button" class="bk-blk info" style="grid-row: 14; grid-column: 10 / span 4;" aria-label="G-12, E. Laurent, 9–13/10, Đang lưu trú">E. Laurent<small>đang ở</small></button>
+<button type="button" class="bk-blk success" style="grid-row: 14; grid-column: 20 / span 2;" aria-label="G-12, E. Laurent, 19–21/10, Đã xác nhận">E. Laurent</button>
+<div class="tl__room" style="grid-row: 15; grid-column: 1;"><b>G-14</b><span>Garden Deluxe King</span></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 2;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 3;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 4;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 5;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 6;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 7;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 8;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 9;"></div>
+<div class="tl__cell td" style="grid-row: 15; grid-column: 10;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 11;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 12;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 13;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 14;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 15;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 16;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 17;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 18;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 19;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 20;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 21;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 22;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 23;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 24;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 25;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 26;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 27;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 28;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 29;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 30;"></div>
+<div class="tl__cell" style="grid-row: 15; grid-column: 31;"></div>
+<div class="tl__cell we" style="grid-row: 15; grid-column: 32;"></div>
+<button type="button" class="bk-blk success" style="grid-row: 15; grid-column: 14 / span 3;" aria-label="G-14, D. Huy, 13–16/10, Đã xác nhận">D. Huy</button>
+<button type="button" class="bk-blk success" style="grid-row: 15; grid-column: 24 / span 5;" aria-label="G-14, O. Petrov, 23–28/10, Đã xác nhận">O. Petrov<small>5 đêm</small></button>
+</div>
+        </div>
+        <div class="ls-popover" role="dialog" aria-label="Chi tiết đơn" style="position: absolute; left: 650px; top: 360px; width: 320px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;"><span class="ls-badge ls-badge--success">Đã xác nhận</span><span class="ls-code">LXS-0402</span></div>
+          <div style="font: 600 22px/28px var(--font-serif);">Anna Novak</div>
+          <dl class="ls-dl" style="grid-template-columns: 96px 1fr; font-size: 13px; line-height: 20px;"><dt>Phòng</dt><dd>S-02 · Grand Heritage Suite</dd><dt>Lưu trú</dt><dd>09 – 12/10 · 3 đêm</dd><dt>Khách</dt><dd>2 người lớn</dd><dt>Thanh toán</dt><dd>26.700.000 ₫ · VNPay</dd></dl>
+          <div style="display: flex; gap: 8px;"><button type="button" class="ls-btn ls-btn--primary ls-btn--sm" style="flex: 1;">Check-in</button><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm">Đổi phòng</button></div>
+        </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+        <div class="tl" aria-busy="true" style="padding: 16px; display: flex; flex-direction: column; gap: 10px;"><span class="ls-skel" style="height: 40px;"></span><sc-for list="{{rows}}" as="x" hint-placeholder-count="8"><div style="display: flex; gap: 12px;"><span class="ls-skel" style="width: 180px; height: 40px;"></span><span class="ls-skel" style="flex: 1; height: 40px; opacity: .6;"></span></div></sc-for></div>
+        </sc-if>
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+        <div class="admin-state"><div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="1.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg></div><p class="ls-empty__t">Chưa có phòng nào để hiển thị</p><p class="ls-empty__d">Lịch hiển thị theo từng phòng vật lý. Thêm hạng phòng và số phòng trước, sau đó booking sẽ xuất hiện ở đây.</p><div class="ls-empty__a"><a class="ls-btn ls-btn--primary" href="#">Thêm hạng phòng</a></div></div></div>
+        </sc-if>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+        <div class="admin-state"><div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được lịch tháng 10</p><p class="ls-empty__d">Đồng bộ với kênh bán bị gián đoạn. Thay đổi bạn vừa làm chưa bị mất.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div></div>
+        </sc-if>
+      </main>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.props.state ?? 'ready';
+    return {
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      rows: [1, 2, 3, 4, 5, 6, 7, 8]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — Đơn đặt phòng</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lx ls adm" data-theme="{{theme}}">
+  <div class="dm dm--admin" role="note"><span class="dm__tag">Demo</span><span>Đây là bản demo: dữ liệu được làm mới mỗi 24 giờ, thanh toán và email không được gửi thật.</span><button type="button" class="dm__x" aria-label="Đóng thông báo demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  <div class="ad">
+    <dc-import name="AdminSidebar" collapsed="{{collapsed}}" active="bookings" theme="{{theme}}" hint-size="264px,100%"></dc-import>
+    <div class="am">
+      <dc-import name="AdminTopbar" compact="{{collapsed}}" theme="{{theme}}" hint-size="100%,72px"></dc-import>
+      <main class="am__body">
+        <div class="am__head">
+          <div><ol class="crumbs"><li><a href="#">Quản trị</a></li><li>Đơn đặt phòng</li></ol><h1>Đơn đặt phòng</h1><p>248 đơn trong tháng 10/2026 · 5 đơn cần xử lý</p></div>
+          <div class="am__actions"><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg>Xuất CSV</button><button type="button" class="ls-btn ls-btn--primary" onClick="{{openCounter}}"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Đặt phòng tại quầy</button></div>
+        </div>
+        <div class="ls-tabs" role="tablist" aria-label="Lọc theo trạng thái">
+          <button type="button" class="ls-tab" role="tab" aria-selected="true">Tất cả <span class="ls-tab__n">248</span></button>
+          <button type="button" class="ls-tab" role="tab" aria-selected="false">Chờ thanh toán <span class="ls-tab__n">5</span></button>
+          <button type="button" class="ls-tab" role="tab" aria-selected="false">Đã xác nhận <span class="ls-tab__n">162</span></button>
+          <button type="button" class="ls-tab" role="tab" aria-selected="false">Đang lưu trú <span class="ls-tab__n">51</span></button>
+          <button type="button" class="ls-tab" role="tab" aria-selected="false">Hoàn tất <span class="ls-tab__n">18</span></button>
+          <button type="button" class="ls-tab" role="tab" aria-selected="false">Đã huỷ <span class="ls-tab__n">10</span></button>
+          <button type="button" class="ls-tab" role="tab" aria-selected="false">Chờ hoàn tiền <span class="ls-tab__n">2</span></button>
+        </div>
+        <div class="ls-tablewrap">
+          <div class="ls-tablebar">
+            <div class="ls-control" style="height: 40px; width: 300px;"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg><input aria-label="Tìm đơn" placeholder="Mã đơn, tên khách, email, SĐT" value="{{query}}"></div>
+            <button type="button" class="ls-chip"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="1.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>Nhận phòng: 01/10 – 31/10<svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+            <button type="button" class="ls-chip">Hạng phòng<svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+            <button type="button" class="ls-chip">Kênh: Tất cả<svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+          </div>
+
+          <sc-if value="{{isReady}}" hint-placeholder-val="{{true}}">
+          <table class="ls-table">
+            <thead><tr><th><button>Khách <svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg></button></th><th>Phòng</th><th aria-sort="ascending"><button>Nhận – trả <svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M7 14l5 5 5-5"></path></svg></button></th><th>Kênh</th><th class="is-num">Tổng</th><th>Trạng thái</th><th style="width: 220px;">Hành động</th></tr></thead>
+            <tbody>
+              <tr><td><div class="ls-person"><span class="ls-avatar">PB</span><div><div class="ls-cell-main">Phạm Gia Bảo</div><div class="ls-code">LXS-0418</div></div></div></td><td>Ocean Pool Villa · V-05</td><td>24 – 27/10 · 3 đêm</td><td>Website · MoMo</td><td class="is-num">37.500.000 ₫</td><td><span class="ls-badge ls-badge--warning">Chờ thanh toán</span></td><td><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openCollect}}">Đã thu tiền</button></td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">EL</span><div><div class="ls-cell-main">Emma Laurent</div><div class="ls-code">LXS-0417</div></div></div></td><td>Garden Deluxe King · G-12</td><td>19 – 21/10 · 2 đêm</td><td>Website · VNPay</td><td class="is-num">9.700.000 ₫</td><td><span class="ls-badge ls-badge--success">Đã xác nhận</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" onClick="{{openDetail}}">Xem chi tiết</button></td></tr>
+              <tr class="is-hover"><td><div class="ls-person"><span class="ls-avatar">LB</span><div><div class="ls-cell-main">Lê Quốc Bảo</div><div class="ls-code">LXS-0398</div></div></div></td><td>Ocean Pool Villa · V-02</td><td>02 – 05/11 · 3 đêm</td><td>Website · MoMo</td><td class="is-num">37.500.000 ₫</td><td><span class="ls-badge ls-badge--info">Chờ hoàn tiền</span></td><td><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openRefund}}">Xác nhận hoàn tiền</button></td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">JW</span><div><div class="ls-cell-main">James Whitmore</div><div class="ls-code">LXS-0411</div></div></div></td><td>Grand Heritage Suite · S-01</td><td>16 – 18/10 · 2 đêm</td><td>Tại quầy · Thẻ</td><td class="is-num">17.800.000 ₫</td><td><span class="ls-badge ls-badge--info">Đang lưu trú</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm">Check-out</button></td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">TT</span><div><div class="ls-cell-main">Trần Hoài Thương</div><div class="ls-code">LXS-0409</div></div></div></td><td>Garden Deluxe King · G-08</td><td>21 – 23/10 · 2 đêm</td><td>Tại quầy · Tiền mặt</td><td class="is-num">9.700.000 ₫</td><td><span class="ls-badge ls-badge--warning">Chờ thanh toán</span></td><td><button type="button" class="ls-btn ls-btn--secondary ls-btn--sm" onClick="{{openCollect}}">Đã thu tiền</button></td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">PJ</span><div><div class="ls-cell-main">Park Ji-woo</div><div class="ls-code">LXS-0405</div></div></div></td><td>Garden Deluxe Twin · G-03</td><td>12 – 14/10 · 2 đêm</td><td>Website · VNPay</td><td class="is-num">9.200.000 ₫</td><td><span class="ls-badge">Hoàn tất</span></td><td><button type="button" class="ls-btn ls-btn--ghost ls-btn--sm" onClick="{{openDetail}}">Xem chi tiết</button></td></tr>
+              <tr><td><div class="ls-person"><span class="ls-avatar">NK</span><div><div class="ls-cell-main">Ngô Khánh Linh</div><div class="ls-code">LXS-0401</div></div></div></td><td>Mist Valley Lodge · L-04</td><td>09 – 11/10 · 2 đêm</td><td>Website · MoMo</td><td class="is-num">7.200.000 ₫</td><td><span class="ls-badge ls-badge--danger">Đã huỷ</span></td><td><span class="ls-muted" style="font-size: 13px;">Tự huỷ · quá hạn thanh toán</span></td></tr>
+            </tbody>
+          </table>
+          <div style="padding: 16px;"><nav class="ls-pager" aria-label="Phân trang"><span>Hiển thị <b style="color: var(--ink);">1–7</b> trong 248 đơn</span><ul class="ls-pages"><li><button type="button" class="ls-page ls-page--nav" disabled>Trước</button></li><li><button type="button" class="ls-page" aria-current="page">1</button></li><li><button type="button" class="ls-page">2</button></li><li><button type="button" class="ls-page">3</button></li><li><span class="ls-page__gap">…</span></li><li><button type="button" class="ls-page">36</button></li><li><button type="button" class="ls-page ls-page--nav">Sau</button></li></ul></nav></div>
+          </sc-if>
+          <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+          <div aria-busy="true" style="padding: 8px 16px;"><sc-for list="{{rows}}" as="x" hint-placeholder-count="7"><div style="display: flex; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line);"><span class="ls-skel ls-skel--circle" style="width: 32px; height: 32px;"></span><span class="ls-skel ls-skel--text" style="width: 180px;"></span><span class="ls-skel ls-skel--text" style="width: 160px;"></span><span class="ls-skel ls-skel--text" style="width: 110px;"></span><span class="ls-skel ls-skel--text" style="width: 100px; margin-left: auto;"></span><span class="ls-skel" style="width: 100px; height: 24px;"></span></div></sc-for></div>
+          </sc-if>
+          <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg></div><p class="ls-empty__t">Không có đơn khớp “Nguyễn Văn An”</p><p class="ls-empty__d">Thử tìm theo số điện thoại hoặc mã đơn, hoặc bỏ bộ lọc ngày nhận phòng.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--secondary">Xoá bộ lọc</button><button type="button" class="ls-btn ls-btn--primary">Tạo đơn tại quầy</button></div></div>
+          </sc-if>
+          <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+          <div class="ls-empty ls-empty--error" role="alert"><div class="ls-empty__art"><svg class="ls-icon" viewBox="0 0 96 96" aria-hidden="true"><path d="M28 70h44a14 14 0 0 0 0-28 22 22 0 0 0-42-4 16 16 0 0 0-2 32z"></path><path d="M48 46v14M48 66v1"></path></svg></div><p class="ls-empty__t">Không tải được danh sách đơn</p><p class="ls-empty__d">Mất kết nối tới máy chủ lúc 14:32. Thông báo đơn mới vẫn được ghi nhận.</p><div class="ls-empty__a"><button type="button" class="ls-btn ls-btn--primary">Tải lại</button></div></div>
+          </sc-if>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- COLLECT MODAL -->
+  <sc-if value="{{mCollect}}" hint-placeholder-val="{{false}}">
+  <div class="modal-stage"><div class="ls-scrim"><div class="ls-modal" role="dialog" aria-modal="true" aria-labelledby="mc1">
+    <div class="ls-modal__head"><h2 class="ls-modal__title" id="mc1">Xác nhận đã thu tiền?</h2><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng" onClick="{{close}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <div class="ls-modal__body" style="display: flex; flex-direction: column; gap: 16px;">
+      <p style="margin: 0;">Đơn <b style="color: var(--ink);">LXS-0409</b> · Trần Hoài Thương · Garden Deluxe King · 21 – 23/10. Đơn sẽ chuyển sang <b style="color: var(--success);">Đã xác nhận</b> và khách nhận email xác nhận.</p>
+      <div class="rf-amount" style="margin: 0;"><span>Số tiền thu</span><b style="color: var(--ink);">9.700.000 ₫</b></div>
+      <div class="g2"><div class="ls-field"><span class="ls-label">Hình thức</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">Tiền mặt tại quầy</span><svg class="ls-icon ls-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div></div><div class="ls-field"><label class="ls-label" for="rc">Số biên lai <span class="ls-opt">(không bắt buộc)</span></label><div class="ls-control"><input id="rc" value="BL-102611"></div></div></div>
+    </div>
+    <div class="ls-modal__foot"><button type="button" class="ls-btn ls-btn--secondary" onClick="{{close}}">Huỷ</button><button type="button" class="ls-btn ls-btn--primary">Xác nhận đã thu 9.700.000 ₫</button></div>
+  </div></div></div>
+  </sc-if>
+
+  <!-- REFUND MODAL -->
+  <sc-if value="{{mRefund}}" hint-placeholder-val="{{false}}">
+  <div class="modal-stage"><div class="ls-scrim"><div class="ls-modal" role="dialog" aria-modal="true" aria-labelledby="mr1">
+    <div class="ls-modal__head"><h2 class="ls-modal__title" id="mr1">Xác nhận hoàn tiền LXS-0398?</h2><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng" onClick="{{close}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <div class="ls-modal__body" style="display: flex; flex-direction: column; gap: 14px;">
+      <p style="margin: 0;">Lê Quốc Bảo huỷ lúc 09:41, 07/10/2026 — trong thời hạn huỷ miễn phí (trước 26/10).</p>
+      <div class="rf-amount" style="margin: 0;"><span>Hoàn về ví MoMo 090•••4471</span><b>37.500.000 ₫</b></div>
+      <div class="rf-lines"><div><span>Đã thanh toán</span><span style="color: var(--ink);">37.500.000 ₫</span></div><div><span>Phí huỷ (0%)</span><span style="color: var(--ink);">0 ₫</span></div></div>
+      <div class="ls-alert ls-alert--warning"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg><div>Thao tác không thể hoàn tác. Lệnh hoàn sẽ gửi tới MoMo ngay sau khi xác nhận.</div></div>
+    </div>
+    <div class="ls-modal__foot"><button type="button" class="ls-btn ls-btn--secondary is-focus" onClick="{{close}}">Để sau</button><button type="button" class="ls-btn ls-btn--primary">Hoàn 37.500.000 ₫</button></div>
+  </div></div></div>
+  </sc-if>
+
+  <!-- BOOKING DETAIL DRAWER -->
+  <sc-if value="{{mDetail}}" hint-placeholder-val="{{false}}">
+  <div class="modal-stage">
+    <div class="ls-scrim" onClick="{{close}}"></div>
+    <aside class="ls-drawer bdr" role="dialog" aria-modal="true" aria-labelledby="bd-t" style="position: absolute;">
+      <div class="ls-drawer__head">
+        <div class="bdr__head"><span class="ls-avatar" style="width: 44px; height: 44px; font-size: 14px;">EL</span><div><div class="ls-eyebrow">LXS-241019-0417 · Website</div><h2 id="bd-t" style="margin: 2px 0 0; font: 600 26px/32px var(--font-serif);">Emma Laurent</h2></div></div>
+        <div style="display: flex; gap: 4px;"><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đơn trước"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đơn sau"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng" onClick="{{close}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+      </div>
+      <div class="ls-drawer__body">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;"><span class="ls-badge ls-badge--success ls-badge--lg">Đã xác nhận</span><span class="ls-badge ls-badge--accent ls-badge--plain ls-badge--lg">Đã thanh toán · VNPay</span><span class="ls-badge ls-badge--brass ls-badge--plain ls-badge--lg">Khách quay lại · lần 3</span></div>
+        <section class="dsec"><h3>Lưu trú</h3><dl class="ls-dl"><dt>Phòng</dt><dd>Garden Deluxe King · <b>G-12</b> <a href="#" style="font-size: 13px; margin-left: 6px;">Đổi phòng</a></dd><dt>Nhận phòng</dt><dd>T2, 19/10/2026 · dự kiến 15:00</dd><dt>Trả phòng</dt><dd>T4, 21/10/2026 · trước 12:00</dd><dt>Khách</dt><dd>2 người lớn</dd><dt>Yêu cầu</dt><dd>Giường King, tầng cao, gối cứng. Dị ứng lông vũ — đã ghi chú buồng phòng.</dd></dl></section>
+        <section class="dsec"><h3>Liên hệ</h3><dl class="ls-dl"><dt>Email</dt><dd>emma.laurent@orange.fr</dd><dt>Điện thoại</dt><dd>+33 6 12 34 56 78</dd><dt>Quốc tịch</dt><dd>Pháp · hộ chiếu đã khai báo tạm trú</dd></dl></section>
+        <section class="dsec"><h3>Thanh toán</h3>
+          <div class="rf-lines"><div><span>4.850.000 ₫ × 2 đêm</span><span style="color: var(--ink);">9.700.000 ₫</span></div><div><span>Giảm giá</span><span style="color: var(--ink);">0 ₫</span></div></div>
+          <div class="bdr__pay" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);"><span style="font-weight: 600;">Đã thu</span><b>9.700.000 ₫</b></div>
+          <p class="ls-help" style="margin-top: 6px;">VNPay · mã GD 14520983 · 18:42, 08/10/2026</p>
+        </section>
+        <section class="dsec"><h3>Lịch sử</h3><ul class="tl-act">
+          <li class="ok"><i></i><span><b>Thanh toán thành công</b> qua VNPay</span><span>18:42, 08/10</span></li>
+          <li><i></i><span><b>Gửi email xác nhận</b> tới khách</span><span>18:42, 08/10</span></li>
+          <li class="warn"><i></i><span><b>Tạo đơn</b> trên website · giữ phòng 15 phút</span><span>18:39, 08/10</span></li>
+        </ul></section>
+        <div class="ls-field"><label class="ls-label" for="bd-note">Ghi chú nội bộ</label><div class="ls-control ls-textarea"><textarea id="bd-note" style="min-height: 64px;" placeholder="Chỉ nhân viên thấy ghi chú này"></textarea></div></div>
+      </div>
+      <div class="ls-drawer__foot"><button type="button" class="ls-btn ls-btn--ghost" style="color: var(--danger);">Huỷ đơn</button><span style="flex: 1;"></span><button type="button" class="ls-btn ls-btn--secondary"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"></path></svg>Phiếu PDF</button><button type="button" class="ls-btn ls-btn--primary">Check-in</button></div>
+    </aside>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{showToast}}" hint-placeholder-val="{{false}}">
+  <div class="toast-stage ls">
+    <div class="ls-toast ls-toast--success" role="status"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Đã xác nhận thu 9.700.000 ₫</div><div class="ls-toast__d">LXS-0409 chuyển sang Đã xác nhận. Email đã gửi cho khách.</div><div class="ls-toast__a"><button type="button">Hoàn tác</button><button type="button">Xem đơn</button></div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><span class="ls-toast__bar" style="transform: scaleX(.7);"></span></div>
+    <div class="ls-toast ls-toast--danger" role="alert"><span class="ls-toast__ic"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg></span><div class="ls-toast__b"><div class="ls-toast__t">Hoàn tiền LXS-0398 thất bại</div><div class="ls-toast__d">MoMo từ chối lệnh hoàn (mã 1006). Chưa có tiền nào được trừ.</div><div class="ls-toast__a"><button type="button">Thử lại</button><button type="button">Chi tiết lỗi</button></div></div><button type="button" class="ls-toast__x" aria-label="Đóng thông báo"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+  </div>
+  </sc-if>
+
+  <!-- COUNTER BOOKING DRAWER -->
+  <sc-if value="{{mCounter}}" hint-placeholder-val="{{false}}">
+  <div class="modal-stage">
+    <div class="ls-scrim" onClick="{{close}}"></div>
+    <aside class="ls-drawer" role="dialog" aria-modal="true" aria-labelledby="cd1" style="position: absolute; width: 560px;">
+      <div class="ls-drawer__head"><div><div class="ls-eyebrow">Đơn mới</div><h2 id="cd1" style="margin: 2px 0 0; font: 600 28px/34px var(--font-serif);">Đặt phòng tại quầy</h2></div><button type="button" class="ls-btn ls-btn--ghost ls-btn--icon ls-btn--sm" aria-label="Đóng" onClick="{{close}}"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+      <div class="ls-drawer__body" style="display: flex; flex-direction: column; gap: 18px;">
+        <div class="k" style="font: 600 12px/16px var(--font-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted);">Khách</div>
+        <div class="g2"><div class="ls-field"><label class="ls-label" for="cb-n">Họ và tên</label><div class="ls-control"><input id="cb-n" value="Đinh Quang Huy"></div></div><div class="ls-field"><label class="ls-label" for="cb-p">Số điện thoại</label><div class="ls-control is-invalid" aria-invalid="true"><span class="ls-control__suffix">+84</span><input id="cb-p" value="912 33" aria-describedby="cb-p-m"></div><p class="ls-error-text" id="cb-p-m"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5.5M12 16.2v.3"></path></svg>Cần 9–10 chữ số</p></div></div>
+        <div class="ls-field"><label class="ls-label" for="cb-e">Email <span class="ls-opt">(để gửi xác nhận)</span></label><div class="ls-control"><input id="cb-e" value="huy.dinh@outlook.com"></div></div>
+        <div class="k" style="font: 600 12px/16px var(--font-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); margin-top: 6px;">Lưu trú</div>
+        <div class="g2"><div class="ls-field"><span class="ls-label">Nhận phòng</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">Hôm nay, 08/10</span></div></div><div class="ls-field"><span class="ls-label">Trả phòng</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">10/10 · 2 đêm</span></div></div></div>
+        <div class="g2"><div class="ls-field"><span class="ls-label">Hạng phòng</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">Garden Deluxe King</span><svg class="ls-icon ls-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div><p class="ls-help" style="color: var(--success);">Còn 3 phòng trống</p></div><div class="ls-field"><span class="ls-label">Số phòng</span><div class="ls-control ls-control--select" role="button" tabindex="0"><span class="ls-value">G-14 · tầng 2</span><svg class="ls-icon ls-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></div></div></div>
+        <div class="k" style="font: 600 12px/16px var(--font-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); margin-top: 6px;">Thanh toán</div>
+        <div class="chipset"><button type="button" class="ls-chip" aria-pressed="true">Tiền mặt</button><button type="button" class="ls-chip">Chuyển khoản</button><button type="button" class="ls-chip">Thẻ (POS)</button><button type="button" class="ls-chip">Thu khi trả phòng</button></div>
+        <label class="swl"><button type="button" class="sw" role="switch" aria-checked="true" aria-label="Đã thu đủ tiền"></button>Đã thu đủ tiền — xác nhận đơn ngay</label>
+        <div class="sum__rows" style="padding: 16px; border: 1px solid var(--line); border-radius: 8px;">
+          <div class="sum__row"><span>4.850.000 ₫ × 2 đêm</span><b>9.700.000 ₫</b></div>
+          <div class="sum__row"><span>Giảm giá thủ công</span><b>0 ₫</b></div>
+          <div class="sum__row" style="font-weight: 600; color: var(--ink);"><span>Tổng</span><b style="font: 600 22px/28px var(--font-serif);">9.700.000 ₫</b></div>
+        </div>
+      </div>
+      <div class="ls-drawer__foot"><button type="button" class="ls-btn ls-btn--secondary" onClick="{{close}}">Huỷ</button><button type="button" class="ls-btn ls-btn--primary" style="flex: 1;">Tạo đơn &amp; gửi xác nhận</button></div>
+    </aside>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","loading","empty","error"],"default":"ready"},"modal":{"editor":"enum","options":["none","collect","refund","counter","detail"],"default":"none"},"toast":{"editor":"boolean","default":false},"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { modal: null };
+  }
+  renderVals() {
+    const st = this.props.state ?? 'ready';
+    const m = this.state.modal ?? this.props.modal ?? 'none';
+    return {
+      theme: this.props.theme ?? 'light',
+      collapsed: !!this.props.collapsed,
+      isReady: st === 'ready', isLoading: st === 'loading', isEmpty: st === 'empty', isError: st === 'error',
+      query: st === 'empty' ? 'Nguyễn Văn An' : '',
+      rows: [1, 2, 3, 4, 5, 6, 7],
+      mCollect: m === 'collect', mRefund: m === 'refund', mCounter: m === 'counter', mDetail: m === 'detail', showToast: !!this.props.toast,
+      openDetail: () => this.setState({ modal: 'detail' }),
+      openCollect: () => this.setState({ modal: 'collect' }),
+      openRefund: () => this.setState({ modal: 'refund' }),
+      openCounter: () => this.setState({ modal: 'counter' }),
+      close: () => this.setState({ modal: 'none' })
+    };
+  }
+}
+</script>
+</body>
+</html>

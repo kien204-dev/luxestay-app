@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin — thanh trên</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/luxestay/components/bundle.css">
+<link rel="stylesheet" href="luxestay.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<header class="lx at ls" data-theme="{{theme}}" style="font-family: var(--font-sans);">
+  <div class="ls-control at__search" role="search">
+    <svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+    <input aria-label="Tìm kiếm" placeholder="Tìm mã đơn, tên khách, số phòng…">
+    <span class="at__kbd">Ctrl K</span>
+  </div>
+  <div class="at__right">
+    <a class="ls-btn ls-btn--primary ls-btn--sm" href="#"><svg class="ls-icon ls-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span class="ls-btn__label">Đặt tại quầy</span></a>
+    <span class="at__div" aria-hidden="true"></span>
+    <button class="at__icon" aria-label="Thông báo, 5 đơn mới" aria-haspopup="dialog" aria-expanded="{{notifExpanded}}" onClick="{{toggleNotif}}">
+      <svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg>
+      <span class="at__badge">5</span>
+    </button>
+    <button class="at__acct" aria-haspopup="menu" aria-expanded="{{acctExpanded}}" onClick="{{toggleAcct}}">
+      <span class="ls-avatar">TH</span>
+      <sc-if value="{{showName}}" hint-placeholder-val="{{true}}"><div><b>Trần Thu Hà</b><span>Quản lý lễ tân</span></div></sc-if>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+
+    <sc-if value="{{notifOpen}}" hint-placeholder-val="{{false}}">
+    <div class="dd dd--notif" role="dialog" aria-label="Thông báo">
+      <div class="dd__head"><b>Thông báo</b><button class="ls-btn ls-btn--link" style="font-size: 13px;">Đánh dấu đã đọc</button></div>
+      <div class="dd__tabs" role="tablist">
+        <button class="ls-tab" role="tab" aria-selected="true">Đơn mới <span class="ls-tab__n">5</span></button>
+        <button class="ls-tab" role="tab" aria-selected="false">Hoạt động</button>
+      </div>
+      <ul class="nlist">
+        <li><a class="nitem is-unread" href="#"><span class="nitem__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="1.5"></rect><path d="M8.5 10h7M8.5 14h7"></path></svg></span><div><div class="nitem__t"><b>LXS-0418</b> · Ocean Pool Villa</div><div class="nitem__s">Phạm Gia Bảo · 24–27/10 · 37.500.000 ₫</div><div style="margin-top: 6px;"><span class="ls-badge ls-badge--warning">Chờ thanh toán</span></div></div><span class="nitem__time">2 phút</span></a></li>
+        <li><a class="nitem is-unread" href="#"><span class="nitem__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="1.5"></rect><path d="M8.5 10h7M8.5 14h7"></path></svg></span><div><div class="nitem__t"><b>LXS-0417</b> · Garden Deluxe King</div><div class="nitem__s">Emma Laurent · 19–21/10 · 9.700.000 ₫</div><div style="margin-top: 6px;"><span class="ls-badge ls-badge--success">Đã xác nhận</span></div></div><span class="nitem__time">18 phút</span></a></li>
+        <li><a class="nitem is-unread" href="#"><span class="nitem__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="1.5"></rect><path d="M8.5 10h7M8.5 14h7"></path></svg></span><div><div class="nitem__t"><b>LXS-0416</b> · Grand Heritage Suite</div><div class="nitem__s">Võ Thanh Tâm · 01–03/11 · 17.800.000 ₫</div><div style="margin-top: 6px;"><span class="ls-badge ls-badge--success">Đã xác nhận</span></div></div><span class="nitem__time">1 giờ</span></a></li>
+        <li><a class="nitem" href="#"><span class="nitem__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95"></path><path d="M19 4v4h-4"></path></svg></span><div><div class="nitem__t"><b>LXS-0398</b> yêu cầu hoàn tiền</div><div class="nitem__s">Lê Quốc Bảo · hoàn 37.500.000 ₫</div><div style="margin-top: 6px;"><span class="ls-badge ls-badge--info">Chờ hoàn tiền</span></div></div><span class="nitem__time">3 giờ</span></a></li>
+      </ul>
+      <div class="dd__foot"><a class="ls-btn ls-btn--link" href="#" style="font-size: 13px;">Xem tất cả đơn đặt phòng</a><a class="ls-btn ls-btn--link" href="#" style="font-size: 13px;">Cài đặt thông báo</a></div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{acctOpen}}" hint-placeholder-val="{{false}}">
+    <div class="dd dd--acct" role="menu" aria-label="Tài khoản">
+      <div class="dd__who"><b>Trần Thu Hà</b><span>ha.tran@luxestay.vn · Quản lý lễ tân</span></div>
+      <div class="dd__sep"></div>
+      <a class="ls-option" role="menuitem" href="#"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c1.2-3.6 3.9-5.5 7-5.5s5.8 1.9 7 5.5"></path></svg>Hồ sơ của tôi</a>
+      <a class="ls-option" role="menuitem" href="#"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.5"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path></svg>Đổi mật khẩu</a>
+      <a class="ls-option" role="menuitem" href="#"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"></path></svg>Giao diện: Sáng</a>
+      <div class="dd__sep"></div>
+      <a class="ls-option" role="menuitem" href="#" style="color: var(--danger);"><svg class="ls-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"></path></svg>Đăng xuất</a>
+    </div>
+    </sc-if>
+  </div>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"notifOpen":{"editor":"boolean","default":false},"acctOpen":{"editor":"boolean","default":false},"compact":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1176,"height":72}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { notif: null, acct: null };
+  }
+  renderVals() {
+    const notif = this.state.notif ?? !!this.props.notifOpen;
+    const acct = this.state.acct ?? !!this.props.acctOpen;
+    return {
+      theme: this.props.theme ?? 'light',
+      notifOpen: notif,
+      acctOpen: acct,
+      notifExpanded: notif ? 'true' : 'false',
+      acctExpanded: acct ? 'true' : 'false',
+      showName: !this.props.compact,
+      toggleNotif: () => this.setState({ notif: !notif, acct: false }),
+      toggleAcct: () => this.setState({ acct: !acct, notif: false })
+    };
+  }
+}
+</script>
+</body>
+</html>
