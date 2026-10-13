@@ -5,6 +5,7 @@ const PDFDocument = require("pdfkit");
 const { getPropertySettings } = require("../services/propertySettings");
 const { daysBetween, getAppTimezone, todayInAppTimezone } = require("../utils/time");
 const { apiMessage } = require("../utils/apiMessages");
+const { computeDashboardOverview, resolveWindow } = require("../services/dashboardOverview");
 
 // pdfkit's built-in standard fonts (Helvetica etc.) have no Vietnamese
 // glyph coverage, so PDF text needs an embedded Unicode font — Noto Sans
@@ -357,6 +358,94 @@ exports.getDashboardAnalytics = async (req, res) => {
   }
 };
 
+// Any window of days (?from=&to=, dates at the property): KPIs against the
+// window before, a value per day, today at the property, latest bookings.
+exports.getDashboardOverview = async (req, res) => {
+  const window = resolveWindow(req.query);
+  if (window.error) return res.status(400).json(apiMessage(window.error, window.params));
+  try {
+    res.json(await computeDashboardOverview(window));
+  } catch (err) {
+    console.error("GET DASHBOARD OVERVIEW ERROR:", err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+};
+
+const percent = (value) => (value === null || value === undefined ? "—" : `${(value * 100).toFixed(1)}%`);
+
+// The export for a window of days: the same numbers as the overview.
+function overviewRows(overview) {
+  const { current: c, before: b } = overview;
+  return [
+    ["Khoảng thời gian", `${overview.from} → ${overview.to} (${overview.days} ngày)`, `${overview.previous.from} → ${overview.previous.to}`],
+    ["Doanh thu (đơn đã thanh toán, theo ngày đặt)", c.revenue, b.revenue],
+    ["Booking mới", c.bookings, b.bookings],
+    ["Trong đó đã huỷ", c.cancelled, b.cancelled],
+    ["Đêm phòng đã bán", c.nightsSold, b.nightsSold],
+    ["Đêm phòng có thể bán", c.nightsAvailable, b.nightsAvailable],
+    ["Công suất phòng", percent(c.occupancy), percent(b.occupancy)],
+    ["Giá trung bình / đêm", c.adr ?? "—", b.adr ?? "—"],
+  ];
+}
+
+async function buildOverviewExcelBuffer(overview, propertyName) {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = propertyName;
+  workbook.created = new Date();
+  const summary = workbook.addWorksheet("Tổng quan");
+  summary.columns = [
+    { header: "Chỉ số", key: "label", width: 44 },
+    { header: "Kỳ này", key: "current", width: 26 },
+    { header: "Kỳ trước", key: "before", width: 26 },
+  ];
+  styleHeaderRow(summary.getRow(1));
+  overviewRows(overview).forEach(([label, current, before]) => summary.addRow({ label, current, before }));
+  ["current", "before"].forEach((key) => { summary.getColumn(key).numFmt = "#,##0"; });
+
+  const daily = workbook.addWorksheet("Theo ngày");
+  daily.columns = [
+    { header: "Ngày", key: "date", width: 14 },
+    { header: "Doanh thu", key: "revenue", width: 18 },
+    { header: "Booking mới", key: "bookings", width: 14 },
+    { header: "Đêm phòng đã bán", key: "nightsSold", width: 18 },
+    { header: "Công suất", key: "occupancy", width: 12 },
+    { header: "Doanh thu kỳ trước", key: "prevRevenue", width: 20 },
+  ];
+  styleHeaderRow(daily.getRow(1));
+  overview.series.forEach((day) => daily.addRow({ ...day, occupancy: percent(day.occupancy) }));
+  ["revenue", "prevRevenue"].forEach((key) => { daily.getColumn(key).numFmt = "#,##0"; });
+  return workbook.xlsx.writeBuffer();
+}
+
+function buildOverviewPdfBuffer(overview, propertyName) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 40, size: "A4" });
+    doc.font(VI_FONT_PATH);
+    const chunks = [];
+    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+
+    doc.fontSize(20).fillColor("#0A1128").text(`Báo cáo Dashboard - ${propertyName}`, { align: "center" });
+    doc.moveDown(0.3);
+    doc.fontSize(11).fillColor("#555555").text(`Xuất lúc: ${new Date().toLocaleString("vi-VN")}`, { align: "center" });
+    doc.moveDown(1.2);
+    doc.fontSize(10).fillColor("#000000");
+    overviewRows(overview).forEach(([label, current, before]) => {
+      const show = (value) => (typeof value === "number" && label !== "Booking mới" && !/Đêm|huỷ/.test(label) ? formatVnd(value) : String(value));
+      doc.text(`${label}: ${show(current)}   (kỳ trước: ${show(before)})`);
+    });
+    doc.moveDown(1);
+    doc.fontSize(14).fillColor("#0A1128").text("Theo ngày");
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#000000");
+    overview.series.forEach((day) => {
+      doc.text(`${day.date}: ${formatVnd(day.revenue)} · ${day.bookings} booking · ${day.nightsSold} đêm phòng · công suất ${percent(day.occupancy)}`);
+    });
+    doc.end();
+  });
+}
+
 function formatVnd(value) {
   return `${(Number(value) || 0).toLocaleString("vi-VN")} đ`;
 }
@@ -535,6 +624,22 @@ exports.exportDashboardReport = async (req, res) => {
     const format = String(req.query.format || "").toLowerCase();
     if (!EXPORT_FORMATS.has(format)) {
       return res.status(400).json({ ...apiMessage("INVALID_EXPORT_FORMAT") });
+    }
+
+    if (req.query.from !== undefined || req.query.to !== undefined) {
+      const window = resolveWindow(req.query);
+      if (window.error) return res.status(400).json(apiMessage(window.error, window.params));
+      const overview = await computeDashboardOverview(window);
+      const propertyName = (await getPropertySettings()).name;
+      const filenameBase = `luxestay-dashboard-${window.from}-${window.to}`;
+      if (format === "xlsx") {
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", `attachment; filename="${filenameBase}.xlsx"`);
+        return res.send(await buildOverviewExcelBuffer(overview, propertyName));
+      }
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${filenameBase}.pdf"`);
+      return res.send(await buildOverviewPdfBuffer(overview, propertyName));
     }
 
     const stats = await computeDashboardStats(req.query.range);

@@ -262,7 +262,11 @@ const BOOKING_SELECT = `
     b.guest_name,
     b.guest_phone,
     b.guest_email,
+    paid.provider AS paid_via,
+    paid.transaction_ref AS paid_ref,
+    paid.paid_at,
     u.name AS user_name,
+    u.phone AS user_phone,
     u.email AS user_email,
     r.room_name,
     r.room_type,
@@ -275,7 +279,30 @@ const BOOKING_SELECT = `
   JOIN users u ON b.user_id = u.id
   JOIN rooms r ON b.room_id = r.id
   LEFT JOIN coupons c ON b.coupon_id = c.id
+  LEFT JOIN LATERAL (
+    SELECT p.provider, p.transaction_ref, p.updated_at AS paid_at
+    FROM payments p
+    WHERE p.booking_id = b.id AND p.status = 'success'
+    ORDER BY p.updated_at DESC
+    LIMIT 1
+  ) paid ON TRUE
 `;
+
+// An admin's search box: a booking code ("#BK-0012", "BK12", "12") or part
+// of the guest's name, email or phone (the account's, or the desk guest's).
+function bookingSearchCondition(raw, params) {
+  const q = String(raw || "").trim().slice(0, 100);
+  if (!q) return null;
+  const code = q.match(/^#?\s*(?:bk)?[-\s]*0*(\d{1,9})$/i);
+  params.push(`%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+  const like = `$${params.length}`;
+  const text = [
+    "u.name", "u.email", "u.phone", "b.guest_name", "b.guest_email", "b.guest_phone",
+  ].map((column) => `${column} ILIKE ${like}`).join(" OR ");
+  if (!code) return `(${text})`;
+  params.push(Number(code[1]));
+  return `(b.id = $${params.length} OR ${text})`;
+}
 
 const PAYMENT_STATUSES = ["unpaid", "pending", "paid", "failed", "refund_pending", "refunded"];
 
@@ -315,6 +342,28 @@ exports.getBookings = async (req, res) => {
       conditions.push(`b.check_out <= $${params.length}::date`);
     }
 
+    // Admin-only filters of the orders list.
+    if (req.user.role === "admin") {
+      const search = bookingSearchCondition(req.query.q, params);
+      if (search) conditions.push(search);
+
+      // Staying tonight: confirmed and today falls in the stay.
+      if (req.query.stay === "in_house" || req.query.stay === "not_in_house") {
+        params.push(todayInAppTimezone());
+        const inHouse = `(b.status = 'confirmed' AND b.check_in <= $${params.length}::date AND b.check_out > $${params.length}::date)`;
+        conditions.push(req.query.stay === "in_house" ? inHouse : `NOT ${inHouse}`);
+      }
+
+      if (typeof req.query.room_type === "string" && req.query.room_type.trim()) {
+        params.push(req.query.room_type.trim());
+        conditions.push(`LOWER(r.room_type) = LOWER($${params.length})`);
+      }
+
+      // Entered at the desk (walk-in, guest_* set) or booked online.
+      if (req.query.channel === "desk") conditions.push("b.guest_name IS NOT NULL");
+      if (req.query.channel === "online") conditions.push("b.guest_name IS NULL");
+    }
+
     const whereClause = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
     const usePagination = page !== undefined || limit !== undefined;
 
@@ -331,7 +380,7 @@ exports.getBookings = async (req, res) => {
     const offset = (pageNum - 1) * limitNum;
 
     const countResult = await pool.query(
-      `SELECT COUNT(*)::int AS total FROM bookings b${whereClause}`,
+      `SELECT COUNT(*)::int AS total FROM bookings b JOIN users u ON b.user_id = u.id JOIN rooms r ON b.room_id = r.id${whereClause}`,
       params
     );
     const total = countResult.rows[0].total;
@@ -386,7 +435,8 @@ exports.getBookingSummary = async (req, res) => {
 // How many bookings there are in each state, for the tabs of "My bookings":
 // the signed-in guest's own (every booking for an admin, like the list).
 // "refund_pending" is counted from the payment state and overlaps
-// "cancelled".
+// "cancelled". An admin also gets "in_house": confirmed stays that include
+// tonight (they are also counted in "confirmed").
 exports.getBookingCounts = async (req, res) => {
   try {
     await runBookingMaintenance();
@@ -399,8 +449,9 @@ exports.getBookingCounts = async (req, res) => {
               COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
               COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled,
               COUNT(*) FILTER (WHERE payment_status = 'refund_pending')::int AS refund_pending
+              ${mine ? "" : ", COUNT(*) FILTER (WHERE status = 'confirmed' AND check_in <= $1::date AND check_out > $1::date)::int AS in_house"}
        FROM bookings${mine ? " WHERE user_id = $1" : ""}`,
-      mine ? [req.user.id] : []
+      mine ? [req.user.id] : [todayInAppTimezone()]
     );
 
     res.json(result.rows[0]);
@@ -449,6 +500,17 @@ exports.getBookingById = async (req, res) => {
       return res.status(403).json({
         ...apiMessage("BOOKING_FORBIDDEN"),
       });
+    }
+
+    // The admin's booking details show every payment attempt (gateway,
+    // reference, result, when) as the booking's history.
+    if (req.user.role === "admin") {
+      const payments = await pool.query(
+        `SELECT provider, transaction_ref, amount, status, created_at, updated_at
+         FROM payments WHERE booking_id = $1 ORDER BY created_at ASC, id ASC`,
+        [id]
+      );
+      return res.json({ ...booking, payments: payments.rows });
     }
 
     res.json(booking);
@@ -1044,6 +1106,60 @@ exports.getBookingCalendar = async (req, res) => {
     });
   } catch (err) {
     console.error("GET BOOKING CALENDAR ERROR:", err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+};
+
+// Admin room calendar: every room, and every booking that is not cancelled
+// with a night in [from, to] (dates at the property, both included; at most
+// 62 days). Each booking carries what its block on the calendar shows.
+const TIMELINE_MAX_DAYS = 62;
+
+exports.getBookingTimeline = async (req, res) => {
+  const today = todayInAppTimezone();
+  const from = req.query.from ?? `${today.slice(0, 8)}01`;
+  const to = req.query.to;
+  if (!parseDateOnly(from) || !parseDateOnly(to) || to < from) {
+    return res.status(400).json({ ...apiMessage("INVALID_DATE_RANGE") });
+  }
+  if (daysBetween(from, to) + 1 > TIMELINE_MAX_DAYS) {
+    return res.status(400).json(apiMessage("DATE_RANGE_TOO_LONG", { max: TIMELINE_MAX_DAYS }));
+  }
+
+  try {
+    await runBookingMaintenance();
+    const [rooms, bookings] = await Promise.all([
+      pool.query(
+        `SELECT id, room_name, room_type, status, location
+         FROM rooms
+         ORDER BY LOWER(room_type), LOWER(room_name), id`
+      ),
+      pool.query(
+        `SELECT b.id, b.room_id, b.check_in, b.check_out, b.status, b.payment_status, b.guests,
+                b.total_price, b.expires_at, COALESCE(b.guest_name, u.name) AS guest_name,
+                (b.guest_name IS NOT NULL) AS at_desk
+         FROM bookings b
+         JOIN users u ON u.id = b.user_id
+         WHERE b.status <> 'cancelled'
+           AND b.check_in <= $2::date AND b.check_out > $1::date
+         ORDER BY b.check_in, b.id`,
+        [from, to]
+      ),
+    ]);
+    res.json({
+      from,
+      to,
+      today,
+      rooms: rooms.rows,
+      bookings: bookings.rows.map((row) => ({
+        ...row,
+        check_in: toDateOnlyString(row.check_in),
+        check_out: toDateOnlyString(row.check_out),
+        total_price: Number(row.total_price) || 0,
+      })),
+    });
+  } catch (err) {
+    console.error("GET BOOKING TIMELINE ERROR:", err);
     res.status(500).json({ ...apiMessage("SERVER_ERROR") });
   }
 };

@@ -223,6 +223,35 @@ exports.getRooms = async (req, res) => {
 // The room types on offer (with how many rooms each has) and the cheapest
 // and dearest nightly price, among rooms a guest can book. The list page
 // builds its filters from this, so it never offers a choice with no rooms.
+// A type typed again with other capitals or spaces ("deluxe", "Deluxe  ")
+// is the type that already exists, spelled as it was first saved, so the
+// list filter never shows two of them. `exceptId`: the room being edited.
+async function canonicalRoomType(input, exceptId = null) {
+  const typed = String(input).trim().replace(/\s+/g, " ");
+  const result = await pool.query(
+    `SELECT room_type FROM rooms
+     WHERE LOWER(REGEXP_REPLACE(TRIM(room_type), '\\s+', ' ', 'g')) = LOWER($1) AND ($2::int IS NULL OR id <> $2)
+     ORDER BY id LIMIT 1`,
+    [typed, exceptId]
+  );
+  return result.rows[0]?.room_type || typed;
+}
+
+// Admin: every room type in use (rooms under maintenance too), for the room
+// form's type picker and the calendar.
+exports.getRoomTypes = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT room_type AS type, COUNT(*)::int AS count
+       FROM rooms GROUP BY room_type ORDER BY LOWER(room_type)`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ...apiMessage("SERVER_ERROR") });
+  }
+};
+
 exports.getRoomFilters = async (req, res) => {
   try {
     const types = await pool.query(
@@ -463,6 +492,7 @@ exports.createRoom = async (req, res) => {
 
     const { amenities, error: amenitiesError } = parseAmenities(req.body.amenities);
     if (amenitiesError) return res.status(400).json(amenitiesError);
+    const roomType = await canonicalRoomType(room_type);
 
     const parsedPrice = parseRoomPrice(price);
     const parsedCapacity = parsePositiveInteger(capacity, null);
@@ -490,7 +520,7 @@ exports.createRoom = async (req, res) => {
        RETURNING id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities`,
       [
         room_name,
-        room_type,
+        roomType,
         parsedPrice,
         description || null,
         parsedCapacity,
@@ -545,6 +575,7 @@ exports.updateRoom = async (req, res) => {
 
     const { amenities, error: amenitiesError } = parseAmenities(req.body.amenities);
     if (amenitiesError) return res.status(400).json(amenitiesError);
+    const roomType = await canonicalRoomType(room_type, id);
 
     const parsedPrice = parseRoomPrice(price);
     const parsedCapacity = parsePositiveInteger(capacity, null);
@@ -591,7 +622,7 @@ exports.updateRoom = async (req, res) => {
        RETURNING id, room_name, room_type, price, description, capacity, image, status, location, created_at, amenities`,
       [
         room_name,
-        room_type,
+        roomType,
         parsedPrice,
         description || null,
         parsedCapacity,
