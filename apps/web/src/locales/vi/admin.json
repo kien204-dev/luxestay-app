@@ -1,5 +1,4 @@
 {
-  "greeting": "Xin chào, {{name}}",
   "refresh": "Làm mới",
   "save": "Lưu",
   "saving": "Đang lưu...",
@@ -12,7 +11,16 @@
   "confirm": "Xác nhận",
   "all": "Tất cả",
   "none": "(không có)",
-  "search": "Tìm kiếm",
+  "search": {
+    "label": "Tìm đơn đặt phòng",
+    "placeholder": "Tìm mã đơn #BK-…, tên, email hoặc SĐT khách",
+    "loading": "Đang tìm…",
+    "failed": "Không tìm được lúc này. Thử lại sau.",
+    "none": "Không có đơn nào khớp “{{term}}”.",
+    "results": "Kết quả tìm kiếm",
+    "seeAll_one": "Xem {{count}} kết quả trong danh sách đơn",
+    "seeAll_other": "Xem cả {{count}} kết quả trong danh sách đơn"
+  },
   "loadFailed": "Không tải được dữ liệu.",
   "roles": {
     "admin": "Quản trị",
@@ -20,18 +28,28 @@
   },
   "nav": {
     "label": "Quản trị",
-    "dashboard": "Tổng quan",
-    "guestSite": "Trang khách",
+    "dashboard": "Dashboard",
+    "guestSite": "Xem trang khách",
     "rooms": "Phòng",
     "users": "Người dùng",
-    "orders": "Đặt phòng",
+    "orders": "Đơn đặt phòng",
     "calendar": "Lịch phòng",
     "coupons": "Mã giảm giá",
     "property": "Cơ sở lưu trú",
-    "destinations": "Ảnh điểm đến",
-    "account": "Tài khoản",
-    "logout": "Đăng xuất",
-    "newBookings": "{{count}} đặt phòng mới"
+    "destinations": "Điểm đến",
+    "dashboardShort": "Tổng quan",
+    "ordersShort": "Đơn",
+    "calendarShort": "Lịch",
+    "reviews": "Đánh giá",
+    "more": "Thêm",
+    "needsAction_one": "{{count}} đơn cần xử lý",
+    "needsAction_other": "{{count}} đơn cần xử lý",
+    "groups": {
+      "overview": "Tổng quan",
+      "business": "Kinh doanh",
+      "customers": "Khách hàng",
+      "settings": "Cấu hình"
+    }
   },
   "pagination": {
     "showing": "Hiển thị {{from}}–{{to}} trên {{total}}",
@@ -52,5 +70,73 @@
     "newBooking": "Đặt phòng mới: {{booking}}",
     "refundPending": "{{code}} cần hoàn tiền. Xem trang Đặt phòng.",
     "duplicatePayment": "{{code}} bị thanh toán hai lần ({{ref}}). Cần hoàn lại khoản thừa."
+  },
+  "shell": {
+    "tag": "Quản trị",
+    "collapse": "Thu gọn thanh bên",
+    "collapseShort": "Thu gọn",
+    "expand": "Mở rộng thanh bên",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "menu": "Menu quản trị",
+    "quickNav": "Màn hình chính",
+    "walkIn": "Đặt tại quầy",
+    "skip": "Bỏ qua đến nội dung"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "label": "Thông báo",
+    "labelUnread_one": "Thông báo, {{count}} chưa đọc",
+    "labelUnread_other": "Thông báo, {{count}} chưa đọc",
+    "markRead": "Đánh dấu đã đọc",
+    "empty": "Chưa có gì mới từ lúc bạn mở trang. Đơn mới, yêu cầu hoàn tiền sẽ hiện ở đây ngay khi có.",
+    "allBookings": "Xem tất cả đơn đặt phòng",
+    "sessionOnly": "Chỉ trong phiên này",
+    "unread": "chưa đọc",
+    "refundAmount": "hoàn {{amount}}",
+    "duplicateSub": "Giao dịch {{ref}} · {{amount}}",
+    "kind": {
+      "created": "{{code}} · {{room}}",
+      "refund": "{{code}} cần hoàn tiền",
+      "duplicate": "{{code}} bị thanh toán hai lần"
+    }
+  },
+  "account": {
+    "title": "Tài khoản",
+    "label": "Tài khoản {{name}}",
+    "profile": "Hồ sơ của tôi",
+    "password": "Đổi mật khẩu",
+    "theme": "Giao diện: {{theme}}",
+    "light": "Sáng",
+    "dark": "Tối",
+    "toLight": "Chuyển sang sáng",
+    "toDark": "Chuyển sang tối",
+    "language": "Ngôn ngữ",
+    "logout": "Đăng xuất"
+  },
+  "state": {
+    "pending": "Chờ thanh toán",
+    "confirmed": "Đã xác nhận",
+    "inHouse": "Đang lưu trú",
+    "completed": "Hoàn tất",
+    "cancelled": "Đã huỷ",
+    "refundPending": "Chờ hoàn tiền"
+  },
+  "crumbs": {
+    "label": "Vị trí",
+    "admin": "Quản trị"
+  },
+  "card": {
+    "nights_one": "{{count}} đêm",
+    "nights_other": "{{count}} đêm",
+    "heldUntil": "Giữ phòng đến {{time}}",
+    "payment": {
+      "unpaid": "Chưa thu",
+      "pending": "Đang thanh toán",
+      "paid": "Đã thu",
+      "failed": "Thanh toán lỗi",
+      "refund_pending": "Chờ hoàn tiền",
+      "refunded": "Đã hoàn tiền"
+    }
   }
 }

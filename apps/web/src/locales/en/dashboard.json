@@ -1,93 +1,140 @@
 {
-  "header": {
-    "title": "Dashboard",
-    "subtitle": "How the property is doing, in the property's local time."
+  "units": {
+    "billion": "B",
+    "million": "M",
+    "currency": "VND"
   },
-  "rangeLabel": "Period",
-  "rangeOptions": {
-    "today": "Today",
-    "week": "Last 7 days",
-    "month": "This month",
-    "year": "This year",
-    "all": "All time"
-  },
-  "rangeNote": {
-    "today": "Today",
-    "week": "Last 7 days",
-    "month": "This month",
-    "year": "This year",
-    "all": "All time"
-  },
-  "chartsAllNote": "The charts below show this year; the figures above cover all time.",
-  "status": {
-    "confirmed": "Confirmed",
-    "pending": "Pending",
-    "completed": "Completed",
-    "cancelled": "Cancelled"
-  },
-  "refresh": {
-    "loading": "Loading...",
-    "refresh": "Refresh"
-  },
-  "export": {
-    "exporting": "Exporting...",
-    "excel": "Export Excel",
-    "pdf": "Export PDF"
+  "weekday": {
+    "0": "Sun",
+    "1": "Mon",
+    "2": "Tue",
+    "3": "Wed",
+    "4": "Thu",
+    "5": "Fri",
+    "6": "Sat"
   },
   "errors": {
     "loadFailed": "Could not load the figures.",
-    "exportFailed": "The export failed.",
-    "refreshed": "Figures refreshed"
+    "exportFailed": "The report could not be exported."
   },
-  "statCards": {
-    "totalRooms": {
-      "label": "Rooms",
-      "note": "All rooms, including under maintenance"
+  "overview": {
+    "crumb": "Dashboard",
+    "title": "Overview",
+    "range": {
+      "label": "Period",
+      "d7": "7 days",
+      "d30": "30 days",
+      "custom": "Custom",
+      "title": "Choose a period",
+      "presets": "Ready-made periods",
+      "preset": {
+        "today": "Today",
+        "thisWeek": "This week",
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "thisYear": "This year"
+      },
+      "from": "From",
+      "to": "To",
+      "missing": "Choose both dates.",
+      "order": "The start date must come before the end date.",
+      "future": "There are no figures after today yet.",
+      "tooLong": "At most {{max}} days.",
+      "summary_one": "{{range}} · {{count}} day · compared with {{prev}}",
+      "summary_other": "{{range}} · {{count}} days · compared with {{prev}}",
+      "cancel": "Cancel",
+      "apply": "Apply"
     },
-    "occupiedTonight": {
-      "label": "Occupied tonight",
-      "note": "Rooms with a confirmed booking covering today"
+    "export": {
+      "label": "Export report",
+      "working": "Exporting…",
+      "excel": "Excel (.xlsx)",
+      "pdf": "PDF",
+      "done": "The report has been downloaded."
     },
-    "availableRooms": {
-      "label": "Free tonight",
-      "note": "No guest and not under maintenance"
+    "kpi": {
+      "revenue": "Revenue",
+      "occupancy": "Occupancy",
+      "bookings": "New bookings",
+      "adr": "Avg. rate / night",
+      "vsBefore_one": "vs the day before",
+      "vsBefore_other": "vs the {{count}} days before",
+      "noBefore": "no revenue in the period before",
+      "points": "{{value}} pts",
+      "roomNights": "{{sold}} / {{total}} room nights",
+      "cancelled_one": "{{count}} cancelled",
+      "cancelled_other": "{{count}} cancelled",
+      "adrNote": "ADR, after discounts"
     },
-    "totalBookings": {
-      "label": "Bookings",
-      "noteSuffix": "any status, by booking date"
+    "today": {
+      "label": "Today",
+      "checkIns": "Check-ins today",
+      "checkOuts": "Check-outs today",
+      "occupied": "Rooms occupied",
+      "pending": "Awaiting payment",
+      "refunds_one": "{{count}} refund due",
+      "refunds_other": "{{count}} refunds due"
     },
-    "revenue": {
-      "label": "Revenue",
-      "noteSuffix": "money received"
+    "chart": {
+      "per": {
+        "day": "by day",
+        "week": "by week",
+        "month": "by month"
+      },
+      "revenue": "Revenue {{per}}",
+      "revenueLabel": "Revenue chart, {{range}}. Use the arrow keys to step through it.",
+      "peak": "highest {{when}}: {{amount}}",
+      "thisPeriod": "This period",
+      "prevPeriod": "Period before ({{range}})",
+      "prevShort": "Period before",
+      "when": "When",
+      "bookings_one": "{{count}} booking",
+      "bookings_other": "{{count}} bookings",
+      "occupancy": "Occupancy",
+      "occupancyLabel": "Occupancy chart, {{range}}. Use the arrow keys to step through it.",
+      "occupancySub": {
+        "day": "% of rooms occupied each night",
+        "week": "% of rooms occupied, weekly average",
+        "month": "% of rooms occupied, monthly average"
+      },
+      "perBar": {
+        "day": "Occupancy per night",
+        "week": "Occupancy per week",
+        "month": "Occupancy per month"
+      },
+      "highest": "Highest of the period",
+      "nights": "{{sold}} / {{total}} room nights",
+      "noRooms": "No room is on sale.",
+      "today": "Today"
     },
-    "outstanding": {
-      "label": "Outstanding",
-      "noteSuffix": "confirmed but not yet paid"
-    }
-  },
-  "revenueOverview": "Revenue",
-  "revenueLabel": "Revenue",
-  "bookingsLabel": "Bookings",
-  "bookingsByMonth": "Bookings",
-  "topBookedRooms": {
-    "title": "Most booked rooms",
-    "empty": "No data yet."
-  },
-  "bookingStatus": {
-    "title": "Booking status",
-    "empty": "No data yet."
-  },
-  "recentBookings": {
-    "title": "Recent bookings",
-    "empty": "No bookings yet.",
-    "columns": {
-      "bookingId": "Code",
+    "recent": {
+      "title": "Recent bookings",
+      "all": "See all bookings",
+      "empty": "No bookings yet.",
       "guest": "Guest",
       "room": "Room",
-      "checkIn": "Check-in",
-      "checkOut": "Check-out",
+      "stay": "Stay",
+      "total": "Total",
       "status": "Status",
-      "amount": "Amount"
+      "created": "Created"
+    },
+    "needs": {
+      "title": "Needs action",
+      "all": "All bookings",
+      "none": "Nothing is waiting for payment or a refund."
+    },
+    "empty": {
+      "noData": "No data yet",
+      "title": "No bookings in this period",
+      "text": "No booking was made and nobody stayed in {{range}}. Figures appear as bookings come in; or try a longer period.",
+      "walkIn": "Add a desk booking",
+      "try30": "See 30 days"
+    },
+    "error": {
+      "title": "Could not load the figures.",
+      "chartTitle": "Charts are unavailable for now",
+      "text": "Bookings and the room calendar keep working. Try again in a few minutes.",
+      "retry": "Reload"
     }
   }
 }

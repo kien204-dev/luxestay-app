@@ -65,7 +65,7 @@ export default function ReviewsPanel() {
                 <th>{t("reviews.columns.comment")}</th>
                 <th>{t("reviews.columns.date")}</th>
                 <th>{t("reviews.columns.status")}</th>
-                <th className="is-right">{t("columns.actions")}</th>
+                <th className="is-right">{t("reviews.columns.actions")}</th>
               </tr>
             </thead>
             <tbody>

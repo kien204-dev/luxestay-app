@@ -58,7 +58,7 @@ Muốn đổi cổng, tên thương hiệu hay mật khẩu cơ sở dữ liệu
 | `/my-bookings` | Đặt phòng của tôi: thanh toán, hủy, đánh giá, tải PDF xác nhận | Đã đăng nhập |
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | Đăng nhập, đăng ký (email/mật khẩu, Google nếu bật), quên và đặt lại mật khẩu | Mọi người |
 | `/settings` | Tài khoản: hồ sơ, ảnh đại diện, mật khẩu | Đã đăng nhập |
-| `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons` | Quản trị. Orders có đặt phòng tại quầy, ghi nhận thu tiền tại quầy và PDF xác nhận | Quản trị |
+| `/admin`, `/admin/rooms`, `/admin/orders`, `/admin/users`, `/admin/calendar`, `/admin/coupons`, `/admin/reviews` | Quản trị. Dashboard theo khoảng ngày; Orders có tìm kiếm, đặt phòng tại quầy, ghi nhận thu tiền tại quầy, xác nhận hoàn tiền và PDF xác nhận; lịch phòng theo tuần/tháng cho mọi phòng | Quản trị |
 | `/admin/property` | Thông tin cơ sở lưu trú: tên, logo, ảnh nền và nội dung trang chủ, liên hệ, giờ nhận/trả phòng, hạn hủy miễn phí | Quản trị |
 | `/admin/destinations` | Ảnh và ghi công ảnh của từng điểm đến | Quản trị |
 

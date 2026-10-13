@@ -144,7 +144,12 @@ describe("admin area data", () => {
     assert.equal(one.body.days, 1);
     assert.equal(one.body.current.bookings, 2);
 
-    for (const query of [`from=${day(1)}&to=${day(1)}`, `from=${day(-1)}&to=${day(-3)}`, `from=2026-02-30&to=${today}`, `from=${day(-400)}&to=${today}`]) {
+    // The last N days, counted at the property.
+    const month = await get("/api/dashboard/overview?days=30");
+    assert.equal(month.status, 200);
+    assert.deepEqual([month.body.from, month.body.to, month.body.days], [day(-29), today, 30]);
+
+    for (const query of [`from=${day(1)}&to=${day(1)}`, `from=${day(-1)}&to=${day(-3)}`, `from=2026-02-30&to=${today}`, `from=${day(-400)}&to=${today}`, "days=0", "days=367", "days=abc"]) {
       const refused = await get(`/api/dashboard/overview?${query}`);
       assert.equal(refused.status, 400, query);
     }

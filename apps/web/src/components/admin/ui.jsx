@@ -156,17 +156,3 @@ export function SkeletonRows({ rows = 5, columns = 5 }) {
     </tr>
   ));
 }
-
-export function LanguageSwitch({ className = "adm-lang" }) {
-  const { i18n, t } = useTranslation("common");
-  const languages = Object.keys(i18n.options.resources || {});
-  return (
-    <div className={className} role="group" aria-label={t("language.label")}>
-      {languages.map((lng) => (
-        <button key={lng} type="button" className={i18n.resolvedLanguage === lng ? "is-active" : ""} aria-pressed={i18n.resolvedLanguage === lng} onClick={() => i18n.changeLanguage(lng)}>
-          {lng.toUpperCase()}
-        </button>
-      ))}
-    </div>
-  );
-}

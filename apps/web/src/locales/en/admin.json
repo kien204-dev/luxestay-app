@@ -1,5 +1,4 @@
 {
-  "greeting": "Hello, {{name}}",
   "refresh": "Refresh",
   "save": "Save",
   "saving": "Saving...",
@@ -12,7 +11,16 @@
   "confirm": "Confirm",
   "all": "All",
   "none": "(none)",
-  "search": "Search",
+  "search": {
+    "label": "Search bookings",
+    "placeholder": "Search code #BK-…, guest name, email or phone",
+    "loading": "Searching…",
+    "failed": "Search is not available right now. Try again later.",
+    "none": "No booking matches “{{term}}”.",
+    "results": "Search results",
+    "seeAll_one": "See {{count}} result in the bookings list",
+    "seeAll_other": "See all {{count}} results in the bookings list"
+  },
   "loadFailed": "Could not load the data.",
   "roles": {
     "admin": "Admin",
@@ -21,7 +29,7 @@
   "nav": {
     "label": "Administration",
     "dashboard": "Dashboard",
-    "guestSite": "Guest site",
+    "guestSite": "View guest site",
     "rooms": "Rooms",
     "users": "Users",
     "orders": "Bookings",
@@ -29,9 +37,19 @@
     "coupons": "Coupons",
     "property": "Property",
     "destinations": "Destinations",
-    "account": "Account",
-    "logout": "Sign out",
-    "newBookings": "{{count}} new bookings"
+    "dashboardShort": "Overview",
+    "ordersShort": "Bookings",
+    "calendarShort": "Calendar",
+    "reviews": "Reviews",
+    "more": "More",
+    "needsAction_one": "{{count}} booking needs action",
+    "needsAction_other": "{{count}} bookings need action",
+    "groups": {
+      "overview": "Overview",
+      "business": "Business",
+      "customers": "Customers",
+      "settings": "Settings"
+    }
   },
   "pagination": {
     "showing": "Showing {{from}}–{{to}} of {{total}}",
@@ -52,5 +70,73 @@
     "newBooking": "New booking: {{booking}}",
     "refundPending": "{{code}} needs a refund. See Bookings.",
     "duplicatePayment": "{{code}} was paid twice ({{ref}}). The extra payment must be refunded."
+  },
+  "shell": {
+    "tag": "Admin",
+    "collapse": "Collapse sidebar",
+    "collapseShort": "Collapse",
+    "expand": "Expand sidebar",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Admin menu",
+    "quickNav": "Main screens",
+    "walkIn": "Desk booking",
+    "skip": "Skip to content"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "label": "Notifications",
+    "labelUnread_one": "Notifications, {{count}} unread",
+    "labelUnread_other": "Notifications, {{count}} unread",
+    "markRead": "Mark as read",
+    "empty": "Nothing new since you opened the page. New bookings and refund requests show up here as they happen.",
+    "allBookings": "See all bookings",
+    "sessionOnly": "This session only",
+    "unread": "unread",
+    "refundAmount": "refund {{amount}}",
+    "duplicateSub": "Transaction {{ref}} · {{amount}}",
+    "kind": {
+      "created": "{{code}} · {{room}}",
+      "refund": "{{code}} needs a refund",
+      "duplicate": "{{code}} was paid twice"
+    }
+  },
+  "account": {
+    "title": "Account",
+    "label": "Account of {{name}}",
+    "profile": "My profile",
+    "password": "Change password",
+    "theme": "Theme: {{theme}}",
+    "light": "Light",
+    "dark": "Dark",
+    "toLight": "Switch to light",
+    "toDark": "Switch to dark",
+    "language": "Language",
+    "logout": "Sign out"
+  },
+  "state": {
+    "pending": "Awaiting payment",
+    "confirmed": "Confirmed",
+    "inHouse": "Staying",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "refundPending": "Refund due"
+  },
+  "crumbs": {
+    "label": "Breadcrumb",
+    "admin": "Admin"
+  },
+  "card": {
+    "nights_one": "{{count}} night",
+    "nights_other": "{{count}} nights",
+    "heldUntil": "Room held until {{time}}",
+    "payment": {
+      "unpaid": "Not paid",
+      "pending": "Payment in progress",
+      "paid": "Paid",
+      "failed": "Payment failed",
+      "refund_pending": "Refund due",
+      "refunded": "Refunded"
+    }
   }
 }

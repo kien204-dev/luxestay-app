@@ -1,6 +1,6 @@
 # Vấn đề đã biết
 
-Cập nhật: 2026-10-12 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại trang đăng nhập và tài khoản).
+Cập nhật: 2026-10-13 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại khu quản trị phần 1).
 
 ## Chưa kiểm chứng với dịch vụ thật
 
@@ -19,7 +19,7 @@ Cập nhật: 2026-10-12 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại
 - **Ảnh đã lưu trước bản này** (trước khi có xử lý ảnh phía máy chủ) không được xử lý lại: chúng giữ định dạng và metadata cũ cho tới khi được tải lên lại.
 - **`demo:reset` xoá và tạo lại toàn bộ bảng** trong khoảng 1 giây; người đang dùng trang lúc đó có thể gặp lỗi tạm thời.
 - **Đánh giá trên thẻ phòng** được tải riêng cho từng phòng (mỗi thẻ một yêu cầu). Với 12 phòng mỗi trang thì không đáng kể.
-- **Lọc theo loại phòng so khớp đúng tên loại** (không phân biệt hoa thường): "Deluxe" và "Phòng Deluxe" là hai loại. Đặt tên loại nhất quán ở form phòng.
+- **Lọc theo loại phòng so khớp đúng tên loại** (không phân biệt hoa thường). Form phòng nay chọn loại có sẵn và gộp tên trùng (khác hoa thường, khoảng trắng), nhưng "Deluxe" và "Phòng Deluxe" vẫn là hai loại nếu cố ý gõ khác. Dữ liệu cũ đã có hai cách viết thì sửa phòng để chọn lại một loại.
 - **Đăng nhập Google: console của trình duyệt vẫn ghi `Cross-Origin-Opener-Policy policy would block the window.closed call`** trong lúc cửa sổ Google đang mở. Dòng này do chính trang đăng nhập của Google gây ra (`accounts.google.com` gửi `Cross-Origin-Opener-Policy: same-origin`, nên Firebase không hỏi được cửa sổ đó đã đóng chưa); header của trang web (`same-origin-allow-popups`) đã đúng và không thể tắt cảnh báo từ phía mình. Đăng nhập vẫn hoàn tất bình thường. Muốn hết hẳn phải bỏ cách đăng nhập bằng popup (chuyển sang chuyển hướng cả trang hoặc Google Identity Services).
 - **Đăng nhập Google tìm tài khoản theo Google uid đã liên kết trước, rồi mới theo email.** Đổi email ở trang Tài khoản không làm mất liên kết: bấm "Tiếp tục với Google" vẫn vào đúng tài khoản cũ. Chỉ một tài khoản Google chưa liên kết với tài khoản nào mới được tìm theo email (và liên kết lần đầu như trước). Nếu dữ liệu cũ có hai tài khoản cùng một uid (do bản trước tạo thêm tài khoản khi email đã đổi), tài khoản cũ nhất chưa bị xoá được dùng; tài khoản thừa không tự gộp, quản trị viên khoá hoặc xoá nó.
 - **Liên kết Google với tài khoản có mật khẩu chưa có bước xác nhận bằng mật khẩu.** Lần đăng nhập Google đầu tiên bằng email trùng với một tài khoản khách có sẵn sẽ tự liên kết hai tài khoản (Google đã xác minh email đó). Sau khi đã liên kết, chỉ đúng tài khoản Google đó vào được. Dự kiến sau v1: việc liên kết chỉ làm từ trang Tài khoản, khi đang đăng nhập và nhập lại mật khẩu.
@@ -41,6 +41,12 @@ Cập nhật: 2026-10-12 (sau phiên bản 1.0.0-rc.2, nhánh thiết kế lại
 - **Nút "Gửi lại email" chỉ đếm ngược khi đã hết lượt** theo giới hạn của API (5 email mỗi giờ cho mỗi địa chỉ IP); trước đó bấm được ngay. Nếu có proxy bỏ mất header `RateLimit`, nút luôn bấm được và API vẫn từ chối khi quá giới hạn.
 - **Các trang đăng nhập chờ `/api/settings/public` trả lời rồi mới vẽ** (để dải demo và nút Google không đẩy trang): nếu API chậm, trang trống thêm chừng đó thời gian. Trang khách khác (trang chủ, danh sách phòng) vẫn vẽ ngay và dải demo vẫn có thể đẩy trang xuống khi API trả lời chậm.
 - **Ô ngày ở thanh tìm phòng là ô ngày của trình duyệt**, nên định dạng ngày theo ngôn ngữ của trình duyệt, không phải theo nút VI/EN.
+- **Khu quản trị so với bản thiết kế (đợt 5a)**: không có nút đổi cơ sở lưu trú, tab "Hoạt động" và "Cài đặt thông báo" trong chuông, phím tắt Ctrl K, "Mua mã nguồn" và "Đặt lại dữ liệu mẫu" trên dải demo, nút "Khoá phòng", "Check-in"/"Check-out", "Đổi phòng", "Xuất CSV", hình thức thu và số biên lai ở hộp "Đã thu tiền", phí huỷ và "hoàn về ví" tự động, "Khách quay lại · lần N", ghi chú nội bộ, quốc tịch, nút gọi Zalo, số khách "đã đến/đã đi" hôm nay: hệ thống chưa có dữ liệu hoặc tính năng tương ứng. Số phòng (V-05) không có: phòng chỉ có tên.
+- **Chuông thông báo chỉ giữ sự kiện trong phiên trang đang mở** (API chưa lưu lịch sử thông báo); tải lại trang thì danh sách trống. Số cạnh "Đơn đặt phòng" thì luôn lấy từ API.
+- **Số trên các tab Đơn đặt phòng tính trên toàn bộ đơn**, không theo ô tìm hay bộ lọc đang bật; danh sách và số dòng thì theo bộ lọc.
+- **Lọc theo ngày ở trang Đơn đặt phòng** lấy các đơn nhận phòng từ ngày đầu và trả phòng đến ngày cuối (lưu trú nằm trong khoảng), như API vốn có.
+- **Lịch phòng không có khoá phòng theo ngày**: phòng bảo trì được gạch chéo cả kỳ vì hệ thống chỉ biết trạng thái bảo trì hiện tại, không biết từ ngày nào tới ngày nào. Công suất ở đầu Lịch phòng và Dashboard dùng số phòng đang mở bán hôm nay cho mọi ngày trong kỳ.
+- **Thanh toán ghi nhận tại quầy không có thời điểm riêng** (API không lưu): lịch sử đơn ghi "Ghi nhận đã thu tại quầy" không kèm giờ. Giờ giữ phòng và giờ huỷ hiện theo giờ của trình duyệt.
 
 ## Mã đặt phòng
 

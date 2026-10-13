@@ -35,8 +35,16 @@ function isRealDate(value) {
 }
 
 // { from, to } (dates) for the request, or { error } with an API message
-// code. Default: the last 7 days, today included.
+// code. Default: the last 7 days, today included; `days` (without from/to):
+// the last that many days, today included, so a browser in another timezone
+// need not know the date at the property.
 function resolveWindow(query = {}, today = todayInAppTimezone()) {
+  if (query.days !== undefined && query.from === undefined && query.to === undefined) {
+    const days = Number(query.days);
+    if (!Number.isInteger(days) || days < 1) return { error: "INVALID_DATE_RANGE" };
+    if (days > MAX_DAYS) return { error: "DATE_RANGE_TOO_LONG", params: { max: MAX_DAYS } };
+    return { from: shiftDate(today, -(days - 1)), to: today };
+  }
   const to = query.to ?? today;
   const from = query.from ?? shiftDate(to, -6);
   if (!isRealDate(from) || !isRealDate(to)) return { error: "INVALID_DATE_RANGE" };
